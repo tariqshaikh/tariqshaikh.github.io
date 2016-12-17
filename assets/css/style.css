@@ -1,6 +1,6 @@
 
 #mainbackground { 
-  background: url(../images/background7.jpg) no-repeat center center fixed; 
+  background: url(../images/background9.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -25,15 +25,15 @@
 }
 
 h1{
-  font-family: 'Bungee', cursive;
-  font-size: 600%;
+font-family: 'Oleo Script';
+  font-size: 700%;
   padding-top: 30vh;
-  color: white;
+  color: #193366;
   margin-bottom: 3%
 }
 
 h2{
-  color: white;
+  color: #193366;
 }
 
 .row{
@@ -52,9 +52,13 @@ ul{
   padding-right: 2%;
 }
 
+a {
+  color: #193366;
+}
+
 a:hover{
   text-decoration: none;
-  color: white;
+  color: #193366;
 }
 
 .icon{
