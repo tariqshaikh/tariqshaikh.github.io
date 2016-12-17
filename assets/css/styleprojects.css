@@ -1,0 +1,65 @@
+#mainbackground { 
+  background: url(../images/background8.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+
+}.w3-navbar li a, .w3-navitem, .w3-navbar li .w3-btn, .w3-navbar li .w3-input{
+  padding: 20px 10px;
+}
+
+.navbar-brand{
+	font-size: 24px;
+}
+
+h2{
+  font-family: 'Bungee', cursive;
+  font-size: 24px;
+}
+
+.backgroundimage{
+  min-height:100%;
+  background-size:cover;
+}
+
+.w3-navbar{
+  color: white;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    margin: 0 0 100px; /* bottom = footer height */
+}
+footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 8vh;
+    width: 100%;
+}
+
+.modal {
+   position: absolute;
+   top: 93vh;
+   right: -3vh;
+   bottom: 0;
+   left: 0;
+   z-index: 10040;
+   overflow: auto;
+   overflow-y: auto;
+}
+
+.modal-content {
+  background-color: transparent;
+  border: none;
+  color: white;
+  text-align: center;
+}
+
+.modal-header {
+  border-bottom: 0;
+}

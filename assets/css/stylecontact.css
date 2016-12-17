@@ -1,0 +1,36 @@
+#mainbackground { 
+  background: url(../images/background6.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+
+}.w3-navbar li a, .w3-navitem, .w3-navbar li .w3-btn, .w3-navbar li .w3-input{
+  padding: 20px 10px;
+}
+
+.navbar-brand{
+	font-size: 24px;
+}
+
+.h2{
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 24px;
+}
+
+.backgroundimage{
+  min-height:100%;
+  background-size:cover;
+}
+
+.w3-navbar{
+  color: white;
+}
+
+.row{
+  margin-top: 20vh;
+}
+
+.icon{
+  padding: 4vw;
+}
