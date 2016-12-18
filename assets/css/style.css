@@ -27,11 +27,12 @@
 
 #opacitycontainer{
   background-color: black;
-  opacity: 0.1;
-  margin-top: 5vh;
+  opacity: 0.2;
+  margin-top: 4vh;
 }
 
 h1{
+  opacity: 1;
   font-family: 'Oleo Script';
   font-size: 700%;
   padding-top: 7vh;
