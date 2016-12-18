@@ -1,12 +1,18 @@
 
 #mainbackground { 
-  background: url(../images/background9.jpg) no-repeat center center fixed; 
+  background: url(../images/smr.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+}
 
-}.w3-navbar li a, .w3-navitem, .w3-navbar li .w3-btn, .w3-navbar li .w3-input{
+.backgroundimage{
+  min-height:100%;
+  background-size:cover;
+}
+
+.w3-navbar li a, .w3-navitem, .w3-navbar li .w3-btn, .w3-navbar li .w3-input{
   padding: 20px 10px;
 }
 
@@ -19,21 +25,22 @@
   font-size: 24px;
 }
 
-.backgroundimage{
-  min-height:100%;
-  background-size:cover;
+#opacitycontainer{
+  background-color: black;
+  opacity: 0.1;
+  margin-top: 5vh;
 }
 
 h1{
-font-family: 'Oleo Script';
+  font-family: 'Oleo Script';
   font-size: 700%;
-  padding-top: 30vh;
-  color: #193366;
+  padding-top: 7vh;
+  color: white;
   margin-bottom: 3%
 }
 
 h2{
-  color: #193366;
+  color: white;
 }
 
 .row{
@@ -53,12 +60,12 @@ ul{
 }
 
 a {
-  color: #193366;
+  color: white;
 }
 
 a:hover{
   text-decoration: none;
-  color: #193366;
+  color: white;
 }
 
 .icon{
