@@ -1,5 +1,5 @@
 #mainbackground { 
-  background: url(../images/background4.jpg) no-repeat center center fixed; 
+  background: url(../images/background8.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -14,7 +14,7 @@
 }
 
 h2{
-  font-family: 'Bungee', cursive;
+  font-family: 'Pacifico', cursive;
   /*font-family: 'Ubuntu', sans-serif;*/
   font-size: 24px;
 }

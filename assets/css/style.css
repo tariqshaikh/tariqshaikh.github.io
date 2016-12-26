@@ -25,16 +25,9 @@
   font-size: 24px;
 }
 
-#opacitycontainer{
-  background-color: black;
-  opacity: 0.2;
-  margin-top: 4vh;
-  margin-bottom: 4vh;
-}
-
 h1{
   opacity: 1;
-  font-family: 'Oleo Script';
+  font-family: 'Pacifico', cursive;
   font-size: 700%;
   padding-top: 7vh;
   color: white;
@@ -77,7 +70,7 @@ a:hover{
 
 .modal {
    position: absolute;
-   top: 63vh;
+   top: 50vh;
    right: -3vh;
    bottom: 0;
    left: 0;
@@ -97,7 +90,12 @@ a:hover{
   border-bottom: 0;
 }
 
-
+#opacitycontainer{
+  background-color: black;
+  background-opacity: 0.2;
+  margin-top: 4vh;
+  margin-bottom: 4vh;
+}
 
 
 
