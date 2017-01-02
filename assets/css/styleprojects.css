@@ -81,3 +81,7 @@ footer {
   background-color: #ffffff;
   opacity: .7;
 }
+
+.w3-container{
+  padding: 0;
+}
