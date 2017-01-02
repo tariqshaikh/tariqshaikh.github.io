@@ -4,8 +4,9 @@
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+}
 
-}.w3-navbar li a, .w3-navitem, .w3-navbar li .w3-btn, .w3-navbar li .w3-input{
+.w3-navbar li a, .w3-navitem, .w3-navbar li .w3-btn, .w3-navbar li .w3-input{
   padding: 20px 10px;
 }
 
