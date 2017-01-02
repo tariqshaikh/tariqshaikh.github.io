@@ -27,11 +27,6 @@ h3{
   position: relative;
 }
 
-.backgroundimage{
-  min-height:100%;
-  background-size:cover;
-}
-
 .w3-navbar{
   color: white;
 }
