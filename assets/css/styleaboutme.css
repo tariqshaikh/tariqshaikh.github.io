@@ -19,6 +19,12 @@ h2{
   font-size: 24px;
 }
 
+h3{
+  font-family: 'Pacifico', cursive;
+  font-size: 500%;
+  text-align: center;
+}
+
 .backgroundimage{
   min-height:100%;
   background-size:cover;
@@ -65,3 +71,18 @@ footer {
   border-bottom: 0;
 }
 
+.shape{
+  top: 0;
+  right: 0:
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  height: 10vh;
+  width: 100%;
+  background-color: #ffffff;
+  opacity: .7;
+}
+
+.w3-container{
+  padding: 0;
+}
