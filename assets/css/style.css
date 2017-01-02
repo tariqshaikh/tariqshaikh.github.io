@@ -1,4 +1,3 @@
-
 #mainbackground { 
   background: url(../images/smr.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
@@ -38,9 +37,6 @@ h2{
   color: white;
 }
 
-.row{
-  height: 25px;
-}
 
 .w3-navbar{
   color: white;
