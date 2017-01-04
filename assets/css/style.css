@@ -101,15 +101,27 @@ svg {
 .lines{
   stroke-dasharray:416;
   stroke-dashoffset:-416;
-  -webkit-animation: draw-lines 2.5s linear;
+  -webkit-animation: draw-lines 3s linear;
   -webkit-animation-iteration-count: 1;
-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
+}
+
+.lines2{
+  stroke-dasharray:416;
+  stroke-dashoffset:-416;
+  -webkit-animation: draw-lines2 3s linear;
+  -webkit-animation-iteration-count: 1;
+  animation-fill-mode: forwards;
 }
 
 #Layer_1{
   width: 17vw;
   height: auto;
-  fill: freeze;
+}
+
+#Layer_2{
+  width: 17vw;
+  height: auto;
 }
 
 .st0{
@@ -122,6 +134,15 @@ animation-fill-mode: forwards;
 @-webkit-keyframes draw-lines{
   from{
     stroke-dashoffset: -416;
+  }
+  to{
+    stroke-dashoffset: 0;
+  }
+}
+
+@-webkit-keyframes draw-lines2{
+  from{
+    stroke-dashoffset: 416;
   }
   to{
     stroke-dashoffset: 0;
