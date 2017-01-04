@@ -78,6 +78,8 @@ footer {
   width: 100%;
   background-color: #ffffff;
   opacity: .7;
+   -webkit-animation-duration: 3s;
+    animation-duration: 3s;
 }
 
 .w3-container{

@@ -88,6 +88,46 @@ a:hover{
   border-bottom: 0;
 }
 
+/*SVG ANIMATION SETTINGS*/
+svg {
+  position: absolute;
+  top: 0;
+  bottom: 6vh;
+  right: 0;
+  left: 0;
+  margin: auto;
+}
+
+.lines{
+  stroke-dasharray:416;
+  stroke-dashoffset:-416;
+  -webkit-animation: draw-lines 2.5s linear;
+  -webkit-animation-iteration-count: 1;
+animation-fill-mode: forwards;
+}
+
+#Layer_1{
+  width: 17vw;
+  height: auto;
+  fill: freeze;
+}
+
+.st0{
+  fill:none;
+  stroke:#2b4d55;
+  stroke-width: 2px;
+  stroke-miterlimit:10;
+}
+
+@-webkit-keyframes draw-lines{
+  from{
+    stroke-dashoffset: -416;
+  }
+  to{
+    stroke-dashoffset: 0;
+  }
+}
+/*SVG ANIMATION SETTINGS*/
 
 
 
