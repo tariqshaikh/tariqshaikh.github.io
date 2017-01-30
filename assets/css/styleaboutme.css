@@ -23,7 +23,7 @@ h2{
 h3{
   font-family: 'Pacifico', cursive;
   font-size: 500%;
-  text-align: center;
+  text-align: left;
   line-height: 1.0;
   position: relative;
 }
@@ -69,19 +69,6 @@ footer {
   border-bottom: 0;
 }
 
-.shape{
-  top: 0;
-  right: 0:
-  bottom: 0;
-  left: 0;
-  margin: auto;
-  height: 25%;
-  width: 100%;
-  background-color: #ffffff;
-  opacity: .7;
-  -webkit-animation-duration: 3s;
-  animation-duration: 3s;
-}
 
 .w3-container{
   padding: 0;
