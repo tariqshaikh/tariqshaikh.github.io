@@ -77,8 +77,9 @@ footer {
 .maintext{
   background: rgba(0, 0, 0, 0.6);
   width: 100%;
-  height: 30vh;
+  height: 25vw;
   color: white;
+
 }
 
 p{
