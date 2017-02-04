@@ -80,12 +80,14 @@ footer {
   color: white;
 }
 
-.carousel-inner > .item > img,
+
+.carousel-inner > .item > img, 
   
 .carousel-inner > .item > a > img {
       width: 80%;
       margin: auto;
 }
+
 
 .captiontext{
   background: rgba(0, 0, 0, 0.9);
