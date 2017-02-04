@@ -80,6 +80,15 @@ footer {
   color: white;
 }
 
+.carContainer{
+  position: absolute;
+  top: 50%;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
+  transform: translate(0, -50%);
+}
 
 .carousel-inner > .item > img, 
   
