@@ -124,3 +124,12 @@ a{
 .linkTitle{
   font-size: 20px;
 }
+
+footer{
+  position: absolute;
+  top: 90%;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
+}
