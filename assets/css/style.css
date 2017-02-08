@@ -67,14 +67,14 @@ h2{
   margin: auto;
 }
 
-/*#styleicons{
+#styleicons{
   position: absolute;
-  top: 39vh;
+  top: 52vh;
   bottom: 0;
   right: 0;
   left: 0;
   margin: auto;
-}*/
+}
 
 .w3-navbar{
   color: white;
