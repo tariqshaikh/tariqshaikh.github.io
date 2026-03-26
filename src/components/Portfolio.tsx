@@ -30,9 +30,9 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="bg-white font-sans text-[#1A1C1E] min-h-screen selection:bg-[#FEBE10]/30 selection:text-[#1C355E]">
+    <div className="bg-[#FDFDFD] font-sans text-[#1A1C1E] min-h-screen selection:bg-[#C5A059]/30 selection:text-[#1C355E]">
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-4.5 flex items-center justify-between border-b border-[#EEEEEF] transition-all duration-300 ${scrolled ? 'bg-white/94 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-4.5 flex items-center justify-between border-b border-[#EEEEEF] transition-all duration-300 ${scrolled ? 'bg-[#FDFDFD]/94 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
         <div className="font-mono text-sm tracking-widest uppercase text-[#6E8A96]">Tariq Shaikh</div>
         <div className="hidden md:flex gap-8">
           <a href="#projects" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Work</a>
@@ -43,22 +43,22 @@ export default function Portfolio() {
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-[75vh] flex flex-col justify-center px-12 pt-32 pb-20 overflow-hidden bg-white border-b-3 border-[#1C355E]">
+      <section className="relative min-h-[75vh] flex flex-col justify-center px-12 pt-32 pb-20 overflow-hidden bg-[#FDFDFD] border-b-3 border-[#1C355E]">
         <div className="absolute top-0 right-0 w-[38%] h-[60%] bg-[#F8F9FA] clip-path-hero z-0 hidden md:block" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 font-mono text-[13px] tracking-[0.14em] uppercase text-[#1C355E] mb-5 animate-fade-up">
-            <div className="w-8 h-px bg-[#FEBE10]" />
+            <div className="w-8 h-px bg-[#C5A059]" />
             Product Manager · New York Metro
           </div>
           <h1 className="font-serif text-[clamp(64px,10vw,136px)] font-black leading-[0.9] tracking-tight mb-3.5 text-[#1A1C1E] animate-fade-up delay-100">
-            Tariq<br /><span className="italic text-[#EE324E]">Shaikh</span>
+            Tariq<br /><span className="italic text-[#8B0000]">Shaikh</span>
           </h1>
           <p className="font-serif text-[clamp(18px,2.5vw,32px)] font-normal italic text-[#6E8A96] animate-fade-up delay-200">
             Product Manager
           </p>
         </div>
         <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-[#1C355E]/30 animate-fade-up delay-500 z-10">
-          <div className="w-px h-10 bg-gradient-to-b from-[#FEBE10] to-transparent animate-scroll-line" />
+          <div className="w-px h-10 bg-gradient-to-b from-[#C5A059] to-transparent animate-scroll-line" />
           <span>Scroll</span>
         </div>
       </section>
@@ -66,7 +66,7 @@ export default function Portfolio() {
       {/* Projects */}
       <section id="projects" className="px-12 py-24 bg-[#F8F9FA] border-t border-[#EEEEEF]">
         <div className="flex items-center gap-5 mb-13">
-          <span className="font-mono text-[13px] text-[#EE324E] font-bold tracking-widest">01</span>
+          <span className="font-mono text-[13px] text-[#8B0000] font-bold tracking-widest">01</span>
           <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-[#1A1C1E]">Selected Work</h2>
           <div className="flex-1 h-px bg-[#EEEEEF]" />
         </div>
@@ -129,7 +129,7 @@ export default function Portfolio() {
       {/* Process */}
       <section id="process" className="px-12 py-24 bg-[#1C355E]">
         <div className="flex items-center gap-5 mb-13">
-          <span className="font-mono text-[13px] text-[#EE324E] tracking-widest">02</span>
+          <span className="font-mono text-[13px] text-[#8B0000] tracking-widest">02</span>
           <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-white">How I Work</h2>
           <div className="flex-1 h-px bg-white/15" />
         </div>
@@ -141,7 +141,7 @@ export default function Portfolio() {
             { num: '04', title: 'Learn & iterate', desc: 'What did users actually do? What confused them? What did I get wrong? V2 is always better than V1.' },
           ].map((step, i) => (
             <div key={i} className={`p-10 border-white/12 ${i !== 3 ? 'lg:border-r' : ''} ${i % 2 === 0 ? 'sm:border-r lg:border-r' : ''}`}>
-              <div className="font-serif text-[52px] font-black text-[#EE324E]/20 leading-none mb-4">{step.num}</div>
+              <div className="font-serif text-[52px] font-black text-[#8B0000]/20 leading-none mb-4">{step.num}</div>
               <div className="font-serif text-xl font-bold mb-2.5 text-white">{step.title}</div>
               <p className="text-[15px] leading-[1.75] text-white/70">{step.desc}</p>
             </div>
@@ -150,10 +150,10 @@ export default function Portfolio() {
       </section>
 
       {/* About */}
-      <section id="about" className="px-12 py-24 bg-white border-t border-[#EEEEEF]">
+      <section id="about" className="px-12 py-24 bg-[#FDFDFD] border-t border-[#EEEEEF]">
         <div className="max-w-3xl">
           <div className="flex items-center gap-5 mb-8">
-            <span className="font-mono text-[13px] text-[#EE324E] font-bold tracking-widest">03</span>
+            <span className="font-mono text-[13px] text-[#8B0000] font-bold tracking-widest">03</span>
             <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-[#1A1C1E]">About</h2>
             <div className="flex-1 h-px bg-[#EEEEEF]" />
           </div>
@@ -173,12 +173,12 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <footer className="px-12 py-9 border-t-3 border-[#EE324E] bg-[#1C355E] flex items-center justify-between flex-wrap gap-4">
+      <footer className="px-12 py-9 border-t-3 border-[#8B0000] bg-[#1C355E] flex items-center justify-between flex-wrap gap-4">
         <div className="font-mono text-[13px] text-white/40 tracking-wider uppercase">© 2026 Tariq Shaikh · PM Portfolio</div>
         <div className="flex gap-6">
-          <a href="mailto:tshaikh92@gmail.com" className="font-mono text-[13px] text-white/60 hover:text-[#EE324E] transition-colors tracking-wider">tshaikh92@gmail.com</a>
-          <a href="tel:8483914393" className="font-mono text-[13px] text-white/60 hover:text-[#EE324E] transition-colors tracking-wider">848-391-4393</a>
-          <a href="https://linkedin.com" target="_blank" className="font-mono text-[13px] text-white/60 hover:text-[#EE324E] transition-colors tracking-wider">LinkedIn</a>
+          <a href="mailto:tshaikh92@gmail.com" className="font-mono text-[13px] text-white/60 hover:text-[#8B0000] transition-colors tracking-wider">tshaikh92@gmail.com</a>
+          <a href="tel:8483914393" className="font-mono text-[13px] text-white/60 hover:text-[#8B0000] transition-colors tracking-wider">848-391-4393</a>
+          <a href="https://linkedin.com" target="_blank" className="font-mono text-[13px] text-white/60 hover:text-[#8B0000] transition-colors tracking-wider">LinkedIn</a>
         </div>
       </footer>
 

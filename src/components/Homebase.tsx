@@ -8,6 +8,7 @@ import { Info, ChevronRight, GripVertical } from 'lucide-react';
 import { NJ_COUNTIES, NJ_ENRICHED, DIMS, COLORS } from '../constants';
 import { NJ_COUNTY_PATHS, NJ_STATE_OUTLINE } from '../mapData';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
+import { Activity, Zap, RefreshCw } from 'lucide-react';
 
 // Helper functions
 const scoreIncome = (v: number | null) => { if (!v) return 50; return Math.min(100, Math.round((v / 180000) * 100)); };
@@ -47,6 +48,9 @@ export default function Homebase() {
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showTownDropdown, setShowTownDropdown] = useState(false);
   const [expandedTown, setExpandedTown] = useState<string | null>(null);
+  const [isLiveMode, setIsLiveMode] = useState(false);
+  const [liveHeatData, setLiveHeatData] = useState<Record<string, number>>({});
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const countyDropdownRef = useRef<HTMLDivElement>(null);
@@ -85,6 +89,33 @@ export default function Homebase() {
   useEffect(() => {
     document.title = "Homebase NJ";
   }, []);
+
+  // Live Mode Data Fetching
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    const fetchLiveHeat = async () => {
+      try {
+        const res = await fetch('/api/market-heat');
+        if (res.ok) {
+          const json = await res.json();
+          setLiveHeatData(json.data);
+          setLastUpdate(new Date().toLocaleTimeString());
+        }
+      } catch (err) {
+        console.error("Failed to fetch live heat data:", err);
+      }
+    };
+
+    if (isLiveMode) {
+      fetchLiveHeat();
+      interval = setInterval(fetchLiveHeat, 30000); // Update every 30s
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLiveMode]);
 
   useEffect(() => {
     if (countySearch.length < 2) {
@@ -168,10 +199,11 @@ export default function Homebase() {
     const { name, county } = townObj;
     const d = NJ_ENRICHED[name];
     if (d) {
+      const currentHeat = (isLiveMode && liveHeatData[name]) ? liveHeatData[name] : d.saleToList;
       return {
         name, county: county + ' County', color: COLORS[i % COLORS.length], hasFullData: true,
         income: d.income, homeVal: d.homeVal, commute: d.commute, pop: d.pop,
-        saleToList: d.saleToList, eduPct: d.eduPct,
+        saleToList: currentHeat, eduPct: d.eduPct,
         schoolRating: d.schoolRating, schoolLabel: d.schoolLabel,
         safetyRaw: d.safetyScore, safetyLabel: d.safetyLabel,
         highwayRaw: d.highway || 50,
@@ -182,7 +214,7 @@ export default function Homebase() {
         highwayScore: scoreHighway(d.highway || 50),
         schoolScore: scoreSchool(d.schoolRating),
         safetyScore: scoreSafety(d.safetyScore), taxScore: scoreTax(d.taxRate),
-        walkScore2: scoreWalk(d.walkScore), marketScore: scoreMarket(d.saleToList),
+        walkScore2: scoreWalk(d.walkScore), marketScore: scoreMarket(currentHeat),
         eduScore: scoreEdu(d.eduPct)
       };
     }
@@ -210,10 +242,32 @@ export default function Homebase() {
   return (
     <div className="bg-[#F7FBFF] min-h-screen font-sans text-[#1A1C1E] flex flex-col">
       <nav className="px-10 py-4 flex items-center justify-between border-b border-[#D4E8F0] bg-white shrink-0">
-        <button onClick={handleClearAll} className="text-2xl leading-none hover:opacity-80 transition-opacity cursor-pointer text-left">
-          <span className="font-serif font-bold text-[#1A1C1E]">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
-        </button>
-        <div className="font-mono text-[13px] text-[#6E8A96] px-2.5 py-0.5 border border-[#D4E8F0] rounded-full">21 counties · enriched data</div>
+        <div className="flex items-center gap-6">
+          <button onClick={handleClearAll} className="text-2xl leading-none hover:opacity-80 transition-opacity cursor-pointer text-left">
+            <span className="font-serif font-bold text-[#1A1C1E]">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
+          </button>
+          
+          <button 
+            onClick={() => setIsLiveMode(!isLiveMode)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all ${
+              isLiveMode 
+                ? 'bg-[#D4EDDE] text-[#1E5C38] border border-[#A8D5B8] shadow-sm' 
+                : 'bg-[#F8F9FA] text-[#6E8A96] border border-[#EEEEEF] hover:border-[#D4E8F0]'
+            }`}
+          >
+            <Activity size={12} className={isLiveMode ? 'animate-pulse' : ''} />
+            {isLiveMode ? 'Live Mode On' : 'Go Live'}
+          </button>
+        </div>
+        <div className="flex items-center gap-4">
+          {isLiveMode && lastUpdate && (
+            <div className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-[#1E5C38] uppercase tracking-tighter">
+              <RefreshCw size={10} className="animate-spin" />
+              Sync: {lastUpdate}
+            </div>
+          )}
+          <div className="font-mono text-[13px] text-[#6E8A96] px-2.5 py-0.5 border border-[#D4E8F0] rounded-full">21 counties · enriched data</div>
+        </div>
       </nav>
 
       <motion.div 
@@ -786,11 +840,20 @@ export default function Homebase() {
                       else if (key === 'taxes') { valDisplay = `${d.taxRate}%`; subDisplay = `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr`; }
                       else if (key === 'walk') { valDisplay = `${d.walkRaw}/100`; subDisplay = d.walkLabel; }
                       else if (key === 'edu') { valDisplay = `${d.eduPct}%`; subDisplay = 'Bachelor\'s Degree+'; tag = tagLabel(score, 'Highly Educated', 'Mixed'); }
-                      else if (key === 'market') { valDisplay = `${d.saleToList}%`; subDisplay = 'Sale-to-list (Last 90 Days)'; tag = tagLabel(score, 'Hot market', 'Cool market'); }
+                      else if (key === 'market') { 
+                        valDisplay = `${d.saleToList}%`; 
+                        subDisplay = isLiveMode ? 'Live Market Feed (30s sync)' : 'Sale-to-list (Last 90 Days)'; 
+                        tag = isLiveMode ? 'Live Update' : tagLabel(score, 'Hot market', 'Cool market'); 
+                      }
 
                       return (
-                        <div key={d.name} className="p-3 border-t border-r border-[#D4E8F0] hover:bg-[#E8F4FB] transition-colors flex flex-col justify-center gap-1">
-                          <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
+                        <div key={d.name} className={`p-3 border-t border-r border-[#D4E8F0] hover:bg-[#E8F4FB] transition-colors flex flex-col justify-center gap-1 ${key === 'market' && isLiveMode ? 'bg-[#D4EDDE]/10' : ''}`}>
+                          <div className="flex items-center gap-2">
+                            <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
+                            {key === 'market' && isLiveMode && (
+                              <div className="w-2 h-2 rounded-full bg-[#1E5C38] animate-pulse shadow-sm shadow-[#1E5C38]/40" />
+                            )}
+                          </div>
                           <div className="text-[12px] text-[#6E8A96] font-mono leading-tight">{subDisplay}</div>
                           <div className="h-1 bg-[#D4E8F0] rounded-full overflow-hidden mt-0.5">
                             <div className="h-full transition-all duration-500" style={{ width: `${score}%`, backgroundColor: barColor(score) }}></div>
