@@ -38,7 +38,7 @@ export default function Homebase() {
   const [countySearch, setCountySearch] = useState('');
   const [townSearch, setTownSearch] = useState('');
   const [ghostText, setGhostText] = useState('');
-  const [priorityOrder, setPriorityOrder] = useState(['income', 'schools', 'home', 'market', 'highway', 'safety', 'walk', 'commute', 'taxes', 'edu']);
+  const [priorityOrder, setPriorityOrder] = useState(['schools', 'safety', 'walk', 'home', 'highway', 'income', 'edu', 'market', 'commute', 'taxes']);
   const [sortKey, setSortKey] = useState('fit');
   const [showResults, setShowResults] = useState(false);
   const [showPrioritySettings, setShowPrioritySettings] = useState(false);

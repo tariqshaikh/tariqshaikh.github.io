@@ -403,16 +403,16 @@ export const NJ_ENRICHED: Record<string, any> = {
 };
 
 export const DIMS = [
-  {key:'income',  label:'Median income',   sub:'Household income / yr', hoverSub: 'NJ Avg: $96k | High: $115k+ | Low: <$85k', scoreKey:'incomeScore'},
-  {key:'home',    label:'Home value',      sub:'Median home value', hoverSub: 'NJ Median: ~$500k. Top towns often exceed $1M. Scores favor affordability.', scoreKey:'homeScore'},
-  {key:'commute', label:'Commute',         sub:'Avg travel time', hoverSub: 'Average NJ commute is 31 mins. Scores favor proximity to NYC/Philly hubs.', scoreKey:'commuteScore'},
-  {key:'highway', label:'Highway Access',  sub:'Proximity to major arteries', hoverSub: 'GSP, TPK, 287, 80, 78, 1, 9, 18, 206, 202', scoreKey:'highwayScore'},
   {key:'schools', label:'Schools',         sub:'Niche district rating', hoverSub: 'Based on Niche.com state-wide rankings. A+ is top 5%, A is top 15%.', scoreKey:'schoolScore'},
   {key:'safety',  label:'Safety',          sub:'Crime index score', hoverSub: 'Combined property and violent crime index. 100 is safest (top 1st percentile).', scoreKey:'safetyScore'},
-  {key:'taxes',   label:'Property taxes',  sub:'Avg annual bill', hoverSub: 'NJ has the highest property taxes in the US. Avg bill is ~$9,500/yr.', scoreKey:'taxScore'},
   {key:'walk',    label:'Walkability',     sub:'Walk score', hoverSub: 'WalkScore.com data. 70+ is Very Walkable, <50 is Car-Dependent.', scoreKey:'walkScore2'},
+  {key:'home',    label:'Home value',      sub:'Median home value', hoverSub: 'NJ Median: ~$500k. Top towns often exceed $1M. Scores favor affordability.', scoreKey:'homeScore'},
+  {key:'highway', label:'Highway Access',  sub:'Proximity to major arteries', hoverSub: 'GSP, TPK, 287, 80, 78, 1, 9, 18, 206, 202', scoreKey:'highwayScore'},
+  {key:'income',  label:'Median income',   sub:'Household income / yr', hoverSub: 'NJ Avg: $96k | High: $115k+ | Low: <$85k', scoreKey:'incomeScore'},
   {key:'edu',     label:'Education',       sub:'% with Degree+', hoverSub: 'Percentage of adults with a Bachelor\'s degree or higher. High correlation with professional communities.', scoreKey:'eduScore'},
-  {key:'market',  label:'Market Heat',     sub:'Sale-to-list % (Last 90 Days)', hoverSub: 'Measures demand. >100% means homes typically sell above asking price.', scoreKey:'marketScore'}
+  {key:'market',  label:'Market Heat',     sub:'Sale-to-list % (Last 90 Days)', hoverSub: 'Measures demand. >100% means homes typically sell above asking price.', scoreKey:'marketScore'},
+  {key:'commute', label:'Commute',         sub:'Avg travel time', hoverSub: 'Average NJ commute is 31 mins. Scores favor proximity to NYC/Philly hubs.', scoreKey:'commuteScore'},
+  {key:'taxes',   label:'Property taxes',  sub:'Avg annual bill', hoverSub: 'NJ has the highest property taxes in the US. Avg bill is ~$9,500/yr.', scoreKey:'taxScore'}
 ];
 
 export const COLORS=['#0471A4','#035480','#5BA8CC','#2B7A9E','#1A5F8A','#0D4D75','#3E8FAD','#1B6B9E'];
