@@ -1,20 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Homebase NJ
 
-# Run and deploy your AI Studio app
+Homebase NJ is a comprehensive homebuyer's decision tool designed to help prospective residents compare New Jersey municipalities across multiple data dimensions.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/adb0c449-1fa5-4773-aba2-b25a027cf9d2
+- **Dynamic Priority Weighting**: Rank categories like Schools, Commute, Safety, and Affordability to see which towns best match your personal needs.
+- **Side-by-Side Comparison**: Compare up to 5 towns simultaneously with visual heatmaps and detailed metrics.
+- **Enriched Data**: Access curated data for over 300+ NJ towns, including median income, home values, school ratings, and property taxes.
+- **Interactive Map**: Visualize town locations and data points geographically.
 
-## Run Locally
+## Data Dimensions
 
-**Prerequisites:**  Node.js
+- **Median Income**: Household income per year.
+- **Home Value**: Median home value based on recent market data.
+- **Commute**: Average travel time to major hubs (NYC/Philly).
+- **Highway Access**: Proximity to major arteries (GSP, TPK, 287, etc.).
+- **Schools**: Niche district ratings and state-wide rankings.
+- **Safety**: Combined property and violent crime index scores.
+- **Property Taxes**: Average annual property tax bill.
+- **Walkability**: WalkScore.com data integration.
+- **Education**: Percentage of adults with a Bachelor's degree or higher.
+- **Market Heat**: Sale-to-list percentage over the last 90 days.
 
+## Tech Stack
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- **React**: Frontend framework.
+- **Tailwind CSS**: Utility-first styling.
+- **Motion**: Fluid animations and transitions.
+- **Lucide React**: Clean, consistent iconography.
+- **TypeScript**: Type-safe development.
+
+## Getting Started
+
+1. Install dependencies: `npm install`
+2. Start the development server: `npm run dev`
+3. Build for production: `npm run build`

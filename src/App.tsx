@@ -6,14 +6,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Portfolio from './components/Portfolio';
-import TownComparator from './components/TownComparator';
+import Homebase from './components/Homebase';
 
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Portfolio />} />
-        <Route path="/comparator" element={<TownComparator />} />
+        <Route path="/homebase" element={<Homebase />} />
       </Routes>
     </Router>
   );

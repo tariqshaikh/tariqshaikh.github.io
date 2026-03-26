@@ -87,12 +87,12 @@ export default function Portfolio() {
               Every home buyer in NJ has 6 browser tabs open — Zillow, GreatSchools, NJ Transit, WalkScore, crime maps. I collapsed them into one weighted comparison tool built for real decisions.
             </p>
             <div className="flex flex-wrap gap-1.5 mb-8">
-              {['Consumer', 'Real Estate', 'Data Product', 'AI-Powered'].map(tag => (
+              {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
                 <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] bg-[#E8F4FB] text-[#0471A4] border border-[#C8E6F5] tracking-widest uppercase">{tag}</span>
               ))}
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Link to="/comparator" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#0471A4] text-white rounded-[2px] text-sm font-semibold hover:bg-[#035480] transition-all">
+              <Link to="/homebase" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#0471A4] text-white rounded-[2px] text-sm font-semibold hover:bg-[#035480] transition-all">
                 <ChevronRight size={13} /> Live Product
               </Link>
               <button onClick={() => openModal('prd-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-[#1A1C1E] border-2 border-[#D4E8F0] rounded-[4px] text-sm font-semibold hover:border-[#0471A4] hover:text-[#0471A4] hover:bg-[#F7FBFF] cursor-pointer transition-all">PRD</button>

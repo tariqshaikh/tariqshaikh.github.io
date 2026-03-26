@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-const files = ['src/components/TownComparator.tsx', 'src/components/Portfolio.tsx'];
+const files = ['src/components/Homebase.tsx', 'src/components/Portfolio.tsx'];
 
 const replacements = {
   '#F7FBFF': '#EDE9DC',
