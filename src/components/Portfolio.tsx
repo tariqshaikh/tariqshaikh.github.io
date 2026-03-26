@@ -30,45 +30,45 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="bg-[#F7FBFF] font-sans text-[#1A1C1E] min-h-screen selection:bg-[#C8E6F5] selection:text-[#0471A4]">
+    <div className="bg-white font-sans text-[#1A1C1E] min-h-screen selection:bg-[#FEBE10]/30 selection:text-[#1C355E]">
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-4.5 flex items-center justify-between border-b border-[#D4E8F0] transition-all duration-300 ${scrolled ? 'bg-[#F7FBFF]/94 backdrop-blur-md' : 'bg-transparent'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-4.5 flex items-center justify-between border-b border-[#EEEEEF] transition-all duration-300 ${scrolled ? 'bg-white/94 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
         <div className="font-mono text-sm tracking-widest uppercase text-[#6E8A96]">Tariq Shaikh</div>
         <div className="hidden md:flex gap-8">
-          <a href="#projects" className="text-sm text-[#6E8A96] hover:text-[#0471A4] transition-colors tracking-wider">Work</a>
-          <a href="#process" className="text-sm text-[#6E8A96] hover:text-[#0471A4] transition-colors tracking-wider">Process</a>
-          <a href="#about" className="text-sm text-[#6E8A96] hover:text-[#0471A4] transition-colors tracking-wider">About</a>
-          <a href="mailto:tshaikh92@gmail.com" className="text-sm text-[#6E8A96] hover:text-[#0471A4] transition-colors tracking-wider">Contact</a>
+          <a href="#projects" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Work</a>
+          <a href="#process" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Process</a>
+          <a href="#about" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">About</a>
+          <a href="mailto:tshaikh92@gmail.com" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Contact</a>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-[75vh] flex flex-col justify-center px-12 pt-32 pb-20 overflow-hidden bg-white border-b-3 border-[#0471A4]">
-        <div className="absolute top-0 right-0 w-[38%] h-[60%] bg-[#E8F4FB] clip-path-hero z-0 hidden md:block" />
+      <section className="relative min-h-[75vh] flex flex-col justify-center px-12 pt-32 pb-20 overflow-hidden bg-white border-b-3 border-[#1C355E]">
+        <div className="absolute top-0 right-0 w-[38%] h-[60%] bg-[#F8F9FA] clip-path-hero z-0 hidden md:block" />
         <div className="relative z-10">
-          <div className="flex items-center gap-3 font-mono text-[13px] tracking-[0.14em] uppercase text-[#0471A4] mb-5 animate-fade-up">
-            <div className="w-8 h-px bg-[#0471A4]" />
+          <div className="flex items-center gap-3 font-mono text-[13px] tracking-[0.14em] uppercase text-[#1C355E] mb-5 animate-fade-up">
+            <div className="w-8 h-px bg-[#FEBE10]" />
             Product Manager · New York Metro
           </div>
           <h1 className="font-serif text-[clamp(64px,10vw,136px)] font-black leading-[0.9] tracking-tight mb-3.5 text-[#1A1C1E] animate-fade-up delay-100">
-            Tariq<br /><span className="italic text-[#0471A4]">Shaikh</span>
+            Tariq<br /><span className="italic text-[#EE324E]">Shaikh</span>
           </h1>
           <p className="font-serif text-[clamp(18px,2.5vw,32px)] font-normal italic text-[#6E8A96] animate-fade-up delay-200">
             Product Manager
           </p>
         </div>
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-[#C8E6F5] animate-fade-up delay-500 z-10">
-          <div className="w-px h-10 bg-gradient-to-b from-[#A8CDD9] to-transparent animate-scroll-line" />
+        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-[#1C355E]/30 animate-fade-up delay-500 z-10">
+          <div className="w-px h-10 bg-gradient-to-b from-[#FEBE10] to-transparent animate-scroll-line" />
           <span>Scroll</span>
         </div>
       </section>
 
       {/* Projects */}
-      <section id="projects" className="px-12 py-24 bg-[#F7FBFF] border-t border-[#D4E8F0]">
+      <section id="projects" className="px-12 py-24 bg-[#F8F9FA] border-t border-[#EEEEEF]">
         <div className="flex items-center gap-5 mb-13">
-          <span className="font-mono text-[13px] text-[#0471A4] tracking-widest">01</span>
+          <span className="font-mono text-[13px] text-[#EE324E] font-bold tracking-widest">01</span>
           <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-[#1A1C1E]">Selected Work</h2>
-          <div className="flex-1 h-px bg-[#D4E8F0]" />
+          <div className="flex-1 h-px bg-[#EEEEEF]" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -127,9 +127,9 @@ export default function Portfolio() {
       </section>
 
       {/* Process */}
-      <section id="process" className="px-12 py-24 bg-[#0471A4]">
+      <section id="process" className="px-12 py-24 bg-[#1C355E]">
         <div className="flex items-center gap-5 mb-13">
-          <span className="font-mono text-[13px] text-[#C8E6F5] tracking-widest">02</span>
+          <span className="font-mono text-[13px] text-[#EE324E] tracking-widest">02</span>
           <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-white">How I Work</h2>
           <div className="flex-1 h-px bg-white/15" />
         </div>
@@ -141,44 +141,44 @@ export default function Portfolio() {
             { num: '04', title: 'Learn & iterate', desc: 'What did users actually do? What confused them? What did I get wrong? V2 is always better than V1.' },
           ].map((step, i) => (
             <div key={i} className={`p-10 border-white/12 ${i !== 3 ? 'lg:border-r' : ''} ${i % 2 === 0 ? 'sm:border-r lg:border-r' : ''}`}>
-              <div className="font-serif text-[52px] font-black text-white/12 leading-none mb-4">{step.num}</div>
+              <div className="font-serif text-[52px] font-black text-[#EE324E]/20 leading-none mb-4">{step.num}</div>
               <div className="font-serif text-xl font-bold mb-2.5 text-white">{step.title}</div>
-              <p className="text-[15px] leading-[1.75] text-white/55">{step.desc}</p>
+              <p className="text-[15px] leading-[1.75] text-white/70">{step.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* About */}
-      <section id="about" className="px-12 py-24 bg-white border-t border-[#D4E8F0]">
+      <section id="about" className="px-12 py-24 bg-white border-t border-[#EEEEEF]">
         <div className="max-w-3xl">
           <div className="flex items-center gap-5 mb-8">
-            <span className="font-mono text-[13px] text-[#0471A4] tracking-widest">03</span>
+            <span className="font-mono text-[13px] text-[#EE324E] font-bold tracking-widest">03</span>
             <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-[#1A1C1E]">About</h2>
-            <div className="flex-1 h-px bg-[#D4E8F0]" />
+            <div className="flex-1 h-px bg-[#EEEEEF]" />
           </div>
           <p className="text-[17px] leading-[1.85] text-[#3D4347] mb-4.5">I'm a <strong className="text-[#1A1C1E] font-semibold">Senior Data Strategist at Indeed</strong> with a background in frontend engineering and a Stanford PM certificate. I've spent 6+ years at the intersection of data, engineering, and product.</p>
           <p className="text-[17px] leading-[1.85] text-[#3D4347] mb-4.5">I build things that solve real problems. The portfolio you're reading right now is one of them — I built every project here, wrote every PRD, and defined every roadmap myself.</p>
           <p className="text-[17px] leading-[1.85] text-[#3D4347] mb-4.5">Based in <strong className="text-[#1A1C1E] font-semibold">New Jersey</strong>. Open to PM roles in B2B SaaS and consumer products.</p>
           <div className="grid grid-cols-2 gap-4 mt-10">
             <div>
-              <div className="font-mono text-[12px] uppercase tracking-widest text-[#0471A4] mb-2">Product</div>
+              <div className="font-mono text-[12px] uppercase tracking-widest text-[#1C355E] font-bold mb-2">Product</div>
               <div className="text-[15px] leading-[2] text-[#3D4347]">Roadmap Ownership<br />A/B Experimentation<br />User Research<br />0→1 Launches<br />Agile / Scrum</div>
             </div>
             <div>
-              <div className="font-mono text-[12px] uppercase tracking-widest text-[#0471A4] mb-2">Technical</div>
+              <div className="font-mono text-[12px] uppercase tracking-widest text-[#1C355E] font-bold mb-2">Technical</div>
               <div className="text-[15px] leading-[2] text-[#3D4347]">JavaScript / React<br />SQL & Tableau<br />Data Automation<br />Front-End Arch.<br />Accessibility</div>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="px-12 py-9 border-t-3 border-[#0471A4] bg-[#1A1C1E] flex items-center justify-between flex-wrap gap-4">
-        <div className="font-mono text-[13px] text-white/30 tracking-wider uppercase">© 2026 Tariq Shaikh · PM Portfolio</div>
+      <footer className="px-12 py-9 border-t-3 border-[#EE324E] bg-[#1C355E] flex items-center justify-between flex-wrap gap-4">
+        <div className="font-mono text-[13px] text-white/40 tracking-wider uppercase">© 2026 Tariq Shaikh · PM Portfolio</div>
         <div className="flex gap-6">
-          <a href="mailto:tshaikh92@gmail.com" className="font-mono text-[13px] text-white/40 hover:text-[#C8E6F5] transition-colors tracking-wider">tshaikh92@gmail.com</a>
-          <a href="tel:8483914393" className="font-mono text-[13px] text-white/40 hover:text-[#C8E6F5] transition-colors tracking-wider">848-391-4393</a>
-          <a href="https://linkedin.com" target="_blank" className="font-mono text-[13px] text-white/40 hover:text-[#C8E6F5] transition-colors tracking-wider">LinkedIn</a>
+          <a href="mailto:tshaikh92@gmail.com" className="font-mono text-[13px] text-white/60 hover:text-[#EE324E] transition-colors tracking-wider">tshaikh92@gmail.com</a>
+          <a href="tel:8483914393" className="font-mono text-[13px] text-white/60 hover:text-[#EE324E] transition-colors tracking-wider">848-391-4393</a>
+          <a href="https://linkedin.com" target="_blank" className="font-mono text-[13px] text-white/60 hover:text-[#EE324E] transition-colors tracking-wider">LinkedIn</a>
         </div>
       </footer>
 
@@ -190,14 +190,14 @@ export default function Portfolio() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeModal}
-            className="fixed inset-0 z-[200] bg-[#0471A4]/15 backdrop-blur-md overflow-y-auto px-6 py-10 flex items-start justify-center"
+            className="fixed inset-0 z-[200] bg-[#1C355E]/20 backdrop-blur-md overflow-y-auto px-6 py-10 flex items-start justify-center"
           >
             <motion.div 
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 16 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white text-[#1A1C1E] max-w-[1100px] w-full rounded-[3px] overflow-hidden shadow-2xl shadow-[#0471A4]/18"
+              className="bg-white text-[#1A1C1E] max-w-[1100px] w-full rounded-[3px] overflow-hidden shadow-2xl shadow-[#1C355E]/20"
             >
               {activeModal === 'prd-1' && (
                 <>
