@@ -210,9 +210,9 @@ export default function Homebase() {
   return (
     <div className="bg-[#F7FBFF] min-h-screen font-sans text-[#1A1C1E] flex flex-col">
       <nav className="px-10 py-4 flex items-center justify-between border-b border-[#D4E8F0] bg-white shrink-0">
-        <div className="text-2xl leading-none">
+        <button onClick={handleClearAll} className="text-2xl leading-none hover:opacity-80 transition-opacity cursor-pointer text-left">
           <span className="font-serif font-bold text-[#1A1C1E]">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
-        </div>
+        </button>
         <div className="font-mono text-[13px] text-[#6E8A96] px-2.5 py-0.5 border border-[#D4E8F0] rounded-full">21 counties · enriched data</div>
       </nav>
 
@@ -221,17 +221,18 @@ export default function Homebase() {
       >
         <AnimatePresence mode="wait">
           {!showResults && (
-            <motion.div 
+            <motion.button 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center mb-10"
+              onClick={handleClearAll}
+              className="text-center mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
             >
               <h1 className="text-[clamp(48px,8vw,84px)] mb-2 leading-none">
                 <span className="font-serif font-bold text-[#0471A4]">Homebase</span> <span className="font-sans font-black text-[#0471A4]/40 ml-1">NJ</span>
               </h1>
               <p className="font-mono text-base text-[#6E8A96] tracking-[0.2em] uppercase">Find your perfect New Jersey town</p>
-            </motion.div>
+            </motion.button>
           )}
         </AnimatePresence>
 
@@ -241,15 +242,18 @@ export default function Homebase() {
           <motion.div className={`flex ${showResults ? 'flex-row gap-6 w-full lg:w-auto shrink-0' : 'flex-col gap-6 w-full'}`}>
             
             {/* County Section */}
-            <motion.div className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-80' : 'w-full'}`} ref={countyDropdownRef}>
-              <div className={`relative flex flex-wrap items-center w-full min-h-[50px] pl-12 pr-6 py-1.5 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2 z-10`}>
+            <motion.div className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-[420px]' : 'w-full'}`} ref={countyDropdownRef}>
+              <div className="flex items-center justify-between mb-0 px-2">
+                <span className="text-[10px] font-bold text-[#6E8A96] uppercase tracking-wider">County Selection</span>
+              </div>
+              <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2 z-10`}>
                 <div className="absolute top-1/2 -translate-y-1/2 left-5 flex items-center pointer-events-none z-20">
                   <span className="text-[#6E8A96]">🔍</span>
                 </div>
                 
                 {/* Pills inside input ONLY if !showResults */}
                 {!showResults && activeCounties.map(c => (
-                  <span key={c} className="px-3 py-1 bg-[#E8F4FB] text-[#0471A4] rounded-full text-sm font-bold border border-[#C8E6F5] flex items-center gap-1.5 z-20">
+                  <span key={c} className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-1.5 z-20">
                     {c} County
                     <button onClick={(e) => { e.stopPropagation(); setActiveCounties(activeCounties.filter(x => x !== c)); }} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
                   </span>
@@ -297,7 +301,7 @@ export default function Homebase() {
 
                 {/* Dropdown for County */}
                 {showCountyDropdown && (
-                  <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto ${showResults ? 'w-80' : 'w-full'}`}>
+                  <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
                     {/* Counties Section */}
                     {Object.entries(NJ_COUNTIES)
                       .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))
@@ -376,7 +380,7 @@ export default function Homebase() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         key={c} 
-                        className="px-3 py-1.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[13px] font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0"
+                        className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0"
                       >
                         <span>{c} County</span>
                         <button onClick={() => setActiveCounties(activeCounties.filter(x => x !== c))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
@@ -394,16 +398,22 @@ export default function Homebase() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-80' : 'w-full'}`} 
+                  className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-[420px]' : 'w-full'}`} 
                   ref={townDropdownRef}
                 >
-                  <div className={`relative flex flex-wrap items-center w-full min-h-[50px] pl-12 pr-6 py-1.5 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2 z-10`}>
+                  <div className="flex items-center justify-between mb-0 px-2">
+                    <span className="text-[10px] font-bold text-[#6E8A96] uppercase tracking-wider">Town Selection</span>
+                    <span className={`text-[10px] font-mono ${selectedTowns.length >= 8 ? 'text-[#D32F2F] font-bold' : 'text-[#6E8A96]'}`}>
+                      {selectedTowns.length}/8 Towns Max
+                    </span>
+                  </div>
+                  <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2 z-10`}>
                     <div className="absolute top-1/2 -translate-y-1/2 left-5 flex items-center pointer-events-none z-20">
                       <span className="text-[#6E8A96]">🏘️</span>
                     </div>
 
                     {!showResults && selectedTowns.map(t => (
-                      <span key={t.name} className="px-3 py-1 bg-[#E8F4FB] text-[#0471A4] rounded-full text-sm font-bold border border-[#C8E6F5] flex items-center gap-1.5 z-20">
+                      <span key={t.name} className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-1.5 z-20">
                         {t.name}
                         <button onClick={(e) => { e.stopPropagation(); setSelectedTowns(selectedTowns.filter(x => x.name !== t.name)); }} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
                       </span>
@@ -422,7 +432,7 @@ export default function Homebase() {
 
                     {/* Dropdown for Town */}
                     {showTownDropdown && (
-                      <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto ${showResults ? 'w-80' : 'w-full'}`}>
+                      <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
                         {!townSearch && (
                           <div className="px-4 py-2 bg-[#F7FBFF] border-b border-[#D4E8F0] flex items-center justify-between">
                             <span className="font-mono text-[11px] text-[#0471A4] uppercase tracking-widest font-bold">Hottest Markets</span>
@@ -457,10 +467,9 @@ export default function Homebase() {
                                 {NJ_ENRICHED[t.name] && (
                                   <span className="font-mono text-[11px] text-[#6E8A96] bg-[#F7FBFF] px-1.5 py-0.5 rounded group-hover:bg-[#E8F4FB] transition-colors">{NJ_ENRICHED[t.name].saleToList}% heat</span>
                                 )}
-                                {NJ_ENRICHED[t.name] ? 
-                                  <span className="font-mono text-[10px] px-1.5 py-0.5 bg-[#D4EDDE] text-[#1E5C38] rounded border border-[#A8D5B8]">✓ full data</span> : 
-                                  <span className="font-mono text-[10px] px-1.5 py-0.5 bg-[#FDEFC6] text-[#7A5200] rounded border border-[#F5D580]">partial</span>
-                                }
+                                {NJ_ENRICHED[t.name] && (
+                                  <span className="font-mono text-[10px] px-1.5 py-0.5 bg-[#D4EDDE] text-[#1E5C38] rounded border border-[#A8D5B8]">✓ full data</span>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -479,7 +488,7 @@ export default function Homebase() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             key={t.name} 
-                            className="px-3 py-1.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[13px] font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0"
+                            className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0"
                           >
                             <div className="flex flex-col leading-none">
                               <div className="flex items-center gap-1.5">
@@ -518,7 +527,7 @@ export default function Homebase() {
             >
               <div className="bg-white/50 border border-[#D4E8F0] rounded-xl p-4 text-center max-w-lg mx-auto">
                 <p className="text-[13px] text-[#6E8A96] font-mono leading-relaxed">
-                  <span className="font-bold text-[#1A1C1E]">Data Coverage:</span> We've enriched 50+ major towns across NJ with deep metrics (schools, safety, walkability). Other towns show "Partial Data" using basic Census estimates.
+                  <span className="font-bold text-[#1A1C1E]">Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
                 </p>
               </div>
 
@@ -563,21 +572,24 @@ export default function Homebase() {
                 <div className="font-mono text-[13px] text-[#6E8A96] mt-1">{selectedTowns.length} towns · New Jersey · Enriched local data + Census ACS 2023</div>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono text-[13px] text-[#6E8A96]">Sort</span>
-                  {['fit', 'income', 'home', 'commute', 'schools', 'edu'].map(k => (
-                    <button 
-                      key={k}
-                      onClick={() => setSortKey(k)}
-                      className={`px-3 py-1 border border-[#D4E8F0] rounded-full text-[13px] font-mono transition-all ${sortKey === k ? 'bg-[#0471A4] text-white border-[#0471A4]' : 'bg-white text-[#3D4347] hover:border-[#0471A4]'}`}
-                    >
-                      {k === 'edu' ? 'Education' : k.charAt(0).toUpperCase() + k.slice(1)} {k === 'fit' ? 'score' : k === 'home' ? 'value' : ''}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[13px] text-[#6E8A96]">Sort by</span>
+                  <select 
+                    value={sortKey}
+                    onChange={(e) => setSortKey(e.target.value)}
+                    className="px-4 py-1.5 bg-white border border-[#D4E8F0] rounded-full text-[13px] font-mono text-[#3D4347] focus:outline-none focus:border-[#0471A4] cursor-pointer hover:border-[#0471A4] transition-all"
+                  >
+                    <option value="fit">Fit Score</option>
+                    <option value="income">Income</option>
+                    <option value="home">Home Value</option>
+                    <option value="commute">Commute</option>
+                    <option value="schools">Schools</option>
+                    <option value="edu">Education</option>
+                  </select>
                 </div>
                 <button 
                   onClick={handleClearAll}
-                  className="px-4 py-1 bg-white text-[#6E8A96] border border-[#D4E8F0] rounded-full text-[13px] font-mono hover:bg-[#F7FBFF] hover:text-[#0471A4] transition-all ml-2"
+                  className="px-4 py-1.5 bg-white text-[#6E8A96] border border-[#D4E8F0] rounded-full text-[13px] font-mono hover:bg-[#F7FBFF] hover:text-[#0471A4] transition-all ml-2"
                 >
                   Start Over
                 </button>
@@ -677,7 +689,7 @@ export default function Homebase() {
                       <ChevronRight size={14} className="rotate-90 opacity-60 group-hover/town:opacity-100" />
                     </div>
                   </div>
-                  <div className="font-mono text-[11px] opacity-60 mt-0.5">{d.hasFullData ? '✓ full data' : 'partial data'}</div>
+                  <div className="font-mono text-[11px] opacity-60 mt-0.5">{d.hasFullData ? '✓ full data' : ''}</div>
                   <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-white/20 rounded-full font-mono text-[13px] group/fit relative">
                     <span>Fit</span><span className="text-base font-bold">{calcFitScore(d)}</span><span className="text-[12px] opacity-60">/100</span>
                     
@@ -717,7 +729,7 @@ export default function Homebase() {
                             <p className="text-[12px] leading-relaxed text-white/80 italic">
                               {d.hasFullData 
                                 ? `${d.name} is a ${d.safetyLabel.toLowerCase()} community with ${d.schoolLabel} rated schools and a ${d.walkLabel.toLowerCase()} layout.`
-                                : "Limited data available for this municipality. Estimates based on county-wide averages."}
+                                : "Detailed metrics coming soon for this municipality."}
                             </p>
                           </div>
                         </div>
