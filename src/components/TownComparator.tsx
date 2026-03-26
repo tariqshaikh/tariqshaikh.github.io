@@ -85,6 +85,10 @@ export default function TownComparator() {
   };
 
   useEffect(() => {
+    document.title = "Homebase NJ";
+  }, []);
+
+  useEffect(() => {
     if (countySearch.length < 2) {
       setGhostText('');
       return;
@@ -129,9 +133,9 @@ export default function TownComparator() {
   const runComparison = () => {
     setIsLoading(true);
     setShowResults(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       setIsLoading(false);
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 600);
   };
 
@@ -206,161 +210,174 @@ export default function TownComparator() {
   });
 
   return (
-    <div className="bg-[#F7FBFF] min-h-screen font-sans text-[#1A1C1E]">
-      <nav className="px-10 py-4 flex items-center justify-between border-b border-[#D4E8F0] bg-white">
+    <div className="bg-[#F7FBFF] min-h-screen font-sans text-[#1A1C1E] flex flex-col">
+      <nav className="px-10 py-4 flex items-center justify-between border-b border-[#D4E8F0] bg-white shrink-0">
         <div className="text-2xl leading-none">
           <span className="font-serif font-bold text-[#1A1C1E]">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
         </div>
         <div className="font-mono text-[13px] text-[#6E8A96] px-2.5 py-0.5 border border-[#D4E8F0] rounded-full">21 counties · enriched data</div>
       </nav>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-20 max-w-4xl mx-auto w-full">
-        <div className="text-center mb-10">
-          <h1 className="text-[clamp(48px,8vw,84px)] mb-2 leading-none">
-            <span className="font-serif font-bold text-[#0471A4]">Homebase</span> <span className="font-sans font-black text-[#0471A4]/40 ml-1">NJ</span>
-          </h1>
-          <p className="font-mono text-base text-[#6E8A96] tracking-[0.2em] uppercase">Find your perfect New Jersey town</p>
-        </div>
+      <motion.div 
+        layout
+        className={`transition-all duration-500 ease-in-out ${showResults ? 'bg-white border-b border-[#D4E8F0] sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center justify-center px-6 py-20 max-w-4xl mx-auto w-full'}`}
+      >
+        <AnimatePresence mode="wait">
+          {!showResults && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center mb-10"
+            >
+              <h1 className="text-[clamp(48px,8vw,84px)] mb-2 leading-none">
+                <span className="font-serif font-bold text-[#0471A4]">Homebase</span> <span className="font-sans font-black text-[#0471A4]/40 ml-1">NJ</span>
+              </h1>
+              <p className="font-mono text-base text-[#6E8A96] tracking-[0.2em] uppercase">Find your perfect New Jersey town</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="w-full max-w-2xl space-y-6">
-          <div className="relative group bg-white rounded-full">
-            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-              <span className="text-[#6E8A96]">🔍</span>
-            </div>
-            <div className="absolute inset-y-0 left-14 flex items-center pointer-events-none text-lg">
-              {ghostText && ghostText.toLowerCase().startsWith(countySearch.toLowerCase()) && (
-                <span className="text-[#6E8A96]/30">
-                  <span className="opacity-0">{countySearch}</span>
-                  {ghostText.slice(countySearch.length)}
-                </span>
-              )}
-            </div>
-            <input 
-              className="w-full pl-12 pr-6 py-3 border border-[#D4E8F0] rounded-full text-base shadow-sm hover:shadow-md focus:shadow-md focus:border-[#0471A4] outline-none transition-all bg-transparent relative z-10"
-              placeholder="Search for a town or county (e.g. Summit, Union, Essex)..."
-              value={countySearch}
-              onChange={e => {
-                setCountySearch(e.target.value);
-                setShowCountyDropdown(true);
-              }}
-              onFocus={() => setShowCountyDropdown(true)}
-              onKeyDown={e => {
-                if (e.key === 'Tab' && ghostText && ghostText.toLowerCase().startsWith(countySearch.toLowerCase())) {
-                  e.preventDefault();
-                  setCountySearch(ghostText);
-                }
-                if (e.key === 'Enter' && countySearch.length >= 2) {
-                  const firstCounty = Object.entries(NJ_COUNTIES)
-                    .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))[0];
-                  const firstTown = allTowns
-                    .filter(t => t.name.toLowerCase().includes(countySearch.toLowerCase()))
-                    .filter(t => !selectedTowns.some(s => s.name === t.name))[0];
-                  
-                  if (firstTown) {
-                    handleTownSelect(firstTown);
-                  } else if (firstCounty) {
-                    handleCountySelect(firstCounty[0]);
+        <motion.div layout className={`w-full ${showResults ? 'max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center gap-4' : 'max-w-2xl space-y-6'}`}>
+          
+          {/* Search Inputs */}
+          <motion.div layout className={`flex ${showResults ? 'flex-row gap-3 w-full lg:w-auto shrink-0' : 'flex-col gap-6 w-full'}`}>
+            <motion.div layout className={`relative group bg-white rounded-full ${showResults ? 'w-full lg:w-64' : 'w-full'}`}>
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                <span className="text-[#6E8A96]">🔍</span>
+              </div>
+              <div className="absolute inset-y-0 left-14 flex items-center pointer-events-none text-lg">
+                {ghostText && ghostText.toLowerCase().startsWith(countySearch.toLowerCase()) && (
+                  <span className="text-[#6E8A96]/30">
+                    <span className="opacity-0">{countySearch}</span>
+                    {ghostText.slice(countySearch.length)}
+                  </span>
+                )}
+              </div>
+              <input 
+                className={`w-full pl-12 pr-6 py-3 border border-[#D4E8F0] rounded-full ${showResults ? 'text-sm' : 'text-base'} shadow-sm hover:shadow-md focus:shadow-md focus:border-[#0471A4] outline-none transition-all bg-transparent relative z-10`}
+                placeholder={showResults ? "Add county..." : "Search for a town or county (e.g. Summit, Union, Essex)..."}
+                value={countySearch}
+                onChange={e => {
+                  setCountySearch(e.target.value);
+                  setShowCountyDropdown(true);
+                }}
+                onFocus={() => setShowCountyDropdown(true)}
+                onKeyDown={e => {
+                  if (e.key === 'Tab' && ghostText && ghostText.toLowerCase().startsWith(countySearch.toLowerCase())) {
+                    e.preventDefault();
+                    setCountySearch(ghostText);
                   }
-                }
-              }}
-            />
-            {showCountyDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto" ref={countyDropdownRef}>
-                {/* Counties Section */}
-                {Object.entries(NJ_COUNTIES)
-                  .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))
-                  .length > 0 && (
-                  <>
-                    <div className="px-6 py-2 text-[12px] font-bold text-[#6E8A96] uppercase tracking-wider bg-[#F7FBFF] border-b border-[#D4E8F0]">
-                      Counties
-                    </div>
-                    {Object.entries(NJ_COUNTIES)
-                      .sort(([, a], [, b]) => b.heat - a.heat)
-                      .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))
-                      .map(([c, data]) => (
-                        <div 
-                          key={c}
-                          className="px-6 py-4 text-base cursor-pointer hover:bg-[#F7FBFF] flex justify-between items-center border-b last:border-0 border-[#E8F4FB] group"
-                          onClick={() => handleCountySelect(c)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-[#0471A4]">📍</span>
-                            <span className={`font-medium ${activeCounties.includes(c) ? 'text-[#0471A4] font-bold' : ''}`}>{c} County</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-mono text-[13px] text-[#6E8A96] bg-[#F7FBFF] px-2 py-1 rounded group-hover:bg-[#E8F4FB] transition-colors">{data.heat}% heat</span>
-                            <span className="font-mono text-[13px] text-[#6E8A96] opacity-60">{data.towns.length} towns</span>
-                          </div>
-                        </div>
-                      ))}
-                  </>
-                )}
-
-                {/* Towns Section */}
-                {countySearch.length >= 2 && allTowns
-                  .filter(t => t.name.toLowerCase().includes(countySearch.toLowerCase()))
-                  .filter(t => !selectedTowns.some(s => s.name === t.name))
-                  .length > 0 && (
-                  <>
-                    <div className="px-6 py-2 text-[12px] font-bold text-[#6E8A96] uppercase tracking-wider bg-[#F7FBFF] border-b border-[#D4E8F0] border-t">
-                      Towns
-                    </div>
-                    {allTowns
+                  if (e.key === 'Enter' && countySearch.length >= 2) {
+                    const firstCounty = Object.entries(NJ_COUNTIES)
+                      .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))[0];
+                    const firstTown = allTowns
                       .filter(t => t.name.toLowerCase().includes(countySearch.toLowerCase()))
-                      .filter(t => !selectedTowns.some(s => s.name === t.name))
-                      .slice(0, 15)
-                      .map(t => (
-                        <div 
-                          key={`${t.name}-${t.county}`}
-                          className="px-6 py-4 text-base cursor-pointer hover:bg-[#F7FBFF] flex justify-between items-center border-b last:border-0 border-[#E8F4FB] group"
-                          onClick={() => handleTownSelect(t)}
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium group-hover:text-[#0471A4] transition-colors">{t.name}</span>
-                            <span className="font-mono text-[12px] text-[#6E8A96] uppercase">{t.county} County</span>
+                      .filter(t => !selectedTowns.some(s => s.name === t.name))[0];
+                    
+                    if (firstTown) {
+                      handleTownSelect(firstTown);
+                    } else if (firstCounty) {
+                      handleCountySelect(firstCounty[0]);
+                    }
+                  }
+                }}
+              />
+              {showCountyDropdown && (
+                <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto ${showResults ? 'w-80' : 'right-0'}`} ref={countyDropdownRef}>
+                  {/* Counties Section */}
+                  {Object.entries(NJ_COUNTIES)
+                    .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))
+                    .length > 0 && (
+                    <>
+                      <div className="px-6 py-2 text-[12px] font-bold text-[#6E8A96] uppercase tracking-wider bg-[#F7FBFF] border-b border-[#D4E8F0]">
+                        Counties
+                      </div>
+                      {Object.entries(NJ_COUNTIES)
+                        .sort(([, a], [, b]) => b.heat - a.heat)
+                        .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))
+                        .map(([c, data]) => (
+                          <div 
+                            key={c}
+                            className="px-6 py-4 text-base cursor-pointer hover:bg-[#F7FBFF] flex justify-between items-center border-b last:border-0 border-[#E8F4FB] group"
+                            onClick={() => handleCountySelect(c)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-[#0471A4]">📍</span>
+                              <span className={`font-medium ${activeCounties.includes(c) ? 'text-[#0471A4] font-bold' : ''}`}>{c} County</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono text-[13px] text-[#6E8A96] bg-[#F7FBFF] px-2 py-1 rounded group-hover:bg-[#E8F4FB] transition-colors">{data.heat}% heat</span>
+                              <span className="font-mono text-[13px] text-[#6E8A96] opacity-60">{data.towns.length} towns</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            {NJ_ENRICHED[t.name] && (
-                              <span className="font-mono text-[12px] text-[#6E8A96] bg-[#F7FBFF] px-2 py-1 rounded group-hover:bg-[#E8F4FB] transition-colors">{NJ_ENRICHED[t.name].saleToList}% heat</span>
-                            )}
-                            <span className="text-[#0471A4] opacity-0 group-hover:opacity-100 transition-opacity">Add +</span>
+                        ))}
+                    </>
+                  )}
+
+                  {/* Towns Section */}
+                  {countySearch.length >= 2 && allTowns
+                    .filter(t => t.name.toLowerCase().includes(countySearch.toLowerCase()))
+                    .filter(t => !selectedTowns.some(s => s.name === t.name))
+                    .length > 0 && (
+                    <>
+                      <div className="px-6 py-2 text-[12px] font-bold text-[#6E8A96] uppercase tracking-wider bg-[#F7FBFF] border-b border-[#D4E8F0] border-t">
+                        Towns
+                      </div>
+                      {allTowns
+                        .filter(t => t.name.toLowerCase().includes(countySearch.toLowerCase()))
+                        .filter(t => !selectedTowns.some(s => s.name === t.name))
+                        .slice(0, 15)
+                        .map(t => (
+                          <div 
+                            key={`${t.name}-${t.county}`}
+                            className="px-6 py-4 text-base cursor-pointer hover:bg-[#F7FBFF] flex justify-between items-center border-b last:border-0 border-[#E8F4FB] group"
+                            onClick={() => handleTownSelect(t)}
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium group-hover:text-[#0471A4] transition-colors">{t.name}</span>
+                              <span className="font-mono text-[12px] text-[#6E8A96] uppercase">{t.county} County</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {NJ_ENRICHED[t.name] && (
+                                <span className="font-mono text-[12px] text-[#6E8A96] bg-[#F7FBFF] px-2 py-1 rounded group-hover:bg-[#E8F4FB] transition-colors">{NJ_ENRICHED[t.name].saleToList}% heat</span>
+                              )}
+                              <span className="text-[#0471A4] opacity-0 group-hover:opacity-100 transition-opacity">Add +</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
-          {activeCounties.length > 0 && (
-            <div className="animate-in fade-in slide-in-from-top-4 duration-300 space-y-6">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {activeCounties.map(c => (
-                  <div key={c} className="px-4 py-2 bg-[#E8F4FB] text-[#0471A4] rounded-full text-base font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm">
-                    <span>{c} County</span>
-                    <button onClick={() => setActiveCounties(activeCounties.filter(x => x !== c))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="relative" ref={townDropdownRef}>
-                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                  <span className="text-[#6E8A96]">🏘️</span>
+                        ))}
+                    </>
+                  )}
                 </div>
+              )}
+            </motion.div>
+
+            <AnimatePresence>
+              {activeCounties.length > 0 && (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className={`relative ${showResults ? 'w-full lg:w-64' : 'w-full'}`} 
+                  ref={townDropdownRef}
+                >
+                  <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                    <span className="text-[#6E8A96]">🏘️</span>
+                  </div>
                 <input 
                   ref={townInputRef}
-                  className="w-full pl-12 pr-6 py-3 border border-[#D4E8F0] rounded-full text-base shadow-sm hover:shadow-md focus:shadow-md focus:border-[#0471A4] outline-none transition-all bg-white"
-                  placeholder={`Search towns in ${activeCounties.join(', ')}...`}
+                  className={`w-full pl-12 pr-6 py-3 border border-[#D4E8F0] rounded-full ${showResults ? 'text-sm' : 'text-base'} shadow-sm hover:shadow-md focus:shadow-md focus:border-[#0471A4] outline-none transition-all bg-white`}
+                  placeholder={showResults ? "Add town..." : `Search towns in ${activeCounties.join(', ')}...`}
                   value={townSearch}
                   onChange={e => setTownSearch(e.target.value)}
                   onFocus={() => setShowTownDropdown(true)}
                 />
                 {showTownDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto">
+                  <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto ${showResults ? 'w-80' : 'right-0'}`}>
                     {!townSearch && (
                       <div className="px-6 py-3 bg-[#F7FBFF] border-b border-[#D4E8F0] flex items-center justify-between">
-                        <span className="font-mono text-[12px] text-[#0471A4] uppercase tracking-widest font-bold">Hottest Markets in {activeCounties.join(', ')}</span>
+                        <span className="font-mono text-[12px] text-[#0471A4] uppercase tracking-widest font-bold">Hottest Markets</span>
                         <span className="text-[12px] text-[#6E8A96] italic">Sorted by sale-to-list %</span>
                       </div>
                     )}
@@ -401,52 +418,93 @@ export default function TownComparator() {
                       ))}
                   </div>
                 )}
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+            </AnimatePresence>
+          </motion.div>
 
-          <div className="flex flex-wrap justify-center gap-2">
-            {selectedTowns.map((t) => (
-              <div key={t.name} className="px-4 py-2 bg-[#E8F4FB] text-[#0471A4] rounded-full text-base font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm animate-in zoom-in-95 duration-200">
-                <div className="flex flex-col leading-none">
-                  <div className="flex items-center gap-1.5">
-                    <span>{t.name}</span>
-                    {NJ_ENRICHED[t.name] ? 
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#1E5C38]" title="Full data available"></span> : 
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#7A5200]" title="Partial data available"></span>
-                    }
+          {/* Selected Items */}
+          <motion.div layout className={`flex flex-wrap items-center ${showResults ? 'gap-2 flex-1 overflow-x-auto pb-2 lg:pb-0' : 'gap-2 justify-center w-full'}`}>
+            <AnimatePresence>
+              {activeCounties.map(c => (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  key={c} 
+                  className={`px-3 py-1.5 bg-[#E8F4FB] text-[#0471A4] rounded-full ${showResults ? 'text-[13px]' : 'text-base'} font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0`}
+                >
+                  <span>{c} County</span>
+                  <button onClick={() => setActiveCounties(activeCounties.filter(x => x !== c))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
+                </motion.div>
+              ))}
+              {selectedTowns.map((t) => (
+                <motion.div 
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  key={t.name} 
+                  className={`px-3 py-1.5 bg-[#E8F4FB] text-[#0471A4] rounded-full ${showResults ? 'text-[13px]' : 'text-base'} font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0`}
+                >
+                  <div className="flex flex-col leading-none">
+                    <div className="flex items-center gap-1.5">
+                      <span>{t.name}</span>
+                      {NJ_ENRICHED[t.name] ? 
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#1E5C38]" title="Full data available"></span> : 
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7A5200]" title="Partial data available"></span>
+                      }
+                    </div>
+                    {!showResults && <span className="text-[11px] opacity-70 font-normal uppercase">{t.county}</span>}
                   </div>
-                  <span className="text-[11px] opacity-70 font-normal uppercase">{t.county}</span>
-                </div>
-                <button onClick={() => setSelectedTowns(selectedTowns.filter(x => x.name !== t.name))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
-              </div>
-            ))}
-          </div>
+                  <button onClick={() => setSelectedTowns(selectedTowns.filter(x => x.name !== t.name))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
 
-          <div className="bg-white/50 border border-[#D4E8F0] rounded-xl p-4 text-center max-w-lg mx-auto">
-            <p className="text-[13px] text-[#6E8A96] font-mono leading-relaxed">
-              <span className="font-bold text-[#1A1C1E]">Data Coverage:</span> We've enriched 50+ major towns across NJ with deep metrics (schools, safety, walkability). Other towns show "Partial Data" using basic Census estimates.
-            </p>
-          </div>
-
-          {selectedTowns.length > 0 && (
-            <div className="flex justify-center items-center gap-4 pt-4">
-              <button 
-                onClick={runComparison}
-                className="px-10 py-4 bg-[#0471A4] text-white rounded-full text-lg font-bold hover:bg-[#035480] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-              >
-                {selectedTowns.length === 1 ? 'View Town Data' : `Compare ${selectedTowns.length} Towns`}
-              </button>
-              <button 
-                onClick={handleClearAll}
-                className="px-8 py-4 bg-white text-[#6E8A96] border border-[#D4E8F0] rounded-full text-lg font-bold hover:bg-[#F7FBFF] hover:text-[#0471A4] transition-all shadow-sm hover:shadow-md"
-              >
-                Clear All
-              </button>
-            </div>
+          {showResults && selectedTowns.length > 0 && (
+            <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 shrink-0">
+              <button onClick={handleClearAll} className="px-4 py-2 text-sm text-[#6E8A96] hover:text-[#0471A4] transition-colors">Clear All</button>
+            </motion.div>
           )}
-        </div>
-      </div>
+        </motion.div>
+
+        <AnimatePresence mode="wait">
+          {!showResults && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full max-w-2xl space-y-6 mt-6"
+            >
+              <div className="bg-white/50 border border-[#D4E8F0] rounded-xl p-4 text-center max-w-lg mx-auto">
+                <p className="text-[13px] text-[#6E8A96] font-mono leading-relaxed">
+                  <span className="font-bold text-[#1A1C1E]">Data Coverage:</span> We've enriched 50+ major towns across NJ with deep metrics (schools, safety, walkability). Other towns show "Partial Data" using basic Census estimates.
+                </p>
+              </div>
+
+              {selectedTowns.length > 0 && (
+                <div className="flex justify-center items-center gap-4 pt-4">
+                  <button 
+                    onClick={runComparison}
+                    className="px-10 py-4 bg-[#0471A4] text-white rounded-full text-lg font-bold hover:bg-[#035480] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    {selectedTowns.length === 1 ? 'View Town Data' : `Compare ${selectedTowns.length} Towns`}
+                  </button>
+                  <button 
+                    onClick={handleClearAll}
+                    className="px-8 py-4 bg-white text-[#6E8A96] border border-[#D4E8F0] rounded-full text-lg font-bold hover:bg-[#F7FBFF] hover:text-[#0471A4] transition-all shadow-sm hover:shadow-md"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {tooltip && (
         <div className="fixed bg-[#1A1C1E] text-white px-3 py-1 rounded text-sm font-mono pointer-events-none z-[100]" style={{ left: tooltip.x + 12, top: tooltip.y - 28 }}>
@@ -454,7 +512,7 @@ export default function TownComparator() {
         </div>
       )}
 
-      <div ref={resultsRef} className={`px-4 md:px-10 pb-20 w-full ${showResults ? 'block' : 'hidden'}`}>
+      <div ref={resultsRef} className={`px-4 md:px-10 pt-8 pb-20 w-full ${showResults ? 'block' : 'hidden'}`}>
         {isLoading ? (
           <div className="py-12 text-center">
             <div className="w-7 h-7 border-3 border-[#C8E6F5] border-t-[#0471A4] rounded-full animate-spin mx-auto mb-3"></div>
