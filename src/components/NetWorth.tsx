@@ -971,7 +971,7 @@ export default function NetWorth() {
                 </button>
                 <div className="absolute top-full right-0 w-48 bg-white border border-[#E5E7EB] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                   <Link to="/orbit/balance-sheet" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#111827] bg-[#F3F4F6] transition-colors text-left">Balance Sheet</Link>
-                  <div className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#4B5563] cursor-not-allowed opacity-50">Retirement Planner</div>
+                  <Link to="/orbit/retirement-planner" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left">Retirement Planner</Link>
                   <Link to="/orbit/simulator" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left">Wealth Simulator</Link>
                   <Link to="/orbit/history" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left">Historical Performance</Link>
                   <Link to="/orbit/currency-converter" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left">Currency Converter</Link>
