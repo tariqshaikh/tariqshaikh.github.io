@@ -52,8 +52,11 @@ export default function NetWorthHistory() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (!u) navigate('/orbit');
+      if (u) {
+        setUser(u);
+      } else {
+        setUser({ uid: 'guest-user', displayName: 'Guest User' });
+      }
     });
     return () => unsubscribe();
   }, [navigate]);

@@ -17,12 +17,15 @@ export default function CurrencyConverter() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
+      if (u) {
+        setUser(u);
+      } else {
+        setUser({ uid: 'guest-user', displayName: 'Guest User' });
+      }
       setIsAuthReady(true);
-      if (!u && isAuthReady) navigate('/orbit');
     });
     return () => unsubscribe();
-  }, [navigate, isAuthReady]);
+  }, [navigate]);
 
   useEffect(() => {
     fetch('https://api.exchangerate-api.com/v4/latest/USD')

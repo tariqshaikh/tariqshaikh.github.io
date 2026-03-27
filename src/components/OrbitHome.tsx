@@ -33,8 +33,15 @@ export default function OrbitHome() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Auth check removed for guest access
-    setIsAuthReady(true);
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (u) {
+        setUser(u);
+      } else {
+        setUser({ uid: 'guest-user', displayName: 'Guest User' });
+      }
+      setIsAuthReady(true);
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {

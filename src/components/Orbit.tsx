@@ -232,7 +232,11 @@ function Orbit() {
   // --- Auth & Data Fetching ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser({ uid: 'guest-user', displayName: 'Guest User' } as any);
+      }
       setIsAuthReady(true);
       
       // Redirect to dashboard if logged in and on landing page

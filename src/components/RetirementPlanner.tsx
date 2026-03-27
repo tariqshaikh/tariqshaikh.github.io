@@ -12,12 +12,15 @@ export default function RetirementPlanner() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
+      if (u) {
+        setUser(u);
+      } else {
+        setUser({ uid: 'guest-user', displayName: 'Guest User' } as any);
+      }
       setIsAuthReady(true);
-      if (!u && isAuthReady) navigate('/orbit');
     });
     return () => unsubscribe();
-  }, [navigate, isAuthReady]);
+  }, [navigate]);
 
   if (!isAuthReady || !user) {
     return (

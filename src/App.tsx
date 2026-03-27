@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
 import Portfolio from './components/Portfolio';
 import Homebase from './components/Homebase';
 import Orbit from './components/Orbit';
@@ -17,6 +18,7 @@ import RetirementPlanner from './components/RetirementPlanner';
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Portfolio />} />
         <Route path="/homebase" element={<Homebase />} />
