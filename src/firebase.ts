@@ -14,8 +14,10 @@ export const googleProvider = new GoogleAuthProvider();
 // --- Auth Helpers ---
 export const signInWithGoogle = async () => {
   try {
+    console.log("Attempting Google Sign-In...");
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
+    console.log("Google Sign-In successful for user:", user.uid);
     
     // Create/Update user profile in Firestore
     const userDoc = doc(db, 'users', user.uid);
@@ -29,8 +31,10 @@ export const signInWithGoogle = async () => {
     }, { merge: true });
     
     return user;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error signing in with Google:", error);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
     throw error;
   }
 };
