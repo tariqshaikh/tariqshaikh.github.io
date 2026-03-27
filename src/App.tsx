@@ -20,7 +20,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Portfolio />} />
         <Route path="/homebase" element={<Homebase />} />
-        <Route path="/orbit" element={<Orbit />} />
+        <Route path="/orbit" element={<OrbitHome />} />
         <Route path="/orbit/dashboard" element={<OrbitHome />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />

@@ -38,7 +38,7 @@ service cloud.firestore {
     }
 
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return (isAuthenticated() && request.auth.uid == userId) || (userId == 'guest-user');
     }
 
     function isValidEmail(email) {
@@ -123,8 +123,13 @@ service cloud.firestore {
     // Net Worth Item Rules
     match /users/{userId}/netWorthItems/{itemId} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && hasRequiredFields(['userId', 'category', 'name', 'value', 'isAsset']);
-      allow update: if isOwner(userId) && hasRequiredFields(['userId', 'category', 'name', 'value', 'isAsset']) && request.resource.data.userId == userId;
+      allow create: if isOwner(userId) && hasRequiredFields(['userId', 'category', 'name', 'value', 'isAsset']) &&
+                      request.resource.data.name is string && request.resource.data.name.size() < 100 &&
+                      request.resource.data.category is string && request.resource.data.category.size() < 50;
+      allow update: if isOwner(userId) && hasRequiredFields(['userId', 'category', 'name', 'value', 'isAsset']) && 
+                      request.resource.data.userId == userId &&
+                      request.resource.data.name is string && request.resource.data.name.size() < 100 &&
+                      request.resource.data.category is string && request.resource.data.category.size() < 50;
       allow delete: if isOwner(userId);
     }
 
