@@ -23,23 +23,19 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, onSnapshot, query, orderBy, limit, doc } from 'firebase/firestore';
 
 export default function OrbitHome() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [user, setUser] = useState<any>({ uid: 'guest-user' });
+  const [isAuthReady, setIsAuthReady] = useState(true);
   const [netWorth, setNetWorth] = useState<number | null>(null);
   const [lastSnapshot, setLastSnapshot] = useState<any>(null);
-  const [viewType, setViewType] = useState<'individual' | 'family' | null>(null);
+  const [viewType, setViewType] = useState<'individual' | 'family' | null>('family');
   const [childAccountsCount, setChildAccountsCount] = useState(0);
   const [currencyCode, setCurrencyCode] = useState<string>("USD");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setIsAuthReady(true);
-      if (!u && isAuthReady) navigate('/orbit');
-    });
-    return () => unsubscribe();
-  }, [navigate, isAuthReady]);
+    // Auth check removed for guest access
+    setIsAuthReady(true);
+  }, []);
 
   useEffect(() => {
     if (!user) return;

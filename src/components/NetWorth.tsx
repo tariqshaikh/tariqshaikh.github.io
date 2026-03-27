@@ -634,14 +634,13 @@ export default function NetWorth() {
   );
 
   // --- Auth & Data ---
+  const [user, setUser] = useState<any>({ uid: 'guest-user' });
+  const [isAuthReady, setIsAuthReady] = useState(true);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setIsAuthReady(true);
-      if (!u && isAuthReady) navigate('/orbit');
-    });
-    return () => unsubscribe();
-  }, [navigate, isAuthReady]);
+    // Auth check removed for guest access
+    setIsAuthReady(true);
+  }, []);
 
   useEffect(() => {
     if (!user || !isAuthReady) return;
