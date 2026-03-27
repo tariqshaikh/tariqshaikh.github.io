@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Portfolio from './components/Portfolio';
 import Homebase from './components/Homebase';
 import Orbit from './components/Orbit';
 import NetWorth from './components/NetWorth';
@@ -17,7 +18,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<OrbitHome />} />
+        <Route path="/" element={<Portfolio />} />
         <Route path="/homebase" element={<Homebase />} />
         <Route path="/orbit" element={<Orbit />} />
         <Route path="/orbit/dashboard" element={<OrbitHome />} />
