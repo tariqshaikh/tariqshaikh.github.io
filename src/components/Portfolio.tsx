@@ -100,15 +100,31 @@ export default function Portfolio() {
             </div>
           </div>
 
-          {/* Project 2 - Placeholder */}
-          <div className="bg-[#E8F4FB] border border-[#D4E8F0] p-10 relative overflow-hidden rounded-[2px] bg-placeholder">
+          {/* Project 2 - Orbit */}
+          <div className="bg-[#1A1A1A] border border-[#333333] p-10 transition-all duration-200 hover:border-[#C5A059] hover:shadow-xl hover:shadow-[#C5A059]/10 relative overflow-hidden rounded-[2px] group">
+            <div className="absolute top-0 left-0 w-[3px] h-full bg-[#C5A059] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-[#6E8A96] tracking-widest">P — 002</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] uppercase tracking-wider bg-[#F7FBFF] text-[#6E8A96] border border-[#D4E8F0]">Planned</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">In Development</span>
             </div>
-            <div className="text-center py-12">
-              <div className="text-6xl text-[#C8E6F5] font-serif leading-none mb-4">+</div>
-              <p className="text-[15px] text-[#6E8A96] leading-[1.6] max-w-[240px] mx-auto">Next project in ideation. Check back soon.</p>
+            <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
+              <span className="font-serif font-bold italic">Orbit</span>
+            </h3>
+            <p className="text-[15px] text-[#6E8A96] italic mb-4.5 font-serif">Strategic wealth simulator</p>
+            <p className="text-base leading-[1.75] text-[#D1D1D1] mb-7 pl-4 border-l-2 border-[#C5A059]/40">
+              Most people know what they spent yesterday, but not how it impacts their life 10 years from now. Orbit is a "What-If" engine for your financial future.
+            </p>
+            <div className="flex flex-wrap gap-1.5 mb-8">
+              {['Fintech', 'Simulation', 'Strategy'].map(tag => (
+                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] bg-[#333333] text-[#C5A059] border border-[#444444] tracking-widest uppercase">{tag}</span>
+              ))}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Link to="/orbit" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#C5A059] text-[#1A1A1A] rounded-[2px] text-sm font-bold hover:bg-[#B38F48] transition-all">
+                <ChevronRight size={13} /> View App
+              </Link>
+              <button onClick={() => openModal('prd-2')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-[#333333] rounded-[4px] text-sm font-semibold hover:border-[#C5A059] hover:text-[#C5A059] hover:bg-[#C5A059]/5 cursor-pointer transition-all">PRD</button>
+              <button onClick={() => openModal('roadmap-2')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-[#333333] rounded-[4px] text-sm font-semibold hover:border-[#C5A059] hover:text-[#C5A059] hover:bg-[#C5A059]/5 cursor-pointer transition-all">Roadmap</button>
             </div>
           </div>
 
@@ -410,6 +426,89 @@ export default function Portfolio() {
                   </div>
                 </>
               )}
+              {activeModal === 'prd-2' && (
+                <>
+                  <div className="px-10 py-8 border-b border-[#333333] flex items-start justify-between gap-4 bg-[#1A1A1A] sticky top-0 z-10">
+                    <div>
+                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#C5A059] mb-2">Product Requirements Document</div>
+                      <div className="text-4xl leading-none">
+                        <span className="font-serif font-bold text-white italic">Orbit</span>
+                      </div>
+                      <div className="flex gap-4 mt-4 text-sm font-mono text-[#6E8A96]">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#C5A059]"></span> Status: In Development</span>
+                        <span>|</span>
+                        <span>Author: TShaikh92</span>
+                        <span>|</span>
+                        <span>Target: Q3 2026</span>
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="text-[#6E8A96] text-3xl leading-none p-1 hover:text-white transition-colors">✕</button>
+                  </div>
+                  
+                  <div className="p-10 bg-[#FDFDFD]">
+                    {/* Executive Summary */}
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">1. Executive Summary</h2>
+                      <div className="bg-[#1A1A1A] border-l-4 border-[#C5A059] px-6 py-5 my-5 text-[16px] leading-[1.7] text-[#D1D1D1] italic rounded-r-md">
+                        "Most people know what they spent yesterday, but they have no idea how today's decisions impact their life 10 years from now. Orbit is a 'What-If' engine for your financial future."
+                      </div>
+                      <p className="text-[16px] leading-[1.8] text-[#3D4347]">
+                        Orbit is a strategic wealth simulator designed to help users move beyond backward-looking expense tracking. By focusing on forward-looking scenarios (e.g., career changes, home purchases, aggressive investing), Orbit provides a "Financial North Star" that helps users understand the long-term opportunity cost of their current decisions.
+                      </p>
+                    </div>
+
+                    {/* Problem Statement */}
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">2. Problem Statement</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                        <div>
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-[#C5A059] mb-3">The User Pain</h3>
+                          <p className="text-[15px] leading-[1.7] text-[#3D4347] mb-4">
+                            Financial tools are either too simple (expense trackers like Mint/Rocket Money) or too complex (Excel spreadsheets with 50 tabs). Users lack a middle ground that provides strategic clarity.
+                          </p>
+                          <p className="text-[15px] leading-[1.7] text-[#3D4347]">
+                            Users suffer from "Decision Paralysis" because they cannot easily visualize the trade-offs between competing priorities (e.g., "Should I pay off my student loans or max out my Roth IRA?").
+                          </p>
+                        </div>
+                        <div className="bg-[#1A1A1A] p-5 rounded-lg border border-[#333333]">
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-[#C5A059] mb-3">The Goal</h3>
+                          <p className="text-[15px] leading-[1.7] text-[#D1D1D1]">
+                            To create a tool that turns "Net Worth" from a static number into a living, breathing trajectory. We want to move users from "What did I spend?" to "What can I become?"
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Core Features */}
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">3. Core Features (MVP)</h2>
+                      <div className="space-y-6 mt-6">
+                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-[#F7FBFF]">
+                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
+                            Financial Position Ledger (Live)
+                          </h3>
+                          <p className="text-[15px] text-[#6E8A96]">Real-time net worth calculation with debounced auto-save and multi-currency support (15+ global currencies).</p>
+                        </div>
+                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
+                            The "What-If" Engine
+                          </h3>
+                          <p className="text-[15px] text-[#6E8A96]">Interactive sliders to simulate career changes, market returns, and major purchases with real-time impact on "Retirement Date."</p>
+                        </div>
+                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
+                            AI Wealth Coach
+                          </h3>
+                          <p className="text-[15px] text-[#6E8A96]">A Gemini-powered advisor that analyzes your specific scenario and suggests the most efficient "Next Move."</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
               {activeModal === 'roadmap-1' && (
                 <>
                   <div className="px-10 py-8 border-b border-[#D4E8F0] flex items-start justify-between gap-4 bg-[#E8F4FB] sticky top-0 z-10">
@@ -495,6 +594,77 @@ export default function Portfolio() {
                                 </div>
                                 <p className="text-[13px] text-[#6E8A96] leading-relaxed mb-3">{item.d}</p>
                                 <div className="font-mono text-[10px] uppercase tracking-wider text-[#6E8A96] bg-[#F7FBFF] inline-block px-2 py-1 rounded border border-[#D4E8F0]">{item.s}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+              {activeModal === 'roadmap-2' && (
+                <>
+                  <div className="px-10 py-8 border-b border-[#333333] flex items-start justify-between gap-4 bg-[#1A1A1A] sticky top-0 z-10">
+                    <div>
+                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#C5A059] mb-2">Product Roadmap</div>
+                      <div className="text-4xl leading-none">
+                        <span className="font-serif font-bold text-white italic">Orbit</span>
+                      </div>
+                      <div className="flex gap-4 mt-4 text-sm font-mono text-[#6E8A96]">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#C5A059]"></span> Status: In Development</span>
+                        <span>|</span>
+                        <span>Author: TShaikh92</span>
+                        <span>|</span>
+                        <span>Updated: Q1 2026</span>
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="text-[#6E8A96] text-3xl leading-none p-1 hover:text-white transition-colors">✕</button>
+                  </div>
+                  
+                  <div className="p-10 bg-[#FDFDFD]">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                      {[
+                        { 
+                          badge: 'V1 — Current', 
+                          badgeClass: 'bg-[#D4EDDE] text-[#1E5C38] border border-[#A8D5B8]', 
+                          title: 'Strategic Core', 
+                          time: 'Q1 2026',
+                          items: [
+                            { t: 'Wealth Pulse Dashboard', d: 'Real-time visualization of net worth with auto-save.', s: 'Done', dot: 'bg-[#1E5C38]' },
+                            { t: 'Multi-Currency Engine', d: 'Support for 15+ global currencies with real-time conversion.', s: 'Done', dot: 'bg-[#1E5C38]' },
+                            { t: 'What-If Engine', d: 'Interactive simulation of major life events (house, career, kids).', s: 'Planned', dot: 'bg-[#C5A059]' },
+                          ]
+                        },
+                        { 
+                          badge: 'V2 — Intelligence', 
+                          badgeClass: 'bg-[#1A1A1A] text-[#C5A059] border border-[#333333]', 
+                          title: 'AI Advisory', 
+                          time: 'Q2 2026',
+                          items: [
+                            { t: 'Gemini Wealth Coach', d: 'Personalized strategic advice based on scenario analysis.', s: 'Discovery', dot: 'bg-[#C5A059]' },
+                            { t: 'Statement Analyzer', d: 'Granular insights from uploaded financial statements.', s: 'Planned', dot: 'bg-[#C5A059]' },
+                          ]
+                        }
+                      ].map((phase, i) => (
+                        <div key={i} className="bg-white border border-[#EEEEEF] rounded-xl p-6 flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
+                          <div className="mb-5">
+                            <span className={`font-mono text-[11px] px-2.5 py-1 rounded uppercase tracking-widest font-bold whitespace-nowrap ${phase.badgeClass}`}>{phase.badge}</span>
+                          </div>
+                          <h3 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-2">{phase.title}</h3>
+                          <div className="font-mono text-[13px] text-[#6E8A96] mb-6 pb-4 border-b border-[#EEEEEF]">{phase.time}</div>
+                          
+                          <div className="space-y-4 flex-1">
+                            {phase.items.map((item, j) => (
+                              <div key={j} className="bg-[#FDFDFD] border border-[#EEEEEF] p-4 rounded-lg shadow-sm hover:border-[#C5A059] transition-colors group">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full shrink-0 ${item.dot}`} />
+                                    <h4 className="font-bold text-[14px] text-[#1A1C1E] leading-tight group-hover:text-[#C5A059] transition-colors">{item.t}</h4>
+                                  </div>
+                                </div>
+                                <p className="text-[13px] text-[#6E8A96] leading-relaxed mb-3">{item.d}</p>
+                                <div className="font-mono text-[10px] uppercase tracking-wider text-[#6E8A96] bg-white inline-block px-2 py-1 rounded border border-[#EEEEEF]">{item.s}</div>
                               </div>
                             ))}
                           </div>

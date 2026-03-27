@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user-specific settings and profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique Firebase Auth UID." },
+        "email": { "type": "string", "format": "email", "description": "User's email address." },
+        "displayName": { "type": "string", "description": "User's display name." },
+        "photoURL": { "type": "string", "description": "URL to the user's profile picture." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the profile was created." },
+        "lastLogin": { "type": "string", "format": "date-time", "description": "When the user last logged in." }
+      },
+      "required": ["uid", "email"]
+    },
+    "Scenario": {
+      "title": "Financial Scenario",
+      "description": "A saved financial simulation with specific parameters.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique ID for the scenario." },
+        "userId": { "type": "string", "description": "The UID of the owner." },
+        "name": { "type": "string", "description": "Name of the scenario (e.g., 'Current Path', 'Early Retirement')." },
+        "monthlySavings": { "type": "number", "description": "Monthly savings amount." },
+        "annualReturn": { "type": "number", "description": "Expected annual return percentage." },
+        "initialWealth": { "type": "number", "description": "Starting wealth amount." },
+        "years": { "type": "number", "description": "Simulation time horizon in years." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "When the scenario was last modified." }
+      },
+      "required": ["userId", "name", "monthlySavings", "annualReturn", "initialWealth", "years"]
+    },
+    "NetWorthItem": {
+      "title": "Net Worth Item",
+      "description": "A single line item in the net worth calculator (asset or liability).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "category": { "type": "string", "enum": ["Joint Accounts", "Retirement 1", "Retirement 2", "Investments", "Debt", "Other"] },
+        "name": { "type": "string" },
+        "value": { "type": "number" },
+        "isAsset": { "type": "boolean" },
+        "institution": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "category", "name", "value", "isAsset"]
+    },
+    "NetWorthSnapshot": {
+      "title": "Net Worth Snapshot",
+      "description": "A historical record of total net worth at a point in time.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "totalAssets": { "type": "number" },
+        "totalLiabilities": { "type": "number" },
+        "netWorth": { "type": "number" }
+      },
+      "required": ["userId", "date", "netWorth"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents."
+    },
+    "/users/{userId}/scenarios/{scenarioId}": {
+      "schema": "Scenario",
+      "description": "A user's saved financial scenarios."
+    },
+    "/users/{userId}/netWorthItems/{itemId}": {
+      "schema": "NetWorthItem",
+      "description": "Individual assets and liabilities."
+    },
+    "/users/{userId}/netWorthHistory/{snapshotId}": {
+      "schema": "NetWorthSnapshot",
+      "description": "Historical net worth snapshots."
+    }
+  }
+}
