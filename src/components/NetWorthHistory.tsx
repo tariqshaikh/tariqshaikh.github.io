@@ -45,10 +45,10 @@ interface HistorySnapshot {
 }
 
 export default function NetWorthHistory() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [history, setHistory] = useState<HistorySnapshot[]>([]);
   const [view, setView] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
-  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -143,11 +143,11 @@ export default function NetWorthHistory() {
                   Tools <ChevronDown size={12} />
                 </button>
                 <div className="absolute top-full right-0 w-48 bg-white border border-[#EEEEEE] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
-                  <Link to="/orbit/balance-sheet" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left">Balance Sheet</Link>
-                  <Link to="/orbit/retirement-planner" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left">Retirement Planner</Link>
-                  <Link to="/orbit/simulator" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left">Wealth Simulator</Link>
-                  <Link to="/orbit/history" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#1A1C1E] bg-[#F8F9FA] transition-colors text-left">Historical Performance</Link>
-                  <Link to="/orbit/currency-converter" className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left">Currency Converter</Link>
+                  <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full">Balance Sheet</button>
+                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full opacity-50 cursor-not-allowed" disabled>Retirement Planner</button>
+                  <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full">Wealth Simulator</button>
+                  <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#1A1C1E] bg-[#F8F9FA] transition-colors text-left w-full">Historical Performance</button>
+                  <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full">Currency Converter</button>
                 </div>
               </div>
             </nav>

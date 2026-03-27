@@ -263,20 +263,17 @@ export default function OrbitHome() {
                 </div>
               </Link>
 
-              <Link 
-                to="/orbit/retirement-planner"
-                className="bg-[#1A1A1A] border border-[#333333] p-8 rounded-[2px] hover:border-[#C5A059] transition-all group relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#C5A059]/20 to-transparent rounded-bl-full" />
-                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors relative z-10">
-                  <Target size={24} className="text-[#C5A059]" />
+                <div className="bg-[#1A1A1A] border border-[#333333] p-8 rounded-[2px] opacity-60 grayscale-[0.5] transition-all relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#C5A059]/20 to-transparent rounded-bl-full" />
+                  <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 relative z-10">
+                    <Target size={24} className="text-[#C5A059]" />
+                  </div>
+                  <h3 className="text-xl font-serif font-bold text-white mb-2 relative z-10">Retirement Planner</h3>
+                  <p className="text-sm text-[#6E8A96] mb-6 leading-relaxed relative z-10">Comprehensive retirement modeling, cash flow projections, and scenario analysis.</p>
+                  <button disabled className="w-full py-3 bg-[#333333] text-[#6E8A96] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] cursor-not-allowed flex items-center justify-center gap-2 mt-4">
+                    <Target size={14} /> Coming Soon
+                  </button>
                 </div>
-                <h3 className="text-xl font-serif font-bold text-white mb-2 relative z-10">Retirement Planner</h3>
-                <p className="text-sm text-[#6E8A96] mb-6 leading-relaxed relative z-10">Comprehensive retirement modeling, cash flow projections, and scenario analysis.</p>
-                <div className="flex items-center gap-2 text-[#C5A059] font-mono text-xs uppercase tracking-widest relative z-10">
-                  Plan Retirement <ArrowRight size={14} />
-                </div>
-              </Link>
 
               <div className="bg-[#1A1A1A] border border-[#333333] p-8 rounded-[2px] opacity-60 grayscale-[0.5] transition-all relative overflow-hidden">
                 <div className="absolute top-4 right-4 bg-[#333333] text-[#6E8A96] px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-[2px]">
