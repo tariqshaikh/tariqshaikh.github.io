@@ -572,8 +572,8 @@ const LedgerSection = React.memo(({
 });
 
 export default function NetWorth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [user, setUser] = useState<any>({ uid: 'guest-user' });
+  const [isAuthReady, setIsAuthReady] = useState(true);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [items, setItems] = useState<NetWorthItem[]>([]);
   const [history, setHistory] = useState<HistorySnapshot[]>([]);
@@ -632,10 +632,6 @@ export default function NetWorth() {
     CURRENCIES.find(c => c.code === currencyCode) || CURRENCIES[0], 
     [currencyCode]
   );
-
-  // --- Auth & Data ---
-  const [user, setUser] = useState<any>({ uid: 'guest-user' });
-  const [isAuthReady, setIsAuthReady] = useState(true);
 
   useEffect(() => {
     // Auth check removed for guest access
