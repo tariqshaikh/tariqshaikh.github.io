@@ -33,6 +33,12 @@ export default function OrbitHome() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isAuthReady) {
+      window.scrollTo(0, 0);
+    }
+  }, [isAuthReady]);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       if (u) {
         setUser(u);
