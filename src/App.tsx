@@ -25,7 +25,7 @@ export default function App() {
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/login" element={<Login />} />
         <Route path="/homebase" element={<Homebase />} />
-        <Route path="/orbit" element={<OrbitHome />} />
+        <Route path="/orbit" element={<Login />} />
         <Route path="/orbit/dashboard" element={<OrbitHome />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />
