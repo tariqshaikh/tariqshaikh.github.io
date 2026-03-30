@@ -53,13 +53,9 @@ export default function Portfolio() {
           
           <div className="w-px h-4 bg-[#EEEEEF]"></div>
           
-          {user ? (
+          {user && (
             <Link to="/orbit/dashboard" className="flex items-center gap-2 text-sm font-semibold text-[#1C355E] hover:text-[#0471A4] transition-colors tracking-wider">
               <LayoutDashboard size={16} /> Dashboard
-            </Link>
-          ) : (
-            <Link to="/login" className="flex items-center gap-2 text-sm font-semibold text-[#1C355E] hover:text-[#0471A4] transition-colors tracking-wider">
-              <LogIn size={16} /> Sign In
             </Link>
           )}
         </div>

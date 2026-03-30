@@ -35,8 +35,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#D1D1D1] font-sans flex flex-col selection:bg-[#C5A059]/30">
       <header className="px-6 py-6 absolute top-0 left-0 w-full z-10">
-        <Link to="/" className="inline-flex items-center gap-2 text-[#6E8A96] hover:text-white transition-colors font-mono text-[11px] uppercase tracking-widest">
-          <ChevronLeft size={14} /> Back to Portfolio
+        <Link to="/portfolio" className="inline-flex items-center gap-2 text-[#6E8A96] hover:text-white transition-colors font-mono text-[11px] uppercase tracking-widest">
+          Explore Portfolio <ArrowRight size={14} />
         </Link>
       </header>
 

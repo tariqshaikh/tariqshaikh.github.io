@@ -21,7 +21,8 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Portfolio />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/login" element={<Login />} />
         <Route path="/homebase" element={<Homebase />} />
         <Route path="/orbit" element={<OrbitHome />} />
