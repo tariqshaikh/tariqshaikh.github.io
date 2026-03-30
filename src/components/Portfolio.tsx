@@ -5,18 +5,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, ExternalLink, ChevronRight, Menu, X, Terminal, Layers, Globe, Phone } from 'lucide-react';
+import { Github, Linkedin, Mail, ExternalLink, ChevronRight, Menu, X, Terminal, Layers, Globe, Phone, LogIn, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Portfolio() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     document.title = "Tariq Shaikh's Portfolio";
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      unsubscribe();
+    };
   }, []);
 
   const openModal = (id: string) => {
@@ -34,11 +45,23 @@ export default function Portfolio() {
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-4.5 flex items-center justify-between border-b border-[#EEEEEF] transition-all duration-300 ${scrolled ? 'bg-[#FDFDFD]/94 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
         <div className="font-mono text-sm tracking-widest uppercase text-[#6E8A96]">Tariq Shaikh</div>
-        <div className="hidden md:flex gap-8">
+        <div className="hidden md:flex items-center gap-8">
           <a href="#projects" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Work</a>
           <a href="#process" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Process</a>
           <a href="#about" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">About</a>
           <a href="mailto:tshaikh92@gmail.com" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Contact</a>
+          
+          <div className="w-px h-4 bg-[#EEEEEF]"></div>
+          
+          {user ? (
+            <Link to="/orbit/dashboard" className="flex items-center gap-2 text-sm font-semibold text-[#1C355E] hover:text-[#0471A4] transition-colors tracking-wider">
+              <LayoutDashboard size={16} /> Dashboard
+            </Link>
+          ) : (
+            <Link to="/login" className="flex items-center gap-2 text-sm font-semibold text-[#1C355E] hover:text-[#0471A4] transition-colors tracking-wider">
+              <LogIn size={16} /> Sign In
+            </Link>
+          )}
         </div>
       </nav>
 

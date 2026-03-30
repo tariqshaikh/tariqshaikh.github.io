@@ -69,9 +69,15 @@ export default function RetirementPlanner() {
             </nav>
             <div className="flex flex-col items-end">
               <span className="text-[12px] font-bold text-white">{user.displayName}</span>
-              <button onClick={() => logout()} className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#C5A059] transition-colors flex items-center gap-1">
-                <LogOut size={10} /> Sign Out
-              </button>
+              {user.uid === 'guest-user' ? (
+                <button onClick={() => navigate('/login')} className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-white transition-colors flex items-center gap-1">
+                  <UserIcon size={10} /> Sign In
+                </button>
+              ) : (
+                <button onClick={() => logout()} className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#C5A059] transition-colors flex items-center gap-1">
+                  <LogOut size={10} /> Sign Out
+                </button>
+              )}
             </div>
             {user.photoURL ? (
               <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-[2px] border border-[#333333]" referrerPolicy="no-referrer" />

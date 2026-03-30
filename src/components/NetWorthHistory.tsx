@@ -9,7 +9,9 @@ import {
   ArrowUpRight, 
   ArrowDownRight,
   Filter,
-  Download
+  Download,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -26,7 +28,8 @@ import {
 } from 'recharts';
 import { 
   auth, 
-  db 
+  db,
+  logout
 } from '../firebase';
 import { 
   collection, 
@@ -167,6 +170,18 @@ export default function NetWorthHistory() {
                 </button>
               ))}
             </div>
+            
+            <div className="h-6 w-px bg-[#EEEEEE] mx-2" />
+            
+            {user?.uid === 'guest-user' ? (
+              <button onClick={() => navigate('/login')} className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#1A1C1E] transition-colors flex items-center gap-1">
+                <UserIcon size={14} /> Sign In
+              </button>
+            ) : (
+              <button onClick={() => logout()} className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#8B0000] transition-colors flex items-center gap-1">
+                <LogOut size={14} /> Sign Out
+              </button>
+            )}
           </div>
         </div>
       </header>

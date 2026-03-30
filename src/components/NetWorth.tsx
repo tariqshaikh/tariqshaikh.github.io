@@ -22,7 +22,9 @@ import {
   RefreshCw,
   Info,
   AlertCircle,
-  Globe
+  Globe,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -42,6 +44,7 @@ import {
 import { 
   auth, 
   db, 
+  logout,
   handleFirestoreError, 
   OperationType 
 } from '../firebase';
@@ -1021,6 +1024,18 @@ export default function NetWorth() {
               <Zap size={16} className="text-[#FBBF24]" />
               AI Audit
             </button>
+            
+            <div className="h-6 w-px bg-[#E5E7EB] mx-2" />
+            
+            {user?.uid === 'guest-user' ? (
+              <button onClick={() => navigate('/login')} className="text-[10px] font-mono uppercase tracking-widest text-[#3B82F6] hover:text-[#111827] transition-colors flex items-center gap-1">
+                <UserIcon size={14} /> Sign In
+              </button>
+            ) : (
+              <button onClick={() => logout()} className="text-[10px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#EF4444] transition-colors flex items-center gap-1">
+                <LogOut size={14} /> Sign Out
+              </button>
+            )}
           </div>
         </div>
       </header>

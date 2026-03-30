@@ -444,13 +444,23 @@ function Orbit() {
                     <UserIcon size={20} className="text-[#6E8A96]" />
                   </div>
                 )}
-                <button 
-                  onClick={logout}
-                  className="p-2.5 bg-[#1A1A1A] border border-[#333333] text-[#6E8A96] rounded-[2px] hover:text-white hover:border-[#8B0000] transition-all"
-                  title="Sign Out"
-                >
-                  <LogOut size={18} />
-                </button>
+                {user.uid === 'guest-user' ? (
+                  <button 
+                    onClick={() => navigate('/login')}
+                    className="p-2.5 bg-[#1A1A1A] border border-[#333333] text-[#C5A059] rounded-[2px] hover:text-white hover:border-[#C5A059] transition-all"
+                    title="Sign In"
+                  >
+                    <UserIcon size={18} />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={logout}
+                    className="p-2.5 bg-[#1A1A1A] border border-[#333333] text-[#6E8A96] rounded-[2px] hover:text-white hover:border-[#8B0000] transition-all"
+                    title="Sign Out"
+                  >
+                    <LogOut size={18} />
+                  </button>
+                )}
               </div>
             ) : (
               <button 

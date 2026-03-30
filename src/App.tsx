@@ -14,6 +14,7 @@ import OrbitHome from './components/OrbitHome';
 import NetWorthHistory from './components/NetWorthHistory';
 import CurrencyConverter from './components/CurrencyConverter';
 import RetirementPlanner from './components/RetirementPlanner';
+import Login from './components/Login';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Portfolio />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/homebase" element={<Homebase />} />
         <Route path="/orbit" element={<OrbitHome />} />
         <Route path="/orbit/dashboard" element={<OrbitHome />} />
