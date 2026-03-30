@@ -186,7 +186,7 @@ export default function Portfolio() {
             <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-[#1A1C1E]">About</h2>
             <div className="flex-1 h-px bg-[#EEEEEF]" />
           </div>
-          <p className="text-[17px] leading-[1.85] text-[#3D4347] mb-4.5">I'm a <strong className="text-[#1A1C1E] font-semibold">Senior Data Strategist at Indeed</strong> with a background in frontend engineering and a Stanford PM certificate. I've spent 6+ years at the intersection of data, engineering, and product.</p>
+          <p className="text-[17px] leading-[1.85] text-[#3D4347] mb-4.5">I'm a <strong className="text-[#1A1C1E] font-semibold">Senior Data Strategist at Indeed</strong> with a background in frontend engineering and a Stanford product management certificate. I've spent 6+ years at the intersection of data, engineering, and product.</p>
           <p className="text-[17px] leading-[1.85] text-[#3D4347] mb-4.5">I build things that solve real problems. The portfolio you're reading right now is one of them — I built every project here, wrote every PRD, and defined every roadmap myself.</p>
           <p className="text-[17px] leading-[1.85] text-[#3D4347] mb-4.5">Based in <strong className="text-[#1A1C1E] font-semibold">New Jersey</strong>. Open to PM roles in B2B SaaS and consumer products.</p>
           <div className="grid grid-cols-2 gap-4 mt-10">

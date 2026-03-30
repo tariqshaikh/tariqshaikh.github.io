@@ -24,7 +24,9 @@ import {
   AlertCircle,
   Globe,
   LogOut,
-  User as UserIcon
+  User as UserIcon,
+  X,
+  MoreVertical
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -56,7 +58,8 @@ import {
   onSnapshot, 
   serverTimestamp,
   query,
-  orderBy
+  orderBy,
+  addDoc
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { GoogleGenAI } from "@google/genai";
@@ -584,6 +587,8 @@ export default function NetWorth() {
   const [appTitle, setAppTitle] = useState<string>("Net Worth Calculator");
   const [viewType, setViewType] = useState<'individual' | 'family' | null>(null);
   const [currencyCode, setCurrencyCode] = useState<string>("USD");
+  const [primaryName, setPrimaryName] = useState<string>("");
+  const [spouseName, setSpouseName] = useState<string>("");
   const [aiAnalysis, setAiAnalysis] = useState<string>("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isFamilyView, setIsFamilyView] = useState(false);
@@ -600,7 +605,14 @@ export default function NetWorth() {
       if (viewType === 'individual') {
         // Individual view: remove "Joint" or "Spouse" references
         title = title.replace('Joint ', '').replace('Spouse 1 ', '').replace('Spouse 2 ', '');
-        if (s.id === 'retirement-2') return null; 
+        if (s.id === 'retirement-2' || s.id === 'individual-accounts') return null; 
+      } else if (viewType === 'family') {
+        // Family view: use names if available
+        if (s.id === 'retirement-1') {
+          title = primaryName ? `${primaryName}'s Retirement` : 'Spouse 1 Retirement';
+        } else if (s.id === 'retirement-2') {
+          title = spouseName ? `${spouseName}'s Retirement` : 'the right person\'s Retirement';
+        }
       }
       return { ...s, title, includeInNetWorth: settings?.includeInNetWorth ?? true };
     }).filter(Boolean) as (SectionDefinition & { title: string, includeInNetWorth: boolean })[];
@@ -681,6 +693,8 @@ export default function NetWorth() {
         setViewType(data.viewType || null);
         setCurrencyCode(data.currencyCode || "USD");
         setChildAccountsCount(data.childAccountsCount || 0);
+        setPrimaryName(data.primaryName || "");
+        setSpouseName(data.spouseName || "");
         if (!data.viewType) {
           setShowOnboarding(true);
         }
@@ -883,12 +897,32 @@ export default function NetWorth() {
   }, [user]);
 
   const [showSaveToast, setShowSaveToast] = useState(false);
+  const [showDuplicateToast, setShowDuplicateToast] = useState(false);
+  const [isSnapshotAnimating, setIsSnapshotAnimating] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
 
   const saveSnapshot = async () => {
     if (!user) return;
     const date = new Date().toISOString().split('T')[0];
+    
+    // Check for duplicates on the same date with same figures
+    const existingSnapshot = history.find(s => s.date === date);
+    if (existingSnapshot && 
+        Math.round(existingSnapshot.totalAssets) === Math.round(totalAssets) && 
+        Math.round(existingSnapshot.totalLiabilities) === Math.round(totalLiabilities) && 
+        Math.round(existingSnapshot.netWorth) === Math.round(netWorth)) {
+      setShowDuplicateToast(true);
+      setTimeout(() => setShowDuplicateToast(false), 4000);
+      return;
+    }
+
     const id = date;
     try {
+      setIsFlashing(true);
+      setIsSnapshotAnimating(true);
+      setTimeout(() => setIsFlashing(false), 600);
+      setTimeout(() => setIsSnapshotAnimating(false), 1500);
+
       await setDoc(doc(db, 'users', user.uid, 'netWorthHistory', id), {
         userId: user.uid,
         date,
@@ -941,6 +975,18 @@ export default function NetWorth() {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] text-[#111827] font-sans selection:bg-[#3B82F6]/30">
+      {/* Flash Effect */}
+      <AnimatePresence>
+        {isFlashing && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.3 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-white z-[200] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Save Toast */}
       <AnimatePresence>
         {showSaveToast && (
@@ -952,6 +998,63 @@ export default function NetWorth() {
           >
             <div className="w-2 h-2 bg-[#C5A059] rounded-full animate-pulse" />
             <span className="text-xs font-mono uppercase tracking-widest">Snapshot Recorded Successfully</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Duplicate Toast Modal */}
+      <AnimatePresence>
+        {showDuplicateToast && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-[#1A1A1A] border border-[#333333] p-8 max-w-md w-full shadow-2xl rounded-[2px] relative"
+            >
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-[#8B0000]/20 flex items-center justify-center rounded-full text-[#FF4444] mb-2">
+                  <AlertCircle size={32} />
+                </div>
+                <h3 className="text-xl font-serif font-bold text-white italic">Duplicate Entry</h3>
+                <p className="text-[#6E8A96] text-sm leading-relaxed">
+                  You have already added an entry for today. Please update the existing ledger items if you wish to make changes to today's snapshot.
+                </p>
+                <button 
+                  onClick={() => setShowDuplicateToast(false)}
+                  className="mt-6 w-full py-3 bg-[#333333] hover:bg-[#444444] text-white text-xs font-mono uppercase tracking-widest transition-colors rounded-[2px]"
+                >
+                  Understood
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Snapshot Animation Overlay */}
+      <AnimatePresence>
+        {isSnapshotAnimating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] pointer-events-none flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 1, x: 0, y: 0, opacity: 1 }}
+              animate={{ 
+                scale: 0.1, 
+                x: 400, 
+                y: -400, 
+                opacity: 0,
+                rotate: 15
+              }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              className="w-64 h-64 bg-white/10 backdrop-blur-md border border-white/20 rounded-[2px] shadow-2xl flex items-center justify-center"
+            >
+              <div className="text-white font-serif italic text-2xl">Snapshot</div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -981,7 +1084,7 @@ export default function NetWorth() {
                 </button>
                 <div className="absolute top-full right-0 w-48 bg-white border border-[#E5E7EB] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                   <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#111827] bg-[#F3F4F6] transition-colors text-left w-full">Balance Sheet</button>
-                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full opacity-50 cursor-not-allowed" disabled>Retirement Planner</button>
+                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Retirement Planner</button>
                   <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Wealth Simulator</button>
                   <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Historical Performance</button>
                   <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Currency Converter</button>
@@ -1148,17 +1251,29 @@ export default function NetWorth() {
                 </div>
               </div>
 
-              <button 
-                onClick={saveSnapshot}
-                className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-4 bg-white border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] hover:border-[#D1D5DB] rounded-xl text-sm font-bold transition-all shadow-sm"
-                title="Save a snapshot of your current net worth to history"
-              >
-                <History size={18} className="text-[#6B7280]" />
-                Take a Snapshot
-              </button>
-              <p className="text-center text-[10px] text-[#9CA3AF] mt-2 font-mono uppercase tracking-wider">
-                This will add it to your performance history
-              </p>
+              <div className="flex flex-col gap-4 mt-4">
+                <button 
+                  onClick={saveSnapshot}
+                  className="w-full flex flex-col items-center justify-center gap-3 px-6 py-10 bg-[#111827] text-white hover:bg-[#1F2937] rounded-xl transition-all shadow-2xl group border-2 border-transparent hover:border-[#C5A059]/30 cursor-pointer"
+                  title="Save a snapshot of your current net worth to history"
+                >
+                  <div className="flex items-center gap-4">
+                    <History size={32} className="text-[#C5A059] group-hover:rotate-12 transition-transform" />
+                    <span className="text-2xl font-bold uppercase tracking-[0.1em]">Take a Snapshot</span>
+                  </div>
+                  <span className="text-[11px] font-mono text-white/40 uppercase tracking-[0.2em] mt-2">
+                    Net worth gets added to historical performance
+                  </span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/orbit/history')}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-white border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-xl transition-all shadow-sm font-bold uppercase tracking-widest text-[11px]"
+                >
+                  <BarChart3 size={18} className="text-[#C5A059]" />
+                  View Historical Performance
+                </button>
+              </div>
 
               <button 
                 onClick={() => updateChildAccountsCount(childAccountsCount + 1)}

@@ -20,7 +20,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, db, logout } from '../firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, onSnapshot, query, orderBy, limit, doc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit, doc, setDoc } from 'firebase/firestore';
 
 export default function OrbitHome() {
   const [user, setUser] = useState<any>({ uid: 'guest-user' });
@@ -30,6 +30,9 @@ export default function OrbitHome() {
   const [viewType, setViewType] = useState<'individual' | 'family' | null>('family');
   const [childAccountsCount, setChildAccountsCount] = useState(0);
   const [currencyCode, setCurrencyCode] = useState<string>("USD");
+  const [primaryName, setPrimaryName] = useState<string>("");
+  const [spouseName, setSpouseName] = useState<string>("");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +64,8 @@ export default function OrbitHome() {
         setViewType(data.viewType || 'family');
         setChildAccountsCount(data.childAccountsCount || 0);
         setCurrencyCode(data.currencyCode || 'USD');
+        setPrimaryName(data.primaryName || '');
+        setSpouseName(data.spouseName || '');
       }
     });
 
@@ -156,6 +161,12 @@ export default function OrbitHome() {
           
           <div className="flex items-center gap-6">
             <nav className="hidden md:flex items-center gap-6 mr-4">
+              <button 
+                onClick={() => setIsSettingsOpen(true)}
+                className="text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-white transition-colors"
+              >
+                Settings
+              </button>
               <Link to="/orbit/dashboard" className="text-[11px] font-mono uppercase tracking-widest text-white transition-colors">Dashboard</Link>
               
               <div className="relative group py-2">
@@ -164,7 +175,7 @@ export default function OrbitHome() {
                 </button>
                 <div className="absolute top-full right-0 w-48 bg-[#1A1A1A] border border-[#333333] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                   <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-white hover:bg-[#333333] transition-colors text-left w-full">Balance Sheet</button>
-                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-white hover:bg-[#333333] transition-colors text-left w-full opacity-50 cursor-not-allowed" disabled>Retirement Planner</button>
+                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-white hover:bg-[#333333] transition-colors text-left w-full">Retirement Planner</button>
                   <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-white hover:bg-[#333333] transition-colors text-left w-full">Wealth Simulator</button>
                   <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-white hover:bg-[#333333] transition-colors text-left w-full">Historical Performance</button>
                   <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-white hover:bg-[#333333] transition-colors text-left w-full">Currency Converter</button>
@@ -196,7 +207,9 @@ export default function OrbitHome() {
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="mb-12">
-          <h2 className="text-4xl font-serif font-bold text-white italic mb-2">Welcome back, {user.displayName?.split(' ')[0]}</h2>
+          <h2 className="text-4xl font-serif font-bold text-white italic mb-2">
+            Welcome back, {primaryName || user.displayName?.split(' ')[0] || 'User'}
+          </h2>
           <p className="text-[#6E8A96] font-mono text-sm uppercase tracking-widest">Your strategic wealth overview</p>
         </div>
 
@@ -282,17 +295,20 @@ export default function OrbitHome() {
                 </div>
               </Link>
 
-                <div className="bg-[#1A1A1A] border border-[#333333] p-8 rounded-[2px] opacity-60 grayscale-[0.5] transition-all relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#C5A059]/20 to-transparent rounded-bl-full" />
-                  <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 relative z-10">
-                    <Target size={24} className="text-[#C5A059]" />
-                  </div>
-                  <h3 className="text-xl font-serif font-bold text-white mb-2 relative z-10">Retirement Planner</h3>
-                  <p className="text-sm text-[#6E8A96] mb-6 leading-relaxed relative z-10">Comprehensive retirement modeling, cash flow projections, and scenario analysis.</p>
-                  <button disabled className="w-full py-3 bg-[#333333] text-[#6E8A96] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] cursor-not-allowed flex items-center justify-center gap-2 mt-4">
-                    <Target size={14} /> Coming Soon
-                  </button>
+              <Link 
+                to="/orbit/retirement-planner"
+                className="bg-[#1A1A1A] border border-[#333333] p-8 rounded-[2px] hover:border-[#C5A059] transition-all group relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#C5A059]/20 to-transparent rounded-bl-full" />
+                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors relative z-10">
+                  <Target size={24} className="text-[#C5A059]" />
                 </div>
+                <h3 className="text-xl font-serif font-bold text-white mb-2 relative z-10">Retirement Planner</h3>
+                <p className="text-sm text-[#6E8A96] mb-6 leading-relaxed relative z-10">Comprehensive retirement modeling, cash flow projections, and scenario analysis.</p>
+                <div className="flex items-center gap-2 text-[#C5A059] font-mono text-xs uppercase tracking-widest relative z-10">
+                  Plan Retirement <ArrowRight size={14} />
+                </div>
+              </Link>
 
               <div className="bg-[#1A1A1A] border border-[#333333] p-8 rounded-[2px] opacity-60 grayscale-[0.5] transition-all relative overflow-hidden">
                 <div className="absolute top-4 right-4 bg-[#333333] text-[#6E8A96] px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-[2px]">
@@ -348,6 +364,68 @@ export default function OrbitHome() {
           Orbit Strategic Intelligence — v1.0.5
         </div>
       </footer>
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsSettingsOpen(false)} />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#1A1A1A] border border-[#333333] p-8 rounded-[2px] w-full max-w-md relative z-10"
+          >
+            <h3 className="text-2xl font-serif font-bold text-white italic mb-6">Profile Settings</h3>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-2">Primary Name</label>
+                <input 
+                  type="text" 
+                  value={primaryName}
+                  onChange={(e) => setPrimaryName(e.target.value)}
+                  placeholder={user.displayName || "Your Name"}
+                  className="w-full bg-[#0A0A0A] border border-[#333333] rounded-[2px] px-4 py-3 text-white font-mono focus:border-[#C5A059] focus:outline-none transition-colors"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-2">Spouse / Partner Name</label>
+                <input 
+                  type="text" 
+                  value={spouseName}
+                  onChange={(e) => setSpouseName(e.target.value)}
+                  placeholder="Spouse Name"
+                  className="w-full bg-[#0A0A0A] border border-[#333333] rounded-[2px] px-4 py-3 text-white font-mono focus:border-[#C5A059] focus:outline-none transition-colors"
+                />
+                <p className="text-[10px] text-[#6E8A96] mt-2 italic">If left blank, we'll refer to them as "Spouse" or "the right person".</p>
+              </div>
+
+              <div className="pt-4 flex gap-4">
+                <button 
+                  onClick={async () => {
+                    if (user.uid !== 'guest-user') {
+                      await setDoc(doc(db, 'users', user.uid, 'appSettings', 'general'), {
+                        primaryName,
+                        spouseName
+                      }, { merge: true });
+                    }
+                    setIsSettingsOpen(false);
+                  }}
+                  className="flex-1 py-3 bg-[#C5A059] text-[#0A0A0A] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] hover:bg-[#B38F48] transition-colors"
+                >
+                  Save Settings
+                </button>
+                <button 
+                  onClick={() => setIsSettingsOpen(false)}
+                  className="flex-1 py-3 bg-transparent border border-[#333333] text-[#6E8A96] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] hover:text-white hover:border-[#6E8A96] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
