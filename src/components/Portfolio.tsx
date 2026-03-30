@@ -52,12 +52,6 @@ export default function Portfolio() {
           <a href="mailto:tshaikh92@gmail.com" className="text-sm text-[#6E8A96] hover:text-[#1C355E] transition-colors tracking-wider">Contact</a>
           
           <div className="w-px h-4 bg-[#EEEEEF]"></div>
-          
-          {user && (
-            <Link to="/orbit/dashboard" className="flex items-center gap-2 text-sm font-semibold text-[#1C355E] hover:text-[#0471A4] transition-colors tracking-wider">
-              <LayoutDashboard size={16} /> Dashboard
-            </Link>
-          )}
         </div>
       </nav>
 
