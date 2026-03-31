@@ -74,6 +74,7 @@ interface NetWorthItem {
   value: number;
   isAsset: boolean;
   order: number;
+  taxStatus?: 'Taxable' | 'Tax-Deferred' | 'Tax-Free';
 }
 
 interface SectionSettings {
@@ -371,6 +372,27 @@ const LedgerRow = React.memo(({
           className="ledger-input w-full bg-transparent text-sm text-[#4B5563] focus:outline-none border-b border-transparent focus:border-[#3B82F6] transition-colors italic"
         />
       </td>
+      {item.isAsset && (
+        <td className="px-6 py-4">
+          <div className="flex items-center space-x-1 bg-[#F3F4F6] p-0.5 rounded-full w-fit">
+            {['Taxable', 'Deferred', 'Free'].map(status => {
+              const fullStatus = status === 'Deferred' ? 'Tax-Deferred' : status === 'Free' ? 'Tax-Free' : 'Taxable';
+              const isSelected = (item.taxStatus || 'Taxable') === fullStatus;
+              return (
+                <button
+                  key={status}
+                  onClick={() => updateItem(item.id, 'taxStatus', fullStatus)}
+                  className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full transition-colors ${
+                    isSelected ? 'bg-white text-[#111827] shadow-sm' : 'text-[#6B7280] hover:text-[#374151]'
+                  }`}
+                >
+                  {status}
+                </button>
+              );
+            })}
+          </div>
+        </td>
+      )}
       <td className="px-6 py-4 text-right">
         <BalanceInput 
           value={item.value} 
@@ -532,8 +554,11 @@ const LedgerSection = React.memo(({
                 <table className="w-full border-collapse min-w-[600px]">
                   <thead>
                     <tr className="border-b border-[#F3F4F6] bg-[#F9FAFB]/50">
-                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/3">Description</th>
-                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/3">Platform / Institution</th>
+                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/4">Description</th>
+                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/4">Platform / Institution</th>
+                      {section.isAsset && (
+                        <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/4">Tax Status</th>
+                      )}
                       <th className="text-[10px] text-right px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest">Balance</th>
                       <th className="w-16"></th>
                     </tr>

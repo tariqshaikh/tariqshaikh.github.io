@@ -1,0 +1,156 @@
+204-  // Projection Logic
+205-  const projectionData = useMemo(() => {
+206-    const data = [];
+207-    
+208-    // Initialize buckets
+209:    let taxableBalance = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.balance, 0);
+210-    let taxDeferredBalance = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.balance, 0);
+211-    let taxFreeBalance = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.balance, 0);
+212-    
+213:    if (deferredAssets.status === 'TAXABLE') taxableBalance += deferredAssets.value;
+214-    else if (deferredAssets.status === 'TAX-FREE') taxFreeBalance += deferredAssets.value;
+215-    else taxDeferredBalance += deferredAssets.value;
+216-
+217:    const taxableContr = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.annualContribution, 0);
+218-    const taxDeferredContr = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.annualContribution, 0);
+219-    const taxFreeContr = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.annualContribution, 0);
+220-
+221-    for (let age = currentAge; age <= lifeExpectancy; age++) {
+222-      const yearOffset = age - currentAge;
+--
+249-      // Contributions
+250-      let p1Ratio = isP1Retired ? 0 : (planningType === 'Couple' ? 0.5 : 1);
+251-      let p2Ratio = isP2Retired ? 0 : (planningType === 'Couple' ? 0.5 : 0);
+252-      let activeRatio = p1Ratio + p2Ratio;
+253-
+254:      let activeTaxableContr = taxableContr * activeRatio;
+255-      let activeTaxDeferredContr = taxDeferredContr * activeRatio;
+256-      let activeTaxFreeContr = taxFreeContr * activeRatio;
+257-
+258-      const yearInflows = futureInflows.filter(f => f.age === age).reduce((sum, f) => sum + f.amount, 0);
+259:      taxableBalance += yearInflows; // Assume inflows go to taxable
+260-
+261-      // Grow balances
+262:      taxableBalance *= (1 + (yearReturn / 100));
+263-      taxDeferredBalance *= (1 + (yearReturn / 100));
+264-      taxFreeBalance *= (1 + (yearReturn / 100));
+265-
+266-      // Add contributions
+267:      taxableBalance += activeTaxableContr;
+268-      taxDeferredBalance += activeTaxDeferredContr;
+269-      taxFreeBalance += activeTaxFreeContr;
+270-
+271-      // Withdrawals (Taxable -> Tax-Deferred -> Tax-Free)
+272-      // Simplified tax estimation: 15% on Taxable (cap gains), 25% on Tax-Deferred (income), 0% on Tax-Free
+273-      let actualWithdrawal = 0;
+274-      let taxPaid = 0;
+275-      if (isRetired && netAnnualNeed > 0) {
+276-        // Taxable
+277:        if (taxableBalance > 0 && netAnnualNeed > 0) {
+278-          const grossNeed = netAnnualNeed / 0.85;
+279:          if (taxableBalance >= grossNeed) {
+280:            taxableBalance -= grossNeed;
+281-            actualWithdrawal += grossNeed;
+282-            taxPaid += grossNeed * 0.15;
+283-            netAnnualNeed = 0;
+284-          } else {
+285:            const netFromTaxable = taxableBalance * 0.85;
+286:            actualWithdrawal += taxableBalance;
+287:            taxPaid += taxableBalance * 0.15;
+288-            netAnnualNeed -= netFromTaxable;
+289:            taxableBalance = 0;
+290-          }
+291-        }
+292-        // Tax-Deferred
+293-        if (taxDeferredBalance > 0 && netAnnualNeed > 0) {
+294-          const grossNeed = netAnnualNeed / 0.75;
+--
+317-            taxFreeBalance = 0;
+318-          }
+319-        }
+320-      }
+321-
+322:      const totalBalance = taxableBalance + taxDeferredBalance + taxFreeBalance;
+323-
+324-      data.push({
+325-        age,
+326-        spouseAge: currentSpouseAge,
+327-        year: new Date().getFullYear() + yearOffset,
+328-        balance: Math.max(0, totalBalance),
+329:        taxableBalance: Math.max(0, taxableBalance),
+330-        taxDeferredBalance: Math.max(0, taxDeferredBalance),
+331-        taxFreeBalance: Math.max(0, taxFreeBalance),
+332-        withdrawalRate: isRetired && totalBalance > 0 ? (actualWithdrawal / totalBalance) * 100 : 0,
+333-        actualWithdrawal,
+334-        taxPaid,
+--
+361-  const comparisonData = useMemo(() => {
+362-    // Compare current plan with a "Proposed Plan" (user-defined multiplier)
+363-    const data = [];
+364-    
+365-    // Initialize buckets
+366:    let taxableBalance = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.balance, 0);
+367-    let taxDeferredBalance = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.balance, 0);
+368-    let taxFreeBalance = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.balance, 0);
+369-    
+370:    if (deferredAssets.status === 'TAXABLE') taxableBalance += deferredAssets.value;
+371-    else if (deferredAssets.status === 'TAX-FREE') taxFreeBalance += deferredAssets.value;
+372-    else taxDeferredBalance += deferredAssets.value;
+373-
+374:    const taxableContr = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.annualContribution, 0) * proposedMultiplier;
+375-    const taxDeferredContr = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.annualContribution, 0) * proposedMultiplier;
+376-    const taxFreeContr = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.annualContribution, 0) * proposedMultiplier;
+377-
+378-    for (let age = currentAge; age <= lifeExpectancy; age++) {
+379-      const yearOffset = age - currentAge;
+--
+406-      // Contributions
+407-      let p1Ratio = isP1Retired ? 0 : (planningType === 'Couple' ? 0.5 : 1);
+408-      let p2Ratio = isP2Retired ? 0 : (planningType === 'Couple' ? 0.5 : 0);
+409-      let activeRatio = p1Ratio + p2Ratio;
+410-
+411:      let activeTaxableContr = taxableContr * activeRatio;
+412-      let activeTaxDeferredContr = taxDeferredContr * activeRatio;
+413-      let activeTaxFreeContr = taxFreeContr * activeRatio;
+414-
+415-      const yearInflows = futureInflows.filter(f => f.age === age).reduce((sum, f) => sum + f.amount, 0);
+416:      taxableBalance += yearInflows; // Assume inflows go to taxable
+417-
+418-      // Grow balances
+419:      taxableBalance *= (1 + (yearReturn / 100));
+420-      taxDeferredBalance *= (1 + (yearReturn / 100));
+421-      taxFreeBalance *= (1 + (yearReturn / 100));
+422-
+423-      // Add contributions
+424:      taxableBalance += activeTaxableContr;
+425-      taxDeferredBalance += activeTaxDeferredContr;
+426-      taxFreeBalance += activeTaxFreeContr;
+427-
+428-      // Withdrawals (Taxable -> Tax-Deferred -> Tax-Free)
+429-      if (isRetired && netAnnualNeed > 0) {
+430:        if (taxableBalance > 0 && netAnnualNeed > 0) {
+431-          const grossNeed = netAnnualNeed / 0.85;
+432:          if (taxableBalance >= grossNeed) {
+433:            taxableBalance -= grossNeed;
+434-            netAnnualNeed = 0;
+435-          } else {
+436:            const netFromTaxable = taxableBalance * 0.85;
+437-            netAnnualNeed -= netFromTaxable;
+438:            taxableBalance = 0;
+439-          }
+440-        }
+441-        if (taxDeferredBalance > 0 && netAnnualNeed > 0) {
+442-          const grossNeed = netAnnualNeed / 0.75;
+443-          if (taxDeferredBalance >= grossNeed) {
+--
+458-            taxFreeBalance = 0;
+459-          }
+460-        }
+461-      }
+462-
+463:      const totalBalance = taxableBalance + taxDeferredBalance + taxFreeBalance;
+464-
+465-      data.push({
+466-        age,
+467-        spouseAge: currentSpouseAge,
+468-        year: new Date().getFullYear() + yearOffset,

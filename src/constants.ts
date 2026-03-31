@@ -412,7 +412,8 @@ export const DIMS = [
   {key:'edu',     label:'Education',       sub:'% with Degree+', hoverSub: 'Percentage of adults with a Bachelor\'s degree or higher. High correlation with professional communities.', scoreKey:'eduScore'},
   {key:'market',  label:'Market Heat',     sub:'Sale-to-list % (Last 90 Days)', hoverSub: 'Measures demand. >100% means homes typically sell above asking price.', scoreKey:'marketScore'},
   {key:'commute', label:'Commute',         sub:'Avg travel time', hoverSub: 'Average NJ commute is 31 mins. Scores favor proximity to NYC/Philly hubs.', scoreKey:'commuteScore'},
-  {key:'taxes',   label:'Property taxes',  sub:'Avg annual bill', hoverSub: 'NJ has the highest property taxes in the US. Avg bill is ~$9,500/yr.', scoreKey:'taxScore'}
+  {key:'taxes',   label:'Property taxes',  sub:'Avg annual bill', hoverSub: 'NJ has the highest property taxes in the US. Avg bill is ~$9,500/yr.', scoreKey:'taxScore'},
+  {key:'localScene', label:'Local Scene',  sub:'Hospitality & Attractions', hoverSub: 'New restaurants, hot spots, famous things, new stuff to do.', scoreKey:'localSceneScore'}
 ];
 
 export const COLORS=['#0471A4','#035480','#5BA8CC','#2B7A9E','#1A5F8A','#0D4D75','#3E8FAD','#1B6B9E'];

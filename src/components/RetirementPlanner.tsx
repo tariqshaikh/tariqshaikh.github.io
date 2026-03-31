@@ -96,6 +96,11 @@ export default function RetirementPlanner() {
   const [newAccount, setNewAccount] = useState({ name: '', balance: 0, annualContribution: 0, type: 'Taxable' });
   const [newInflow, setNewInflow] = useState({ name: '', amount: 0, age: 65 });
 
+  // Income Sources State
+  const [socialSecurity, setSocialSecurity] = useState({ monthly: 3200, age: 67 });
+  const [pension, setPension] = useState({ annual: 12000, cola: true });
+  const [deferredAssets, setDeferredAssets] = useState({ value: 185000, status: 'DEFERRED' });
+
   // Goals State
   const [goals, setGoals] = useState([
     { id: 'g1', title: 'Retirement Expense', category: 'RETIREMENT', value: 10000, period: 'Monthly', icon: <Briefcase size={20} /> },
@@ -132,7 +137,7 @@ export default function RetirementPlanner() {
           balance: item.value,
           annualContribution: item.name?.toLowerCase().includes('401k') ? 22500 : 
                              item.name?.toLowerCase().includes('ira') ? 6500 : 0,
-          type: item.category?.includes('retirement') ? 'Tax-Deferred' : 'Taxable'
+          type: item.taxStatus || 'Taxable'
         }));
 
       if (mappedAccounts.length > 0) {
@@ -199,74 +204,141 @@ export default function RetirementPlanner() {
   // Projection Logic
   const projectionData = useMemo(() => {
     const data = [];
-    let currentBalance = combinedAccounts.reduce((sum, acc) => sum + acc.balance, 0);
-    const totalAnnualContribution = combinedAccounts.reduce((sum, acc) => sum + acc.annualContribution, 0);
     
-    // For couples, we track both ages. We'll use Person 1's age as the primary index for the loop.
+    // Initialize buckets
+    let taxableBalance = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.balance, 0);
+    let taxDeferredBalance = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.balance, 0);
+    let taxFreeBalance = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.balance, 0);
+    
+    if (deferredAssets.status === 'TAXABLE') taxableBalance += deferredAssets.value;
+    else if (deferredAssets.status === 'TAX-FREE') taxFreeBalance += deferredAssets.value;
+    else taxDeferredBalance += deferredAssets.value;
+
+    const taxableContr = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.annualContribution, 0);
+    const taxDeferredContr = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.annualContribution, 0);
+    const taxFreeContr = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.annualContribution, 0);
+
     for (let age = currentAge; age <= lifeExpectancy; age++) {
       const yearOffset = age - currentAge;
       const currentSpouseAge = spouseAge + yearOffset;
       
       const isP1Retired = age >= retirementAge;
       const isP2Retired = planningType === 'Couple' ? currentSpouseAge >= spouseRetirementAge : true;
-      
-      // Withdrawals start when the first person retires (or we can define this differently)
-      // For this model, let's say retirement lifestyle starts when P1 retires.
       const isRetired = isP1Retired; 
       
       const yearReturn = isRetired ? postRetirementReturn : preRetirementReturn;
-      
-      // Calculate annual retirement needs adjusted for inflation
       const inflationFactor = Math.pow(1 + (inflationRate / 100), yearOffset);
       
-      const annualRetirementExpense = goals.find(g => g.id === 'g1')?.value || 0;
-      const annualTravel = goals.find(g => g.id === 'g2')?.value || 0;
-      const annualHealth = goals.find(g => g.id === 'g3')?.value || 0;
+      let totalAnnualNeed = 0;
+      goals.forEach(g => {
+        const amount = g.period === 'Monthly' ? g.value * 12 : g.value;
+        totalAnnualNeed += amount;
+      });
+      totalAnnualNeed *= inflationFactor;
       
-      // If couple, maybe expenses are higher? For now we use the goals as defined.
-      const totalAnnualNeed = (annualRetirementExpense * 12 + annualTravel + annualHealth) * inflationFactor;
+      let annualIncome = 0;
+      if (age >= socialSecurity.age) {
+        annualIncome += (socialSecurity.monthly * 12) * inflationFactor;
+      }
+      if (isRetired) {
+        annualIncome += pension.cola ? pension.annual * inflationFactor : pension.annual;
+      }
       
-      // Contributions: 
-      // If individual: only P1 contributes until retirementAge.
-      // If couple: P1 contributes until retirementAge, P2 contributes until spouseRetirementAge.
-      // We'll simplify by splitting the totalAnnualContribution 50/50 if couple, 
-      // or just assuming it's all P1 if individual.
-      let activeContribution = 0;
-      if (planningType === 'Individual') {
-        activeContribution = isP1Retired ? 0 : totalAnnualContribution;
-      } else {
-        // Simple 50/50 split of contributions for the model
-        const p1Contr = isP1Retired ? 0 : totalAnnualContribution / 2;
-        const p2Contr = isP2Retired ? 0 : totalAnnualContribution / 2;
-        activeContribution = p1Contr + p2Contr;
+      let netAnnualNeed = Math.max(0, totalAnnualNeed - annualIncome);
+      
+      // Contributions
+      let p1Ratio = isP1Retired ? 0 : (planningType === 'Couple' ? 0.5 : 1);
+      let p2Ratio = isP2Retired ? 0 : (planningType === 'Couple' ? 0.5 : 0);
+      let activeRatio = p1Ratio + p2Ratio;
+
+      let activeTaxableContr = taxableContr * activeRatio;
+      let activeTaxDeferredContr = taxDeferredContr * activeRatio;
+      let activeTaxFreeContr = taxFreeContr * activeRatio;
+
+      const yearInflows = futureInflows.filter(f => f.age === age).reduce((sum, f) => sum + f.amount, 0);
+      taxableBalance += yearInflows; // Assume inflows go to taxable
+
+      // Grow balances
+      taxableBalance *= (1 + (yearReturn / 100));
+      taxDeferredBalance *= (1 + (yearReturn / 100));
+      taxFreeBalance *= (1 + (yearReturn / 100));
+
+      // Add contributions
+      taxableBalance += activeTaxableContr;
+      taxDeferredBalance += activeTaxDeferredContr;
+      taxFreeBalance += activeTaxFreeContr;
+
+      // Withdrawals (Taxable -> Tax-Deferred -> Tax-Free)
+      // Simplified tax estimation: 15% on Taxable (cap gains), 25% on Tax-Deferred (income), 0% on Tax-Free
+      let actualWithdrawal = 0;
+      let taxPaid = 0;
+      if (isRetired && netAnnualNeed > 0) {
+        // Taxable
+        if (taxableBalance > 0 && netAnnualNeed > 0) {
+          const grossNeed = netAnnualNeed / 0.85;
+          if (taxableBalance >= grossNeed) {
+            taxableBalance -= grossNeed;
+            actualWithdrawal += grossNeed;
+            taxPaid += grossNeed * 0.15;
+            netAnnualNeed = 0;
+          } else {
+            const netFromTaxable = taxableBalance * 0.85;
+            actualWithdrawal += taxableBalance;
+            taxPaid += taxableBalance * 0.15;
+            netAnnualNeed -= netFromTaxable;
+            taxableBalance = 0;
+          }
+        }
+        // Tax-Deferred
+        if (taxDeferredBalance > 0 && netAnnualNeed > 0) {
+          const grossNeed = netAnnualNeed / 0.75;
+          if (taxDeferredBalance >= grossNeed) {
+            taxDeferredBalance -= grossNeed;
+            actualWithdrawal += grossNeed;
+            taxPaid += grossNeed * 0.25;
+            netAnnualNeed = 0;
+          } else {
+            const netFromDeferred = taxDeferredBalance * 0.75;
+            actualWithdrawal += taxDeferredBalance;
+            taxPaid += taxDeferredBalance * 0.25;
+            netAnnualNeed -= netFromDeferred;
+            taxDeferredBalance = 0;
+          }
+        }
+        // Tax-Free
+        if (taxFreeBalance > 0 && netAnnualNeed > 0) {
+          if (taxFreeBalance >= netAnnualNeed) {
+            taxFreeBalance -= netAnnualNeed;
+            actualWithdrawal += netAnnualNeed;
+            netAnnualNeed = 0;
+          } else {
+            actualWithdrawal += taxFreeBalance;
+            netAnnualNeed -= taxFreeBalance;
+            taxFreeBalance = 0;
+          }
+        }
       }
 
-      // Add future inflows if they occur this year
-      const yearInflows = futureInflows
-        .filter(f => f.age === age)
-        .reduce((sum, f) => sum + f.amount, 0);
-      
-      currentBalance += yearInflows;
-
-      if (activeContribution > 0) {
-        currentBalance = (currentBalance + activeContribution) * (1 + (yearReturn / 100));
-      } else {
-        currentBalance = (currentBalance - totalAnnualNeed) * (1 + (yearReturn / 100));
-      }
+      const totalBalance = taxableBalance + taxDeferredBalance + taxFreeBalance;
 
       data.push({
         age,
         spouseAge: currentSpouseAge,
         year: new Date().getFullYear() + yearOffset,
-        balance: Math.max(0, currentBalance),
-        withdrawalRate: isRetired && currentBalance > 0 ? (totalAnnualNeed / currentBalance) * 100 : 0,
-        inflows: activeContribution + yearInflows,
+        balance: Math.max(0, totalBalance),
+        taxableBalance: Math.max(0, taxableBalance),
+        taxDeferredBalance: Math.max(0, taxDeferredBalance),
+        taxFreeBalance: Math.max(0, taxFreeBalance),
+        withdrawalRate: isRetired && totalBalance > 0 ? (actualWithdrawal / totalBalance) * 100 : 0,
+        actualWithdrawal,
+        taxPaid,
+        inflows: activeTaxableContr + activeTaxDeferredContr + activeTaxFreeContr + yearInflows + annualIncome,
         outflows: isRetired ? totalAnnualNeed : 0,
-        netFlows: (activeContribution + yearInflows) - (isRetired ? totalAnnualNeed : 0)
+        netFlows: (activeTaxableContr + activeTaxDeferredContr + activeTaxFreeContr + yearInflows + annualIncome) - (isRetired ? totalAnnualNeed : 0)
       });
     }
     return data;
-  }, [currentAge, retirementAge, spouseAge, spouseRetirementAge, planningType, lifeExpectancy, inflationRate, preRetirementReturn, postRetirementReturn, combinedAccounts, goals, futureInflows]);
+  }, [currentAge, retirementAge, spouseAge, spouseRetirementAge, planningType, lifeExpectancy, inflationRate, preRetirementReturn, postRetirementReturn, combinedAccounts, goals, futureInflows, socialSecurity, pension, deferredAssets]);
 
   const confidenceData = useMemo(() => {
     // Generate Monte Carlo-like range of outcomes
@@ -288,47 +360,122 @@ export default function RetirementPlanner() {
 
   const comparisonData = useMemo(() => {
     // Compare current plan with a "Proposed Plan" (user-defined multiplier)
-    let currentProposedBalance = combinedAccounts.reduce((sum, acc) => sum + acc.balance, 0);
-    const totalAnnualContribution = combinedAccounts.reduce((sum, acc) => sum + acc.annualContribution, 0) * proposedMultiplier;
+    const data = [];
     
-    return projectionData.map(d => {
-      const yearOffset = d.age - currentAge;
+    // Initialize buckets
+    let taxableBalance = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.balance, 0);
+    let taxDeferredBalance = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.balance, 0);
+    let taxFreeBalance = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.balance, 0);
+    
+    if (deferredAssets.status === 'TAXABLE') taxableBalance += deferredAssets.value;
+    else if (deferredAssets.status === 'TAX-FREE') taxFreeBalance += deferredAssets.value;
+    else taxDeferredBalance += deferredAssets.value;
+
+    const taxableContr = combinedAccounts.filter(a => a.type === 'Taxable').reduce((sum, acc) => sum + acc.annualContribution, 0) * proposedMultiplier;
+    const taxDeferredContr = combinedAccounts.filter(a => a.type === 'Tax-Deferred').reduce((sum, acc) => sum + acc.annualContribution, 0) * proposedMultiplier;
+    const taxFreeContr = combinedAccounts.filter(a => a.type === 'Tax-Free').reduce((sum, acc) => sum + acc.annualContribution, 0) * proposedMultiplier;
+
+    for (let age = currentAge; age <= lifeExpectancy; age++) {
+      const yearOffset = age - currentAge;
       const currentSpouseAge = spouseAge + yearOffset;
-      const isP1Retired = d.age >= retirementAge;
+      
+      const isP1Retired = age >= retirementAge;
       const isP2Retired = planningType === 'Couple' ? currentSpouseAge >= spouseRetirementAge : true;
-      const isRetired = isP1Retired;
+      const isRetired = isP1Retired; 
+      
       const yearReturn = isRetired ? postRetirementReturn : preRetirementReturn;
       const inflationFactor = Math.pow(1 + (inflationRate / 100), yearOffset);
-      const totalAnnualNeed = (goals.reduce((sum, g) => sum + (g.period === 'Monthly' ? g.value * 12 : g.value), 0)) * inflationFactor;
       
-      let activeContribution = 0;
-      if (planningType === 'Individual') {
-        activeContribution = isP1Retired ? 0 : totalAnnualContribution;
-      } else {
-        const p1Contr = isP1Retired ? 0 : totalAnnualContribution / 2;
-        const p2Contr = isP2Retired ? 0 : totalAnnualContribution / 2;
-        activeContribution = p1Contr + p2Contr;
+      let totalAnnualNeed = 0;
+      goals.forEach(g => {
+        const amount = g.period === 'Monthly' ? g.value * 12 : g.value;
+        totalAnnualNeed += amount;
+      });
+      totalAnnualNeed *= inflationFactor;
+      
+      let annualIncome = 0;
+      if (age >= socialSecurity.age) {
+        annualIncome += (socialSecurity.monthly * 12) * inflationFactor;
+      }
+      if (isRetired) {
+        annualIncome += pension.cola ? pension.annual * inflationFactor : pension.annual;
+      }
+      
+      let netAnnualNeed = Math.max(0, totalAnnualNeed - annualIncome);
+      
+      // Contributions
+      let p1Ratio = isP1Retired ? 0 : (planningType === 'Couple' ? 0.5 : 1);
+      let p2Ratio = isP2Retired ? 0 : (planningType === 'Couple' ? 0.5 : 0);
+      let activeRatio = p1Ratio + p2Ratio;
+
+      let activeTaxableContr = taxableContr * activeRatio;
+      let activeTaxDeferredContr = taxDeferredContr * activeRatio;
+      let activeTaxFreeContr = taxFreeContr * activeRatio;
+
+      const yearInflows = futureInflows.filter(f => f.age === age).reduce((sum, f) => sum + f.amount, 0);
+      taxableBalance += yearInflows; // Assume inflows go to taxable
+
+      // Grow balances
+      taxableBalance *= (1 + (yearReturn / 100));
+      taxDeferredBalance *= (1 + (yearReturn / 100));
+      taxFreeBalance *= (1 + (yearReturn / 100));
+
+      // Add contributions
+      taxableBalance += activeTaxableContr;
+      taxDeferredBalance += activeTaxDeferredContr;
+      taxFreeBalance += activeTaxFreeContr;
+
+      // Withdrawals (Taxable -> Tax-Deferred -> Tax-Free)
+      if (isRetired && netAnnualNeed > 0) {
+        if (taxableBalance > 0 && netAnnualNeed > 0) {
+          const grossNeed = netAnnualNeed / 0.85;
+          if (taxableBalance >= grossNeed) {
+            taxableBalance -= grossNeed;
+            netAnnualNeed = 0;
+          } else {
+            const netFromTaxable = taxableBalance * 0.85;
+            netAnnualNeed -= netFromTaxable;
+            taxableBalance = 0;
+          }
+        }
+        if (taxDeferredBalance > 0 && netAnnualNeed > 0) {
+          const grossNeed = netAnnualNeed / 0.75;
+          if (taxDeferredBalance >= grossNeed) {
+            taxDeferredBalance -= grossNeed;
+            netAnnualNeed = 0;
+          } else {
+            const netFromDeferred = taxDeferredBalance * 0.75;
+            netAnnualNeed -= netFromDeferred;
+            taxDeferredBalance = 0;
+          }
+        }
+        if (taxFreeBalance > 0 && netAnnualNeed > 0) {
+          if (taxFreeBalance >= netAnnualNeed) {
+            taxFreeBalance -= netAnnualNeed;
+            netAnnualNeed = 0;
+          } else {
+            netAnnualNeed -= taxFreeBalance;
+            taxFreeBalance = 0;
+          }
+        }
       }
 
-      // Add future inflows if they occur this year
-      const yearInflows = futureInflows
-        .filter(f => f.age === d.age)
-        .reduce((sum, f) => sum + f.amount, 0);
-      
-      currentProposedBalance += yearInflows;
+      const totalBalance = taxableBalance + taxDeferredBalance + taxFreeBalance;
 
-      if (activeContribution > 0) {
-        currentProposedBalance = (currentProposedBalance + activeContribution) * (1 + (yearReturn / 100));
-      } else {
-        currentProposedBalance = (currentProposedBalance - totalAnnualNeed) * (1 + (yearReturn / 100));
-      }
-
-      return {
-        ...d,
-        proposedBalance: Math.max(0, currentProposedBalance)
-      };
-    });
-  }, [projectionData, combinedAccounts, currentAge, retirementAge, spouseAge, spouseRetirementAge, planningType, postRetirementReturn, preRetirementReturn, inflationRate, goals, futureInflows, proposedMultiplier]);
+      data.push({
+        age,
+        spouseAge: currentSpouseAge,
+        year: new Date().getFullYear() + yearOffset,
+        proposedBalance: Math.max(0, totalBalance)
+      });
+    }
+    
+    // Merge with projectionData
+    return projectionData.map((d, i) => ({
+      ...d,
+      proposedBalance: data[i]?.proposedBalance || 0
+    }));
+  }, [projectionData, combinedAccounts, currentAge, retirementAge, spouseAge, spouseRetirementAge, planningType, postRetirementReturn, preRetirementReturn, inflationRate, goals, futureInflows, proposedMultiplier, socialSecurity, pension, deferredAssets, lifeExpectancy]);
 
   const handleSaveSettings = async (newData: any) => {
     if (!user || user.uid === 'guest-user') return;
@@ -716,21 +863,41 @@ export default function RetirementPlanner() {
                           <div className="space-y-3">
                             <div className="flex justify-between items-center">
                               <span className="text-[11px] text-white">Effective Rate</span>
-                              <span className="text-[11px] font-mono text-[#C5A059] font-bold">14.2%</span>
+                              <span className="text-[11px] font-mono text-[#C5A059] font-bold">
+                                {(() => {
+                                  const totalTax = projectionData.reduce((sum, d) => sum + d.taxPaid, 0);
+                                  const totalWithdrawal = projectionData.reduce((sum, d) => sum + (d.withdrawalRate > 0 ? (d.withdrawalRate / 100) * d.balance : 0), 0);
+                                  return totalWithdrawal > 0 ? ((totalTax / totalWithdrawal) * 100).toFixed(1) + '%' : '0.0%';
+                                })()}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-[11px] text-white">Tax-Free</span>
-                              <span className="text-[11px] font-mono text-[#C5A059] font-bold">22%</span>
+                              <span className="text-[11px] font-mono text-[#C5A059] font-bold">
+                                {(() => {
+                                  const retirementStart = projectionData.find(d => d.age === retirementAge);
+                                  if (!retirementStart || retirementStart.balance === 0) return '0%';
+                                  return ((retirementStart.taxFreeBalance / retirementStart.balance) * 100).toFixed(0) + '%';
+                                })()}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-[11px] text-white">Tax-Deferred</span>
-                              <span className="text-[11px] font-mono text-[#C5A059] font-bold">78%</span>
+                              <span className="text-[11px] font-mono text-[#C5A059] font-bold">
+                                {(() => {
+                                  const retirementStart = projectionData.find(d => d.age === retirementAge);
+                                  if (!retirementStart || retirementStart.balance === 0) return '0%';
+                                  return ((retirementStart.taxDeferredBalance / retirementStart.balance) * 100).toFixed(0) + '%';
+                                })()}
+                              </span>
                             </div>
                           </div>
                         </div>
                         <div className="pt-4 border-t border-[#333333]">
                           <p className="text-[9px] font-mono uppercase tracking-widest text-[#6E8A96] mb-1">Lifetime Tax</p>
-                          <p className="text-xl font-serif font-bold text-white">$420,000</p>
+                          <p className="text-xl font-serif font-bold text-white">
+                            {formatCurrency(projectionData.reduce((sum, d) => sum + d.taxPaid, 0))}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -911,11 +1078,24 @@ export default function RetirementPlanner() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[#6E8A96]">Monthly Est.</span>
-                        <span className="text-sm font-mono text-white font-bold">$3,200</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-mono text-[#6E8A96] mr-1">$</span>
+                          <input 
+                            type="number" 
+                            value={socialSecurity.monthly}
+                            onChange={(e) => setSocialSecurity({...socialSecurity, monthly: Number(e.target.value)})}
+                            className="bg-transparent text-white font-mono text-sm font-bold border-b border-transparent focus:border-[#C5A059] outline-none w-16 text-right transition-colors"
+                          />
+                        </div>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[#6E8A96]">Claiming Age</span>
-                        <span className="text-xs font-mono text-[#C5A059] font-bold">67</span>
+                        <input 
+                          type="number" 
+                          value={socialSecurity.age}
+                          onChange={(e) => setSocialSecurity({...socialSecurity, age: Number(e.target.value)})}
+                          className="bg-transparent text-[#C5A059] font-mono text-xs font-bold border-b border-transparent focus:border-[#C5A059] outline-none w-12 text-right transition-colors"
+                        />
                       </div>
                     </div>
                   </div>
@@ -932,11 +1112,24 @@ export default function RetirementPlanner() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[#6E8A96]">Annual Est.</span>
-                        <span className="text-sm font-mono text-white font-bold">$12,000</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-mono text-[#6E8A96] mr-1">$</span>
+                          <input 
+                            type="number" 
+                            value={pension.annual}
+                            onChange={(e) => setPension({...pension, annual: Number(e.target.value)})}
+                            className="bg-transparent text-white font-mono text-sm font-bold border-b border-transparent focus:border-[#C5A059] outline-none w-20 text-right transition-colors"
+                          />
+                        </div>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[#6E8A96]">COLA Adj.</span>
-                        <span className="text-xs font-mono text-[#1E5C38] font-bold">YES</span>
+                        <button 
+                          onClick={() => setPension({...pension, cola: !pension.cola})}
+                          className={`text-xs font-mono font-bold px-2 py-0.5 rounded-[2px] transition-colors ${pension.cola ? 'bg-[#1E5C38]/20 text-[#1E5C38]' : 'bg-[#333333] text-[#6E8A96]'}`}
+                        >
+                          {pension.cola ? 'YES' : 'NO'}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -953,11 +1146,35 @@ export default function RetirementPlanner() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[#6E8A96]">Total Value</span>
-                        <span className="text-sm font-mono text-white font-bold">$185,000</span>
+                        <div className="flex items-center">
+                          <span className="text-sm font-mono text-[#6E8A96] mr-1">$</span>
+                          <input 
+                            type="number" 
+                            value={deferredAssets.value}
+                            onChange={(e) => setDeferredAssets({...deferredAssets, value: Number(e.target.value)})}
+                            className="bg-transparent text-white font-mono text-sm font-bold border-b border-transparent focus:border-[#C5A059] outline-none w-24 text-right transition-colors"
+                          />
+                        </div>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-[#6E8A96]">Tax Status</span>
-                        <span className="text-xs font-mono text-[#C5A059] font-bold">DEFERRED</span>
+                        <div className="flex items-center space-x-1 bg-[#0A0A0A] border border-[#333333] p-0.5 rounded-[2px]">
+                          {['Taxable', 'Deferred', 'Free'].map(status => {
+                            const fullStatus = status === 'Deferred' ? 'DEFERRED' : status === 'Free' ? 'TAX-FREE' : 'TAXABLE';
+                            const isSelected = deferredAssets.status === fullStatus;
+                            return (
+                              <button
+                                key={status}
+                                onClick={() => setDeferredAssets({...deferredAssets, status: fullStatus})}
+                                className={`px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wider rounded-[2px] transition-colors ${
+                                  isSelected ? 'bg-[#333333] text-[#C5A059]' : 'text-[#6E8A96] hover:text-white'
+                                }`}
+                              >
+                                {status}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1067,12 +1284,34 @@ export default function RetirementPlanner() {
                         <PieChart className="text-[#C5A059]" size={24} />
                         <h3 className="text-2xl font-serif font-bold text-white">Invested Assets</h3>
                       </div>
-                      <button 
-                        onClick={() => setIsAddAccountOpen(true)}
-                        className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-white transition-colors"
-                      >
-                        Add Account +
-                      </button>
+                      <div className="flex items-center gap-4">
+                        <button 
+                          onClick={() => setIsAddAccountOpen(true)}
+                          className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-white transition-colors"
+                        >
+                          Add Account +
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96]">ETS:</span>
+                          <div className="flex items-center space-x-1 bg-[#0A0A0A] border border-[#333333] p-0.5 rounded-[2px]">
+                            {['Taxable', 'Deferred', 'Free'].map(status => {
+                              const fullStatus = status === 'Deferred' ? 'DEFERRED' : status === 'Free' ? 'TAX-FREE' : 'TAXABLE';
+                              const isSelected = deferredAssets.status === fullStatus;
+                              return (
+                                <button
+                                  key={status}
+                                  onClick={() => setDeferredAssets({...deferredAssets, status: fullStatus})}
+                                  className={`px-2 py-1 text-[9px] font-mono uppercase tracking-widest rounded-[1px] transition-colors ${
+                                    isSelected ? 'bg-[#C5A059] text-black font-bold' : 'text-[#6E8A96] hover:text-white'
+                                  }`}
+                                >
+                                  {status}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="space-y-4">
@@ -1093,7 +1332,6 @@ export default function RetirementPlanner() {
                                     <span className="text-[8px] font-mono uppercase px-1 bg-[#C5A059]/20 text-[#C5A059] rounded-[1px]">Manual</span>
                                   )}
                                 </div>
-                                <p className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96]">{acc.type}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-6">
@@ -1617,24 +1855,28 @@ export default function RetirementPlanner() {
                     </tr>
                   </thead>
                   <tbody>
-                    {projectionData.filter((_, i) => i % 5 === 0 || i === 0).map((row, idx) => (
+                    {projectionData.filter((_, i) => i % 5 === 0 || i === 0).map((row, idx) => {
+                      const totalInflows = row.inflows + row.actualWithdrawal;
+                      const totalOutflows = row.outflows + row.taxPaid;
+                      const netFlows = totalInflows - totalOutflows;
+                      return (
                       <tr key={idx} className="border-b border-[#333333] hover:bg-[#1A1A1A] transition-colors">
                         <td className="p-4 font-mono text-xs text-white border-r border-[#333333]">{row.year}</td>
                         <td className="p-4 font-mono text-xs text-white border-r border-[#333333]">
                           {planningType === 'Couple' ? `${row.age} / ${row.spouseAge}` : row.age}
                         </td>
                         <td className="p-4 font-mono text-xs text-[#1E5C38] border-r border-[#333333]">{formatCurrency(row.inflows)}</td>
-                        <td className="p-4 font-mono text-xs text-[#1E5C38] border-r border-[#333333]">$0</td>
-                        <td className="p-4 font-mono text-xs text-[#1E5C38] border-r border-[#333333] font-bold">{formatCurrency(row.inflows)}</td>
-                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333]">{formatCurrency(row.outflows * 0.7)}</td>
-                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333]">{formatCurrency(row.outflows * 0.2)}</td>
-                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333]">{formatCurrency(row.outflows * 0.1)}</td>
-                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333] font-bold">{formatCurrency(row.outflows)}</td>
-                        <td className={`p-4 font-mono text-xs font-bold ${row.netFlows >= 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
-                          ({formatCurrency(Math.abs(row.netFlows))})
+                        <td className="p-4 font-mono text-xs text-[#1E5C38] border-r border-[#333333]">{formatCurrency(row.actualWithdrawal)}</td>
+                        <td className="p-4 font-mono text-xs text-[#1E5C38] border-r border-[#333333] font-bold">{formatCurrency(totalInflows)}</td>
+                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333]">{formatCurrency(row.outflows)}</td>
+                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333]">$0</td>
+                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333]">{formatCurrency(row.taxPaid)}</td>
+                        <td className="p-4 font-mono text-xs text-[#8B0000] border-r border-[#333333] font-bold">{formatCurrency(totalOutflows)}</td>
+                        <td className={`p-4 font-mono text-xs font-bold ${netFlows >= 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
+                          {netFlows >= 0 ? formatCurrency(netFlows) : `(${formatCurrency(Math.abs(netFlows))})`}
                         </td>
                       </tr>
-                    ))}
+                    )})}
                   </tbody>
                 </table>
               </div>
@@ -1712,15 +1954,23 @@ export default function RetirementPlanner() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-2">Account Type</label>
-                  <select 
-                    value={newAccount.type}
-                    onChange={(e) => setNewAccount({ ...newAccount, type: e.target.value })}
-                    className="w-full bg-[#0A0A0A] border border-[#333333] rounded-[2px] px-4 py-3 text-white font-mono focus:border-[#C5A059] focus:outline-none transition-colors"
-                  >
-                    <option value="Taxable">Taxable</option>
-                    <option value="Tax-Deferred">Tax-Deferred</option>
-                    <option value="Tax-Free">Tax-Free</option>
-                  </select>
+                  <div className="flex items-center space-x-1 bg-[#0A0A0A] border border-[#333333] p-1 rounded-[2px] w-full">
+                    {['Taxable', 'Deferred', 'Free'].map(status => {
+                      const fullStatus = status === 'Deferred' ? 'Tax-Deferred' : status === 'Free' ? 'Tax-Free' : 'Taxable';
+                      const isSelected = newAccount.type === fullStatus;
+                      return (
+                        <button
+                          key={status}
+                          onClick={() => setNewAccount({ ...newAccount, type: fullStatus })}
+                          className={`flex-1 px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider rounded-[2px] transition-colors ${
+                            isSelected ? 'bg-[#333333] text-white' : 'text-[#6E8A96] hover:text-white'
+                          }`}
+                        >
+                          {status}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="flex gap-4 pt-4">
                   <button 

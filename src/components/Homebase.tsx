@@ -6,9 +6,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Info, ChevronRight, GripVertical } from 'lucide-react';
 import { NJ_COUNTIES, NJ_ENRICHED, DIMS, COLORS } from '../constants';
-import { NJ_COUNTY_PATHS, NJ_STATE_OUTLINE } from '../mapData';
+import { NJ_COUNTY_PATHS, NJ_STATE_OUTLINE, COUNTY_CENTERS } from '../mapData';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { Activity, Zap, RefreshCw } from 'lucide-react';
+
+// Regional Data
+const REGIONS = [
+  {
+    id: 'north',
+    name: 'North Jersey',
+    sub: 'NYC Hubs & Skylines',
+    counties: ['Bergen', 'Essex', 'Hudson', 'Morris', 'Passaic', 'Sussex', 'Union', 'Warren'],
+    color: '#0471A4',
+    bg: 'bg-blue-50'
+  },
+  {
+    id: 'central',
+    name: 'Central Jersey',
+    sub: 'Suburban Bliss & Tech',
+    counties: ['Hunterdon', 'Mercer', 'Middlesex', 'Monmouth', 'Somerset', 'Ocean'],
+    color: '#035480',
+    bg: 'bg-slate-50'
+  },
+  {
+    id: 'south',
+    name: 'South Jersey',
+    sub: 'Philly Metro & Shore',
+    counties: ['Atlantic', 'Burlington', 'Camden', 'Cape May', 'Cumberland', 'Gloucester', 'Salem'],
+    color: '#5BA8CC',
+    bg: 'bg-indigo-50'
+  }
+];
 
 // Helper functions
 const scoreIncome = (v: number | null) => { if (!v) return 50; return Math.min(100, Math.round((v / 180000) * 100)); };
@@ -21,6 +49,7 @@ const scoreTax = (rate: number | null) => { if (!rate) return 50; return Math.ma
 const scoreWalk = (v: number | null) => { if (!v) return 50; return v; };
 const scoreEdu = (v: number | null) => { if (!v) return 50; return v; };
 const scoreMarket = (v: number | null) => { if (v == null) return 50; return Math.min(100, Math.max(0, (v - 96) * 12)); };
+const scoreLocalScene = (v: number | null) => { if (!v) return 50; return v; };
 
 const rankToWeight = (r: number, total: number) => {
   const weights = [2.5, 2.0, 1.5, 1.2, 1.0, 0.8, 0.6, 0.4];
@@ -39,7 +68,7 @@ export default function Homebase() {
   const [countySearch, setCountySearch] = useState('');
   const [townSearch, setTownSearch] = useState('');
   const [ghostText, setGhostText] = useState('');
-  const [priorityOrder, setPriorityOrder] = useState(['schools', 'safety', 'walk', 'home', 'highway', 'income', 'edu', 'market', 'commute', 'taxes']);
+  const [priorityOrder, setPriorityOrder] = useState(['schools', 'safety', 'walk', 'home', 'highway', 'income', 'edu', 'market', 'commute', 'taxes', 'localScene']);
   const [sortKey, setSortKey] = useState('fit');
   const [showResults, setShowResults] = useState(false);
   const [showPrioritySettings, setShowPrioritySettings] = useState(false);
@@ -58,6 +87,7 @@ export default function Homebase() {
   const townInputRef = useRef<HTMLInputElement>(null);
 
   const allTowns = React.useMemo(() => 
+
     Object.entries(NJ_COUNTIES).flatMap(([county, data]) => 
       data.towns.map(town => ({ name: town, county }))
     ), []
@@ -200,6 +230,7 @@ export default function Homebase() {
     const d = NJ_ENRICHED[name];
     if (d) {
       const currentHeat = (isLiveMode && liveHeatData[name]) ? liveHeatData[name] : d.saleToList;
+      const derivedLocalScene = d.localScene || Math.min(100, Math.round(((d.walkScore || 50) * 0.6) + ((d.pop || 10000) / 1000)));
       return {
         name, county: county + ' County', color: COLORS[i % COLORS.length], hasFullData: true,
         income: d.income, homeVal: d.homeVal, commute: d.commute, pop: d.pop,
@@ -207,6 +238,7 @@ export default function Homebase() {
         schoolRating: d.schoolRating, schoolLabel: d.schoolLabel,
         safetyRaw: d.safetyScore, safetyLabel: d.safetyLabel,
         highwayRaw: d.highway || 50,
+        localSceneRaw: derivedLocalScene,
         taxRate: d.taxRate, avgTax: d.avgTax,
         walkRaw: d.walkScore, walkLabel: d.walkLabel,
         incomeScore: scoreIncome(d.income), homeScore: scoreHome(d.homeVal),
@@ -215,17 +247,17 @@ export default function Homebase() {
         schoolScore: scoreSchool(d.schoolRating),
         safetyScore: scoreSafety(d.safetyScore), taxScore: scoreTax(d.taxRate),
         walkScore2: scoreWalk(d.walkScore), marketScore: scoreMarket(currentHeat),
-        eduScore: scoreEdu(d.eduPct)
+        eduScore: scoreEdu(d.eduPct), localSceneScore: scoreLocalScene(derivedLocalScene)
       };
     }
     return {
       name, county: county + ' County', color: COLORS[i % COLORS.length], hasFullData: false,
       income: null, homeVal: null, commute: null, pop: null, saleToList: null, eduPct: null,
       schoolRating: null, schoolLabel: null, safetyRaw: null, safetyLabel: null,
-      taxRate: null, avgTax: null, walkRaw: null, walkLabel: null,
+      taxRate: null, avgTax: null, walkRaw: null, walkLabel: null, localSceneRaw: null,
       incomeScore: 50, homeScore: 50, commuteScore: 50, schoolScore: 50,
       safetyScore: 50, taxScore: 50, walkScore2: 50, marketScore: 50,
-      highwayScore: 50, eduScore: 50
+      highwayScore: 50, eduScore: 50, localSceneScore: 50
     };
   });
 
@@ -290,17 +322,20 @@ export default function Homebase() {
           )}
         </AnimatePresence>
 
-        <motion.div className={`w-full ${showResults ? 'max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-start gap-6' : 'max-w-2xl space-y-6'}`}>
+        <motion.div className={`w-full ${showResults ? 'max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-start gap-6' : 'max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12'}`}>
           
           {/* Search Inputs */}
-          <motion.div className={`flex ${showResults ? 'flex-row gap-6 w-full lg:w-auto shrink-0' : 'flex-col gap-6 w-full'}`}>
+          <motion.div className={`flex ${showResults ? 'flex-row gap-6 w-full lg:w-auto shrink-0' : 'flex-col gap-6 w-full lg:flex-1'}`}>
             
             {/* County Section */}
-            <motion.div className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-[420px]' : 'w-full'}`} ref={countyDropdownRef}>
+            <motion.div 
+              className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-[420px]' : 'w-full'} relative ${showCountyDropdown ? 'z-30' : 'z-20'}`} 
+              ref={countyDropdownRef}
+            >
               <div className="flex items-center justify-between mb-0 px-2">
                 <span className="text-[10px] font-bold text-[#6E8A96] uppercase tracking-wider">County Selection</span>
               </div>
-              <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2 z-10`}>
+              <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2`}>
                 <div className="absolute top-1/2 -translate-y-1/2 left-5 flex items-center pointer-events-none z-20">
                   <span className="text-[#6E8A96]">🔍</span>
                 </div>
@@ -452,7 +487,7 @@ export default function Homebase() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-[420px]' : 'w-full'}`} 
+                  className={`flex flex-col gap-2 ${showResults ? 'w-full lg:w-[420px]' : 'w-full'} relative ${showTownDropdown ? 'z-30' : 'z-10'}`} 
                   ref={townDropdownRef}
                 >
                   <div className="flex items-center justify-between mb-0 px-2">
@@ -461,7 +496,7 @@ export default function Homebase() {
                       {selectedTowns.length}/8 Towns Max
                     </span>
                   </div>
-                  <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2 z-10`}>
+                  <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2`}>
                     <div className="absolute top-1/2 -translate-y-1/2 left-5 flex items-center pointer-events-none z-20">
                       <span className="text-[#6E8A96]">🏘️</span>
                     </div>
@@ -563,6 +598,8 @@ export default function Homebase() {
               )}
             </AnimatePresence>
           </motion.div>
+
+          {/* Geo Explorer Section - REMOVED */}
 
           {showResults && selectedTowns.length > 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 shrink-0">
@@ -727,31 +764,32 @@ export default function Homebase() {
               <div className="p-4 border-r border-[#D4E8F0] bg-white sticky left-0 z-10">
                 <div className="font-mono text-[12px] text-[#6E8A96] uppercase tracking-widest">Town</div>
               </div>
-              {sortedTowns.map(d => (
+              {sortedTowns.map(d => {
+                const isPerfectMatch = calcFitScore(d) >= 85;
+                return (
                 <div 
                   key={d.name} 
-                  className="p-4 text-white cursor-pointer hover:brightness-110 transition-all relative group/town" 
+                  className={`p-4 text-white cursor-pointer hover:brightness-110 transition-all relative group/town ${isPerfectMatch ? 'border-t-4 border-[#FFD700]' : ''}`} 
                   style={{ backgroundColor: d.color }}
                   onClick={() => setExpandedTown(expandedTown === d.name ? null : d.name)}
                 >
-                  <div className="flex justify-between items-start">
+                  {isPerfectMatch && (
+                    <div className="absolute top-0 left-0 right-0 bg-[#FFD700] text-[#1A1C1E] text-[9px] font-bold text-center uppercase tracking-widest py-0.5 shadow-sm">
+                      Excellent Town
+                    </div>
+                  )}
+                  <div className={`flex justify-between items-start ${isPerfectMatch ? 'mt-2' : ''}`}>
                     <div>
                       <div className="font-serif text-lg font-bold leading-tight">{d.name}</div>
                       <div className="font-mono text-[11px] opacity-60 uppercase tracking-wider">{d.county}</div>
                     </div>
                     <div className={`transition-transform duration-300 ${expandedTown === d.name ? 'rotate-180' : ''}`}>
-                      <ChevronRight size={14} className="rotate-90 opacity-60 group-hover/town:opacity-100" />
+                      <ChevronRight size={14} className="opacity-60 group-hover/town:opacity-100" />
                     </div>
                   </div>
                   <div className="font-mono text-[11px] opacity-60 mt-0.5">{d.hasFullData ? '✓ full data' : ''}</div>
                   <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-white/20 rounded-full font-mono text-[13px] group/fit relative">
                     <span>Fit</span><span className="text-base font-bold">{calcFitScore(d)}</span><span className="text-[12px] opacity-60">/100</span>
-                    
-                    {calcFitScore(d) >= 85 && (
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#FFD700] text-[#1A1C1E] text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tighter whitespace-nowrap shadow-lg">
-                        Perfect Match
-                      </div>
-                    )}
                   </div>
 
                   {/* Town Detail Dropdown */}
@@ -791,7 +829,8 @@ export default function Homebase() {
                     )}
                   </AnimatePresence>
                 </div>
-              ))}
+                );
+              })}
 
               {priorityOrder.map((key, rank) => {
                 const dim = DIMS.find(d => d.key === key)!;
@@ -838,6 +877,7 @@ export default function Homebase() {
                       else if (key === 'schools') { valDisplay = d.schoolLabel; subDisplay = 'Niche district rating'; tag = tagLabel(score, 'Top tier', 'Below avg'); }
                       else if (key === 'safety') { valDisplay = d.safetyLabel; subDisplay = `Score: ${d.safetyRaw}/100`; }
                       else if (key === 'taxes') { valDisplay = `${d.taxRate}%`; subDisplay = `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr`; }
+                      else if (key === 'localScene') { valDisplay = `${d.localSceneRaw}/100`; subDisplay = 'Local Scene Score'; tag = tagLabel(score, 'Vibrant', 'Quiet'); }
                       else if (key === 'walk') { valDisplay = `${d.walkRaw}/100`; subDisplay = d.walkLabel; }
                       else if (key === 'edu') { valDisplay = `${d.eduPct}%`; subDisplay = 'Bachelor\'s Degree+'; tag = tagLabel(score, 'Highly Educated', 'Mixed'); }
                       else if (key === 'market') { 
@@ -869,8 +909,15 @@ export default function Homebase() {
 
             {/* Mobile Stacked Card View */}
             <div className="md:hidden space-y-6">
-              {sortedTowns.map(d => (
-                <div key={d.name} className="bg-white border border-[#D4E8F0] rounded-xl overflow-hidden shadow-sm">
+              {sortedTowns.map(d => {
+                const isPerfectMatch = calcFitScore(d) >= 85;
+                return (
+                <div key={d.name} className={`bg-white border border-[#D4E8F0] rounded-xl overflow-hidden shadow-sm relative ${isPerfectMatch ? 'border-t-4 border-t-[#FFD700]' : ''}`}>
+                  {isPerfectMatch && (
+                    <div className="bg-[#FFD700] text-[#1A1C1E] text-[10px] font-bold text-center uppercase tracking-widest py-1 shadow-sm">
+                      Excellent Town
+                    </div>
+                  )}
                   <div className="p-4 text-white" style={{ backgroundColor: d.color }}>
                     <div className="flex justify-between items-start">
                       <div>
@@ -882,9 +929,6 @@ export default function Homebase() {
                           <span className="opacity-70 text-[10px] uppercase">Fit</span>
                           <span>{calcFitScore(d)}/100</span>
                         </div>
-                        {calcFitScore(d) >= 85 && (
-                          <span className="bg-[#FFD700] text-[#1A1C1E] text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tighter">Perfect Match</span>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -915,6 +959,7 @@ export default function Homebase() {
                       else if (key === 'schools') { valDisplay = d.schoolLabel; subDisplay = 'Niche rating'; }
                       else if (key === 'safety') { valDisplay = d.safetyLabel; subDisplay = `Score: ${d.safetyRaw}/100`; }
                       else if (key === 'taxes') { valDisplay = `${d.taxRate}%`; subDisplay = `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr`; }
+                      else if (key === 'localScene') { valDisplay = `${d.localSceneRaw}/100`; subDisplay = 'Local Scene Score'; }
                       else if (key === 'walk') { valDisplay = `${d.walkRaw}/100`; subDisplay = d.walkLabel; }
                       else if (key === 'edu') { valDisplay = `${d.eduPct}%`; subDisplay = 'Bachelor\'s Degree+'; }
                       else if (key === 'market') { valDisplay = `${d.saleToList}%`; subDisplay = 'Sale-to-list'; }
@@ -942,7 +987,8 @@ export default function Homebase() {
                     })}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
             <div className="text-[13px] font-mono text-[#6E8A96] mt-4 text-center">
               Sources: <a href="https://www.census.gov" className="text-[#0471A4] hover:underline">US Census ACS 2023</a> · Niche school ratings · NJ property tax records · WalkScore
