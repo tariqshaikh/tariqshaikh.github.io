@@ -77,6 +77,9 @@ export default function Homebase() {
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showTownDropdown, setShowTownDropdown] = useState(false);
   const [expandedTown, setExpandedTown] = useState<string | null>(null);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [marketPeriods, setMarketPeriods] = useState<Record<string, string>>({});
+  const [apiTownData, setApiTownData] = useState<Record<string, any>>({});
   const [isLiveMode, setIsLiveMode] = useState(false);
   const [liveHeatData, setLiveHeatData] = useState<Record<string, number>>({});
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
@@ -92,6 +95,19 @@ export default function Homebase() {
       data.towns.map(town => ({ name: town, county }))
     ), []
   );
+
+  useEffect(() => {
+    const fetchTownData = async () => {
+      try {
+        const res = await fetch('/api/towns');
+        const data = await res.json();
+        setApiTownData(data);
+      } catch (err) {
+        console.error('Failed to fetch town data:', err);
+      }
+    };
+    fetchTownData();
+  }, []);
 
   const handleCountySelect = (c: string) => {
     if (!activeCounties.includes(c)) {
@@ -227,7 +243,7 @@ export default function Homebase() {
 
   const townData = selectedTowns.map((townObj, i) => {
     const { name, county } = townObj;
-    const d = NJ_ENRICHED[name];
+    const d = apiTownData[name] || NJ_ENRICHED[name];
     if (d) {
       const currentHeat = (isLiveMode && liveHeatData[name]) ? liveHeatData[name] : d.saleToList;
       const derivedLocalScene = d.localScene || Math.min(100, Math.round(((d.walkScore || 50) * 0.6) + ((d.pop || 10000) / 1000)));
@@ -247,7 +263,9 @@ export default function Homebase() {
         schoolScore: scoreSchool(d.schoolRating),
         safetyScore: scoreSafety(d.safetyScore), taxScore: scoreTax(d.taxRate),
         walkScore2: scoreWalk(d.walkScore), marketScore: scoreMarket(currentHeat),
-        eduScore: scoreEdu(d.eduPct), localSceneScore: scoreLocalScene(derivedLocalScene)
+        eduScore: scoreEdu(d.eduPct), localSceneScore: scoreLocalScene(derivedLocalScene),
+        hottestThings: d.hottestThings || [],
+        marketHistory: d.marketHistory || null
       };
     }
     return {
@@ -257,7 +275,9 @@ export default function Homebase() {
       taxRate: null, avgTax: null, walkRaw: null, walkLabel: null, localSceneRaw: null,
       incomeScore: 50, homeScore: 50, commuteScore: 50, schoolScore: 50,
       safetyScore: 50, taxScore: 50, walkScore2: 50, marketScore: 50,
-      highwayScore: 50, eduScore: 50, localSceneScore: 50
+      highwayScore: 50, eduScore: 50, localSceneScore: 50,
+      hottestThings: [],
+      marketHistory: null
     };
   });
 
@@ -877,28 +897,126 @@ export default function Homebase() {
                       else if (key === 'schools') { valDisplay = d.schoolLabel; subDisplay = 'Niche district rating'; tag = tagLabel(score, 'Top tier', 'Below avg'); }
                       else if (key === 'safety') { valDisplay = d.safetyLabel; subDisplay = `Score: ${d.safetyRaw}/100`; }
                       else if (key === 'taxes') { valDisplay = `${d.taxRate}%`; subDisplay = `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr`; }
-                      else if (key === 'localScene') { valDisplay = `${d.localSceneRaw}/100`; subDisplay = 'Local Scene Score'; tag = tagLabel(score, 'Vibrant', 'Quiet'); }
+                      else if (key === 'localScene') { 
+                        valDisplay = `${d.localSceneRaw}/100`; 
+                        subDisplay = 'Local Scene Score'; 
+                        tag = tagLabel(score, 'Vibrant', 'Quiet'); 
+                      }
                       else if (key === 'walk') { valDisplay = `${d.walkRaw}/100`; subDisplay = d.walkLabel; }
                       else if (key === 'edu') { valDisplay = `${d.eduPct}%`; subDisplay = 'Bachelor\'s Degree+'; tag = tagLabel(score, 'Highly Educated', 'Mixed'); }
                       else if (key === 'market') { 
-                        valDisplay = `${d.saleToList}%`; 
-                        subDisplay = isLiveMode ? 'Live Market Feed (30s sync)' : 'Sale-to-list (Last 90 Days)'; 
-                        tag = isLiveMode ? 'Live Update' : tagLabel(score, 'Hot market', 'Cool market'); 
+                        const period = marketPeriods[d.name] || '90d';
+                        const marketVal = d.marketHistory?.[period] || d.saleToList;
+                        valDisplay = `${marketVal}%`; 
+                        subDisplay = isLiveMode ? 'Live Market Feed (30s sync)' : `Sale-to-list (${period})`; 
+                        tag = isLiveMode ? 'Live Update' : tagLabel(scoreMarket(marketVal), 'Hot market', 'Cool market'); 
                       }
 
+                      const isExpandable = key === 'localScene' || key === 'market';
+                      const isExpanded = expandedCard === `${d.name}-${key}`;
+                      
+                      // Calculate dynamic score for Market Heat period selection
+                      const period = marketPeriods[d.name] || '90d';
+                      const marketVal = key === 'market' ? (d.marketHistory?.[period] || d.saleToList) : 0;
+                      const dynamicScore = key === 'market' ? scoreMarket(marketVal) : score;
+
                       return (
-                        <div key={d.name} className={`p-3 border-t border-r border-[#D4E8F0] hover:bg-[#E8F4FB] transition-colors flex flex-col justify-center gap-1 ${key === 'market' && isLiveMode ? 'bg-[#D4EDDE]/10' : ''}`}>
-                          <div className="flex items-center gap-2">
-                            <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
-                            {key === 'market' && isLiveMode && (
-                              <div className="w-2 h-2 rounded-full bg-[#1E5C38] animate-pulse shadow-sm shadow-[#1E5C38]/40" />
+                        <div 
+                          key={d.name} 
+                          className={`p-3 border-t border-r border-[#D4E8F0] hover:bg-[#E8F4FB] transition-all flex flex-col justify-center gap-1 relative ${key === 'market' && isLiveMode ? 'bg-[#D4EDDE]/10' : ''} ${isExpandable ? 'cursor-pointer group/card' : ''}`}
+                          onClick={() => {
+                            if (isExpandable) {
+                              setExpandedCard(isExpanded ? null : `${d.name}-${key}`);
+                            }
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
+                              {key === 'market' && isLiveMode && (
+                                <div className="w-2 h-2 rounded-full bg-[#1E5C38] animate-pulse shadow-sm shadow-[#1E5C38]/40" />
+                              )}
+                            </div>
+                            {isExpandable && (
+                              <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                                <ChevronRight size={14} className="text-[#0471A4] opacity-40 group-hover/card:opacity-100" />
+                              </div>
                             )}
                           </div>
-                          <div className="text-[12px] text-[#6E8A96] font-mono leading-tight">{subDisplay}</div>
-                          <div className="h-1 bg-[#D4E8F0] rounded-full overflow-hidden mt-0.5">
-                            <div className="h-full transition-all duration-500" style={{ width: `${score}%`, backgroundColor: barColor(score) }}></div>
+                          
+                          <div className="text-[12px] text-[#6E8A96] font-mono leading-tight flex items-center justify-between">
+                            <span>{subDisplay}</span>
+                            {isExpandable && !isExpanded && (
+                              <span className="text-[9px] font-bold text-[#0471A4] uppercase tracking-tighter opacity-0 group-hover/card:opacity-100 transition-opacity">
+                                {key === 'localScene' ? 'What\'s hot' : 'History'}
+                              </span>
+                            )}
                           </div>
-                          {tag && <span className={`text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full w-fit font-mono ${tagClass(score)}`}>{tag}</span>}
+
+                          <div className="h-1 bg-[#D4E8F0] rounded-full overflow-hidden mt-0.5">
+                            <div className="h-full transition-all duration-500" style={{ width: `${dynamicScore}%`, backgroundColor: barColor(dynamicScore) }}></div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between gap-2">
+                            {tag && <span className={`text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full w-fit font-mono ${tagClass(dynamicScore)}`}>{tag}</span>}
+                          </div>
+
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden mt-2 pt-2 border-t border-[#D4E8F0]"
+                              >
+                                {key === 'localScene' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Hottest Lately:</div>
+                                    <div className="space-y-2">
+                                      {(d.hottestThings && d.hottestThings.length > 0) ? (
+                                        d.hottestThings.map((thing: string, idx: number) => (
+                                          <div key={idx} className="flex items-start gap-2 group/item">
+                                            <div className="w-5 h-5 rounded-lg bg-[#0471A4]/10 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:bg-[#0471A4]/20 transition-colors">
+                                              <Zap size={10} className="text-[#0471A4]" />
+                                            </div>
+                                            <span className="text-[11px] text-[#3D4347] leading-tight font-medium">{thing}</span>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div className="text-[11px] text-[#6E8A96] italic">New spots opening soon...</div>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                                {key === 'market' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Select Period:</div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {['90d', '6m', '1y', '3y', '5y'].map((p) => {
+                                        const isActive = (marketPeriods[d.name] || '90d') === p;
+                                        return (
+                                          <button
+                                            key={p}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setMarketPeriods(prev => ({ ...prev, [d.name]: p }));
+                                            }}
+                                            className={`px-2 py-1 rounded-full text-[10px] font-bold font-mono transition-all ${
+                                              isActive 
+                                                ? 'bg-[#0471A4] text-white shadow-sm' 
+                                                : 'bg-[#F0F7FA] text-[#6E8A96] hover:bg-[#D4E8F0]'
+                                            }`}
+                                          >
+                                            {p.toUpperCase()}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       );
                     })}
@@ -962,26 +1080,111 @@ export default function Homebase() {
                       else if (key === 'localScene') { valDisplay = `${d.localSceneRaw}/100`; subDisplay = 'Local Scene Score'; }
                       else if (key === 'walk') { valDisplay = `${d.walkRaw}/100`; subDisplay = d.walkLabel; }
                       else if (key === 'edu') { valDisplay = `${d.eduPct}%`; subDisplay = 'Bachelor\'s Degree+'; }
-                      else if (key === 'market') { valDisplay = `${d.saleToList}%`; subDisplay = 'Sale-to-list'; }
+                      else if (key === 'market') { 
+                        const period = marketPeriods[d.name] || '90d';
+                        const marketVal = d.marketHistory?.[period] || d.saleToList;
+                        valDisplay = `${marketVal}%`; 
+                        subDisplay = `Sale-to-list (${period})`; 
+                      }
+
+                      const isExpandable = key === 'localScene' || key === 'market';
+                      const isExpanded = expandedCard === `${d.name}-${key}-mobile`;
+                      
+                      // Calculate dynamic score for Market Heat period selection
+                      const period = marketPeriods[d.name] || '90d';
+                      const marketVal = key === 'market' ? (d.marketHistory?.[period] || d.saleToList) : 0;
+                      const dynamicScore = key === 'market' ? scoreMarket(marketVal) : score;
 
                       return (
-                        <div key={key} className="p-4 flex items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="font-mono text-[10px] text-[#6E8A96] uppercase tracking-widest">#{rank + 1}</span>
-                              <span className="font-bold text-[13px] text-[#3D4347] uppercase tracking-tight">{dim.label}</span>
+                        <div 
+                          key={key} 
+                          className={`p-4 flex flex-col gap-2 transition-colors ${isExpandable ? 'cursor-pointer hover:bg-[#F7FBFF]' : ''}`}
+                          onClick={() => {
+                            if (isExpandable) {
+                              setExpandedCard(isExpanded ? null : `${d.name}-${key}-mobile`);
+                            }
+                          }}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="font-mono text-[10px] text-[#6E8A96] uppercase tracking-widest">#{rank + 1}</span>
+                                <span className="font-bold text-[13px] text-[#3D4347] uppercase tracking-tight">{dim.label}</span>
+                                {isExpandable && (
+                                  <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                                    <ChevronRight size={12} className="text-[#0471A4]" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
+                              <div className="text-[11px] text-[#6E8A96] font-mono">{subDisplay}</div>
                             </div>
-                            <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
-                            <div className="text-[11px] text-[#6E8A96] font-mono">{subDisplay}</div>
-                          </div>
-                          <div className="w-24 flex flex-col items-end gap-1.5">
-                            <div className="w-full h-1.5 bg-[#D4E8F0] rounded-full overflow-hidden">
-                              <div className="h-full" style={{ width: `${score}%`, backgroundColor: barColor(score) }}></div>
+                            <div className="w-24 flex flex-col items-end gap-1.5">
+                              <div className="w-full h-1.5 bg-[#D4E8F0] rounded-full overflow-hidden">
+                                <div className="h-full" style={{ width: `${dynamicScore}%`, backgroundColor: barColor(dynamicScore) }}></div>
+                              </div>
+                              <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full font-mono whitespace-nowrap ${tagClass(dynamicScore)}`}>
+                                {tagLabel(dynamicScore, 'High', 'Low')}
+                              </span>
                             </div>
-                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full font-mono whitespace-nowrap ${tagClass(score)}`}>
-                              {tagLabel(score, 'High', 'Low')}
-                            </span>
                           </div>
+
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden mt-1 pt-3 border-t border-[#D4E8F0]"
+                              >
+                                {key === 'localScene' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Hottest Lately:</div>
+                                    <div className="space-y-2">
+                                      {(d.hottestThings && d.hottestThings.length > 0) ? (
+                                        d.hottestThings.map((thing: string, idx: number) => (
+                                          <div key={idx} className="flex items-start gap-2 group/item">
+                                            <div className="w-5 h-5 rounded-lg bg-[#0471A4]/10 flex items-center justify-center shrink-0 mt-0.5">
+                                              <Zap size={10} className="text-[#0471A4]" />
+                                            </div>
+                                            <span className="text-[12px] text-[#3D4347] leading-tight font-medium">{thing}</span>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div className="text-[12px] text-[#6E8A96] italic">New spots opening soon...</div>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                                {key === 'market' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Select Period:</div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {['90d', '6m', '1y', '3y', '5y'].map((p) => {
+                                        const isActive = (marketPeriods[d.name] || '90d') === p;
+                                        return (
+                                          <button
+                                            key={p}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setMarketPeriods(prev => ({ ...prev, [d.name]: p }));
+                                            }}
+                                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold font-mono transition-all ${
+                                              isActive 
+                                                ? 'bg-[#0471A4] text-white shadow-sm' 
+                                                : 'bg-[#F0F7FA] text-[#6E8A96]'
+                                            }`}
+                                          >
+                                            {p.toUpperCase()}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       );
                     })}

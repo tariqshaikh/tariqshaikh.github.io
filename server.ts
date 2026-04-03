@@ -30,6 +30,47 @@ async function startServer() {
     });
   });
 
+  // API Route for Town Data
+  app.get("/api/towns", (req, res) => {
+    const enrichedData = { ...NJ_ENRICHED };
+    
+    // Ensure every town has some hottestThings and marketHistory for the demo
+    Object.keys(enrichedData).forEach(town => {
+      if (!enrichedData[town].hottestThings) {
+        enrichedData[town].hottestThings = [
+          "Local Farmers Market",
+          "Historic Downtown Walk",
+          "Community Park Events",
+          "Seasonal Town Festivals",
+          "Highly-rated Local Bistro"
+        ];
+      }
+      if (!enrichedData[town].marketHistory) {
+        const base = enrichedData[town].saleToList || 100;
+        enrichedData[town].marketHistory = {
+          '90d': base,
+          '6m': base - 1,
+          '1y': base - 3,
+          '3y': base - 8,
+          '5y': base - 12
+        };
+      }
+    });
+    
+    res.json(enrichedData);
+  });
+
+  // API Route for Hottest Things (specific town)
+  app.get("/api/hottest-things/:town", (req, res) => {
+    const town = req.params.town;
+    const data = NJ_ENRICHED[town];
+    if (data && data.hottestThings) {
+      res.json({ town, hottestThings: data.hottestThings });
+    } else {
+      res.status(404).json({ error: "Town not found or no data available" });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
