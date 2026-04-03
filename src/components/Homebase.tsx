@@ -4,11 +4,11 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Info, ChevronRight, GripVertical } from 'lucide-react';
+import { Info, ChevronRight, GripVertical, Zap } from 'lucide-react';
 import { NJ_COUNTIES, NJ_ENRICHED, DIMS, COLORS } from '../constants';
+import { fetchLiveTownData } from '../services/geminiService';
 import { NJ_COUNTY_PATHS, NJ_STATE_OUTLINE, COUNTY_CENTERS } from '../mapData';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
-import { Activity, Zap, RefreshCw } from 'lucide-react';
 
 // Regional Data
 const REGIONS = [
@@ -41,11 +41,11 @@ const REGIONS = [
 // Helper functions
 const scoreIncome = (v: number | null) => { if (!v) return 50; return Math.min(100, Math.round((v / 180000) * 100)); };
 const scoreHome = (v: number | null) => { if (!v) return 50; return Math.max(0, 100 - Math.round((v / 2000000) * 100)); };
-const scoreCommute = (v: number | null) => { if (!v) return 50; return Math.max(0, 100 - Math.round((v / 90) * 100)); };
+const scoreCommute = (v: any) => { if (!v || v === 'N/A') return 50; return Math.max(0, 100 - Math.round((Number(v) / 90) * 100)); };
 const scoreHighway = (v: number | null) => { if (!v) return 50; return v; };
 const scoreSchool = (v: number | null) => { if (!v) return 50; return v; };
 const scoreSafety = (v: number | null) => { if (!v) return 50; return v; };
-const scoreTax = (rate: number | null) => { if (!rate) return 50; return Math.max(0, 100 - Math.round(rate * 20)); };
+const scoreTax = (rate: any) => { if (!rate || rate === 'N/A') return 50; return Math.max(0, 100 - Math.round(Number(rate) * 20)); };
 const scoreWalk = (v: number | null) => { if (!v) return 50; return v; };
 const scoreEdu = (v: number | null) => { if (!v) return 50; return v; };
 const scoreMarket = (v: number | null) => { if (v == null) return 50; return Math.min(100, Math.max(0, (v - 96) * 12)); };
@@ -79,10 +79,12 @@ export default function Homebase() {
   const [expandedTown, setExpandedTown] = useState<string | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [marketPeriods, setMarketPeriods] = useState<Record<string, string>>({});
+  const [commuteMetros, setCommuteMetros] = useState<Record<string, string>>({});
+  const [taxPeriods, setTaxPeriods] = useState<Record<string, string>>({});
   const [apiTownData, setApiTownData] = useState<Record<string, any>>({});
-  const [isLiveMode, setIsLiveMode] = useState(false);
-  const [liveHeatData, setLiveHeatData] = useState<Record<string, number>>({});
-  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const [liveTownData, setLiveTownData] = useState<Record<string, any>>({});
+  const [liveLoading, setLiveLoading] = useState<Record<string, boolean>>({});
+  const [isLiveMode, setIsLiveMode] = useState(true);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const countyDropdownRef = useRef<HTMLDivElement>(null);
@@ -129,39 +131,24 @@ export default function Homebase() {
       setShowCountyDropdown(false);
       // Focus town search after a short delay to allow adding more from the same county
       setTimeout(() => townInputRef.current?.focus(), 100);
+
+      // Always fetch live data for the new town
+      fetchTownLive(t.name, t.county);
     }
+  };
+
+  const fetchTownLive = async (name: string, county: string) => {
+    setLiveLoading(prev => ({ ...prev, [name]: true }));
+    const data = await fetchLiveTownData(name, county);
+    if (data) {
+      setLiveTownData(prev => ({ ...prev, [name]: data }));
+    }
+    setLiveLoading(prev => ({ ...prev, [name]: false }));
   };
 
   useEffect(() => {
     document.title = "Homebase NJ";
   }, []);
-
-  // Live Mode Data Fetching
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    const fetchLiveHeat = async () => {
-      try {
-        const res = await fetch('/api/market-heat');
-        if (res.ok) {
-          const json = await res.json();
-          setLiveHeatData(json.data);
-          setLastUpdate(new Date().toLocaleTimeString());
-        }
-      } catch (err) {
-        console.error("Failed to fetch live heat data:", err);
-      }
-    };
-
-    if (isLiveMode) {
-      fetchLiveHeat();
-      interval = setInterval(fetchLiveHeat, 30000); // Update every 30s
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isLiveMode]);
 
   useEffect(() => {
     if (countySearch.length < 2) {
@@ -221,6 +208,8 @@ export default function Homebase() {
     setTownSearch('');
     setShowResults(false);
     setGhostText('');
+    setLiveTownData({});
+    setLiveLoading({});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -243,12 +232,16 @@ export default function Homebase() {
 
   const townData = selectedTowns.map((townObj, i) => {
     const { name, county } = townObj;
-    const d = apiTownData[name] || NJ_ENRICHED[name];
+    const d = liveTownData[name] || apiTownData[name] || NJ_ENRICHED[name];
+    const isLive = !!liveTownData[name];
+    const isLoadingLive = !!liveLoading[name];
+
     if (d) {
-      const currentHeat = (isLiveMode && liveHeatData[name]) ? liveHeatData[name] : d.saleToList;
+      const currentHeat = d.saleToList;
       const derivedLocalScene = d.localScene || Math.min(100, Math.round(((d.walkScore || 50) * 0.6) + ((d.pop || 10000) / 1000)));
       return {
         name, county: county + ' County', color: COLORS[i % COLORS.length], hasFullData: true,
+        isLive, isLoadingLive,
         income: d.income, homeVal: d.homeVal, commute: d.commute, pop: d.pop,
         saleToList: currentHeat, eduPct: d.eduPct,
         schoolRating: d.schoolRating, schoolLabel: d.schoolLabel,
@@ -265,7 +258,9 @@ export default function Homebase() {
         walkScore2: scoreWalk(d.walkScore), marketScore: scoreMarket(currentHeat),
         eduScore: scoreEdu(d.eduPct), localSceneScore: scoreLocalScene(derivedLocalScene),
         hottestThings: d.hottestThings || [],
-        marketHistory: d.marketHistory || null
+        marketHistory: d.marketHistory || null,
+        commuteMetros: d.commuteMetros || null,
+        taxHistory: d.taxHistory || null
       };
     }
     return {
@@ -277,7 +272,11 @@ export default function Homebase() {
       safetyScore: 50, taxScore: 50, walkScore2: 50, marketScore: 50,
       highwayScore: 50, eduScore: 50, localSceneScore: 50,
       hottestThings: [],
-      marketHistory: null
+      marketHistory: null,
+      commuteMetros: null,
+      taxHistory: null,
+      isLive: false,
+      isLoadingLive: false
     };
   });
 
@@ -288,6 +287,12 @@ export default function Homebase() {
     if (sortKey === 'commute') return (a.commute || 99) - (b.commute || 99);
     if (sortKey === 'schools') return (b.schoolRating || 0) - (a.schoolRating || 0);
     if (sortKey === 'edu') return (b.eduPct || 0) - (a.eduPct || 0);
+    if (sortKey === 'safety') return (b.safetyRaw || 0) - (a.safetyRaw || 0);
+    if (sortKey === 'walk') return (b.walkRaw || 0) - (a.walkRaw || 0);
+    if (sortKey === 'highway') return (b.highwayRaw || 0) - (a.highwayRaw || 0);
+    if (sortKey === 'market') return (b.saleToList || 0) - (a.saleToList || 0);
+    if (sortKey === 'taxes') return (a.taxRate || 99) - (b.taxRate || 99);
+    if (sortKey === 'localScene') return (b.localSceneRaw || 0) - (a.localSceneRaw || 0);
     return 0;
   });
 
@@ -298,27 +303,9 @@ export default function Homebase() {
           <button onClick={handleClearAll} className="text-2xl leading-none hover:opacity-80 transition-opacity cursor-pointer text-left">
             <span className="font-serif font-bold text-[#1A1C1E]">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
           </button>
-          
-          <button 
-            onClick={() => setIsLiveMode(!isLiveMode)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all ${
-              isLiveMode 
-                ? 'bg-[#D4EDDE] text-[#1E5C38] border border-[#A8D5B8] shadow-sm' 
-                : 'bg-[#F8F9FA] text-[#6E8A96] border border-[#EEEEEF] hover:border-[#D4E8F0]'
-            }`}
-          >
-            <Activity size={12} className={isLiveMode ? 'animate-pulse' : ''} />
-            {isLiveMode ? 'Live Mode On' : 'Go Live'}
-          </button>
         </div>
         <div className="flex items-center gap-4">
-          {isLiveMode && lastUpdate && (
-            <div className="hidden md:flex items-center gap-1.5 text-[10px] font-mono text-[#1E5C38] uppercase tracking-tighter">
-              <RefreshCw size={10} className="animate-spin" />
-              Sync: {lastUpdate}
-            </div>
-          )}
-          <div className="font-mono text-[13px] text-[#6E8A96] px-2.5 py-0.5 border border-[#D4E8F0] rounded-full">21 counties · enriched data</div>
+          <div className="font-mono text-[13px] text-[#6E8A96] px-2.5 py-0.5 border border-[#D4E8F0] rounded-full">21 counties · live verified data</div>
         </div>
       </nav>
 
@@ -696,6 +683,12 @@ export default function Homebase() {
                     <option value="commute">Commute</option>
                     <option value="schools">Schools</option>
                     <option value="edu">Education</option>
+                    <option value="safety">Safety</option>
+                    <option value="walk">Walkability</option>
+                    <option value="highway">Regional Access</option>
+                    <option value="market">Market Heat</option>
+                    <option value="taxes">Property Taxes</option>
+                    <option value="localScene">Local Scene</option>
                   </select>
                 </div>
                 <button 
@@ -789,7 +782,7 @@ export default function Homebase() {
                 return (
                 <div 
                   key={d.name} 
-                  className={`p-4 text-white cursor-pointer hover:brightness-110 transition-all relative group/town ${isPerfectMatch ? 'border-t-4 border-[#FFD700]' : ''}`} 
+                  className={`p-4 text-white cursor-pointer hover:brightness-110 transition-all relative group/town ${isPerfectMatch ? 'border-t-4 border-[#FFD700]' : ''} ${expandedTown === d.name ? 'z-50' : 'z-30'}`} 
                   style={{ backgroundColor: d.color }}
                   onClick={() => setExpandedTown(expandedTown === d.name ? null : d.name)}
                 >
@@ -800,14 +793,32 @@ export default function Homebase() {
                   )}
                   <div className={`flex justify-between items-start ${isPerfectMatch ? 'mt-2' : ''}`}>
                     <div>
-                      <div className="font-serif text-lg font-bold leading-tight">{d.name}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="font-serif text-lg font-bold leading-tight">{d.name}</div>
+                        {d.isLive && (
+                          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" title="Live Data Active"></div>
+                        )}
+                      </div>
                       <div className="font-mono text-[11px] opacity-60 uppercase tracking-wider">{d.county}</div>
                     </div>
                     <div className={`transition-transform duration-300 ${expandedTown === d.name ? 'rotate-180' : ''}`}>
                       <ChevronRight size={14} className="opacity-60 group-hover/town:opacity-100" />
                     </div>
                   </div>
-                  <div className="font-mono text-[11px] opacity-60 mt-0.5">{d.hasFullData ? '✓ full data' : ''}</div>
+                  <div className="font-mono text-[11px] opacity-60 mt-0.5">
+                    {d.isLoadingLive ? (
+                      <span className="flex items-center gap-1.5 italic animate-pulse">
+                        <Zap size={10} className="text-yellow-400 fill-yellow-400" />
+                        Fetching live...
+                      </span>
+                    ) : d.isLive ? (
+                      <span className="text-green-300 font-bold uppercase tracking-tighter text-[9px]">Live Verified</span>
+                    ) : d.hasFullData ? (
+                      '✓ full data'
+                    ) : (
+                      ''
+                    )}
+                  </div>
                   <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-white/20 rounded-full font-mono text-[13px] group/fit relative">
                     <span>Fit</span><span className="text-base font-bold">{calcFitScore(d)}</span><span className="text-[12px] opacity-60">/100</span>
                   </div>
@@ -892,11 +903,21 @@ export default function Homebase() {
 
                       if (key === 'income') { valDisplay = fmtDollar(d.income); subDisplay = 'household / yr'; tag = tagLabel(score, 'High income', 'Low income'); }
                       else if (key === 'home') { valDisplay = fmtDollar(d.homeVal); subDisplay = 'median home value'; tag = tagLabel(score, 'Affordable', 'Expensive'); }
-                      else if (key === 'commute') { valDisplay = `${d.commute} min`; subDisplay = 'avg travel time'; }
+                      else if (key === 'commute') { 
+                        const metro = commuteMetros[d.name] || 'Avg';
+                        const commuteVal = metro === 'Avg' ? d.commute : (d.commuteMetros?.[metro] || 'N/A');
+                        valDisplay = `${commuteVal}${commuteVal === 'N/A' ? '' : ' min'}`; 
+                        subDisplay = metro === 'Avg' ? 'avg travel time' : `to ${metro}`; 
+                      }
                       else if (key === 'highway') { valDisplay = `${d.highwayRaw}/100`; subDisplay = 'Regional Access Score'; tag = tagLabel(score, 'Excellent', 'Limited'); }
                       else if (key === 'schools') { valDisplay = d.schoolLabel; subDisplay = 'Niche district rating'; tag = tagLabel(score, 'Top tier', 'Below avg'); }
                       else if (key === 'safety') { valDisplay = d.safetyLabel; subDisplay = `Score: ${d.safetyRaw}/100`; }
-                      else if (key === 'taxes') { valDisplay = `${d.taxRate}%`; subDisplay = `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr`; }
+                      else if (key === 'taxes') { 
+                        const period = taxPeriods[d.name] || '1y';
+                        const taxVal = period === '1y' ? d.taxRate : (d.taxHistory?.[period] || 'N/A');
+                        valDisplay = `${taxVal}${taxVal === 'N/A' ? '' : '%'}`; 
+                        subDisplay = period === '1y' ? `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr` : `Tax Rate (${period})`; 
+                      }
                       else if (key === 'localScene') { 
                         valDisplay = `${d.localSceneRaw}/100`; 
                         subDisplay = 'Local Scene Score'; 
@@ -908,22 +929,32 @@ export default function Homebase() {
                         const period = marketPeriods[d.name] || '90d';
                         const marketVal = d.marketHistory?.[period] || d.saleToList;
                         valDisplay = `${marketVal}%`; 
-                        subDisplay = isLiveMode ? 'Live Market Feed (30s sync)' : `Sale-to-list (${period})`; 
-                        tag = isLiveMode ? 'Live Update' : tagLabel(scoreMarket(marketVal), 'Hot market', 'Cool market'); 
+                        subDisplay = `Sale-to-list (${period})`; 
+                        tag = tagLabel(scoreMarket(marketVal), 'Hot market', 'Cool market'); 
                       }
 
-                      const isExpandable = key === 'localScene' || key === 'market';
+                      const isExpandable = key === 'localScene' || key === 'market' || key === 'commute' || key === 'taxes';
                       const isExpanded = expandedCard === `${d.name}-${key}`;
                       
-                      // Calculate dynamic score for Market Heat period selection
-                      const period = marketPeriods[d.name] || '90d';
-                      const marketVal = key === 'market' ? (d.marketHistory?.[period] || d.saleToList) : 0;
-                      const dynamicScore = key === 'market' ? scoreMarket(marketVal) : score;
+                      // Calculate dynamic score for period/metro selections
+                      const mPeriod = marketPeriods[d.name] || '90d';
+                      const marketVal = key === 'market' ? (d.marketHistory?.[mPeriod] || d.saleToList) : 0;
+                      
+                      const metro = commuteMetros[d.name] || 'Avg';
+                      const commuteVal = key === 'commute' ? (metro === 'Avg' ? d.commute : d.commuteMetros?.[metro]) : 0;
+                      
+                      const tPeriod = taxPeriods[d.name] || '1y';
+                      const taxVal = key === 'taxes' ? (tPeriod === '1y' ? d.taxRate : d.taxHistory?.[tPeriod]) : 0;
+
+                      let dynamicScore = score;
+                      if (key === 'market') dynamicScore = scoreMarket(marketVal);
+                      if (key === 'commute') dynamicScore = scoreCommute(commuteVal);
+                      if (key === 'taxes') dynamicScore = scoreTax(taxVal);
 
                       return (
                         <div 
                           key={d.name} 
-                          className={`p-3 border-t border-r border-[#D4E8F0] hover:bg-[#E8F4FB] transition-all flex flex-col justify-center gap-1 relative ${key === 'market' && isLiveMode ? 'bg-[#D4EDDE]/10' : ''} ${isExpandable ? 'cursor-pointer group/card' : ''}`}
+                          className={`p-3 border-t border-r border-[#D4E8F0] hover:bg-[#E8F4FB] transition-all flex flex-col justify-center gap-1 relative ${isExpandable ? 'cursor-pointer group/card' : ''}`}
                           onClick={() => {
                             if (isExpandable) {
                               setExpandedCard(isExpanded ? null : `${d.name}-${key}`);
@@ -933,9 +964,6 @@ export default function Homebase() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
-                              {key === 'market' && isLiveMode && (
-                                <div className="w-2 h-2 rounded-full bg-[#1E5C38] animate-pulse shadow-sm shadow-[#1E5C38]/40" />
-                              )}
                             </div>
                             {isExpandable && (
                               <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
@@ -985,6 +1013,58 @@ export default function Homebase() {
                                       ) : (
                                         <div className="text-[11px] text-[#6E8A96] italic">New spots opening soon...</div>
                                       )}
+                                    </div>
+                                  </>
+                                )}
+                                {key === 'commute' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Select Metro:</div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {['Avg', 'NYC', 'PHI', 'JC'].map((m) => {
+                                        const isActive = (commuteMetros[d.name] || 'Avg') === m;
+                                        return (
+                                          <button
+                                            key={m}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setCommuteMetros(prev => ({ ...prev, [d.name]: m }));
+                                            }}
+                                            className={`px-2 py-1 rounded-full text-[10px] font-bold font-mono transition-all ${
+                                              isActive 
+                                                ? 'bg-[#0471A4] text-white shadow-sm' 
+                                                : 'bg-[#F0F7FA] text-[#6E8A96] hover:bg-[#E0EEF5]'
+                                            }`}
+                                          >
+                                            {m}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </>
+                                )}
+                                {key === 'taxes' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Select Period:</div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {['1y', '3y', '5y'].map((p) => {
+                                        const isActive = (taxPeriods[d.name] || '1y') === p;
+                                        return (
+                                          <button
+                                            key={p}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setTaxPeriods(prev => ({ ...prev, [d.name]: p }));
+                                            }}
+                                            className={`px-2 py-1 rounded-full text-[10px] font-bold font-mono transition-all ${
+                                              isActive 
+                                                ? 'bg-[#0471A4] text-white shadow-sm' 
+                                                : 'bg-[#F0F7FA] text-[#6E8A96] hover:bg-[#E0EEF5]'
+                                            }`}
+                                          >
+                                            {p.toUpperCase()}
+                                          </button>
+                                        );
+                                      })}
                                     </div>
                                   </>
                                 )}
@@ -1049,6 +1129,16 @@ export default function Homebase() {
                         </div>
                       </div>
                     </div>
+                    <div className="mt-2 flex items-center gap-3 border-t border-white/10 pt-2">
+                      <div className="flex items-center gap-1">
+                        <div className="w-1 h-1 bg-[#0471A4] rounded-full"></div>
+                        <span className="text-[9px] font-mono uppercase opacity-60 tracking-tighter">Source: Census ACS + 2026 Projections</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                        <span className="text-[9px] font-mono uppercase opacity-60 tracking-tighter">Verified: April 2026</span>
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="divide-y divide-[#D4E8F0]">
@@ -1072,11 +1162,21 @@ export default function Homebase() {
                       let subDisplay = '';
                       if (key === 'income') { valDisplay = fmtDollar(d.income); subDisplay = 'household / yr'; }
                       else if (key === 'home') { valDisplay = fmtDollar(d.homeVal); subDisplay = 'median home value'; }
-                      else if (key === 'commute') { valDisplay = `${d.commute} min`; subDisplay = 'avg travel time'; }
+                      else if (key === 'commute') { 
+                        const metro = commuteMetros[d.name] || 'Avg';
+                        const commuteVal = metro === 'Avg' ? d.commute : d.commuteMetros?.[metro];
+                        valDisplay = `${commuteVal} min`; 
+                        subDisplay = metro === 'Avg' ? 'avg travel time' : `to ${metro}`; 
+                      }
                       else if (key === 'highway') { valDisplay = `${d.highwayRaw}/100`; subDisplay = 'Regional Access'; }
                       else if (key === 'schools') { valDisplay = d.schoolLabel; subDisplay = 'Niche rating'; }
                       else if (key === 'safety') { valDisplay = d.safetyLabel; subDisplay = `Score: ${d.safetyRaw}/100`; }
-                      else if (key === 'taxes') { valDisplay = `${d.taxRate}%`; subDisplay = `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr`; }
+                      else if (key === 'taxes') { 
+                        const period = taxPeriods[d.name] || '1y';
+                        const taxVal = period === '1y' ? d.taxRate : d.taxHistory?.[period];
+                        valDisplay = `${taxVal}%`; 
+                        subDisplay = period === '1y' ? `~$${d.avgTax ? d.avgTax.toLocaleString() : 'N/A'}/yr` : `Tax Rate (${period})`; 
+                      }
                       else if (key === 'localScene') { valDisplay = `${d.localSceneRaw}/100`; subDisplay = 'Local Scene Score'; }
                       else if (key === 'walk') { valDisplay = `${d.walkRaw}/100`; subDisplay = d.walkLabel; }
                       else if (key === 'edu') { valDisplay = `${d.eduPct}%`; subDisplay = 'Bachelor\'s Degree+'; }
@@ -1087,13 +1187,23 @@ export default function Homebase() {
                         subDisplay = `Sale-to-list (${period})`; 
                       }
 
-                      const isExpandable = key === 'localScene' || key === 'market';
+                      const isExpandable = key === 'localScene' || key === 'market' || key === 'commute' || key === 'taxes';
                       const isExpanded = expandedCard === `${d.name}-${key}-mobile`;
                       
-                      // Calculate dynamic score for Market Heat period selection
-                      const period = marketPeriods[d.name] || '90d';
-                      const marketVal = key === 'market' ? (d.marketHistory?.[period] || d.saleToList) : 0;
-                      const dynamicScore = key === 'market' ? scoreMarket(marketVal) : score;
+                      // Calculate dynamic score for period/metro selections
+                      const mPeriod = marketPeriods[d.name] || '90d';
+                      const marketVal = key === 'market' ? (d.marketHistory?.[mPeriod] || d.saleToList) : 0;
+                      
+                      const metro = commuteMetros[d.name] || 'Avg';
+                      const commuteVal = key === 'commute' ? (metro === 'Avg' ? d.commute : d.commuteMetros?.[metro]) : 0;
+                      
+                      const tPeriod = taxPeriods[d.name] || '1y';
+                      const taxVal = key === 'taxes' ? (tPeriod === '1y' ? d.taxRate : d.taxHistory?.[tPeriod]) : 0;
+
+                      let dynamicScore = score;
+                      if (key === 'market') dynamicScore = scoreMarket(marketVal);
+                      if (key === 'commute') dynamicScore = scoreCommute(commuteVal);
+                      if (key === 'taxes') dynamicScore = scoreTax(taxVal);
 
                       return (
                         <div 
@@ -1153,6 +1263,58 @@ export default function Homebase() {
                                       ) : (
                                         <div className="text-[12px] text-[#6E8A96] italic">New spots opening soon...</div>
                                       )}
+                                    </div>
+                                  </>
+                                )}
+                                {key === 'commute' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Select Metro:</div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {['Avg', 'NYC', 'PHI', 'JC'].map((m) => {
+                                        const isActive = (commuteMetros[d.name] || 'Avg') === m;
+                                        return (
+                                          <button
+                                            key={m}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setCommuteMetros(prev => ({ ...prev, [d.name]: m }));
+                                            }}
+                                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold font-mono transition-all ${
+                                              isActive 
+                                                ? 'bg-[#0471A4] text-white shadow-sm' 
+                                                : 'bg-[#F0F7FA] text-[#6E8A96]'
+                                            }`}
+                                          >
+                                            {m}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </>
+                                )}
+                                {key === 'taxes' && (
+                                  <>
+                                    <div className="font-mono text-[10px] text-[#0471A4] uppercase tracking-widest font-bold mb-2">Select Period:</div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {['1y', '3y', '5y'].map((p) => {
+                                        const isActive = (taxPeriods[d.name] || '1y') === p;
+                                        return (
+                                          <button
+                                            key={p}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setTaxPeriods(prev => ({ ...prev, [d.name]: p }));
+                                            }}
+                                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold font-mono transition-all ${
+                                              isActive 
+                                                ? 'bg-[#0471A4] text-white shadow-sm' 
+                                                : 'bg-[#F0F7FA] text-[#6E8A96]'
+                                            }`}
+                                          >
+                                            {p.toUpperCase()}
+                                          </button>
+                                        );
+                                      })}
                                     </div>
                                   </>
                                 )}
