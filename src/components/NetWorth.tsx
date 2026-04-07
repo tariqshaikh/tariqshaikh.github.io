@@ -290,7 +290,7 @@ const BalanceInput = React.memo(({ value, onUpdate, symbol = '$' }: { value: num
 
   return (
     <div className="flex items-center justify-end">
-      <span className="text-[#9CA3AF] text-xs mr-1.5 font-mono">{symbol}</span>
+      <span className="text-[#8C8670] text-xs mr-1.5 font-mono">{symbol}</span>
       <input
         type="text"
         value={localValue}
@@ -298,7 +298,7 @@ const BalanceInput = React.memo(({ value, onUpdate, symbol = '$' }: { value: num
         onFocus={() => setIsFocused(true)}
         onBlur={handleBlur}
         onKeyDown={handleEnterKey}
-        className="ledger-input bg-transparent text-base font-mono font-bold text-[#111827] text-right focus:outline-none border-b border-transparent focus:border-[#3B82F6] transition-colors w-32"
+        className="ledger-input bg-transparent text-base font-mono font-bold text-[#2C3338] text-right focus:outline-none border-b border-transparent focus:border-[#C5A059] transition-colors w-32"
       />
     </div>
   );
@@ -351,7 +351,7 @@ const LedgerRow = React.memo(({
   }, [localInstitution, item.id, item.institution, updateItem]);
 
   return (
-    <tr className="hover:bg-[#F9FAFB] group transition-colors">
+    <tr className="hover:bg-[#E8E4D0]/50 group transition-colors">
       <td className="px-6 py-4">
         <input
           type="text"
@@ -359,7 +359,7 @@ const LedgerRow = React.memo(({
           onChange={(e) => setLocalName(e.target.value)}
           onKeyDown={handleEnterKey}
           placeholder="e.g. 401k"
-          className="ledger-input w-full bg-transparent text-sm text-[#111827] font-semibold focus:outline-none border-b border-transparent focus:border-[#3B82F6] transition-colors"
+          className="ledger-input w-full bg-transparent text-sm text-[#2C3338] font-semibold focus:outline-none border-b border-transparent focus:border-[#C5A059] transition-colors"
         />
       </td>
       <td className="px-6 py-4">
@@ -369,12 +369,12 @@ const LedgerRow = React.memo(({
           onChange={(e) => setLocalInstitution(e.target.value)}
           onKeyDown={handleEnterKey}
           placeholder={getInstitutionPlaceholder(sectionId)}
-          className="ledger-input w-full bg-transparent text-sm text-[#4B5563] focus:outline-none border-b border-transparent focus:border-[#3B82F6] transition-colors italic"
+          className="ledger-input w-full bg-transparent text-sm text-[#8C8670] focus:outline-none border-b border-transparent focus:border-[#C5A059] transition-colors italic"
         />
       </td>
       {item.isAsset && (
         <td className="px-6 py-4">
-          <div className="flex items-center space-x-1 bg-[#F3F4F6] p-0.5 rounded-full w-fit">
+          <div className="flex items-center space-x-1 bg-[#E8E4D0] p-0.5 rounded-full w-fit">
             {['Taxable', 'Deferred', 'Free'].map(status => {
               const fullStatus = status === 'Deferred' ? 'Tax-Deferred' : status === 'Free' ? 'Tax-Free' : 'Taxable';
               const isSelected = (item.taxStatus || 'Taxable') === fullStatus;
@@ -383,7 +383,7 @@ const LedgerRow = React.memo(({
                   key={status}
                   onClick={() => updateItem(item.id, 'taxStatus', fullStatus)}
                   className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full transition-colors ${
-                    isSelected ? 'bg-white text-[#111827] shadow-sm' : 'text-[#6B7280] hover:text-[#374151]'
+                    isSelected ? 'bg-[#FAF9F6] text-[#2C3338] shadow-sm' : 'text-[#8C8670] hover:text-[#2C3338]'
                   }`}
                 >
                   {status}
@@ -488,14 +488,14 @@ const LedgerSection = React.memo(({
   }, [deleteConfirm, deleteItem]);
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+    <div className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
       <div 
-        className="px-6 py-4 flex justify-between items-center border-b border-[#F3F4F6] cursor-pointer hover:bg-[#F9FAFB] transition-colors"
+        className="px-6 py-4 flex justify-between items-center border-b border-[#E8E4D0] cursor-pointer hover:bg-[#E8E4D0] transition-colors"
         style={{ borderLeft: `6px solid ${section.color}` }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-4 flex-1">
-          <div className="text-[#9CA3AF]">
+          <div className="text-[#8C8670]">
             {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
           </div>
           <div className="flex flex-col">
@@ -504,9 +504,9 @@ const LedgerSection = React.memo(({
               defaultValue={section.title}
               onClick={(e) => e.stopPropagation()}
               onBlur={(e) => updateSectionTitle(section.id, e.target.value)}
-              className="bg-transparent text-[#111827] font-serif font-bold text-xl focus:outline-none border-b border-transparent hover:border-[#D1D5DB] transition-colors w-full"
+              className="bg-transparent text-[#2C3338] font-serif font-bold text-xl focus:outline-none border-b border-transparent hover:border-[#8C8670] transition-colors w-full"
             />
-            <span className="text-[9px] font-mono text-[#9CA3AF] uppercase tracking-widest mt-0.5">
+            <span className="text-[9px] font-mono text-[#8C8670] uppercase tracking-widest mt-0.5">
               {section.isAsset ? 'Asset Category' : 'Liability Category'}
             </span>
           </div>
@@ -516,18 +516,18 @@ const LedgerSection = React.memo(({
             className="flex items-center gap-2 mr-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="text-[10px] font-mono text-[#6B7280] uppercase tracking-wider">
+            <span className="text-[10px] font-mono text-[#8C8670] uppercase tracking-wider">
               Include in Net Worth
             </span>
             <button
               onClick={() => updateSectionSetting(section.id, { includeInNetWorth: !section.includeInNetWorth })}
-              className={`w-8 h-4 rounded-full transition-colors relative ${section.includeInNetWorth ? 'bg-[#10B981]' : 'bg-[#D1D5DB]'}`}
+              className={`w-8 h-4 rounded-full transition-colors relative ${section.includeInNetWorth ? 'bg-[#10B981]' : 'bg-[#E8E4D0]'}`}
             >
               <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-transform ${section.includeInNetWorth ? 'translate-x-4.5 left-0' : 'translate-x-0.5 left-0'}`} />
             </button>
           </div>
           {!isExpanded && (
-            <span className="text-sm font-mono font-bold text-[#111827]">
+            <span className="text-sm font-mono font-bold text-[#2C3338]">
               {symbol}{formatCurrency(sectionItems.reduce((acc, i) => acc + i.value, 0), symbol)}
             </span>
           )}
@@ -553,17 +553,17 @@ const LedgerSection = React.memo(({
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse min-w-[600px]">
                   <thead>
-                    <tr className="border-b border-[#F3F4F6] bg-[#F9FAFB]/50">
-                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/4">Description</th>
-                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/4">Platform / Institution</th>
+                    <tr className="border-b border-[#E8E4D0] bg-[#E8E4D0]/50">
+                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#8C8670] uppercase tracking-widest w-1/4">Description</th>
+                      <th className="text-[10px] text-left px-6 py-3 font-mono text-[#8C8670] uppercase tracking-widest w-1/4">Platform / Institution</th>
                       {section.isAsset && (
-                        <th className="text-[10px] text-left px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest w-1/4">Tax Status</th>
+                        <th className="text-[10px] text-left px-6 py-3 font-mono text-[#8C8670] uppercase tracking-widest w-1/4">Tax Status</th>
                       )}
-                      <th className="text-[10px] text-right px-6 py-3 font-mono text-[#6B7280] uppercase tracking-widest">Balance</th>
+                      <th className="text-[10px] text-right px-6 py-3 font-mono text-[#8C8670] uppercase tracking-widest">Balance</th>
                       <th className="w-16"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#F3F4F6]">
+                  <tbody className="divide-y divide-[#E8E4D0]">
                     {sectionItems.map((item) => (
                       <LedgerRow 
                         key={item.id}
@@ -575,11 +575,11 @@ const LedgerSection = React.memo(({
                         symbol={symbol}
                       />
                     ))}
-                    <tr className="bg-[#F9FAFB] font-bold">
-                      <td colSpan={2} className="px-6 py-4 text-xs font-serif text-[#374151] uppercase tracking-[0.2em]">
+                    <tr className="bg-[#E8E4D0]/30 font-bold">
+                      <td colSpan={2} className="px-6 py-4 text-xs font-serif text-[#2C3338] uppercase tracking-[0.2em]">
                         {section.title} Total
                       </td>
-                      <td className="px-6 py-4 text-right text-lg font-mono text-[#111827]">
+                      <td className="px-6 py-4 text-right text-lg font-mono text-[#2C3338]">
                         {symbol}{formatCurrency(sectionItems.reduce((acc, i) => acc + i.value, 0), symbol)}
                       </td>
                       <td></td>
@@ -589,7 +589,7 @@ const LedgerSection = React.memo(({
               </div>
               <button
                 onClick={() => addItem(section.id)}
-                className="w-full py-4 flex items-center justify-center gap-3 text-xs font-mono font-bold text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-all border-t border-dashed border-[#E5E7EB]"
+                className="w-full py-4 flex items-center justify-center gap-3 text-xs font-mono font-bold text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-all border-t border-dashed border-[#E8E4D0]"
               >
                 <Plus size={16} />
                 ADD NEW {section.isAsset ? 'ASSET' : 'LIABILITY'} ENTRY
@@ -999,7 +999,7 @@ export default function NetWorth() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6] text-[#111827] font-sans selection:bg-[#3B82F6]/30">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#2C3338] font-sans selection:bg-[#C5A059]/30">
       {/* Flash Effect */}
       <AnimatePresence>
         {isFlashing && (
@@ -1007,7 +1007,7 @@ export default function NetWorth() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.3 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white z-[200] pointer-events-none"
+            className="fixed inset-0 bg-[#FAF9F6] z-[200] pointer-events-none"
           />
         )}
       </AnimatePresence>
@@ -1019,7 +1019,7 @@ export default function NetWorth() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-8 right-8 z-[100] bg-[#111827] text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border border-[#333333]"
+            className="fixed bottom-8 right-8 z-[100] bg-[#2C3338] text-[#FAF9F6] px-6 py-3 rounded-[2px] shadow-2xl flex items-center gap-3 border border-[#E8E4D0]"
           >
             <div className="w-2 h-2 bg-[#C5A059] rounded-full animate-pulse" />
             <span className="text-xs font-mono uppercase tracking-widest">Snapshot Recorded Successfully</span>
@@ -1030,24 +1030,24 @@ export default function NetWorth() {
       {/* Duplicate Toast Modal */}
       <AnimatePresence>
         {showDuplicateToast && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#2C3338]/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-[#1A1A1A] border border-[#333333] p-8 max-w-md w-full shadow-2xl rounded-[2px] relative"
+              className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-md w-full shadow-2xl rounded-[2px] relative"
             >
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 bg-[#8B0000]/20 flex items-center justify-center rounded-full text-[#FF4444] mb-2">
+                <div className="w-16 h-16 bg-[#8B0000]/10 flex items-center justify-center rounded-full text-[#8B0000] mb-2">
                   <AlertCircle size={32} />
                 </div>
-                <h3 className="text-xl font-serif font-bold text-white italic">Duplicate Entry</h3>
-                <p className="text-[#6E8A96] text-sm leading-relaxed">
+                <h3 className="text-xl font-serif font-bold text-[#2C3338] italic">Duplicate Entry</h3>
+                <p className="text-[#8C8670] text-sm leading-relaxed">
                   You have already added an entry for today. Please update the existing ledger items if you wish to make changes to today's snapshot.
                 </p>
                 <button 
                   onClick={() => setShowDuplicateToast(false)}
-                  className="mt-6 w-full py-3 bg-[#333333] hover:bg-[#444444] text-white text-xs font-mono uppercase tracking-widest transition-colors rounded-[2px]"
+                  className="mt-6 w-full py-3 bg-[#E8E4D0] hover:bg-[#D4D0BC] text-[#2C3338] text-xs font-mono uppercase tracking-widest transition-colors rounded-[2px]"
                 >
                   Understood
                 </button>
@@ -1076,43 +1076,43 @@ export default function NetWorth() {
                 rotate: 15
               }}
               transition={{ duration: 1, ease: "easeInOut" }}
-              className="w-64 h-64 bg-white/10 backdrop-blur-md border border-white/20 rounded-[2px] shadow-2xl flex items-center justify-center"
+              className="w-64 h-64 bg-[#FAF9F6]/10 backdrop-blur-md border border-[#E8E4D0]/20 rounded-[2px] shadow-2xl flex items-center justify-center"
             >
-              <div className="text-white font-serif italic text-2xl">Snapshot</div>
+              <div className="text-[#2C3338] font-serif italic text-2xl">Snapshot</div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Header */}
-      <header className="border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+      <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#F3F4F6] rounded-md transition-colors group">
-              <ChevronLeft size={20} className="text-[#6B7280] group-hover:text-[#111827]" />
+            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#E8E4D0] rounded-md transition-colors group">
+              <ChevronLeft size={20} className="text-[#8C8670] group-hover:text-[#2C3338]" />
             </Link>
             <div className="flex flex-col">
-              <h1 className="text-xl font-serif font-bold text-[#111827] tracking-tight px-1">
+              <h1 className="text-xl font-serif font-bold text-[#2C3338] tracking-tight px-1">
                 {appTitle}
               </h1>
-              <span className="text-[9px] font-mono text-[#9CA3AF] uppercase tracking-widest px-1">Financial Position Ledger</span>
+              <span className="text-[9px] font-mono text-[#8C8670] uppercase tracking-widest px-1">Financial Position Ledger</span>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
             <nav className="hidden md:flex items-center gap-6 mr-4">
-              <Link to="/orbit/dashboard" className="text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] transition-colors">Dashboard</Link>
+              <Link to="/orbit/dashboard" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Dashboard</Link>
               
               <div className="relative group py-2">
-                <button className="text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] transition-colors flex items-center gap-1">
+                <button className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors flex items-center gap-1">
                   Tools <ChevronDown size={12} />
                 </button>
-                <div className="absolute top-full right-0 w-48 bg-white border border-[#E5E7EB] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
-                  <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#111827] bg-[#F3F4F6] transition-colors text-left w-full">Balance Sheet</button>
-                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Retirement Planner</button>
-                  <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Wealth Simulator</button>
-                  <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Historical Performance</button>
-                  <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left w-full">Currency Converter</button>
+                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
+                  <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Balance Sheet</button>
+                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Retirement Planner</button>
+                  <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator</button>
+                  <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Historical Performance</button>
+                  <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
                 </div>
               </div>
             </nav>
@@ -1122,16 +1122,16 @@ export default function NetWorth() {
             </div>
 
             <div className="relative group/currency">
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-md text-[10px] font-mono font-bold text-[#4B5563] hover:border-[#3B82F6] transition-all">
-                <Globe size={12} className="text-[#3B82F6]" />
+              <button className="flex items-center gap-2 px-3 py-1.5 bg-[#FAF9F6] border border-[#E8E4D0] rounded-md text-[10px] font-mono font-bold text-[#8C8670] hover:border-[#C5A059] transition-all">
+                <Globe size={12} className="text-[#C5A059]" />
                 {currentCurrency.code} ({currentCurrency.symbol})
               </button>
-              <div className="absolute right-0 top-full mt-1 bg-white border border-[#E5E7EB] rounded-md shadow-xl opacity-0 invisible group-hover/currency:opacity-100 group-hover/currency:visible transition-all z-[100] min-w-[200px] py-1 max-h-[400px] overflow-y-auto">
+              <div className="absolute right-0 top-full mt-1 bg-[#FAF9F6] border border-[#E8E4D0] rounded-md shadow-xl opacity-0 invisible group-hover/currency:opacity-100 group-hover/currency:visible transition-all z-[100] min-w-[200px] py-1 max-h-[400px] overflow-y-auto">
                 {CURRENCIES.map(c => (
                   <button
                     key={c.code}
                     onClick={() => updateCurrency(c.code)}
-                    className={`w-full text-left px-4 py-2 text-[10px] font-mono hover:bg-[#F3F4F6] transition-colors flex justify-between items-center ${currencyCode === c.code ? 'text-[#3B82F6] bg-[#F3F4F6]' : 'text-[#4B5563]'}`}
+                    className={`w-full text-left px-4 py-2 text-[10px] font-mono hover:bg-[#E8E4D0] transition-colors flex justify-between items-center ${currencyCode === c.code ? 'text-[#C5A059] bg-[#E8E4D0]' : 'text-[#8C8670]'}`}
                   >
                     <span className="flex items-center gap-2">
                       <span className="text-sm">{c.flag}</span>
@@ -1143,11 +1143,11 @@ export default function NetWorth() {
               </div>
             </div>
 
-            <div className="h-6 w-px bg-[#E5E7EB] mx-2" />
+            <div className="h-6 w-px bg-[#E8E4D0] mx-2" />
 
             <button 
               onClick={analyzeNetWorth}
-              className="flex items-center gap-2 px-5 py-2 bg-[#111827] text-white rounded-md text-xs font-bold hover:bg-[#1F2937] transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-2 bg-[#2C3338] text-[#FAF9F6] rounded-md text-xs font-bold hover:bg-[#3D464D] transition-all shadow-sm"
             >
               <Zap size={16} className="text-[#FBBF24]" />
               AI Audit

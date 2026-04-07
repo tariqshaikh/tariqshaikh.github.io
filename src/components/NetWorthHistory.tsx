@@ -176,7 +176,7 @@ export default function NetWorthHistory() {
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-[#1A1C1E] font-sans">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#2C3338] font-sans">
       {/* Manual Entry Success Toast */}
       <AnimatePresence>
         {showManualSuccess && (
@@ -184,7 +184,7 @@ export default function NetWorthHistory() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-8 right-8 z-[100] bg-[#111827] text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 border border-[#333333]"
+            className="fixed bottom-8 right-8 z-[100] bg-[#2C3338] text-[#FAF9F6] px-6 py-3 rounded-[2px] shadow-2xl flex items-center gap-3 border border-[#E8E4D0]"
           >
             <div className="w-2 h-2 bg-[#C5A059] rounded-full animate-pulse" />
             <span className="text-xs font-mono uppercase tracking-widest">Manual Entry Recorded</span>
@@ -192,41 +192,41 @@ export default function NetWorthHistory() {
         )}
       </AnimatePresence>
 
-      <header className="border-b border-[#EEEEEE] bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#F8F9FA] rounded-[2px] transition-colors group">
-              <ChevronLeft size={18} className="text-[#6E8A96] group-hover:text-[#1A1C1E]" />
+            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors group">
+              <ChevronLeft size={18} className="text-[#8C8670] group-hover:text-[#2C3338]" />
             </Link>
-            <h1 className="text-xl font-serif font-bold text-[#1A1C1E]">Historical Performance</h1>
+            <h1 className="text-xl font-serif font-bold text-[#2C3338]">Historical Performance</h1>
           </div>
 
           <div className="flex items-center gap-6">
             <nav className="hidden md:flex items-center gap-6 mr-4">
-              <Link to="/orbit/dashboard" className="text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] transition-colors">Dashboard</Link>
+              <Link to="/orbit/dashboard" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Dashboard</Link>
               
               <div className="relative group py-2">
-                <button className="text-[11px] font-mono uppercase tracking-widest text-[#1A1C1E] transition-colors flex items-center gap-1">
+                <button className="text-[11px] font-mono uppercase tracking-widest text-[#2C3338] transition-colors flex items-center gap-1">
                   Tools <ChevronDown size={12} />
                 </button>
-                <div className="absolute top-full right-0 w-48 bg-white border border-[#EEEEEE] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
-                  <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full">Balance Sheet</button>
-                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full">Retirement Planner</button>
-                  <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full">Wealth Simulator</button>
-                  <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#1A1C1E] bg-[#F8F9FA] transition-colors text-left w-full">Historical Performance</button>
-                  <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#1A1C1E] hover:bg-[#F8F9FA] transition-colors text-left w-full">Currency Converter</button>
+                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
+                  <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Balance Sheet</button>
+                  <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Retirement Planner</button>
+                  <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator</button>
+                  <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Historical Performance</button>
+                  <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
                 </div>
               </div>
             </nav>
             
-            <div className="h-6 w-px bg-[#EEEEEE] mx-2" />
+            <div className="h-6 w-px bg-[#E8E4D0] mx-2" />
             
             {user?.uid === 'guest-user' ? (
-              <button onClick={() => navigate('/login')} className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#1A1C1E] transition-colors flex items-center gap-1">
+              <button onClick={() => navigate('/login')} className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#2C3338] transition-colors flex items-center gap-1">
                 <UserIcon size={14} /> Sign In
               </button>
             ) : (
-              <button onClick={() => logout()} className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] hover:text-[#8B0000] transition-colors flex items-center gap-1">
+              <button onClick={() => logout()} className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#8B0000] transition-colors flex items-center gap-1">
                 <LogOut size={14} /> Sign Out
               </button>
             )}
@@ -237,13 +237,13 @@ export default function NetWorthHistory() {
       <main className="max-w-[1200px] mx-auto px-6 py-10">
         {/* Time Period Filters - Centered above stats */}
         <div className="flex justify-center mb-8">
-          <div className="flex bg-white border border-[#EEEEEE] p-1 rounded-[2px] shadow-sm">
+          <div className="flex bg-[#FAF9F6] border border-[#E8E4D0] p-1 rounded-[2px] shadow-sm">
             {(['1m', '3m', '6m', '1y', '5y', 'all', 'ytd'] as const).map((v) => (
               <button
                 key={v}
                 onClick={() => setView(v)}
                 className={`px-5 py-2 text-[10px] font-mono uppercase tracking-widest transition-all rounded-[1px] ${
-                  view === v ? 'bg-[#1A1C1E] text-white font-bold' : 'text-[#6E8A96] hover:text-[#1A1C1E]'
+                  view === v ? 'bg-[#2C3338] text-[#FAF9F6] font-bold' : 'text-[#8C8670] hover:text-[#2C3338]'
                 }`}
               >
                 {v}
@@ -254,21 +254,21 @@ export default function NetWorthHistory() {
 
         {/* Hero Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-white border border-[#EEEEEE] p-6 rounded-[2px] shadow-sm">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-2">Current Net Worth</div>
-            <div className="text-3xl font-serif font-bold">
+          <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] shadow-sm">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Current Net Worth</div>
+            <div className="text-3xl font-serif font-bold text-[#2C3338]">
               {history.length > 0 ? formatCurrency(history[history.length - 1].netWorth) : '$0'}
             </div>
           </div>
-          <div className="bg-white border border-[#EEEEEE] p-6 rounded-[2px] shadow-sm">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-2">Period Change</div>
+          <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] shadow-sm">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Period Change</div>
             <div className={`text-3xl font-serif font-bold flex items-center gap-2 ${stats.change >= 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
               {stats.change >= 0 ? <ArrowUpRight size={24} /> : <ArrowDownRight size={24} />}
               {formatCurrency(Math.abs(stats.change))}
             </div>
           </div>
-          <div className="bg-white border border-[#EEEEEE] p-6 rounded-[2px] shadow-sm">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-2">Growth Rate</div>
+          <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] shadow-sm">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Growth Rate</div>
             <div className={`text-3xl font-serif font-bold ${stats.percent >= 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
               {stats.percent >= 0 ? '+' : ''}{stats.percent.toFixed(1)}%
             </div>
@@ -278,21 +278,21 @@ export default function NetWorthHistory() {
         {/* Main Content Grid */}
         <div className={`grid gap-6 ${isMaximized ? 'grid-cols-1' : 'lg:grid-cols-2'}`}>
           {/* Chart Section */}
-          <div className={`bg-white border border-[#EEEEEE] p-8 rounded-[2px] shadow-sm ${isMaximized ? 'mb-6' : ''}`}>
+          <div className={`bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm ${isMaximized ? 'mb-6' : ''}`}>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-lg font-serif font-bold">Net Worth Growth</h2>
-                <p className="text-xs text-[#6E8A96] italic">Visualizing your wealth accumulation over time</p>
+                <h2 className="text-lg font-serif font-bold text-[#2C3338]">Net Worth Growth</h2>
+                <p className="text-xs text-[#8C8670] italic">Visualizing your wealth accumulation over time</p>
               </div>
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => setIsMaximized(!isMaximized)}
-                  className="p-2 hover:bg-[#F8F9FA] rounded-[2px] text-[#6E8A96] transition-colors flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest"
+                  className="p-2 hover:bg-[#E8E4D0] rounded-[2px] text-[#8C8670] transition-colors flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest"
                 >
                   {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
                   {isMaximized ? 'Minimize' : 'Maximize'}
                 </button>
-                <button className="p-2 hover:bg-[#F8F9FA] rounded-[2px] text-[#6E8A96] transition-colors">
+                <button className="p-2 hover:bg-[#E8E4D0] rounded-[2px] text-[#8C8670] transition-colors">
                   <Download size={18} />
                 </button>
               </div>
@@ -307,12 +307,12 @@ export default function NetWorthHistory() {
                       <stop offset="95%" stopColor="#C5A059" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0F0" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E8E4D0" />
                   <XAxis 
                     dataKey="date" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fill: '#6E8A96', fontFamily: 'monospace' }}
+                    tick={{ fontSize: 10, fill: '#8C8670', fontFamily: 'monospace' }}
                     tickFormatter={(val) => {
                       const d = new Date(val);
                       if (view === '1y' || view === '5y' || view === 'all') {
@@ -324,11 +324,11 @@ export default function NetWorthHistory() {
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fill: '#6E8A96', fontFamily: 'monospace' }}
+                    tick={{ fontSize: 10, fill: '#8C8670', fontFamily: 'monospace' }}
                     tickFormatter={(val) => `$${val / 1000}k`}
                   />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#1A1C1E', border: 'none', borderRadius: '2px', color: 'white', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#2C3338', border: 'none', borderRadius: '2px', color: '#FAF9F6', fontSize: '12px' }}
                     itemStyle={{ color: '#C5A059' }}
                     formatter={(val: number) => [formatCurrency(val), 'Net Worth']}
                   />
@@ -348,25 +348,25 @@ export default function NetWorthHistory() {
           </div>
 
           {/* Table Section */}
-          <div className="bg-white border border-[#EEEEEE] rounded-[2px] shadow-sm">
-            <div className="px-6 py-4 border-b border-[#EEEEEE] bg-[#F8F9FA] flex items-center justify-between">
-              <h3 className="text-sm font-mono uppercase tracking-widest font-bold">Snapshot Ledger</h3>
+          <div className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-sm">
+            <div className="px-6 py-4 border-b border-[#E8E4D0] bg-[#E8E4D0]/30 flex items-center justify-between">
+              <h3 className="text-sm font-mono uppercase tracking-widest font-bold text-[#2C3338]">Snapshot Ledger</h3>
             </div>
             <div className="overflow-visible">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-[#EEEEEE]">
-                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#6E8A96]">Date</th>
-                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#6E8A96]">Total Assets</th>
-                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#6E8A96]">Total Liabilities</th>
-                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#6E8A96] text-right">Net Worth</th>
+                  <tr className="border-b border-[#E8E4D0]">
+                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#8C8670]">Date</th>
+                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#8C8670]">Total Assets</th>
+                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#8C8670]">Total Liabilities</th>
+                    <th className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-[#8C8670] text-right">Net Worth</th>
                     <th className="px-6 py-4 w-10"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EEEEEE]">
+                <tbody className="divide-y divide-[#E8E4D0]">
                   {[...filteredData].reverse().map((s) => (
-                    <tr key={s.id} className="hover:bg-[#FDFDFD] transition-colors group">
-                      <td className="px-6 py-4 text-xs font-medium text-[#1A1C1E]">
+                    <tr key={s.id} className="hover:bg-[#E8E4D0]/10 transition-colors group">
+                      <td className="px-6 py-4 text-xs font-medium text-[#2C3338]">
                         {new Date(s.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </td>
                       <td className="px-6 py-4 text-xs text-[#1E5C38] font-medium">
@@ -376,19 +376,19 @@ export default function NetWorthHistory() {
                         {formatCurrency(s.totalLiabilities)}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="text-sm font-serif font-bold text-[#1A1C1E]">
+                        <span className="text-sm font-serif font-bold text-[#2C3338]">
                           {formatCurrency(s.netWorth)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="relative group/menu">
-                          <button className="p-1 hover:bg-[#F8F9FA] rounded-[2px] text-[#6E8A96] transition-colors">
+                          <button className="p-1 hover:bg-[#E8E4D0] rounded-[2px] text-[#8C8670] transition-colors">
                             <MoreVertical size={14} />
                           </button>
-                          <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-[#EEEEEE] rounded-[2px] shadow-lg opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-[100]">
+                          <div className="absolute right-0 top-full mt-1 w-32 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-lg opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-[100]">
                             <button 
                               onClick={() => deleteSnapshot(s.id)}
-                              className="w-full text-left px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-[#8B0000] hover:bg-[#F8F9FA] transition-colors flex items-center gap-2"
+                              className="w-full text-left px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-[#8B0000] hover:bg-[#E8E4D0] transition-colors flex items-center gap-2"
                             >
                               <Trash2 size={12} /> Delete
                             </button>
@@ -399,7 +399,7 @@ export default function NetWorthHistory() {
                   ))}
                   {filteredData.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-20 text-center text-[#6E8A96] italic text-sm">
+                      <td colSpan={5} className="px-6 py-20 text-center text-[#8C8670] italic text-sm">
                         No snapshots recorded yet. Save your first balance sheet to start tracking.
                       </td>
                     </tr>
@@ -407,10 +407,10 @@ export default function NetWorthHistory() {
                 </tbody>
               </table>
             </div>
-            <div className="p-4 border-t border-[#EEEEEE] bg-[#FDFDFD]">
+            <div className="p-4 border-t border-[#E8E4D0] bg-[#FAF9F6]">
               <button 
                 onClick={() => setShowManualEntry(true)}
-                className="w-full text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#1A1C1E] transition-colors flex items-center justify-center gap-2 py-3 border border-dashed border-[#EEEEEE] rounded-[2px] bg-white hover:bg-[#F8F9FA]"
+                className="w-full text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#2C3338] transition-colors flex items-center justify-center gap-2 py-3 border border-dashed border-[#E8E4D0] rounded-[2px] bg-[#FAF9F6] hover:bg-[#E8E4D0]/20"
               >
                 <Plus size={14} /> Add Manual Entry
               </button>
@@ -424,28 +424,28 @@ export default function NetWorthHistory() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white w-full max-w-md rounded-[2px] shadow-2xl overflow-hidden"
+              className="bg-[#FAF9F6] w-full max-w-md rounded-[2px] shadow-2xl overflow-hidden border border-[#E8E4D0]"
             >
-              <div className="px-6 py-4 border-b border-[#EEEEEE] flex items-center justify-between bg-[#F8F9FA]">
-                <h3 className="text-sm font-mono uppercase tracking-widest font-bold">Add Historical Entry</h3>
-                <button onClick={() => setShowManualEntry(false)} className="text-[#6E8A96] hover:text-[#1A1C1E]">
+              <div className="px-6 py-4 border-b border-[#E8E4D0] flex items-center justify-between bg-[#E8E4D0]/30">
+                <h3 className="text-sm font-mono uppercase tracking-widest font-bold text-[#2C3338]">Add Historical Entry</h3>
+                <button onClick={() => setShowManualEntry(false)} className="text-[#8C8670] hover:text-[#2C3338]">
                   <X size={18} />
                 </button>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-1">Date</label>
+                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Date</label>
                   <input 
                     type="date" 
                     value={manualDate}
                     onChange={(e) => setManualDate(e.target.value)}
-                    className="w-full bg-[#F8F9FA] border border-[#EEEEEE] px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#C5A059] transition-colors"
+                    className="w-full bg-[#FAF9F6] border border-[#E8E4D0] px-3 py-2 text-sm font-mono focus:outline-none focus:border-[#C5A059] transition-colors text-[#2C3338]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-1">Total Assets</label>
+                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Total Assets</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] text-xs font-mono">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C8670] text-xs font-mono">$</span>
                     <input 
                       type="text" 
                       value={manualAssets}
@@ -460,14 +460,14 @@ export default function NetWorthHistory() {
                           }
                         }
                       }}
-                      className="w-full bg-[#F8F9FA] border border-[#EEEEEE] pl-7 pr-3 py-2 text-sm font-mono focus:outline-none focus:border-[#C5A059] transition-colors"
+                      className="w-full bg-[#FAF9F6] border border-[#E8E4D0] pl-7 pr-3 py-2 text-sm font-mono focus:outline-none focus:border-[#C5A059] transition-colors text-[#2C3338]"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#6E8A96] mb-1">Total Liabilities</label>
+                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Total Liabilities</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] text-xs font-mono">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C8670] text-xs font-mono">$</span>
                     <input 
                       type="text" 
                       value={manualLiabilities}
@@ -482,20 +482,20 @@ export default function NetWorthHistory() {
                           }
                         }
                       }}
-                      className="w-full bg-[#F8F9FA] border border-[#EEEEEE] pl-7 pr-3 py-2 text-sm font-mono focus:outline-none focus:border-[#C5A059] transition-colors"
+                      className="w-full bg-[#FAF9F6] border border-[#E8E4D0] pl-7 pr-3 py-2 text-sm font-mono focus:outline-none focus:border-[#C5A059] transition-colors text-[#2C3338]"
                     />
                   </div>
                 </div>
-                <div className="pt-4 border-t border-[#EEEEEE]">
+                <div className="pt-4 border-t border-[#E8E4D0]">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#6E8A96]">Resulting Net Worth</span>
-                    <span className="text-lg font-serif font-bold">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Resulting Net Worth</span>
+                    <span className="text-lg font-serif font-bold text-[#2C3338]">
                       {formatCurrency(Number(manualAssets.replace(/,/g, '')) - Number(manualLiabilities.replace(/,/g, '')))}
                     </span>
                   </div>
                   <button 
                     onClick={handleManualEntry}
-                    className="w-full bg-[#1A1C1E] text-white py-3 rounded-[2px] text-[11px] font-mono uppercase tracking-widest hover:bg-[#2C2E30] transition-all shadow-md"
+                    className="w-full bg-[#2C3338] text-[#FAF9F6] py-3 rounded-[2px] text-[11px] font-mono uppercase tracking-widest hover:bg-[#3C4348] transition-all shadow-md"
                   >
                     Save Entry
                   </button>
@@ -507,7 +507,7 @@ export default function NetWorthHistory() {
       </main>
 
       <footer className="py-12 text-center opacity-30">
-        <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-[#6E8A96]">
+        <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-[#8C8670]">
           Orbit Historical Analysis Engine
         </div>
       </footer>

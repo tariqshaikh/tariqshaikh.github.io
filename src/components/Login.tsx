@@ -37,46 +37,46 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#D1D1D1] font-sans flex flex-col selection:bg-[#C5A059]/30">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#2C3338] font-sans flex flex-col selection:bg-[#C5A059]/30">
       <header className="px-6 py-6 absolute top-0 left-0 w-full z-10">
-        <Link to="/portfolio" className="inline-flex items-center gap-2 text-[#6E8A96] hover:text-white transition-colors font-mono text-[11px] uppercase tracking-widest">
+        <Link to="/portfolio" className="inline-flex items-center gap-2 text-[#8C8670] hover:text-[#2C3338] transition-colors font-mono text-[11px] uppercase tracking-widest">
           <ChevronLeft size={14} /> Back to Portfolio
         </Link>
       </header>
 
       <div className="flex-1 flex flex-col lg:flex-row">
         {/* Left Side - Branding */}
-        <div className="flex-1 flex flex-col justify-center px-12 lg:px-24 py-20 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-[#333333]">
-          <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-[#1A1A1A] clip-path-hero z-0 hidden lg:block opacity-30" />
+        <div className="flex-1 flex flex-col justify-center px-12 lg:px-24 py-20 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-[#E8E4D0]">
+          <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-[#E8E4D0] clip-path-hero z-0 hidden lg:block opacity-30" />
           
           <div className="relative z-10 max-w-xl">
             <div className="flex items-center gap-4 mb-8">
               <div className="w-14 h-14 bg-[#C5A059] rounded-[2px] flex items-center justify-center">
-                <TrendingUp size={32} className="text-[#0A0A0A]" />
+                <TrendingUp size={32} className="text-[#FAF9F6]" />
               </div>
               <div>
-                <h1 className="text-4xl font-serif font-bold text-white italic leading-none">Orbit</h1>
+                <h1 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-none">Orbit</h1>
                 <p className="text-[12px] font-mono uppercase tracking-[0.2em] text-[#C5A059] mt-2">Strategic Wealth Intelligence</p>
               </div>
             </div>
             
-            <h2 className="text-[clamp(32px,4vw,48px)] font-serif font-bold text-white leading-[1.1] mb-6">
+            <h2 className="text-[clamp(32px,4vw,48px)] font-serif font-bold text-[#2C3338] leading-[1.1] mb-6">
               Master your financial trajectory.
             </h2>
-            <p className="text-[#6E8A96] text-lg leading-relaxed mb-10 max-w-md">
+            <p className="text-[#8C8670] text-lg leading-relaxed mb-10 max-w-md">
               A comprehensive dashboard for tracking net worth, analyzing historical performance, and planning your retirement strategy.
             </p>
             
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-sm text-[#D1D1D1]">
+              <div className="flex items-center gap-3 text-sm text-[#2C3338]">
                 <ShieldCheck size={18} className="text-[#1E5C38]" />
                 <span>Secure, private, and encrypted data storage</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-[#D1D1D1]">
+              <div className="flex items-center gap-3 text-sm text-[#2C3338]">
                 <ShieldCheck size={18} className="text-[#1E5C38]" />
                 <span>Real-time currency conversion and tracking</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-[#D1D1D1]">
+              <div className="flex items-center gap-3 text-sm text-[#2C3338]">
                 <ShieldCheck size={18} className="text-[#1E5C38]" />
                 <span>Advanced retirement modeling and forecasting</span>
               </div>
@@ -85,14 +85,14 @@ export default function Login() {
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6 py-20 bg-[#111111]">
+        <div className="flex-1 flex flex-col justify-center items-center px-6 py-20 bg-[#FAF9F6]">
           <div className="w-full max-w-md">
-            <div className="bg-[#1A1A1A] border border-[#333333] p-10 rounded-[2px] shadow-2xl">
-              <h3 className="text-2xl font-serif font-bold text-white mb-2">Welcome to Orbit</h3>
-              <p className="text-[#6E8A96] text-sm mb-8">Sign in to start tracking your financial future.</p>
+            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-[2px] shadow-2xl">
+              <h3 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">Welcome to Orbit</h3>
+              <p className="text-[#8C8670] text-sm mb-8">Sign in to start tracking your financial future.</p>
               
               {error && (
-                <div className="mb-6 p-4 bg-[#8B0000]/10 border border-[#8B0000]/30 rounded-[2px] text-[#FF6B6B] text-sm leading-relaxed">
+                <div className="mb-6 p-4 bg-[#8B0000]/10 border border-[#8B0000]/30 rounded-[2px] text-[#8B0000] text-sm leading-relaxed">
                   {error}
                 </div>
               )}
@@ -101,10 +101,10 @@ export default function Login() {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 bg-white text-[#1A1C1E] py-3.5 px-4 rounded-[2px] font-semibold hover:bg-[#F8F9FA] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-3 bg-[#2C3338] text-[#FAF9F6] py-3.5 px-4 rounded-[2px] font-semibold hover:bg-[#3D464D] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-[#1A1C1E]/20 border-t-[#1A1C1E] rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-[#FAF9F6]/20 border-t-[#FAF9F6] rounded-full animate-spin" />
                   ) : (
                     <>
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -117,23 +117,23 @@ export default function Login() {
                     </>
                   )}
                 </button>
-                <p className="text-center text-[#6E8A96] text-[10px] font-mono uppercase tracking-widest">No account creation required</p>
+                <p className="text-center text-[#8C8670] text-[10px] font-mono uppercase tracking-widest">No account creation required</p>
               </div>
 
               <div className="relative flex items-center py-4 mb-6">
-                <div className="flex-grow border-t border-[#333333]"></div>
-                <span className="flex-shrink-0 mx-4 text-[#6E8A96] text-xs font-mono uppercase tracking-widest">Or</span>
-                <div className="flex-grow border-t border-[#333333]"></div>
+                <div className="flex-grow border-t border-[#E8E4D0]"></div>
+                <span className="flex-shrink-0 mx-4 text-[#8C8670] text-xs font-mono uppercase tracking-widest">Or</span>
+                <div className="flex-grow border-t border-[#E8E4D0]"></div>
               </div>
 
               <Link 
                 to="/orbit/dashboard"
-                className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#333333] text-white py-3.5 px-4 rounded-[2px] font-semibold hover:border-[#C5A059] hover:text-[#C5A059] transition-all group"
+                className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#E8E4D0] text-[#2C3338] py-3.5 px-4 rounded-[2px] font-semibold hover:border-[#C5A059] hover:text-[#C5A059] transition-all group"
               >
                 Continue as Guest <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
               
-              <p className="text-center text-[#6E8A96] text-xs mt-6 leading-relaxed">
+              <p className="text-center text-[#8C8670] text-xs mt-6 leading-relaxed">
                 Guest mode allows you to explore the interface, but data will not be saved permanently.
               </p>
             </div>

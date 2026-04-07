@@ -297,35 +297,35 @@ export default function Homebase() {
   });
 
   return (
-    <div className="bg-[#F7FBFF] min-h-screen font-sans text-[#1A1C1E] flex flex-col">
-      <nav className="px-10 py-4 flex items-center justify-between border-b border-[#D4E8F0] bg-white shrink-0">
+    <div className="bg-slate-50 min-h-screen font-sans text-slate-900 flex flex-col">
+      <nav className="px-10 py-4 flex items-center justify-between border-b border-slate-200 bg-white shrink-0">
         <div className="flex items-center gap-6">
           <button onClick={handleClearAll} className="text-2xl leading-none hover:opacity-80 transition-opacity cursor-pointer text-left">
-            <span className="font-serif font-bold text-[#1A1C1E]">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
+            <span className="font-serif font-bold text-slate-900">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <div className="font-mono text-[13px] text-[#6E8A96] px-2.5 py-0.5 border border-[#D4E8F0] rounded-full">21 counties · live verified data</div>
+          <div className="font-mono text-[13px] text-slate-500 px-2.5 py-0.5 border border-slate-200 rounded-full">21 counties · live verified data</div>
         </div>
       </nav>
 
       <motion.div 
-        className={`transition-all duration-500 ease-in-out ${showResults ? 'bg-white border-b border-[#D4E8F0] sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center justify-center px-6 py-20 max-w-4xl mx-auto w-full'}`}
+        className={`transition-all duration-500 ease-in-out ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center justify-center px-6 py-20 max-w-4xl mx-auto w-full'}`}
       >
         <AnimatePresence mode="wait">
           {!showResults && (
-            <motion.button 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              onClick={handleClearAll}
-              className="text-center mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
-            >
-              <h1 className="text-[clamp(48px,8vw,84px)] mb-2 leading-none">
-                <span className="font-serif font-bold text-[#0471A4]">Homebase</span> <span className="font-sans font-black text-[#0471A4]/40 ml-1">NJ</span>
-              </h1>
-              <p className="font-mono text-base text-[#6E8A96] tracking-[0.2em] uppercase">Find your perfect New Jersey town</p>
-            </motion.button>
+              <motion.button 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                onClick={handleClearAll}
+                className="text-center mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
+              >
+                <h1 className="text-[clamp(48px,8vw,84px)] mb-2 leading-none">
+                  <span className="font-serif font-bold text-[#0471A4]">Homebase</span> <span className="font-sans font-black text-[#0471A4]/20 ml-1">NJ</span>
+                </h1>
+                <p className="font-mono text-base text-slate-500 tracking-[0.2em] uppercase">Find your perfect New Jersey town</p>
+              </motion.button>
           )}
         </AnimatePresence>
 
@@ -340,16 +340,16 @@ export default function Homebase() {
               ref={countyDropdownRef}
             >
               <div className="flex items-center justify-between mb-0 px-2">
-                <span className="text-[10px] font-bold text-[#6E8A96] uppercase tracking-wider">County Selection</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">County Selection</span>
               </div>
-              <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2`}>
+              <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-slate-200 rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2`}>
                 <div className="absolute top-1/2 -translate-y-1/2 left-5 flex items-center pointer-events-none z-20">
-                  <span className="text-[#6E8A96]">🔍</span>
+                  <span className="text-slate-400">🔍</span>
                 </div>
                 
                 {/* Pills inside input ONLY if !showResults */}
                 {!showResults && activeCounties.map(c => (
-                  <span key={c} className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-1.5 z-20">
+                  <span key={c} className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-1.5 z-20">
                     {c} County
                     <button onClick={(e) => { e.stopPropagation(); setActiveCounties(activeCounties.filter(x => x !== c)); }} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
                   </span>
@@ -358,7 +358,7 @@ export default function Homebase() {
                 <div className="relative flex-1 min-w-[120px]">
                   <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none text-lg">
                     {ghostText && ghostText.toLowerCase().startsWith(countySearch.toLowerCase()) && (
-                      <span className="text-[#6E8A96]/30">
+                      <span className="text-slate-300">
                         <span className="opacity-0">{countySearch}</span>
                         {ghostText.slice(countySearch.length)}
                       </span>
@@ -397,13 +397,13 @@ export default function Homebase() {
 
                 {/* Dropdown for County */}
                 {showCountyDropdown && (
-                  <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
+                  <div className={`absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
                     {/* Counties Section */}
                     {Object.entries(NJ_COUNTIES)
                       .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))
                       .length > 0 && (
                       <>
-                        <div className="px-4 py-2 text-[12px] font-bold text-[#6E8A96] uppercase tracking-wider bg-[#F7FBFF] border-b border-[#D4E8F0]">
+                        <div className="px-4 py-2 text-[12px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">
                           Counties
                         </div>
                         {Object.entries(NJ_COUNTIES)
@@ -412,7 +412,7 @@ export default function Homebase() {
                           .map(([c, data]) => (
                             <div 
                               key={c}
-                              className="px-4 py-2 text-sm cursor-pointer hover:bg-[#F7FBFF] flex justify-between items-center border-b last:border-0 border-[#E8F4FB] group"
+                              className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-50 flex justify-between items-center border-b last:border-0 border-slate-100 group"
                               onClick={() => handleCountySelect(c)}
                             >
                               <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
@@ -420,8 +420,8 @@ export default function Homebase() {
                                 <span className={`font-medium truncate ${activeCounties.includes(c) ? 'text-[#0471A4] font-bold' : ''}`}>{c} County</span>
                               </div>
                               <div className="flex items-center gap-2 whitespace-nowrap shrink-0 ml-2">
-                                <span className="font-mono text-[11px] text-[#6E8A96] bg-[#F7FBFF] px-1.5 py-0.5 rounded group-hover:bg-[#E8F4FB] transition-colors">{data.heat}% heat</span>
-                                <span className="font-mono text-[11px] text-[#6E8A96] opacity-60">{data.towns.length} towns</span>
+                                <span className="font-mono text-[11px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded group-hover:bg-slate-100 transition-colors">{data.heat}% heat</span>
+                                <span className="font-mono text-[11px] text-slate-400 opacity-60">{data.towns.length} towns</span>
                               </div>
                             </div>
                           ))}
@@ -434,7 +434,7 @@ export default function Homebase() {
                       .filter(t => !selectedTowns.some(s => s.name === t.name))
                       .length > 0 && (
                       <>
-                        <div className="px-4 py-2 text-[12px] font-bold text-[#6E8A96] uppercase tracking-wider bg-[#F7FBFF] border-b border-[#D4E8F0] border-t">
+                        <div className="px-4 py-2 text-[12px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100 border-t">
                           Towns
                         </div>
                         {allTowns
@@ -444,16 +444,16 @@ export default function Homebase() {
                           .map(t => (
                             <div 
                               key={`${t.name}-${t.county}`}
-                              className="px-4 py-2 text-sm cursor-pointer hover:bg-[#F7FBFF] flex justify-between items-center border-b last:border-0 border-[#E8F4FB] group"
+                              className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-50 flex justify-between items-center border-b last:border-0 border-slate-100 group"
                               onClick={() => handleTownSelect(t)}
                             >
                               <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
                                 <span className="font-medium group-hover:text-[#0471A4] transition-colors truncate">{t.name}</span>
-                                <span className="font-mono text-[10px] text-[#6E8A96] uppercase shrink-0">{t.county}</span>
+                                <span className="font-mono text-[10px] text-slate-400 uppercase shrink-0">{t.county}</span>
                               </div>
                               <div className="flex items-center gap-2 whitespace-nowrap shrink-0 ml-2">
                                 {NJ_ENRICHED[t.name] && (
-                                  <span className="font-mono text-[11px] text-[#6E8A96] bg-[#F7FBFF] px-1.5 py-0.5 rounded group-hover:bg-[#E8F4FB] transition-colors">{NJ_ENRICHED[t.name].saleToList}% heat</span>
+                                  <span className="font-mono text-[11px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded group-hover:bg-slate-100 transition-colors">{NJ_ENRICHED[t.name].saleToList}% heat</span>
                                 )}
                                 <span className="text-[#0471A4] text-[12px] opacity-0 group-hover:opacity-100 transition-opacity">Add +</span>
                               </div>
@@ -476,7 +476,7 @@ export default function Homebase() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         key={c} 
-                        className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0"
+                        className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-2 shadow-sm shrink-0"
                       >
                         <span>{c} County</span>
                         <button onClick={() => setActiveCounties(activeCounties.filter(x => x !== c))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
@@ -498,18 +498,18 @@ export default function Homebase() {
                   ref={townDropdownRef}
                 >
                   <div className="flex items-center justify-between mb-0 px-2">
-                    <span className="text-[10px] font-bold text-[#6E8A96] uppercase tracking-wider">Town Selection</span>
-                    <span className={`text-[10px] font-mono ${selectedTowns.length >= 8 ? 'text-[#D32F2F] font-bold' : 'text-[#6E8A96]'}`}>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Town Selection</span>
+                    <span className={`text-[10px] font-mono ${selectedTowns.length >= 8 ? 'text-red-600 font-bold' : 'text-slate-400'}`}>
                       {selectedTowns.length}/8 Towns Max
                     </span>
                   </div>
-                  <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-[#D4E8F0] rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2`}>
+                  <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-slate-200 rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2`}>
                     <div className="absolute top-1/2 -translate-y-1/2 left-5 flex items-center pointer-events-none z-20">
-                      <span className="text-[#6E8A96]">🏘️</span>
+                      <span className="text-slate-400">🏘️</span>
                     </div>
 
                     {!showResults && selectedTowns.map(t => (
-                      <span key={t.name} className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-1.5 z-20">
+                      <span key={t.name} className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-1.5 z-20">
                         {t.name}
                         <button onClick={(e) => { e.stopPropagation(); setSelectedTowns(selectedTowns.filter(x => x.name !== t.name)); }} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
                       </span>
@@ -528,11 +528,11 @@ export default function Homebase() {
 
                     {/* Dropdown for Town */}
                     {showTownDropdown && (
-                      <div className={`absolute top-full left-0 mt-2 bg-white border border-[#D4E8F0] rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
+                      <div className={`absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
                         {!townSearch && (
-                          <div className="px-4 py-2 bg-[#F7FBFF] border-b border-[#D4E8F0] flex items-center justify-between">
+                          <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                             <span className="font-mono text-[11px] text-[#0471A4] uppercase tracking-widest font-bold">Hottest Markets</span>
-                            <span className="text-[11px] text-[#6E8A96] italic">Sorted by sale-to-list %</span>
+                            <span className="text-[11px] text-slate-400 italic">Sorted by sale-to-list %</span>
                           </div>
                         )}
                         {activeCounties.flatMap(c => (NJ_COUNTIES as any)[c].towns.map((t: string) => ({ name: t, county: c })))
@@ -546,7 +546,7 @@ export default function Homebase() {
                           .map(t => (
                             <div 
                               key={`${t.name}-${t.county}`}
-                              className="px-4 py-2 text-sm cursor-pointer hover:bg-[#F7FBFF] flex justify-between items-center border-b last:border-0 border-[#E8F4FB] group"
+                              className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-50 flex justify-between items-center border-b last:border-0 border-slate-100 group"
                               onClick={() => {
                                 if (selectedTowns.length < 8) {
                                   setSelectedTowns([...selectedTowns, t]);
@@ -557,14 +557,14 @@ export default function Homebase() {
                             >
                               <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
                                 <span className="font-medium group-hover:text-[#0471A4] transition-colors truncate">{t.name}</span>
-                                <span className="font-mono text-[10px] text-[#6E8A96] uppercase shrink-0">{t.county}</span>
+                                <span className="font-mono text-[10px] text-slate-400 uppercase shrink-0">{t.county}</span>
                               </div>
                               <div className="flex items-center gap-2 whitespace-nowrap shrink-0 ml-2">
                                 {NJ_ENRICHED[t.name] && (
-                                  <span className="font-mono text-[11px] text-[#6E8A96] bg-[#F7FBFF] px-1.5 py-0.5 rounded group-hover:bg-[#E8F4FB] transition-colors">{NJ_ENRICHED[t.name].saleToList}% heat</span>
+                                  <span className="font-mono text-[11px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded group-hover:bg-slate-100 transition-colors">{NJ_ENRICHED[t.name].saleToList}% heat</span>
                                 )}
                                 {NJ_ENRICHED[t.name] && (
-                                  <span className="font-mono text-[10px] px-1.5 py-0.5 bg-[#D4EDDE] text-[#1E5C38] rounded border border-[#A8D5B8]">✓ full data</span>
+                                  <span className="font-mono text-[10px] px-1.5 py-0.5 bg-green-50 text-green-700 rounded border border-green-200">✓ full data</span>
                                 )}
                               </div>
                             </div>
@@ -584,14 +584,14 @@ export default function Homebase() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             key={t.name} 
-                            className="px-2 py-0.5 bg-[#E8F4FB] text-[#0471A4] rounded-full text-[12px] font-bold border border-[#C8E6F5] flex items-center gap-2 shadow-sm shrink-0"
+                            className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-2 shadow-sm shrink-0"
                           >
                             <div className="flex flex-col leading-none">
                               <div className="flex items-center gap-1.5">
                                 <span>{t.name}</span>
                                 {NJ_ENRICHED[t.name] ? 
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#1E5C38]" title="Full data available"></span> : 
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#7A5200]" title="Partial data available"></span>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-600" title="Full data available"></span> : 
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600" title="Partial data available"></span>
                                 }
                               </div>
                             </div>
@@ -610,7 +610,7 @@ export default function Homebase() {
 
           {showResults && selectedTowns.length > 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 shrink-0">
-              <button onClick={handleClearAll} className="px-4 py-2 text-sm text-[#6E8A96] hover:text-[#0471A4] transition-colors">Clear All</button>
+              <button onClick={handleClearAll} className="px-4 py-2 text-sm text-slate-400 hover:text-[#0471A4] transition-all">Clear All</button>
             </motion.div>
           )}
         </motion.div>
@@ -623,9 +623,9 @@ export default function Homebase() {
               exit={{ opacity: 0, y: -20 }}
               className="w-full max-w-2xl space-y-6 mt-6"
             >
-              <div className="bg-white/50 border border-[#D4E8F0] rounded-xl p-4 text-center max-w-lg mx-auto">
-                <p className="text-[13px] text-[#6E8A96] font-mono leading-relaxed">
-                  <span className="font-bold text-[#1A1C1E]">Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
+              <div className="bg-white/50 border border-slate-200 rounded-xl p-4 text-center max-w-lg mx-auto">
+                <p className="text-[13px] text-slate-500 font-mono leading-relaxed">
+                  <span className="font-bold text-slate-900">Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
                 </p>
               </div>
 
@@ -639,7 +639,7 @@ export default function Homebase() {
                   </button>
                   <button 
                     onClick={handleClearAll}
-                    className="px-5 py-2.5 bg-white text-[#6E8A96] border border-[#D4E8F0] rounded-full text-sm font-bold hover:bg-[#F7FBFF] hover:text-[#0471A4] transition-all shadow-sm hover:shadow-md"
+                    className="px-5 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 hover:text-[#0471A4] transition-all shadow-sm hover:shadow-md"
                   >
                     Clear All
                   </button>
@@ -650,32 +650,32 @@ export default function Homebase() {
         </AnimatePresence>
       </motion.div>
 
-      {tooltip && (
-        <div className="fixed bg-[#1A1C1E] text-white px-3 py-1 rounded text-sm font-mono pointer-events-none z-[100]" style={{ left: tooltip.x + 12, top: tooltip.y - 28 }}>
-          {tooltip.name} County
-        </div>
-      )}
+        {tooltip && (
+          <div className="fixed bg-slate-900 text-white px-3 py-1 rounded text-sm font-mono pointer-events-none z-[100]" style={{ left: tooltip.x + 12, top: tooltip.y - 28 }}>
+            {tooltip.name} County
+          </div>
+        )}
 
       <div ref={resultsRef} className={`px-4 md:px-10 pt-8 pb-20 w-full ${showResults ? 'block' : 'hidden'}`}>
         {isLoading ? (
           <div className="py-12 text-center">
-            <div className="w-7 h-7 border-3 border-[#C8E6F5] border-t-[#0471A4] rounded-full animate-spin mx-auto mb-3"></div>
-            <p className="font-mono text-sm text-[#6E8A96]">Loading comparison...</p>
+            <div className="w-7 h-7 border-3 border-blue-100 border-t-[#0471A4] rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="font-mono text-sm text-slate-400">Loading comparison...</p>
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
               <div>
                 <h2 className="font-serif text-3xl italic"><span className="not-italic">{selectedTowns.length === 1 ? selectedTowns[0].name : 'Town Comparison'}</span></h2>
-                <div className="font-mono text-[13px] text-[#6E8A96] mt-1">{selectedTowns.length} towns · New Jersey · Enriched local data + Census ACS 2023</div>
+                <div className="font-mono text-[13px] text-slate-400 mt-1">{selectedTowns.length} towns · New Jersey · Enriched local data + Census ACS 2023</div>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[13px] text-[#6E8A96]">Sort by</span>
+                  <span className="font-mono text-[13px] text-slate-400">Sort by</span>
                   <select 
                     value={sortKey}
                     onChange={(e) => setSortKey(e.target.value)}
-                    className="px-4 py-1.5 bg-white border border-[#D4E8F0] rounded-full text-[13px] font-mono text-[#3D4347] focus:outline-none focus:border-[#0471A4] cursor-pointer hover:border-[#0471A4] transition-all"
+                    className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-[13px] font-mono text-slate-900 focus:outline-none focus:border-[#0471A4] cursor-pointer hover:border-[#0471A4] transition-all"
                   >
                     <option value="fit">Fit Score</option>
                     <option value="income">Income</option>
@@ -693,21 +693,21 @@ export default function Homebase() {
                 </div>
                 <button 
                   onClick={handleClearAll}
-                  className="px-4 py-1.5 bg-white text-[#6E8A96] border border-[#D4E8F0] rounded-full text-[13px] font-mono hover:bg-[#F7FBFF] hover:text-[#0471A4] transition-all ml-2"
+                  className="px-4 py-1.5 bg-white text-slate-500 border border-slate-200 rounded-full text-[13px] font-mono hover:bg-slate-50 hover:text-[#0471A4] transition-all ml-2"
                 >
                   Start Over
                 </button>
               </div>
             </div>
 
-            <div className="bg-white border border-[#D4E8F0] rounded-xl overflow-hidden mb-10 shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-10 shadow-sm">
               <button 
                 onClick={() => setShowPrioritySettings(!showPrioritySettings)}
-                className="w-full px-6 py-4 flex items-center justify-between bg-[#F7FBFF] hover:bg-[#E8F4FB] transition-colors"
+                className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-blue-50 transition-colors"
               >
                 <div className="flex items-baseline gap-3">
-                  <h3 className="font-serif text-xl text-[#1A1C1E]">What matters most to you?</h3>
-                  <p className="text-sm text-[#6E8A96] font-mono hidden sm:block">Drag to rank · top = highest priority</p>
+                  <h3 className="font-serif text-xl text-slate-900">What matters most to you?</h3>
+                  <p className="text-sm text-slate-400 font-mono hidden sm:block">Drag to rank · top = highest priority</p>
                 </div>
                 <div className={`transition-transform duration-300 ${showPrioritySettings ? 'rotate-180' : ''}`}>
                   <ChevronRight size={20} className="rotate-90 text-[#0471A4]" />
@@ -722,9 +722,9 @@ export default function Homebase() {
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-6 pt-2 border-t border-[#D4E8F0]">
+                    <div className="p-6 pt-2 border-t border-slate-100">
                       <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between px-4 py-1 font-mono text-[10px] text-[#6E8A96] uppercase tracking-widest opacity-60">
+                        <div className="flex items-center justify-between px-4 py-1 font-mono text-[10px] text-slate-400 uppercase tracking-widest opacity-60">
                           <span>Highest Priority</span>
                           <span>Lowest Priority</span>
                         </div>
@@ -743,14 +743,14 @@ export default function Homebase() {
                                 value={key}
                                 className="group/prio cursor-grab active:cursor-grabbing"
                               >
-                                <div className="flex items-center gap-4 p-3 bg-[#F7FBFF] border border-[#D4E8F0] rounded-lg hover:border-[#0471A4] hover:bg-white transition-all shadow-sm hover:shadow-md">
+                                <div className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg hover:border-[#0471A4] hover:bg-slate-50 transition-all shadow-sm hover:shadow-md">
                                   <div className="flex items-center gap-3 flex-1">
-                                    <div className="w-8 h-8 rounded-full bg-[#E8F4FB] flex items-center justify-center font-mono text-xs font-bold text-[#0471A4]">
+                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center font-mono text-xs font-bold text-[#0471A4]">
                                       {i + 1}
                                     </div>
                                     <div>
-                                      <div className="font-bold text-sm text-[#1A1C1E]">{dim.label}</div>
-                                      <div className="text-[11px] text-[#6E8A96] font-mono">{dim.sub}</div>
+                                      <div className="font-bold text-sm text-slate-900">{dim.label}</div>
+                                      <div className="text-[11px] text-slate-400 font-mono">{dim.sub}</div>
                                     </div>
                                   </div>
                                   
@@ -758,7 +758,7 @@ export default function Homebase() {
                                     <div className="px-2.5 py-1 bg-[#0471A4]/10 rounded-md border border-[#0471A4]/20">
                                       <span className="font-mono text-[10px] text-[#0471A4] font-bold uppercase">Weight x{rankToWeight(i, priorityOrder.length)}</span>
                                     </div>
-                                    <GripVertical size={16} className="text-[#D4E8F0] group-hover/prio:text-[#0471A4] transition-colors" />
+                                    <GripVertical size={16} className="text-slate-300 group-hover/prio:text-[#0471A4] transition-colors" />
                                   </div>
                                 </div>
                               </Reorder.Item>
@@ -773,21 +773,21 @@ export default function Homebase() {
             </div>
 
             {/* Desktop Grid View */}
-            <div className="hidden md:grid bg-white border border-[#D4E8F0] rounded-xl shadow-sm" style={{ gridTemplateColumns: `150px repeat(${sortedTowns.length}, 1fr)` }}>
-              <div className="p-4 border-r border-[#D4E8F0] bg-white sticky left-0 z-10">
-                <div className="font-mono text-[12px] text-[#6E8A96] uppercase tracking-widest">Town</div>
+            <div className="hidden md:grid bg-white border border-slate-200 rounded-xl shadow-sm" style={{ gridTemplateColumns: `150px repeat(${sortedTowns.length}, 1fr)` }}>
+              <div className="p-4 border-r border-slate-100 bg-slate-50 sticky left-0 z-10">
+                <div className="font-mono text-[12px] text-slate-400 uppercase tracking-widest">Town</div>
               </div>
               {sortedTowns.map(d => {
                 const isPerfectMatch = calcFitScore(d) >= 85;
                 return (
                 <div 
                   key={d.name} 
-                  className={`p-4 text-white cursor-pointer hover:brightness-110 transition-all relative group/town ${isPerfectMatch ? 'border-t-4 border-[#FFD700]' : ''} ${expandedTown === d.name ? 'z-50' : 'z-30'}`} 
+                  className={`p-4 text-white cursor-pointer hover:brightness-110 transition-all relative group/town ${isPerfectMatch ? 'border-t-4 border-amber-400' : ''} ${expandedTown === d.name ? 'z-50' : 'z-30'}`} 
                   style={{ backgroundColor: d.color }}
                   onClick={() => setExpandedTown(expandedTown === d.name ? null : d.name)}
                 >
                   {isPerfectMatch && (
-                    <div className="absolute top-0 left-0 right-0 bg-[#FFD700] text-[#1A1C1E] text-[9px] font-bold text-center uppercase tracking-widest py-0.5 shadow-sm">
+                    <div className="absolute top-0 left-0 right-0 bg-amber-400 text-amber-950 text-[9px] font-bold text-center uppercase tracking-widest py-0.5 shadow-sm">
                       Excellent Town
                     </div>
                   )}
@@ -830,26 +830,26 @@ export default function Homebase() {
                         initial={{ opacity: 0, y: -10, height: 0 }}
                         animate={{ opacity: 1, y: 0, height: 'auto' }}
                         exit={{ opacity: 0, y: -10, height: 0 }}
-                        className="absolute top-full left-0 right-0 bg-[#1A1C1E] text-white z-50 shadow-2xl overflow-hidden border-t border-white/10"
+                        className="absolute top-full left-0 right-0 bg-white text-slate-900 z-50 shadow-2xl overflow-hidden border-t border-slate-100"
                       >
                         <div className="p-4 space-y-3">
-                          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                            <span className="font-mono text-[11px] uppercase tracking-widest text-[#6E8A96]">Market Heat</span>
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <span className="font-mono text-[11px] uppercase tracking-widest text-slate-400">Market Heat</span>
                             <span className="text-base font-bold text-[#0471A4]">{d.saleToList || 'N/A'}%</span>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
-                              <div className="font-mono text-[10px] uppercase text-[#6E8A96]">Population</div>
+                              <div className="font-mono text-[10px] uppercase text-slate-400">Population</div>
                               <div className="text-sm font-bold">{d.pop ? d.pop.toLocaleString() : 'N/A'}</div>
                             </div>
                             <div className="space-y-1">
-                              <div className="font-mono text-[10px] uppercase text-[#6E8A96]">Education</div>
+                              <div className="font-mono text-[10px] uppercase text-slate-400">Education</div>
                               <div className="text-sm font-bold">{d.eduPct || 'N/A'}% Degree+</div>
                             </div>
                           </div>
                           <div className="pt-2">
-                            <div className="font-mono text-[10px] uppercase text-[#6E8A96] mb-1">Quick Take</div>
-                            <p className="text-[12px] leading-relaxed text-white/80 italic">
+                            <div className="font-mono text-[10px] uppercase text-slate-400 mb-1">Quick Take</div>
+                            <p className="text-[12px] leading-relaxed text-slate-600 italic">
                               {d.hasFullData 
                                 ? `${d.name} is a ${d.safetyLabel.toLowerCase()} community with ${d.schoolLabel} rated schools and a ${d.walkLabel.toLowerCase()} layout.`
                                 : "Detailed metrics coming soon for this municipality."}
@@ -867,35 +867,35 @@ export default function Homebase() {
                 const dim = DIMS.find(d => d.key === key)!;
                 return (
                   <React.Fragment key={key}>
-                    <div className="p-3 border-t border-r border-[#D4E8F0] bg-[#F7FBFF] flex flex-col justify-center sticky left-0 z-20 group/dim relative">
+                    <div className="p-3 border-t border-r border-slate-100 bg-slate-50 flex flex-col justify-center sticky left-0 z-20 group/dim relative">
                       <div className="flex items-center gap-1.5">
-                        <div className="text-[12px] font-bold uppercase tracking-wider text-[#3D4347]">{dim.label}</div>
+                        <div className="text-[12px] font-bold uppercase tracking-wider text-slate-900">{dim.label}</div>
                         {(dim as any).hoverSub && (
-                          <Info size={12} className="text-[#6E8A96] opacity-40 group-hover/dim:opacity-100 transition-opacity cursor-help" />
+                          <Info size={12} className="text-slate-400 opacity-40 group-hover/dim:opacity-100 transition-opacity cursor-help" />
                         )}
                       </div>
-                      <div className="text-[11px] text-[#6E8A96] font-mono leading-tight mt-0.5">{dim.sub}</div>
+                      <div className="text-[11px] text-slate-400 font-mono leading-tight mt-0.5">{dim.sub}</div>
                       
                       {(dim as any).hoverSub && (
-                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 w-72 p-4 bg-[#1A1C1E] text-white text-[13px] font-mono rounded-2xl shadow-2xl z-[100] hidden group-hover/dim:block animate-in fade-in zoom-in-95 duration-200 pointer-events-none border border-white/10 backdrop-blur-xl">
+                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 w-72 p-4 bg-white text-slate-900 text-[13px] font-mono rounded-2xl shadow-2xl z-[100] hidden group-hover/dim:block animate-in fade-in zoom-in-95 duration-200 pointer-events-none border border-slate-100 backdrop-blur-xl">
                           <div className="relative">
-                            <div className="absolute -left-[24px] top-1/2 -translate-y-1/2 border-[8px] border-transparent border-r-[#1A1C1E]"></div>
+                            <div className="absolute -left-[24px] top-1/2 -translate-y-1/2 border-[8px] border-transparent border-r-white"></div>
                             <div className="flex items-center gap-2 mb-2">
                               <div className="w-1 h-3 bg-[#0471A4] rounded-full"></div>
-                              <div className="text-[12px] text-[#6E8A96] uppercase tracking-[0.2em] font-bold opacity-80">Methodology</div>
+                              <div className="text-[12px] text-slate-400 uppercase tracking-[0.2em] font-bold opacity-80">Methodology</div>
                             </div>
-                            <div className="leading-relaxed text-[#D4E8F0]">
+                            <div className="leading-relaxed text-slate-600">
                               {(dim as any).hoverSub}
                             </div>
                           </div>
                         </div>
                       )}
 
-                      <div className="mt-1 px-1.5 py-0.5 bg-[#1A1C1E] text-white text-[11px] font-mono rounded-full w-fit">x{rankToWeight(rank, priorityOrder.length)}</div>
+                      <div className="mt-1 px-1.5 py-0.5 bg-slate-900 text-white text-[11px] font-mono rounded-full w-fit">x{rankToWeight(rank, priorityOrder.length)}</div>
                     </div>
                     {sortedTowns.map(d => {
                       const score = (d as any)[dim.scoreKey];
-                      if (!d.hasFullData) return <div key={d.name} className="p-3 border-t border-r border-[#D4E8F0] flex flex-col justify-center"><div className="text-base font-bold text-[#6E8A96]">N/A</div><div className="text-[12px] text-[#6E8A96] font-mono">data not available</div></div>;
+                      if (!d.hasFullData) return <div key={d.name} className="p-3 border-t border-r border-slate-100 flex flex-col justify-center"><div className="text-base font-bold text-slate-400">N/A</div><div className="text-[12px] text-slate-400 font-mono">data not available</div></div>;
                       
                       let valDisplay = '';
                       let subDisplay = '';
@@ -954,7 +954,7 @@ export default function Homebase() {
                       return (
                         <div 
                           key={d.name} 
-                          className={`p-3 border-t border-r border-[#D4E8F0] hover:bg-[#E8F4FB] transition-all flex flex-col justify-center gap-1 relative ${isExpandable ? 'cursor-pointer group/card' : ''}`}
+                          className={`p-3 border-t border-r border-slate-100 hover:bg-blue-50 transition-all flex flex-col justify-center gap-1 relative ${isExpandable ? 'cursor-pointer group/card' : ''}`}
                           onClick={() => {
                             if (isExpandable) {
                               setExpandedCard(isExpanded ? null : `${d.name}-${key}`);
@@ -963,7 +963,7 @@ export default function Homebase() {
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
+                              <div className="text-base font-bold text-slate-900">{valDisplay}</div>
                             </div>
                             {isExpandable && (
                               <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
@@ -972,7 +972,7 @@ export default function Homebase() {
                             )}
                           </div>
                           
-                          <div className="text-[12px] text-[#6E8A96] font-mono leading-tight flex items-center justify-between">
+                          <div className="text-[12px] text-slate-400 font-mono leading-tight flex items-center justify-between">
                             <span>{subDisplay}</span>
                             {isExpandable && !isExpanded && (
                               <span className="text-[9px] font-bold text-[#0471A4] uppercase tracking-tighter opacity-0 group-hover/card:opacity-100 transition-opacity">
@@ -981,7 +981,7 @@ export default function Homebase() {
                             )}
                           </div>
 
-                          <div className="h-1 bg-[#D4E8F0] rounded-full overflow-hidden mt-0.5">
+                          <div className="h-1 bg-slate-100 rounded-full overflow-hidden mt-0.5">
                             <div className="h-full transition-all duration-500" style={{ width: `${dynamicScore}%`, backgroundColor: barColor(dynamicScore) }}></div>
                           </div>
                           
@@ -995,7 +995,7 @@ export default function Homebase() {
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden mt-2 pt-2 border-t border-[#D4E8F0]"
+                                className="overflow-hidden mt-2 pt-2 border-t border-slate-100"
                               >
                                 {key === 'localScene' && (
                                   <>
@@ -1007,11 +1007,11 @@ export default function Homebase() {
                                             <div className="w-5 h-5 rounded-lg bg-[#0471A4]/10 flex items-center justify-center shrink-0 mt-0.5 group-hover/item:bg-[#0471A4]/20 transition-colors">
                                               <Zap size={10} className="text-[#0471A4]" />
                                             </div>
-                                            <span className="text-[11px] text-[#3D4347] leading-tight font-medium">{thing}</span>
+                                            <span className="text-[11px] text-slate-900 leading-tight font-medium">{thing}</span>
                                           </div>
                                         ))
                                       ) : (
-                                        <div className="text-[11px] text-[#6E8A96] italic">New spots opening soon...</div>
+                                        <div className="text-[11px] text-slate-400 italic">New spots opening soon...</div>
                                       )}
                                     </div>
                                   </>
@@ -1032,7 +1032,7 @@ export default function Homebase() {
                                             className={`px-2 py-1 rounded-full text-[10px] font-bold font-mono transition-all ${
                                               isActive 
                                                 ? 'bg-[#0471A4] text-white shadow-sm' 
-                                                : 'bg-[#F0F7FA] text-[#6E8A96] hover:bg-[#E0EEF5]'
+                                                : 'bg-slate-100 text-slate-500 hover:bg-blue-50'
                                             }`}
                                           >
                                             {m}
@@ -1058,7 +1058,7 @@ export default function Homebase() {
                                             className={`px-2 py-1 rounded-full text-[10px] font-bold font-mono transition-all ${
                                               isActive 
                                                 ? 'bg-[#0471A4] text-white shadow-sm' 
-                                                : 'bg-[#F0F7FA] text-[#6E8A96] hover:bg-[#E0EEF5]'
+                                                : 'bg-slate-100 text-slate-500 hover:bg-blue-50'
                                             }`}
                                           >
                                             {p.toUpperCase()}
@@ -1084,7 +1084,7 @@ export default function Homebase() {
                                             className={`px-2 py-1 rounded-full text-[10px] font-bold font-mono transition-all ${
                                               isActive 
                                                 ? 'bg-[#0471A4] text-white shadow-sm' 
-                                                : 'bg-[#F0F7FA] text-[#6E8A96] hover:bg-[#D4E8F0]'
+                                                : 'bg-slate-100 text-slate-500 hover:bg-blue-50'
                                             }`}
                                           >
                                             {p.toUpperCase()}
@@ -1110,9 +1110,9 @@ export default function Homebase() {
               {sortedTowns.map(d => {
                 const isPerfectMatch = calcFitScore(d) >= 85;
                 return (
-                <div key={d.name} className={`bg-white border border-[#D4E8F0] rounded-xl overflow-hidden shadow-sm relative ${isPerfectMatch ? 'border-t-4 border-t-[#FFD700]' : ''}`}>
+                <div key={d.name} className={`bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm relative ${isPerfectMatch ? 'border-t-4 border-t-amber-400' : ''}`}>
                   {isPerfectMatch && (
-                    <div className="bg-[#FFD700] text-[#1A1C1E] text-[10px] font-bold text-center uppercase tracking-widest py-1 shadow-sm">
+                    <div className="bg-amber-400 text-amber-950 text-[10px] font-bold text-center uppercase tracking-widest py-1 shadow-sm">
                       Excellent Town
                     </div>
                   )}
@@ -1141,7 +1141,7 @@ export default function Homebase() {
                     </div>
                   </div>
                   
-                  <div className="divide-y divide-[#D4E8F0]">
+                  <div className="divide-y divide-slate-100">
                     {priorityOrder.map((key, rank) => {
                       const dim = DIMS.find(dim => dim.key === key)!;
                       const score = (d as any)[dim.scoreKey];
@@ -1149,11 +1149,11 @@ export default function Homebase() {
                         <div key={key} className="p-4 flex items-center justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="font-mono text-[10px] text-[#6E8A96] uppercase tracking-widest">#{rank + 1}</span>
-                              <span className="font-bold text-[13px] text-[#3D4347] uppercase tracking-tight">{dim.label}</span>
+                              <span className="font-mono text-[10px] text-slate-400 uppercase tracking-widest">#{rank + 1}</span>
+                              <span className="font-bold text-[13px] text-slate-900 uppercase tracking-tight">{dim.label}</span>
                             </div>
-                            <div className="text-base font-bold text-[#6E8A96]">N/A</div>
-                            <div className="text-[11px] text-[#6E8A96] font-mono leading-tight">data not available</div>
+                            <div className="text-base font-bold text-slate-400">N/A</div>
+                            <div className="text-[11px] text-slate-400 font-mono leading-tight">data not available</div>
                           </div>
                         </div>
                       );
@@ -1208,7 +1208,7 @@ export default function Homebase() {
                       return (
                         <div 
                           key={key} 
-                          className={`p-4 flex flex-col gap-2 transition-colors ${isExpandable ? 'cursor-pointer hover:bg-[#F7FBFF]' : ''}`}
+                          className={`p-4 flex flex-col gap-2 transition-colors ${isExpandable ? 'cursor-pointer hover:bg-slate-50' : ''}`}
                           onClick={() => {
                             if (isExpandable) {
                               setExpandedCard(isExpanded ? null : `${d.name}-${key}-mobile`);
@@ -1218,19 +1218,19 @@ export default function Homebase() {
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-0.5">
-                                <span className="font-mono text-[10px] text-[#6E8A96] uppercase tracking-widest">#{rank + 1}</span>
-                                <span className="font-bold text-[13px] text-[#3D4347] uppercase tracking-tight">{dim.label}</span>
+                                <span className="font-mono text-[10px] text-slate-400 uppercase tracking-widest">#{rank + 1}</span>
+                                <span className="font-bold text-[13px] text-slate-900 uppercase tracking-tight">{dim.label}</span>
                                 {isExpandable && (
                                   <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
                                     <ChevronRight size={12} className="text-[#0471A4]" />
                                   </div>
                                 )}
                               </div>
-                              <div className="text-base font-bold text-[#1A1C1E]">{valDisplay}</div>
-                              <div className="text-[11px] text-[#6E8A96] font-mono">{subDisplay}</div>
+                              <div className="text-base font-bold text-slate-900">{valDisplay}</div>
+                              <div className="text-[11px] text-slate-400 font-mono">{subDisplay}</div>
                             </div>
                             <div className="w-24 flex flex-col items-end gap-1.5">
-                              <div className="w-full h-1.5 bg-[#D4E8F0] rounded-full overflow-hidden">
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                 <div className="h-full" style={{ width: `${dynamicScore}%`, backgroundColor: barColor(dynamicScore) }}></div>
                               </div>
                               <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full font-mono whitespace-nowrap ${tagClass(dynamicScore)}`}>
@@ -1245,7 +1245,7 @@ export default function Homebase() {
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden mt-1 pt-3 border-t border-[#D4E8F0]"
+                                className="overflow-hidden mt-1 pt-3 border-t border-slate-100"
                               >
                                 {key === 'localScene' && (
                                   <>
@@ -1257,11 +1257,11 @@ export default function Homebase() {
                                             <div className="w-5 h-5 rounded-lg bg-[#0471A4]/10 flex items-center justify-center shrink-0 mt-0.5">
                                               <Zap size={10} className="text-[#0471A4]" />
                                             </div>
-                                            <span className="text-[12px] text-[#3D4347] leading-tight font-medium">{thing}</span>
+                                            <span className="text-[12px] text-slate-900 leading-tight font-medium">{thing}</span>
                                           </div>
                                         ))
                                       ) : (
-                                        <div className="text-[12px] text-[#6E8A96] italic">New spots opening soon...</div>
+                                        <div className="text-[12px] text-slate-400 italic">New spots opening soon...</div>
                                       )}
                                     </div>
                                   </>
@@ -1282,7 +1282,7 @@ export default function Homebase() {
                                             className={`px-3 py-1.5 rounded-full text-[11px] font-bold font-mono transition-all ${
                                               isActive 
                                                 ? 'bg-[#0471A4] text-white shadow-sm' 
-                                                : 'bg-[#F0F7FA] text-[#6E8A96]'
+                                                : 'bg-slate-100 text-slate-500'
                                             }`}
                                           >
                                             {m}
@@ -1308,7 +1308,7 @@ export default function Homebase() {
                                             className={`px-3 py-1.5 rounded-full text-[11px] font-bold font-mono transition-all ${
                                               isActive 
                                                 ? 'bg-[#0471A4] text-white shadow-sm' 
-                                                : 'bg-[#F0F7FA] text-[#6E8A96]'
+                                                : 'bg-slate-100 text-slate-500'
                                             }`}
                                           >
                                             {p.toUpperCase()}
@@ -1334,7 +1334,7 @@ export default function Homebase() {
                                             className={`px-3 py-1.5 rounded-full text-[11px] font-bold font-mono transition-all ${
                                               isActive 
                                                 ? 'bg-[#0471A4] text-white shadow-sm' 
-                                                : 'bg-[#F0F7FA] text-[#6E8A96]'
+                                                : 'bg-slate-100 text-slate-500'
                                             }`}
                                           >
                                             {p.toUpperCase()}
@@ -1355,7 +1355,7 @@ export default function Homebase() {
                 );
               })}
             </div>
-            <div className="text-[13px] font-mono text-[#6E8A96] mt-4 text-center">
+            <div className="text-[13px] font-mono text-slate-400 mt-4 text-center">
               Sources: <a href="https://www.census.gov" className="text-[#0471A4] hover:underline">US Census ACS 2023</a> · Niche school ratings · NJ property tax records · WalkScore
             </div>
           </div>
