@@ -379,8 +379,6 @@ function Orbit() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>(Object.keys(categorizedPresets)[0]);
   const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   // --- Auth & Data Fetching ---
   useEffect(() => {
@@ -389,59 +387,11 @@ function Orbit() {
         setUser(currentUser);
       } else {
         setUser({ uid: 'guest-user', displayName: 'Guest User' } as any);
-        setIsDataLoaded(true); // Guest user doesn't load data
       }
       setIsAuthReady(true);
     });
     return () => unsubscribe();
   }, []);
-
-  // Load Data
-  useEffect(() => {
-    if (!user || user.uid === 'guest-user') return;
-    
-    let isMounted = true;
-    const loadData = async () => {
-      try {
-        const docRef = doc(db, 'users', user.uid, 'orbitData', 'main');
-        const docSnap = await getDocFromServer(docRef);
-        if (docSnap.exists() && isMounted) {
-          const data = docSnap.data();
-          if (data.profile) setProfile(data.profile);
-          if (data.expenses) setExpenses(data.expenses);
-        }
-      } catch (error) {
-        console.error("Error loading data", error);
-      } finally {
-        if (isMounted) setIsDataLoaded(true);
-      }
-    };
-    loadData();
-    return () => { isMounted = false; };
-  }, [user]);
-
-  // Auto-Save Data
-  useEffect(() => {
-    if (!user || user.uid === 'guest-user' || !isDataLoaded) return;
-
-    setSaveStatus('saving');
-    const timer = setTimeout(async () => {
-      try {
-        await setDoc(doc(db, 'users', user.uid, 'orbitData', 'main'), {
-          profile,
-          expenses,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-        setSaveStatus('saved');
-        setTimeout(() => setSaveStatus('idle'), 2000);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/orbitData/main`);
-        setSaveStatus('idle');
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [profile, expenses, user, isDataLoaded]);
 
   // Validate connection to Firestore
   useEffect(() => {
@@ -617,16 +567,6 @@ function Orbit() {
           <div className="flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-4">
-                {user.uid !== 'guest-user' && (
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] text-[10px] font-mono uppercase tracking-widest border transition-all ${
-                    saveStatus === 'saving' ? 'bg-[#E8E4D0] border-[#E8E4D0] text-[#8C8670]' :
-                    saveStatus === 'saved' ? 'bg-[#1E5C38]/10 border-[#1E5C38]/20 text-[#1E5C38]' :
-                    'bg-[#FAF9F6] border-[#E8E4D0] text-[#8C8670]'
-                  }`}>
-                    <Save size={12} />
-                    {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Auto-Saved'}
-                  </div>
-                )}
                 <div className="text-right hidden sm:block">
                   <div className="text-xs font-bold text-[#2C3338]">{user.displayName}</div>
                   <div className="text-[10px] text-[#8C8670] font-mono">{user.email}</div>
