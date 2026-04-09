@@ -369,14 +369,9 @@ function Orbit() {
         setUser({ uid: 'guest-user', displayName: 'Guest User' } as any);
       }
       setIsAuthReady(true);
-      
-      // Redirect to landing page if on /orbit
-      if (location.pathname === '/orbit') {
-        navigate('/');
-      }
     });
     return () => unsubscribe();
-  }, [location.pathname, navigate]);
+  }, []);
 
   // Validate connection to Firestore
   useEffect(() => {
@@ -542,7 +537,7 @@ function Orbit() {
                   <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                     <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
                     <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator <span className="text-[9px] text-[#C5A059] block">(In Production)</span></button>
-                    <button onClick={() => navigate('/')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
+                    <button onClick={() => navigate('/orbit')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
                   </div>
                 </div>
               </>
