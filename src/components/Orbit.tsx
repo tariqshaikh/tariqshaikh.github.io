@@ -359,6 +359,7 @@ function Orbit() {
   };
 
   const [selectedCategory, setSelectedCategory] = useState<string>(Object.keys(categorizedPresets)[0]);
+  const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
 
   // --- Auth & Data Fetching ---
   useEffect(() => {
@@ -759,20 +760,28 @@ function Orbit() {
               </div>
             </section>
 
-            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
-              <h2 className="font-serif text-xl font-bold text-[#2C3338] mb-6 flex items-center gap-3">
-                <Info size={20} className="text-[#C5A059]" />
-                Sinking Fund Logic
-              </h2>
-              <div className="space-y-6">
-                <div className="p-4 bg-[#FAF9F6] border-l-2 border-[#C5A059]">
-                  <p className="text-sm text-[#8C8670] mb-1 italic">Monthly Set-Aside</p>
-                  <p className="text-lg font-serif font-bold text-[#2C3338]">${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} / mo</p>
-                  <p className="text-xs text-[#C5A059] mt-2 font-mono">To cover all irregular expenses</p>
+            <section 
+              onClick={() => setShowSinkingFundModal(true)}
+              className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] shadow-sm cursor-pointer hover:border-[#C5A059] transition-all group"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-serif text-lg font-bold text-[#2C3338] flex items-center gap-2">
+                  <Info size={16} className="text-[#C5A059]" />
+                  Sinking Fund Strategy
+                </h2>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] opacity-0 group-hover:opacity-100 transition-opacity">
+                  Click to learn more
+                </span>
+              </div>
+              
+              <div className="p-4 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-[2px] flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Monthly Set-Aside</p>
+                  <p className="text-2xl font-serif font-bold text-[#2C3338]">${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} <span className="text-sm text-[#8C8670] font-sans font-normal">/ mo</span></p>
                 </div>
-                <p className="text-xs text-[#8C8670] leading-relaxed italic">
-                  By saving this amount monthly into a dedicated "Sinking Fund" account, you neutralize the impact of large one-time hits like car insurance or property taxes.
-                </p>
+                <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center group-hover:bg-[#C5A059] transition-colors">
+                  <ChevronRight size={16} className="text-[#C5A059] group-hover:text-white transition-colors" />
+                </div>
               </div>
             </section>
           </div>
@@ -1175,6 +1184,86 @@ function Orbit() {
           </div>
         </div>
       </footer>
+      {/* Sinking Fund Modal */}
+      <AnimatePresence>
+        {showSinkingFundModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSinkingFundModal(false)}
+              className="absolute inset-0 bg-[#2C3338]/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-[#FAF9F6] w-full max-w-2xl rounded-[2px] shadow-2xl relative z-10 overflow-hidden border border-[#E8E4D0]"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-8">
+                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] flex items-center gap-3">
+                    <Info size={24} className="text-[#C5A059]" />
+                    Sinking Fund Strategy
+                  </h2>
+                  <button 
+                    onClick={() => setShowSinkingFundModal(false)}
+                    className="text-[#8C8670] hover:text-[#2C3338] transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="p-6 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-[2px] text-center">
+                    <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Your Monthly Set-Aside</p>
+                    <p className="text-4xl font-serif font-bold text-[#2C3338]">${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="border-b border-[#E8E4D0] pb-6">
+                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
+                        <span className="text-[#C5A059] font-mono text-[11px]">01.</span> Where does this number come from?
+                      </h4>
+                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
+                        We took your total annual orbiting expenses (${totalAnnualOrbitExpenses.toLocaleString()}) and divided it by 12. This smooths out the "spikes" of irregular bills (like annual premiums or holidays) into a flat, predictable monthly cost.
+                      </p>
+                    </div>
+
+                    <div className="border-b border-[#E8E4D0] pb-6">
+                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
+                        <span className="text-[#C5A059] font-mono text-[11px]">02.</span> Where should I keep this money?
+                      </h4>
+                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
+                        <strong>Open a separate High-Yield Savings Account (HYSA).</strong> Do not keep this in your main checking account. Mixing it with your daily spending money leads to accidental spending. A separate HYSA keeps it safe, liquid, and earns you interest while it waits to be deployed.
+                      </p>
+                    </div>
+
+                    <div className="border-b border-[#E8E4D0] pb-6">
+                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
+                        <span className="text-[#C5A059] font-mono text-[11px]">03.</span> How long do I do this?
+                      </h4>
+                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
+                        <strong>Perpetually.</strong> This is not a temporary savings goal; it is a permanent cash flow management system. As long as you have irregular expenses orbiting your life, you must feed the sinking fund.
+                      </p>
+                    </div>
+
+                    <div className="pt-2">
+                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
+                        <span className="text-[#C5A059] font-mono text-[11px]">04.</span> The Golden Rule: Automate It
+                      </h4>
+                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
+                        Set up an automatic transfer from your checking to your HYSA for exactly ${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} on the 1st of every month (or split it per paycheck). When an orbiting bill is due, transfer the exact amount back to checking and pay it.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
