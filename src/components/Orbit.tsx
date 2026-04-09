@@ -7,6 +7,7 @@ import {
   MessageSquare, 
   ChevronLeft, 
   ChevronDown,
+  ChevronRight,
   ArrowUpRight, 
   ArrowDownRight, 
   DollarSign, 
@@ -23,7 +24,8 @@ import {
   Wallet,
   ShieldCheck,
   Plus,
-  Menu
+  Menu,
+  X
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -245,9 +247,8 @@ function Orbit() {
       { id: '2', label: 'Car Payment', amount: 450 },
       { id: '3', label: 'Student Loans', amount: 300 },
       { id: '4', label: 'Utilities', amount: 250 },
-      { id: '5', label: 'Groceries', amount: 600 },
-      { id: '6', label: 'Insurance', amount: 150 },
-      { id: '7', label: 'Other', amount: 250 }
+      { id: '5', label: 'Day Care', amount: 1200 },
+      { id: '6', label: 'Other', amount: 250 }
     ],
     savingsGoal: 1000,
     cardColors: {
@@ -286,20 +287,31 @@ function Orbit() {
   ];
 
   const categorizedPresets = {
+    'Daily Living & Variable': [
+      { name: 'Groceries', amount: 800, frequency: 'monthly', category: 'daily_living', month: 1 },
+      { name: 'Dining Out', amount: 300, frequency: 'monthly', category: 'daily_living', month: 1 },
+      { name: 'Gas / Transit', amount: 200, frequency: 'monthly', category: 'daily_living', month: 1 },
+      { name: 'Gifts', amount: 500, frequency: 'annual', category: 'daily_living', month: 12 },
+      { name: 'Personal Care', amount: 100, frequency: 'monthly', category: 'daily_living', month: 1 },
+      { name: 'Pet Care', amount: 100, frequency: 'monthly', category: 'daily_living', month: 1 },
+      { name: 'Clothing', amount: 200, frequency: 'quarterly', category: 'daily_living', month: 1 },
+      { name: 'Custom Expense', amount: 0, frequency: 'monthly', category: 'other', month: 1 },
+    ],
     'Streaming & Entertainment': [
-      { name: 'Netflix', amount: 20, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Hulu', amount: 15, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Disney+', amount: 14, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'HBO Max', amount: 16, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Spotify', amount: 11, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'YouTube Premium', amount: 14, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Paramount+', amount: 12, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Peacock', amount: 10, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Apple TV+', amount: 10, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Audible', amount: 15, frequency: 'annual', category: 'subscription', month: 1 },
+      { name: 'Netflix', amount: 23, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Hulu', amount: 18, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Disney+', amount: 140, frequency: 'annual', category: 'subscription', month: 1 },
+      { name: 'HBO Max', amount: 16, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Spotify', amount: 120, frequency: 'annual', category: 'subscription', month: 1 },
+      { name: 'YouTube Premium', amount: 14, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Paramount+', amount: 12, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Peacock', amount: 12, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Apple TV+', amount: 10, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Audible', amount: 15, frequency: 'monthly', category: 'subscription', month: 1 },
       { name: 'Nintendo Switch Online', amount: 50, frequency: 'annual', category: 'subscription', month: 10 },
       { name: 'PlayStation Plus', amount: 80, frequency: 'annual', category: 'subscription', month: 11 },
       { name: 'Xbox Game Pass', amount: 120, frequency: 'annual', category: 'subscription', month: 12 },
+      { name: 'Custom Entertainment', amount: 0, frequency: 'monthly', category: 'subscription', month: 1 },
     ],
     'Credit Cards & Finance': [
       { name: 'Amex Platinum', amount: 695, frequency: 'annual', category: 'subscription', month: 1 },
@@ -310,6 +322,7 @@ function Orbit() {
       { name: 'Citi Premier', amount: 95, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Tax Preparation', amount: 300, frequency: 'annual', category: 'tax', month: 3 },
       { name: 'Financial Advisor Fee', amount: 1000, frequency: 'annual', category: 'other', month: 12 },
+      { name: 'Custom Finance', amount: 0, frequency: 'annual', category: 'other', month: 1 },
     ],
     'Insurance & Protection': [
       { name: 'Car Insurance', amount: 1200, frequency: 'semi-annual', category: 'insurance', month: 3 },
@@ -318,6 +331,7 @@ function Orbit() {
       { name: 'Home Insurance', amount: 1500, frequency: 'annual', category: 'insurance', month: 1 },
       { name: 'Umbrella Policy', amount: 300, frequency: 'annual', category: 'insurance', month: 5 },
       { name: 'Identity Theft Protection', amount: 150, frequency: 'annual', category: 'insurance', month: 2 },
+      { name: 'Custom Insurance', amount: 0, frequency: 'annual', category: 'insurance', month: 1 },
     ],
     'Home & Auto Maintenance': [
       { name: 'Car Maintenance', amount: 400, frequency: 'quarterly', category: 'maintenance', month: 5 },
@@ -327,6 +341,7 @@ function Orbit() {
       { name: 'Pool Opening/Closing', amount: 600, frequency: 'semi-annual', category: 'maintenance', month: 5 },
       { name: 'Gutter Cleaning', amount: 200, frequency: 'semi-annual', category: 'maintenance', month: 4 },
       { name: 'Landscaping Mulch', amount: 500, frequency: 'annual', category: 'maintenance', month: 4 },
+      { name: 'Custom Maintenance', amount: 0, frequency: 'annual', category: 'maintenance', month: 1 },
     ],
     'Travel & Leisure': [
       { name: 'Annual Vacation', amount: 5000, frequency: 'annual', category: 'other', month: 7 },
@@ -334,32 +349,38 @@ function Orbit() {
       { name: 'TSA PreCheck / Global Entry', amount: 100, frequency: 'one-time', category: 'other', month: 1 },
       { name: 'National Parks Pass', amount: 80, frequency: 'annual', category: 'subscription', month: 5 },
       { name: 'Ski Pass', amount: 800, frequency: 'annual', category: 'subscription', month: 10 },
+      { name: 'Custom Travel', amount: 0, frequency: 'annual', category: 'other', month: 1 },
     ],
     'Education & Learning': [
       { name: 'Tuition Payment', amount: 10000, frequency: 'semi-annual', category: 'other', month: 8 },
       { name: 'School Supplies', amount: 300, frequency: 'annual', category: 'other', month: 8 },
       { name: 'Online Courses', amount: 200, frequency: 'quarterly', category: 'subscription', month: 1 },
       { name: 'Professional Certification', amount: 500, frequency: 'annual', category: 'other', month: 6 },
+      { name: 'Custom Education', amount: 0, frequency: 'annual', category: 'other', month: 1 },
     ],
     'Gifts & Donations': [
       { name: 'Holiday Gifts', amount: 1500, frequency: 'annual', category: 'other', month: 12 },
       { name: 'Birthday Fund', amount: 1000, frequency: 'annual', category: 'other', month: 1 },
       { name: 'Annual Charity Donation', amount: 2000, frequency: 'annual', category: 'other', month: 12 },
       { name: 'Alumni Association', amount: 100, frequency: 'annual', category: 'subscription', month: 9 },
+      { name: 'Custom Gift/Donation', amount: 0, frequency: 'annual', category: 'other', month: 1 },
     ],
     'Memberships & Subscriptions': [
       { name: 'Amazon Prime', amount: 139, frequency: 'annual', category: 'subscription', month: 7 },
-      { name: 'Costco Membership', amount: 60, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Gym Membership', amount: 600, frequency: 'annual', category: 'subscription', month: 1 },
+      { name: 'Costco Membership', amount: 65, frequency: 'annual', category: 'subscription', month: 1 },
+      { name: 'Gym Membership', amount: 60, frequency: 'monthly', category: 'subscription', month: 1 },
       { name: 'Professional Dues', amount: 300, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Property Tax', amount: 4500, frequency: 'annual', category: 'tax', month: 10 },
       { name: 'Cloud Storage (iCloud/Google)', amount: 120, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Newspaper/Journal Sub', amount: 150, frequency: 'annual', category: 'subscription', month: 1 },
+      { name: 'Custom Membership', amount: 0, frequency: 'annual', category: 'subscription', month: 1 },
     ]
   };
 
   const [selectedCategory, setSelectedCategory] = useState<string>(Object.keys(categorizedPresets)[0]);
   const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   // --- Auth & Data Fetching ---
   useEffect(() => {
@@ -368,11 +389,59 @@ function Orbit() {
         setUser(currentUser);
       } else {
         setUser({ uid: 'guest-user', displayName: 'Guest User' } as any);
+        setIsDataLoaded(true); // Guest user doesn't load data
       }
       setIsAuthReady(true);
     });
     return () => unsubscribe();
   }, []);
+
+  // Load Data
+  useEffect(() => {
+    if (!user || user.uid === 'guest-user') return;
+    
+    let isMounted = true;
+    const loadData = async () => {
+      try {
+        const docRef = doc(db, 'users', user.uid, 'orbitData', 'main');
+        const docSnap = await getDocFromServer(docRef);
+        if (docSnap.exists() && isMounted) {
+          const data = docSnap.data();
+          if (data.profile) setProfile(data.profile);
+          if (data.expenses) setExpenses(data.expenses);
+        }
+      } catch (error) {
+        console.error("Error loading data", error);
+      } finally {
+        if (isMounted) setIsDataLoaded(true);
+      }
+    };
+    loadData();
+    return () => { isMounted = false; };
+  }, [user]);
+
+  // Auto-Save Data
+  useEffect(() => {
+    if (!user || user.uid === 'guest-user' || !isDataLoaded) return;
+
+    setSaveStatus('saving');
+    const timer = setTimeout(async () => {
+      try {
+        await setDoc(doc(db, 'users', user.uid, 'orbitData', 'main'), {
+          profile,
+          expenses,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}/orbitData/main`);
+        setSaveStatus('idle');
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [profile, expenses, user, isDataLoaded]);
 
   // Validate connection to Firestore
   useEffect(() => {
@@ -548,6 +617,16 @@ function Orbit() {
           <div className="flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-4">
+                {user.uid !== 'guest-user' && (
+                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-[2px] text-[10px] font-mono uppercase tracking-widest border transition-all ${
+                    saveStatus === 'saving' ? 'bg-[#E8E4D0] border-[#E8E4D0] text-[#8C8670]' :
+                    saveStatus === 'saved' ? 'bg-[#1E5C38]/10 border-[#1E5C38]/20 text-[#1E5C38]' :
+                    'bg-[#FAF9F6] border-[#E8E4D0] text-[#8C8670]'
+                  }`}>
+                    <Save size={12} />
+                    {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Auto-Saved'}
+                  </div>
+                )}
                 <div className="text-right hidden sm:block">
                   <div className="text-xs font-bold text-[#2C3338]">{user.displayName}</div>
                   <div className="text-[10px] text-[#8C8670] font-mono">{user.email}</div>

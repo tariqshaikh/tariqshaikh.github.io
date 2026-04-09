@@ -146,6 +146,11 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    // Orbit Data Rules
+    match /users/{userId}/orbitData/{docId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // Section Settings Rules
     match /users/{userId}/sectionSettings/{settingId} {
       allow read, write: if isOwner(userId);
