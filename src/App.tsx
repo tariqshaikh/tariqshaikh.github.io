@@ -21,12 +21,12 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Portfolio />} />
+        <Route path="/" element={<Orbit />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/login" element={<Login />} />
         <Route path="/homebase" element={<Homebase />} />
-        <Route path="/orbit" element={<Login />} />
-        <Route path="/orbit/dashboard" element={<OrbitHome />} />
+        <Route path="/orbit" element={<Orbit />} />
+        <Route path="/orbit/dashboard" element={<Orbit />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />
         <Route path="/orbit/simulator" element={<Orbit />} />

@@ -118,7 +118,7 @@ export default function Portfolio() {
             <div className="absolute top-0 left-0 w-[3px] h-full bg-[#C5A059] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-[#8C8670] tracking-widest">P — 002</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">In Development</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Take a look!</span>
             </div>
             <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
               <span className="font-serif font-bold italic">Orbit</span>
@@ -498,21 +498,21 @@ export default function Portfolio() {
                         <div className="border border-[#EEEEEF] rounded-lg p-6 bg-[#F7FBFF]">
                           <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
-                            Orbit Expense Tracker
+                            Orbit Expense Engine
                           </h3>
-                          <p className="text-[15px] text-[#6E8A96]">A dedicated system for logging non-monthly expenses (Annual, Semi-Annual, Quarterly) with specific month-of-impact tracking.</p>
+                          <p className="text-[15px] text-[#6E8A96]">A dedicated system for logging non-monthly expenses (Annual, Semi-Annual, Quarterly, Monthly, Weekly) with specific month-of-impact tracking.</p>
                         </div>
                         <div className="border border-[#EEEEEF] rounded-lg p-6">
                           <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
                             12-Month Cash Flow Visualizer
                           </h3>
-                          <p className="text-[15px] text-[#6E8A96]">An interactive area chart showing projected bank balance throughout the year, highlighting "Danger Zones" where balance hits the floor.</p>
+                          <p className="text-[15px] text-[#6E8A96]">An interactive grid showing projected annual spend, highlighting "Danger Zones" and categorizing irregular hits into a clear visual dashboard.</p>
                         </div>
                         <div className="border border-[#EEEEEF] rounded-lg p-6">
                           <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
-                            Sinking Fund Calculator
+                            Sinking Fund Logic
                           </h3>
                           <p className="text-[15px] text-[#6E8A96]">Automatically calculates the exact monthly amount needed to be set aside to cover all orbiting expenses without stress.</p>
                         </div>
@@ -644,8 +644,8 @@ export default function Portfolio() {
                           time: 'Q1 2026',
                           items: [
                             { t: 'Orbit Expense Engine', d: 'Core logic for tracking irregular expenses and their monthly impact.', s: 'Done', dot: 'bg-green-600' },
-                            { t: '12-Month Visualizer', d: 'Real-time cash flow chart showing balance spikes and floors.', s: 'Done', dot: 'bg-green-600' },
-                            { t: 'Sinking Fund Logic', d: 'Automated calculation of monthly set-asides for annual hits.', s: 'Done', dot: 'bg-green-600' },
+                            { t: 'Fluid Expense Grid', d: 'Real-time dashboard showing annual income, spend, surplus, and categorized irregular hits.', s: 'Done', dot: 'bg-green-600' },
+                            { t: 'Dynamic Fixed Expenses', d: 'Customizable monthly fixed expenses to accurately calculate baseline spend.', s: 'Done', dot: 'bg-green-600' },
                           ]
                         },
                         { 
@@ -654,8 +654,18 @@ export default function Portfolio() {
                           title: 'AI Advisory', 
                           time: 'Q2 2026',
                           items: [
-                            { t: 'Gemini Wealth Coach', d: 'Personalized strategic advice based on scenario analysis.', s: 'Discovery', dot: 'bg-[#C5A059]' },
+                            { t: 'Gemini Wealth Coach', d: 'Personalized strategic advice based on annual cash flow analysis.', s: 'Done', dot: 'bg-[#C5A059]' },
                             { t: 'Statement Analyzer', d: 'Granular insights from uploaded financial statements.', s: 'Planned', dot: 'bg-[#C5A059]' },
+                          ]
+                        },
+                        { 
+                          badge: 'V3 — Wealth', 
+                          badgeClass: 'bg-slate-50 text-slate-400 border border-slate-200', 
+                          title: 'Surplus Deployment', 
+                          time: 'Q3 2026',
+                          items: [
+                            { t: 'Surplus Ideas', d: 'Actionable strategies for deploying the Annual Surplus into investments.', s: 'Discovery', dot: 'bg-slate-400' },
+                            { t: 'Wealth Simulator', d: 'Comprehensive retirement modeling and scenario analysis.', s: 'In Progress', dot: 'bg-slate-400' },
                           ]
                         }
                       ].map((phase, i) => (

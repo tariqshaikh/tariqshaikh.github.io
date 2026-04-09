@@ -1,42 +1,40 @@
 # Product Requirements Document: Orbit
 
 ## 1. Executive Summary
-"Most people know what they spent yesterday, but they have no idea how today's decisions impact their life 10 years from now. Orbit is a 'What-If' engine for your financial future."
+"Most people know what they spent yesterday, but they are blindsided by the 'Orbiting' expenses that hit once or twice a year. Orbit is a strategic cash flow engine for your annual financial cycle."
 
-Orbit is a strategic wealth simulator designed to help users move beyond backward-looking expense tracking. By focusing on forward-looking scenarios (e.g., career changes, home purchases, aggressive investing), Orbit provides a "Financial North Star" that helps users understand the long-term opportunity cost of their current decisions.
+Orbit is a cash flow intelligence tool designed to help users manage irregular, non-monthly expenses (car insurance, annual fees, taxes). By visualizing the "Orbit" of these expenses, the app provides a clear 12-month trajectory, helping users build sinking funds and avoid financial surprises.
 
 ## 2. Problem Statement
 ### The User Pain
-- Financial tools are either too simple (expense trackers like Mint/Rocket Money) or too complex (Excel spreadsheets with 50 tabs). Users lack a middle ground that provides strategic clarity.
-- Users suffer from "Decision Paralysis" because they cannot easily visualize the trade-offs between competing priorities (e.g., "Should I pay off my student loans or max out my Roth IRA?").
+- Monthly budgeting tools focus on the 30-day cycle, but fail to prepare users for the "Big Hits"—those irregular expenses that orbit your life and cause stress when they land.
+- Users often feel "broke" during months with insurance premiums or annual fees, even if their annual income is sufficient. They lack a tool that smooths these spikes into a predictable monthly set-aside.
 
 ### The Goal
-To create a tool that turns "Net Worth" from a static number into a living, breathing trajectory. We want to move users from "What did I spend?" to "What can I become?"
+To create a tool that turns "Annual Cash Flow" from a guessing game into a precise orbit. We want to move users from "Surprise Expenses" to "Strategic Sinking Funds."
 
 ## 3. Core Features (MVP)
-### The "What-If" Engine
-Interactive sliders to simulate career changes, market returns, and major purchases with real-time impact on "Retirement Date."
+### Orbit Expense Engine
+A dedicated system for logging non-monthly expenses (Annual, Semi-Annual, Quarterly, Monthly, Weekly) with specific month-of-impact tracking.
 
-### Opportunity Cost Tracker
-Translates current spending into future value. "That $100 dinner is actually $1,200 of your future house downpayment."
+### 12-Month Cash Flow Visualizer
+An interactive grid showing projected annual spend, highlighting "Danger Zones" and categorizing irregular hits into a clear visual dashboard.
 
-### Retirement Intelligence
-A robust retirement planner with a workflow similar to Root Financial's planner. It includes comprehensive cash flow modeling, scenario analysis, and projections for required vs. projected portfolio at retirement age.
+### Sinking Fund Logic
+Automatically calculates the exact monthly amount needed to be set aside to cover all orbiting expenses without stress.
 
 ### AI Wealth Coach
-A Gemini-powered advisor that analyzes your specific scenario and suggests the most efficient "Next Move."
-
-### Financial Position Ledger (Live)
-- **Real-time Net Worth:** Accurate calculation based on categorized assets and liabilities.
-- **Auto-Save:** Instant synchronization of ledger entries to ensure data integrity without manual intervention.
-- **Multi-Currency Support:** Support for 15+ major global currencies with real-time conversion capabilities.
+A Gemini-powered advisor that analyzes your specific annual cash flow scenario and suggests high-impact strategic insights on managing the annual cycle.
 
 ## 4. Success Metrics
-- **Retention:** Users returning monthly to update their "Wealth Pulse."
-- **Scenario Creation:** Average number of "What-If" scenarios saved per user.
+- **Retention:** Users returning monthly to update their "Orbit."
+- **Expense Logging:** Average number of orbiting expenses tracked per user.
 - **AI Engagement:** Number of strategic insights generated and acted upon.
 
-## 5. Technical Constraints
+## 5. Future Ideas
+- **Surplus Investments:** Actionable strategies for deploying the "Annual Surplus" into investments, high-yield savings, or other wealth-building vehicles.
+- **Statement Analyzer:** Upload financial statements to automatically detect and categorize orbiting expenses.
+
+## 6. Technical Constraints
 - **Security:** Firestore Security Rules must strictly enforce data ownership and validation.
-- **Performance:** Real-time updates must be debounced to prevent excessive database writes while maintaining a responsive UI.
 - **Privacy:** Personally Identifiable Information (PII) must be handled with extreme care and isolated from public access.

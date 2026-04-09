@@ -22,7 +22,8 @@ import {
   AlertCircle,
   Wallet,
   ShieldCheck,
-  Plus
+  Plus,
+  Menu
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -122,8 +123,9 @@ interface RecurringExpense {
   name: string;
   amount: number;
   month: number; // 1-12
-  frequency: 'annual' | 'semi-annual' | 'quarterly' | 'one-time';
-  category: 'insurance' | 'tax' | 'subscription' | 'maintenance' | 'other';
+  frequency: 'annual' | 'semi-annual' | 'quarterly' | 'monthly' | 'bi-weekly' | 'weekly' | 'one-time';
+  category: string;
+  customCategory?: string;
 }
 
 interface PersonIncome {
@@ -131,38 +133,66 @@ interface PersonIncome {
   frequencyPerMonth: number;
 }
 
-interface FixedExpenses {
-  mortgageRent: number;
-  carPayment: number;
-  studentLoans: number;
-  utilities: number;
-  groceries: number;
-  insurance: number;
-  other: number;
+interface FixedExpense {
+  id: string;
+  label: string;
+  amount: number;
 }
 
 interface FinanceProfile {
   primaryIncome: PersonIncome;
   spouseIncome: PersonIncome;
-  fixedExpenses: FixedExpenses;
+  fixedExpenses: FixedExpense[];
   savingsGoal: number;
+  cardColors: Record<string, string>;
 }
 
 // --- Components ---
 
-const StatCard = ({ label, value, subValue, icon: Icon, trend }: any) => (
-  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative overflow-hidden group shadow-sm">
-    <div className="absolute top-0 left-0 w-1 h-full bg-[#C5A059] opacity-0 group-hover:opacity-100 transition-opacity" />
-    <div className="flex justify-between items-start mb-4">
-      <div className="p-2 bg-[#C5A059]/10 rounded-[2px]">
-        <Icon size={20} className="text-[#C5A059]" />
-      </div>
-      {trend && (
-        <div className={`flex items-center gap-1 text-xs font-mono ${trend > 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
-          {trend > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-          {Math.abs(trend)}%
+const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string) => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const colors = ['#C5A059', '#1E5C38', '#8B0000', '#6E8A96', '#2C3338', '#8C8670'];
+  
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-1 hover:bg-[#E8E4D0] rounded-[2px] text-[#8C8670] transition-colors"
+      >
+        <Menu size={14} />
+      </button>
+      {isOpen && (
+        <div className="absolute top-full right-0 mt-1 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl z-50 flex gap-2">
+          {colors.map(c => (
+            <button
+              key={c}
+              onClick={() => { onChange(c); setIsOpen(false); }}
+              className={`w-4 h-4 rounded-full border ${color === c ? 'border-[#2C3338]' : 'border-transparent'}`}
+              style={{ backgroundColor: c }}
+            />
+          ))}
         </div>
       )}
+    </div>
+  );
+};
+
+const StatCard = ({ label, value, subValue, icon: Icon, trend, color = '#C5A059', onColorChange }: any) => (
+  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative overflow-visible group shadow-sm transition-colors" style={{ borderTopColor: color, borderTopWidth: '3px' }}>
+    <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: color }} />
+    <div className="flex justify-between items-start mb-4">
+      <div className="p-2 rounded-[2px]" style={{ backgroundColor: `${color}15` }}>
+        <Icon size={20} style={{ color }} />
+      </div>
+      <div className="flex items-center gap-2">
+        {trend && (
+          <div className={`flex items-center gap-1 text-xs font-mono ${trend > 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
+            {trend > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+            {Math.abs(trend)}%
+          </div>
+        )}
+        {onColorChange && <ColorPicker color={color} onChange={onColorChange} />}
+      </div>
     </div>
     <div className="font-mono text-[11px] uppercase tracking-widest text-[#8C8670] mb-1">{label}</div>
     <div className="text-3xl font-serif font-bold text-[#2C3338] mb-1">{value}</div>
@@ -210,16 +240,22 @@ function Orbit() {
   const [profile, setProfile] = useState<FinanceProfile>({
     primaryIncome: { paycheckAmount: 3500, frequencyPerMonth: 2 },
     spouseIncome: { paycheckAmount: 0, frequencyPerMonth: 0 },
-    fixedExpenses: {
-      mortgageRent: 2200,
-      carPayment: 450,
-      studentLoans: 300,
-      utilities: 250,
-      groceries: 600,
-      insurance: 150,
-      other: 250
-    },
+    fixedExpenses: [
+      { id: '1', label: 'Rent / Mortgage', amount: 2200 },
+      { id: '2', label: 'Car Payment', amount: 450 },
+      { id: '3', label: 'Student Loans', amount: 300 },
+      { id: '4', label: 'Utilities', amount: 250 },
+      { id: '5', label: 'Groceries', amount: 600 },
+      { id: '6', label: 'Insurance', amount: 150 },
+      { id: '7', label: 'Other', amount: 250 }
+    ],
     savingsGoal: 1000,
+    cardColors: {
+      income: '#1E5C38',
+      spend: '#8B0000',
+      surplus: '#C5A059',
+      totalSpend: '#1E5C38'
+    }
   });
 
   const [expenses, setExpenses] = useState<RecurringExpense[]>([
@@ -334,9 +370,9 @@ function Orbit() {
       }
       setIsAuthReady(true);
       
-      // Redirect to dashboard if logged in and on landing page
-      if (currentUser && location.pathname === '/orbit') {
-        navigate('/orbit/dashboard');
+      // Redirect to landing page if on /orbit
+      if (location.pathname === '/orbit') {
+        navigate('/');
       }
     });
     return () => unsubscribe();
@@ -364,13 +400,16 @@ function Orbit() {
   }, [profile.primaryIncome, profile.spouseIncome]);
 
   const monthlyFixedExpenses = useMemo(() => {
-    return Object.values(profile.fixedExpenses).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0);
+    return profile.fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   }, [profile.fixedExpenses]);
 
   const totalAnnualOrbitExpenses = useMemo(() => expenses.reduce((sum, e) => {
     if (e.frequency === 'annual' || e.frequency === 'one-time') return sum + e.amount;
     if (e.frequency === 'semi-annual') return sum + (e.amount * 2);
     if (e.frequency === 'quarterly') return sum + (e.amount * 4);
+    if (e.frequency === 'monthly') return sum + (e.amount * 12);
+    if (e.frequency === 'bi-weekly') return sum + (e.amount * 26);
+    if (e.frequency === 'weekly') return sum + (e.amount * 52);
     return sum;
   }, 0), [expenses]);
 
@@ -406,7 +445,7 @@ function Orbit() {
       `;
       
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
       
@@ -421,19 +460,29 @@ function Orbit() {
 
   const handleAddExpense = () => {
     if (newExpense.name && newExpense.amount) {
+      const finalCategory = newExpense.category === 'other' ? (newExpense.customCategory || 'other') : newExpense.category;
+      const expenseToSave = {
+        ...newExpense,
+        category: finalCategory
+      };
       if (editingExpenseId) {
-        setExpenses(expenses.map(e => e.id === editingExpenseId ? { ...newExpense, id: editingExpenseId } as RecurringExpense : e));
+        setExpenses(expenses.map(e => e.id === editingExpenseId ? { ...expenseToSave, id: editingExpenseId } as RecurringExpense : e));
       } else {
-        setExpenses([...expenses, { ...newExpense, id: Date.now().toString() } as RecurringExpense]);
+        setExpenses([...expenses, { ...expenseToSave, id: Date.now().toString() } as RecurringExpense]);
       }
-      setNewExpense({ name: '', amount: 0, month: 1, frequency: 'annual', category: 'other' });
+      setNewExpense({ name: '', amount: 0, month: 1, frequency: 'annual', category: 'other', customCategory: '' });
       setEditingExpenseId(null);
       setShowAddExpense(false);
     }
   };
 
   const editExpense = (exp: RecurringExpense) => {
-    setNewExpense(exp);
+    const isStandard = ['insurance', 'tax', 'subscription', 'maintenance'].includes(exp.category);
+    setNewExpense({
+      ...exp,
+      category: isStandard ? exp.category : 'other',
+      customCategory: isStandard ? '' : exp.category
+    });
     setEditingExpenseId(exp.id);
     setShowAddExpense(true);
   };
@@ -442,13 +491,34 @@ function Orbit() {
     setExpenses(expenses.filter(e => e.id !== id));
   };
 
+  const addFixedExpense = () => {
+    setProfile({
+      ...profile,
+      fixedExpenses: [...profile.fixedExpenses, { id: Date.now().toString(), label: 'New Expense', amount: 0 }]
+    });
+  };
+
+  const removeFixedExpense = (id: string) => {
+    setProfile({
+      ...profile,
+      fixedExpenses: profile.fixedExpenses.filter(e => e.id !== id)
+    });
+  };
+
+  const updateFixedExpense = (id: string, updates: Partial<FixedExpense>) => {
+    setProfile({
+      ...profile,
+      fixedExpenses: profile.fixedExpenses.map(e => e.id === id ? { ...e, ...updates } : e)
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#2C3338] font-sans selection:bg-[#C5A059]/30">
       {/* Header */}
       <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/" className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors group">
+            <Link to="/portfolio" className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors group">
               <ChevronLeft size={20} className="text-[#8C8670] group-hover:text-[#2C3338]" />
             </Link>
             <div className="flex items-center gap-3">
@@ -465,18 +535,14 @@ function Orbit() {
           <nav className="hidden md:flex items-center gap-6 mr-4">
             {user && (
               <>
-                <Link to="/orbit/dashboard" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Dashboard</Link>
-                
                 <div className="relative group py-2">
                   <button className="text-[11px] font-mono uppercase tracking-widest text-[#2C3338] transition-colors flex items-center gap-1">
                     Tools <ChevronDown size={12} />
                   </button>
                   <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
-                    <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Balance Sheet</button>
-                    {/* <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Retirement Planner</button> */}
-                    <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
-                    <button onClick={() => navigate('/orbit/history')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Historical Performance</button>
                     <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
+                    <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator <span className="text-[9px] text-[#C5A059] block">(In Production)</span></button>
+                    <button onClick={() => navigate('/')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
                   </div>
                 </div>
               </>
@@ -547,9 +613,120 @@ function Orbit() {
           </div>
         </div>
 
+        {/* Stats Grid (Full Width) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <StatCard 
+            label="Annual Income" 
+            value={`$${totalAnnualIncome.toLocaleString()}`} 
+            subValue="Gross yearly inflow"
+            icon={TrendingUp}
+            color={profile.cardColors.income}
+            onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, income: c}})}
+          />
+          <StatCard 
+            label="Annual Spend" 
+            value={`$${totalAnnualSpend.toLocaleString()}`} 
+            subValue="Fixed + Orbiting"
+            icon={RefreshCw}
+            color={profile.cardColors.spend}
+            onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, spend: c}})}
+          />
+          <StatCard 
+            label="Annual Surplus" 
+            value={`$${annualSurplus.toLocaleString()}`} 
+            subValue="Potential savings"
+            icon={Zap}
+            trend={annualSurplus > 0 ? 1 : -1}
+            color={profile.cardColors.surplus}
+            onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, surplus: c}})}
+          />
+        </div>
+
+        {/* Fluid Expense Grid (Full Width) */}
+        <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm mb-12">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Annual Finance Orbit</h2>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">Comprehensive view of all annual payments</p>
+            </div>
+            <button 
+              onClick={askAiCoach}
+              className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] rounded-[2px] text-xs font-bold hover:bg-[#B38F48] transition-all"
+            >
+              <Zap size={14} />
+              AI Insights
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {/* Total Spend Card (Large) */}
+            <div className="col-span-2 border p-6 rounded-[2px] flex flex-col justify-between relative group" style={{ backgroundColor: `${profile.cardColors.totalSpend}05`, borderColor: `${profile.cardColors.totalSpend}20` }}>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <ColorPicker 
+                  color={profile.cardColors.totalSpend} 
+                  onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, totalSpend: c}})} 
+                />
+              </div>
+              <div>
+                <h3 className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: profile.cardColors.totalSpend }}>Total Annual Spend</h3>
+                <div className="text-3xl font-serif font-bold text-[#2C3338]">${totalAnnualSpend.toLocaleString()}</div>
+              </div>
+              <div className="text-[10px] font-mono mt-4" style={{ color: `${profile.cardColors.totalSpend}99` }}>Jan 1 - Dec 31</div>
+            </div>
+
+            {/* Fixed Expense Cards */}
+            {profile.fixedExpenses.map((item, i) => {
+              const color = profile.cardColors[`fixed_${item.id}`] || '#C5A059';
+              return (
+                <div key={i} className="border p-4 rounded-[2px] flex flex-col justify-between transition-colors group relative" style={{ backgroundColor: `${color}05`, borderColor: '#E8E4D0' }}>
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ColorPicker 
+                      color={color} 
+                      onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`fixed_${item.id}`]: c}})} 
+                    />
+                  </div>
+                  <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6">{item.label}</h3>
+                  <div className="text-lg font-serif font-bold text-[#2C3338] mt-2">${(item.amount * 12).toLocaleString()}</div>
+                  <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic">Annual Total</div>
+                </div>
+              );
+            })}
+
+            {/* Orbiting Expense Categories */}
+            {Array.from(new Set(expenses.map(e => e.category))).map((cat, i) => {
+              const color = profile.cardColors[`cat_${cat}`] || '#2C3338';
+              const catTotal = expenses
+                .filter(e => e.category === cat)
+                .reduce((sum, e) => {
+                  if (e.frequency === 'annual' || e.frequency === 'one-time') return sum + e.amount;
+                  if (e.frequency === 'semi-annual') return sum + (e.amount * 2);
+                  if (e.frequency === 'quarterly') return sum + (e.amount * 4);
+                  if (e.frequency === 'monthly') return sum + (e.amount * 12);
+                  if (e.frequency === 'bi-weekly') return sum + (e.amount * 26);
+                  if (e.frequency === 'weekly') return sum + (e.amount * 52);
+                  return sum;
+                }, 0);
+              
+              return (
+                <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px] flex flex-col justify-between transition-colors group relative" style={{ borderTopColor: color, borderTopWidth: '2px' }}>
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ColorPicker 
+                      color={color} 
+                      onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`cat_${cat}`]: c}})} 
+                    />
+                  </div>
+                  <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6">Orbit: {cat}</h3>
+                  <div className="text-lg font-serif font-bold text-[#2C3338] mt-2">${catTotal.toLocaleString()}</div>
+                  <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic">Irregular Hits</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Controls */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="lg:col-span-5 space-y-8">
             <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
               <h2 className="font-serif text-xl font-bold text-[#2C3338] mb-8 flex items-center gap-3">
                 <Wallet size={20} className="text-[#C5A059]" />
@@ -563,15 +740,18 @@ function Orbit() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Paycheck</label>
-                      <input 
-                        type="number"
-                        value={profile.primaryIncome.paycheckAmount}
-                        onChange={(e) => setProfile({
-                          ...profile, 
-                          primaryIncome: { ...profile.primaryIncome, paycheckAmount: Number(e.target.value) }
-                        })}
-                        className="w-full bg-transparent border-b border-[#E8E4D0] py-1 text-sm font-serif focus:border-[#C5A059] outline-none"
-                      />
+                      <div className="flex items-center gap-1 border-b border-[#E8E4D0] focus-within:border-[#C5A059]">
+                        <span className="text-sm font-serif text-[#8C8670]">$</span>
+                        <input 
+                          type="number"
+                          value={profile.primaryIncome.paycheckAmount}
+                          onChange={(e) => setProfile({
+                            ...profile, 
+                            primaryIncome: { ...profile.primaryIncome, paycheckAmount: Number(e.target.value) }
+                          })}
+                          className="w-full bg-transparent py-1 text-sm font-serif outline-none"
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Freq / Mo</label>
@@ -595,15 +775,18 @@ function Orbit() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Paycheck</label>
-                        <input 
-                          type="number"
-                          value={profile.spouseIncome.paycheckAmount}
-                          onChange={(e) => setProfile({
-                            ...profile, 
-                            spouseIncome: { ...profile.spouseIncome, paycheckAmount: Number(e.target.value) }
-                          })}
-                          className="w-full bg-transparent border-b border-[#E8E4D0] py-1 text-sm font-serif focus:border-[#C5A059] outline-none"
-                        />
+                        <div className="flex items-center gap-1 border-b border-[#E8E4D0] focus-within:border-[#C5A059]">
+                          <span className="text-sm font-serif text-[#8C8670]">$</span>
+                          <input 
+                            type="number"
+                            value={profile.spouseIncome.paycheckAmount}
+                            onChange={(e) => setProfile({
+                              ...profile, 
+                              spouseIncome: { ...profile.spouseIncome, paycheckAmount: Number(e.target.value) }
+                            })}
+                            className="w-full bg-transparent py-1 text-sm font-serif outline-none"
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Freq / Mo</label>
@@ -623,27 +806,40 @@ function Orbit() {
 
                 {/* Fixed Expenses */}
                 <div className="space-y-4">
-                  <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670]">Monthly Fixed</h3>
-                  {[
-                    { key: 'mortgageRent', label: 'Rent / Mortgage' },
-                    { key: 'carPayment', label: 'Car Payment' },
-                    { key: 'studentLoans', label: 'Student Loans' },
-                    { key: 'utilities', label: 'Utilities' },
-                    { key: 'groceries', label: 'Groceries' },
-                    { key: 'insurance', label: 'Insurance' },
-                    { key: 'other', label: 'Other' }
-                  ].map(({ key, label }) => (
-                    <div key={key} className="flex justify-between items-center border-b border-[#E8E4D0]/50 pb-2">
-                      <label className="text-[11px] font-mono uppercase tracking-tighter text-[#8C8670]">{label}</label>
-                      <input 
-                        type="number"
-                        value={(profile.fixedExpenses as any)[key]}
-                        onChange={(e) => setProfile({
-                          ...profile,
-                          fixedExpenses: { ...profile.fixedExpenses, [key]: Number(e.target.value) }
-                        })}
-                        className="w-20 bg-transparent text-right text-sm font-serif font-bold text-[#2C3338] focus:text-[#C5A059] outline-none"
-                      />
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670]">Monthly Fixed</h3>
+                    <button 
+                      onClick={addFixedExpense}
+                      className="text-[9px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#2C3338] transition-colors"
+                    >
+                      + Add Item
+                    </button>
+                  </div>
+                  {profile.fixedExpenses.map((exp) => (
+                    <div key={exp.id} className="flex justify-between items-center border-b border-[#E8E4D0]/50 pb-2 group">
+                      <div className="flex items-center gap-2 flex-1">
+                        <button 
+                          onClick={() => removeFixedExpense(exp.id)}
+                          className="opacity-0 group-hover:opacity-100 text-[#8B0000] hover:bg-[#8B0000]/10 p-1 rounded transition-all"
+                        >
+                          ✕
+                        </button>
+                        <input 
+                          type="text"
+                          value={exp.label}
+                          onChange={(e) => updateFixedExpense(exp.id, { label: e.target.value })}
+                          className="text-[11px] font-mono uppercase tracking-tighter text-[#8C8670] bg-transparent outline-none focus:text-[#2C3338] w-full"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-serif font-bold text-[#2C3338]">$</span>
+                        <input 
+                          type="number"
+                          value={exp.amount}
+                          onChange={(e) => updateFixedExpense(exp.id, { amount: Number(e.target.value) })}
+                          className="w-20 bg-transparent text-right text-sm font-serif font-bold text-[#2C3338] focus:text-[#C5A059] outline-none"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -730,96 +926,7 @@ function Orbit() {
             </section>
           </div>
 
-          {/* Right Column: Dashboard */}
-          <div className="lg:col-span-8 space-y-8">
-            
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCard 
-                label="Annual Income" 
-                value={`$${totalAnnualIncome.toLocaleString()}`} 
-                subValue="Gross yearly inflow"
-                icon={TrendingUp}
-              />
-              <StatCard 
-                label="Annual Spend" 
-                value={`$${totalAnnualSpend.toLocaleString()}`} 
-                subValue="Fixed + Orbiting"
-                icon={RefreshCw}
-              />
-              <StatCard 
-                label="Annual Surplus" 
-                value={`$${annualSurplus.toLocaleString()}`} 
-                subValue="Potential savings"
-                icon={Zap}
-                trend={annualSurplus > 0 ? 1 : -1}
-              />
-            </div>
-
-            {/* Fluid Expense Grid */}
-            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Annual Finance Orbit</h2>
-                  <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">Comprehensive view of all annual payments</p>
-                </div>
-                <button 
-                  onClick={askAiCoach}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] rounded-[2px] text-xs font-bold hover:bg-[#B38F48] transition-all"
-                >
-                  <Zap size={14} />
-                  AI Insights
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {/* Total Spend Card (Large) */}
-                <div className="col-span-2 bg-[#1E5C38]/5 border border-[#1E5C38]/20 p-6 rounded-[2px] flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#1E5C38] mb-1">Total Annual Spend</h3>
-                    <div className="text-3xl font-serif font-bold text-[#2C3338]">${totalAnnualSpend.toLocaleString()}</div>
-                  </div>
-                  <div className="text-[10px] font-mono text-[#1E5C38]/60 mt-4">Jan 1 - Dec 31</div>
-                </div>
-
-                {/* Fixed Expense Cards */}
-                {[
-                  { label: 'Mortgage', value: profile.fixedExpenses.mortgageRent * 12, color: 'bg-[#C5A059]/5' },
-                  { label: 'Car Payment', value: profile.fixedExpenses.carPayment * 12, color: 'bg-[#6E8A96]/5' },
-                  { label: 'Utilities', value: profile.fixedExpenses.utilities * 12, color: 'bg-[#8B0000]/5' },
-                  { label: 'Groceries', value: profile.fixedExpenses.groceries * 12, color: 'bg-[#1E5C38]/5' },
-                  { label: 'Insurance', value: profile.fixedExpenses.insurance * 12, color: 'bg-[#C5A059]/5' },
-                  { label: 'Loans', value: profile.fixedExpenses.studentLoans * 12, color: 'bg-[#6E8A96]/5' },
-                ].map((item, i) => (
-                  <div key={i} className={`${item.color} border border-[#E8E4D0] p-4 rounded-[2px] flex flex-col justify-between hover:border-[#C5A059] transition-colors group`}>
-                    <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors">{item.label}</h3>
-                    <div className="text-lg font-serif font-bold text-[#2C3338] mt-2">${item.value.toLocaleString()}</div>
-                    <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic">Annual Total</div>
-                  </div>
-                ))}
-
-                {/* Orbiting Expense Categories */}
-                {['insurance', 'tax', 'subscription', 'maintenance'].map((cat, i) => {
-                  const catTotal = expenses
-                    .filter(e => e.category === cat)
-                    .reduce((sum, e) => {
-                      if (e.frequency === 'annual' || e.frequency === 'one-time') return sum + e.amount;
-                      if (e.frequency === 'semi-annual') return sum + (e.amount * 2);
-                      if (e.frequency === 'quarterly') return sum + (e.amount * 4);
-                      return sum;
-                    }, 0);
-                  
-                  return (
-                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px] flex flex-col justify-between hover:border-[#C5A059] transition-colors group">
-                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors">Orbit: {cat}</h3>
-                      <div className="text-lg font-serif font-bold text-[#2C3338] mt-2">${catTotal.toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic">Irregular Hits</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
+          <div className="lg:col-span-7 space-y-8">
             {/* AI Coach Section */}
             <AnimatePresence>
               {showAiCoach && (
@@ -857,8 +964,6 @@ function Orbit() {
                 </motion.section>
               )}
             </AnimatePresence>
-
-            {/* Bottom Grid - Removed as requested */}
           </div>
         </div>
       </main>
@@ -945,12 +1050,12 @@ function Orbit() {
 
                       <div>
                         <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Frequency</label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {['annual', 'semi-annual', 'quarterly', 'one-time'].map(freq => (
+                        <div className="grid grid-cols-3 gap-2">
+                          {['annual', 'semi-annual', 'quarterly', 'monthly', 'bi-weekly', 'weekly', 'one-time'].map(freq => (
                             <button
                               key={freq}
                               onClick={() => setNewExpense({...newExpense, frequency: freq as any})}
-                              className={`py-2 px-3 text-[10px] font-mono uppercase tracking-widest border rounded-[2px] transition-all ${newExpense.frequency === freq ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
+                              className={`py-2 px-1 text-[9px] font-mono uppercase tracking-widest border rounded-[2px] transition-all ${newExpense.frequency === freq ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
                             >
                               {freq}
                             </button>
@@ -964,13 +1069,24 @@ function Orbit() {
                           {['insurance', 'tax', 'subscription', 'maintenance', 'other'].map(cat => (
                             <button
                               key={cat}
-                              onClick={() => setNewExpense({...newExpense, category: cat as any})}
+                              onClick={() => setNewExpense({...newExpense, category: cat})}
                               className={`py-2 px-1 text-[9px] font-mono uppercase tracking-tighter border rounded-[2px] transition-all ${newExpense.category === cat ? 'bg-[#2C3338] border-[#2C3338] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#2C3338]'}`}
                             >
                               {cat}
                             </button>
                           ))}
                         </div>
+                        {newExpense.category === 'other' && (
+                          <div className="mt-3">
+                            <input 
+                              type="text" 
+                              value={newExpense.customCategory || ''}
+                              onChange={e => setNewExpense({...newExpense, customCategory: e.target.value})}
+                              className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-2 rounded-[2px] text-[10px] focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
+                              placeholder="Write in category..."
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
