@@ -1019,7 +1019,7 @@ export default function NetWorth() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-8 right-8 z-[100] bg-[#2C3338] text-[#FAF9F6] px-6 py-3 rounded-[2px] shadow-2xl flex items-center gap-3 border border-[#E8E4D0]"
+            className="fixed bottom-8 right-8 z-[100] bg-[#2C3338] text-[#FAF9F6] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-[#E8E4D0]"
           >
             <div className="w-2 h-2 bg-[#C5A059] rounded-full animate-pulse" />
             <span className="text-xs font-mono uppercase tracking-widest">Snapshot Recorded Successfully</span>
@@ -1035,7 +1035,7 @@ export default function NetWorth() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-md w-full shadow-2xl rounded-[2px] relative"
+              className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-md w-full shadow-2xl rounded-xl relative"
             >
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-[#8B0000]/10 flex items-center justify-center rounded-full text-[#8B0000] mb-2">
@@ -1047,7 +1047,7 @@ export default function NetWorth() {
                 </p>
                 <button 
                   onClick={() => setShowDuplicateToast(false)}
-                  className="mt-6 w-full py-3 bg-[#E8E4D0] hover:bg-[#D4D0BC] text-[#2C3338] text-xs font-mono uppercase tracking-widest transition-colors rounded-[2px]"
+                  className="mt-6 w-full py-3 bg-[#E8E4D0] hover:bg-[#D4D0BC] text-[#2C3338] text-xs font-mono uppercase tracking-widest transition-colors rounded-xl"
                 >
                   Understood
                 </button>
@@ -1076,7 +1076,7 @@ export default function NetWorth() {
                 rotate: 15
               }}
               transition={{ duration: 1, ease: "easeInOut" }}
-              className="w-64 h-64 bg-[#FAF9F6]/10 backdrop-blur-md border border-[#E8E4D0]/20 rounded-[2px] shadow-2xl flex items-center justify-center"
+              className="w-64 h-64 bg-[#FAF9F6]/10 backdrop-blur-md border border-[#E8E4D0]/20 rounded-xl shadow-2xl flex items-center justify-center"
             >
               <div className="text-[#2C3338] font-serif italic text-2xl">Snapshot</div>
             </motion.div>
@@ -1107,7 +1107,7 @@ export default function NetWorth() {
                 <button className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors flex items-center gap-1">
                   Tools <ChevronDown size={12} />
                 </button>
-                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
+                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                   <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Balance Sheet</button>
                   <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Retirement Planner</button>
                   <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator</button>

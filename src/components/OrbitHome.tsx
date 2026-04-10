@@ -145,11 +145,11 @@ export default function OrbitHome() {
       <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/" className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors group">
+            <Link to="/" className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors group">
               <ChevronLeft size={20} className="text-[#8C8670] group-hover:text-[#2C3338]" />
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#C5A059] rounded-[2px] flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#C5A059] rounded-xl flex items-center justify-center">
                 <TrendingUp size={24} className="text-[#FAF9F6]" />
               </div>
               <div>
@@ -173,7 +173,7 @@ export default function OrbitHome() {
                 <button className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors flex items-center gap-1">
                   Tools <ChevronDown size={12} />
                 </button>
-                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
+                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                   <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Balance Sheet</button>
                   <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Retirement Planner</button>
                   <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator</button>
@@ -195,9 +195,9 @@ export default function OrbitHome() {
               )}
             </div>
             {user.photoURL ? (
-              <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-[2px] border border-[#E8E4D0]" referrerPolicy="no-referrer" />
+              <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-xl border border-[#E8E4D0]" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl flex items-center justify-center">
                 <UserIcon size={20} className="text-[#8C8670]" />
               </div>
             )}
@@ -218,7 +218,7 @@ export default function OrbitHome() {
           <div className="lg:col-span-8 space-y-8">
             <Link 
               to="/orbit/balance-sheet"
-              className="block bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-[2px] relative overflow-hidden group hover:border-[#C5A059] transition-all shadow-sm"
+              className="block bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-xl relative overflow-hidden group hover:border-[#C5A059] transition-all shadow-sm"
             >
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity text-[#2C3338]">
                 <TrendingUp size={200} />
@@ -255,9 +255,9 @@ export default function OrbitHome() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Link 
                 to="/orbit/history"
-                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] hover:border-[#C5A059] transition-all group shadow-sm"
+                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl hover:border-[#C5A059] transition-all group shadow-sm"
               >
-                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors">
+                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors">
                   <BarChart3 size={24} className="text-[#C5A059]" />
                 </div>
                 <h3 className="text-xl font-serif font-bold text-[#2C3338] mb-2">Historical Performance</h3>
@@ -269,9 +269,9 @@ export default function OrbitHome() {
 
               <Link 
                 to="/orbit/simulator"
-                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] hover:border-[#C5A059] transition-all group shadow-sm"
+                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl hover:border-[#C5A059] transition-all group shadow-sm"
               >
-                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors">
+                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors">
                   <RefreshCw size={24} className="text-[#C5A059]" />
                 </div>
                 <h3 className="text-xl font-serif font-bold text-[#2C3338] mb-2">Annual Orbit</h3>
@@ -283,10 +283,10 @@ export default function OrbitHome() {
 
               <Link 
                 to="/orbit/retirement-planner"
-                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] hover:border-[#C5A059] transition-all group relative overflow-hidden shadow-sm"
+                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl hover:border-[#C5A059] transition-all group relative overflow-hidden shadow-sm"
               >
                 <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#C5A059]/20 to-transparent rounded-bl-full" />
-                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors relative z-10">
+                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors relative z-10">
                   <Target size={24} className="text-[#C5A059]" />
                 </div>
                 <h3 className="text-xl font-serif font-bold text-[#2C3338] mb-2 relative z-10">Wealth Simulator</h3>
@@ -298,9 +298,9 @@ export default function OrbitHome() {
 
               <Link 
                 to="/orbit/currency-converter"
-                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] hover:border-[#C5A059] transition-all group shadow-sm"
+                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl hover:border-[#C5A059] transition-all group shadow-sm"
               >
-                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors">
+                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors">
                   <Globe size={24} className="text-[#C5A059]" />
                 </div>
                 <h3 className="text-xl font-serif font-bold text-[#2C3338] mb-2">Currency Converter</h3>
@@ -310,16 +310,16 @@ export default function OrbitHome() {
                 </div>
               </Link>
 
-              <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] opacity-60 grayscale-[0.5] transition-all relative overflow-hidden shadow-sm">
-                <div className="absolute top-4 right-4 bg-[#E8E4D0] text-[#8C8670] px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-[2px]">
+              <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl opacity-60 grayscale-[0.5] transition-all relative overflow-hidden shadow-sm">
+                <div className="absolute top-4 right-4 bg-[#E8E4D0] text-[#8C8670] px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-xl">
                   Coming Soon
                 </div>
-                <div className="w-12 h-12 bg-[#E8E4D0] rounded-[2px] flex items-center justify-center mb-6">
+                <div className="w-12 h-12 bg-[#E8E4D0] rounded-xl flex items-center justify-center mb-6">
                   <Wallet size={24} className="text-[#8C8670]" />
                 </div>
                 <h3 className="text-xl font-serif font-bold text-[#8C8670] mb-2">Statement Analyzer</h3>
                 <p className="text-sm text-[#8C8670] mb-4 leading-relaxed">Upload your debit and credit card statements to get granular insights into your monthly spending and usage patterns.</p>
-                <button disabled className="w-full py-3 bg-[#E8E4D0] text-[#8C8670] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] cursor-not-allowed flex items-center justify-center gap-2 mt-4">
+                <button disabled className="w-full py-3 bg-[#E8E4D0] text-[#8C8670] font-mono text-xs uppercase tracking-widest font-bold rounded-xl cursor-not-allowed flex items-center justify-center gap-2 mt-4">
                   <Plus size={14} /> Upload Statement
                 </button>
               </div>
@@ -328,7 +328,7 @@ export default function OrbitHome() {
 
           {/* Sidebar: Quick Actions & Insights */}
           <div className="lg:col-span-4 space-y-8">
-            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
+            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
               <h3 className="font-serif text-lg font-bold text-[#2C3338] mb-6 flex items-center gap-3 italic">
                 <Zap size={18} className="text-[#C5A059]" />
                 Strategic Nudges
@@ -345,12 +345,12 @@ export default function OrbitHome() {
               </div>
             </section>
 
-            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
+            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
               <h3 className="font-serif text-lg font-bold text-[#2C3338] mb-6 flex items-center gap-3 italic">
                 <BarChart3 size={18} className="text-[#C5A059]" />
                 Wealth Velocity
               </h3>
-              <div className="flex items-center justify-center py-10 border border-dashed border-[#E8E4D0] rounded-[2px]">
+              <div className="flex items-center justify-center py-10 border border-dashed border-[#E8E4D0] rounded-xl">
                 <p className="text-xs font-mono text-[#8C8670] uppercase tracking-widest">Chart data pending...</p>
               </div>
               <p className="text-[10px] text-[#8C8670] mt-4 italic text-center">Velocity is calculated after your second monthly snapshot.</p>
@@ -372,7 +372,7 @@ export default function OrbitHome() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] w-full max-w-md relative z-10 shadow-2xl"
+            className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl w-full max-w-md relative z-10 shadow-2xl"
           >
             <h3 className="text-2xl font-serif font-bold text-[#2C3338] italic mb-6">Profile Settings</h3>
             
@@ -384,7 +384,7 @@ export default function OrbitHome() {
                   value={primaryName}
                   onChange={(e) => setPrimaryName(e.target.value)}
                   placeholder={user.displayName || "Your Name"}
-                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors"
                 />
               </div>
               
@@ -395,7 +395,7 @@ export default function OrbitHome() {
                   value={spouseName}
                   onChange={(e) => setSpouseName(e.target.value)}
                   placeholder="Spouse Name"
-                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors"
+                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors"
                 />
                 <p className="text-[10px] text-[#8C8670] mt-2 italic">If left blank, we'll refer to them as "Spouse" or "the right person".</p>
               </div>
@@ -411,13 +411,13 @@ export default function OrbitHome() {
                     }
                     setIsSettingsOpen(false);
                   }}
-                  className="flex-1 py-3 bg-[#C5A059] text-[#FAF9F6] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] hover:bg-[#B38F48] transition-colors"
+                  className="flex-1 py-3 bg-[#C5A059] text-[#FAF9F6] font-mono text-xs uppercase tracking-widest font-bold rounded-xl hover:bg-[#B38F48] transition-colors"
                 >
                   Save Settings
                 </button>
                 <button 
                   onClick={() => setIsSettingsOpen(false)}
-                  className="flex-1 py-3 bg-transparent border border-[#E8E4D0] text-[#8C8670] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] hover:text-[#2C3338] hover:border-[#8C8670] transition-colors"
+                  className="flex-1 py-3 bg-transparent border border-[#E8E4D0] text-[#8C8670] font-mono text-xs uppercase tracking-widest font-bold rounded-xl hover:text-[#2C3338] hover:border-[#8C8670] transition-colors"
                 >
                   Cancel
                 </button>

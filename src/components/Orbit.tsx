@@ -94,7 +94,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center p-6">
-          <div className="bg-[#FAF9F6] border border-[#8B0000] p-8 max-w-md w-full rounded-[2px]">
+          <div className="bg-[#FAF9F6] border border-[#8B0000] p-8 max-w-md w-full rounded-xl">
             <div className="flex items-center gap-3 text-[#FF4444] mb-4">
               <AlertCircle size={24} />
               <h2 className="font-serif text-xl font-bold">System Error</h2>
@@ -102,12 +102,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             <p className="text-[#8C8670] text-sm mb-6 leading-relaxed">
               Orbit encountered a critical error. This is often due to a connection issue or security restriction.
             </p>
-            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px] mb-6 overflow-auto max-h-40">
+            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl mb-6 overflow-auto max-h-40">
               <code className="text-[10px] text-[#FF4444] font-mono break-all">{this.state.errorInfo}</code>
             </div>
             <button 
               onClick={() => window.location.reload()}
-              className="w-full py-3 bg-[#E8E4D0] text-[#2C3338] font-bold rounded-[2px] hover:bg-[#D8D4C0] transition-all"
+              className="w-full py-3 bg-[#E8E4D0] text-[#2C3338] font-bold rounded-xl hover:bg-[#D8D4C0] transition-all"
             >
               Restart Simulation
             </button>
@@ -159,12 +159,12 @@ const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string)
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1 hover:bg-[#E8E4D0] rounded-[2px] text-[#8C8670] transition-colors"
+        className="p-1 hover:bg-[#E8E4D0] rounded-xl text-[#8C8670] transition-colors"
       >
         <Menu size={14} />
       </button>
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl z-50 flex gap-2">
+        <div className="absolute top-full right-0 mt-1 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl z-50 flex gap-2">
           {colors.map(c => (
             <button
               key={c}
@@ -180,10 +180,10 @@ const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string)
 };
 
 const StatCard = ({ label, value, subValue, icon: Icon, trend, color = '#C5A059', onColorChange }: any) => (
-  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative overflow-visible group shadow-sm transition-colors" style={{ borderTopColor: color, borderTopWidth: '3px' }}>
+  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative overflow-visible group shadow-sm transition-colors" style={{ borderTopColor: color, borderTopWidth: '3px' }}>
     <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: color }} />
     <div className="flex justify-between items-start mb-4">
-      <div className="p-2 rounded-[2px]" style={{ backgroundColor: `${color}15` }}>
+      <div className="p-2 rounded-xl" style={{ backgroundColor: `${color}15` }}>
         <Icon size={20} style={{ color }} />
       </div>
       <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ const SliderInput = ({ label, value, min, max, step, onChange, unit = "", onSync
         {onSync && (
           <button 
             onClick={onSync}
-            className="p-1 hover:bg-[#E8E4D0] rounded-[2px] text-[#C5A059] transition-colors group/sync"
+            className="p-1 hover:bg-[#E8E4D0] rounded-xl text-[#C5A059] transition-colors group/sync"
             title="Sync with latest ledger snapshot"
           >
             <RefreshCw size={12} className="group-hover/sync:rotate-180 transition-transform duration-500" />
@@ -226,7 +226,7 @@ const SliderInput = ({ label, value, min, max, step, onChange, unit = "", onSync
       step={step} 
       value={value} 
       onChange={(e) => onChange(Number(e.target.value))}
-      className="w-full h-1 bg-[#E8E4D0] rounded-lg appearance-none cursor-pointer accent-[#C5A059]"
+      className="w-full h-1 bg-[#E8E4D0] rounded-xl appearance-none cursor-pointer accent-[#C5A059]"
     />
   </div>
 );
@@ -533,11 +533,11 @@ function Orbit() {
       <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/portfolio" className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors group">
+            <Link to="/portfolio" className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors group">
               <ChevronLeft size={20} className="text-[#8C8670] group-hover:text-[#2C3338]" />
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#C5A059] rounded-[2px] flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#C5A059] rounded-xl flex items-center justify-center">
                 <TrendingUp size={24} className="text-[#FAF9F6]" />
               </div>
               <div>
@@ -554,7 +554,7 @@ function Orbit() {
                   <button className="text-[11px] font-mono uppercase tracking-widest text-[#2C3338] transition-colors flex items-center gap-1">
                     Tools <ChevronDown size={12} />
                   </button>
-                  <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
+                  <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                     <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
                     <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator <span className="text-[9px] text-[#C5A059] block">(In Production)</span></button>
                     <button onClick={() => navigate('/orbit')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
@@ -572,16 +572,16 @@ function Orbit() {
                   <div className="text-[10px] text-[#8C8670] font-mono">{user.email}</div>
                 </div>
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName || ''} className="w-10 h-10 rounded-[2px] border border-[#E8E4D0]" referrerPolicy="no-referrer" />
+                  <img src={user.photoURL} alt={user.displayName || ''} className="w-10 h-10 rounded-xl border border-[#E8E4D0]" referrerPolicy="no-referrer" />
                 ) : (
-                  <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] flex items-center justify-center">
+                  <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl flex items-center justify-center">
                     <UserIcon size={20} className="text-[#8C8670]" />
                   </div>
                 )}
                 {user.uid === 'guest-user' ? (
                   <button 
                     onClick={() => navigate('/login')}
-                    className="p-2.5 bg-[#FAF9F6] border border-[#E8E4D0] text-[#C5A059] rounded-[2px] hover:text-[#2C3338] hover:border-[#C5A059] transition-all"
+                    className="p-2.5 bg-[#FAF9F6] border border-[#E8E4D0] text-[#C5A059] rounded-xl hover:text-[#2C3338] hover:border-[#C5A059] transition-all"
                     title="Sign In"
                   >
                     <UserIcon size={18} />
@@ -589,7 +589,7 @@ function Orbit() {
                 ) : (
                   <button 
                     onClick={logout}
-                    className="p-2.5 bg-[#FAF9F6] border border-[#E8E4D0] text-[#8C8670] rounded-[2px] hover:text-[#2C3338] hover:border-[#8B0000] transition-all"
+                    className="p-2.5 bg-[#FAF9F6] border border-[#E8E4D0] text-[#8C8670] rounded-xl hover:text-[#2C3338] hover:border-[#8B0000] transition-all"
                     title="Sign Out"
                   >
                     <LogOut size={18} />
@@ -599,7 +599,7 @@ function Orbit() {
             ) : (
               <button 
                 onClick={signInWithGoogle}
-                className="flex items-center gap-2 px-6 py-2.5 bg-[#C5A059] text-[#FAF9F6] rounded-[2px] text-sm font-bold hover:bg-[#B38F48] transition-all"
+                className="flex items-center gap-2 px-6 py-2.5 bg-[#C5A059] text-[#FAF9F6] rounded-xl text-sm font-bold hover:bg-[#B38F48] transition-all"
               >
                 <LogIn size={18} />
                 Sign In
@@ -612,16 +612,16 @@ function Orbit() {
       <main className="max-w-7xl mx-auto px-6 py-12">
         {/* Mode Toggle */}
         <div className="flex justify-center mb-12">
-          <div className="bg-[#E8E4D0]/30 p-1 rounded-[2px] border border-[#E8E4D0] flex">
+          <div className="bg-[#E8E4D0]/30 p-1 rounded-xl border border-[#E8E4D0] flex">
             <button 
               onClick={() => setMode('individual')}
-              className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'individual' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
+              className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'individual' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
             >
               Individual
             </button>
             <button 
               onClick={() => setMode('family')}
-              className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'family' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
+              className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'family' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
             >
               Family
             </button>
@@ -660,7 +660,7 @@ function Orbit() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Controls */}
           <div className="lg:col-span-4 space-y-8">
-            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
+            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
               <h2 className="font-serif text-xl font-bold text-[#2C3338] mb-8 flex items-center gap-3">
                 <Wallet size={20} className="text-[#C5A059]" />
                 Income & Fixed
@@ -668,7 +668,7 @@ function Orbit() {
               
               <div className="space-y-8">
                 {/* Primary Income */}
-                <div className="p-4 bg-[#E8E4D0]/10 rounded-[2px] border border-[#E8E4D0]/50">
+                <div className="p-4 bg-[#E8E4D0]/10 rounded-xl border border-[#E8E4D0]/50">
                   <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#C5A059] mb-4">Primary Income</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -703,7 +703,7 @@ function Orbit() {
 
                 {/* Spouse Income if Family Mode */}
                 {mode === 'family' && (
-                  <div className="p-4 bg-[#E8E4D0]/10 rounded-[2px] border border-[#E8E4D0]/50">
+                  <div className="p-4 bg-[#E8E4D0]/10 rounded-xl border border-[#E8E4D0]/50">
                     <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#C5A059] mb-4">Spouse Income</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -781,7 +781,7 @@ function Orbit() {
 
             <section 
               onClick={() => setShowSinkingFundModal(true)}
-              className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] shadow-sm cursor-pointer hover:border-[#C5A059] transition-all group"
+              className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl shadow-sm cursor-pointer hover:border-[#C5A059] transition-all group"
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-serif text-lg font-bold text-[#2C3338] flex items-center gap-2">
@@ -793,7 +793,7 @@ function Orbit() {
                 </span>
               </div>
               
-              <div className="p-4 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-[2px] flex justify-between items-center">
+              <div className="p-4 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-xl flex justify-between items-center">
                 <div>
                   <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Monthly Set-Aside</p>
                   <p className="text-2xl font-serif font-bold text-[#2C3338]">${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} <span className="text-sm text-[#8C8670] font-sans font-normal">/ mo</span></p>
@@ -807,7 +807,7 @@ function Orbit() {
 
           <div className="lg:col-span-8 space-y-8">
             {/* Fluid Expense Grid */}
-            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
+            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
               <div className="flex justify-between items-center mb-8">
                 <div>
                   <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Annual Finance Orbit</h2>
@@ -815,7 +815,7 @@ function Orbit() {
                 </div>
                 <button 
                   onClick={askAiCoach}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] rounded-[2px] text-xs font-bold hover:bg-[#B38F48] transition-all"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] rounded-xl text-xs font-bold hover:bg-[#B38F48] transition-all"
                 >
                   <Zap size={14} />
                   AI Insights
@@ -824,7 +824,7 @@ function Orbit() {
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {/* Total Spend Card (Large) */}
-                <div className="col-span-2 border p-6 rounded-[2px] flex flex-col justify-between relative group" style={{ backgroundColor: `${profile.cardColors.totalSpend}05`, borderColor: `${profile.cardColors.totalSpend}20` }}>
+                <div className="col-span-2 border p-6 rounded-xl flex flex-col justify-between relative group" style={{ backgroundColor: `${profile.cardColors.totalSpend}05`, borderColor: `${profile.cardColors.totalSpend}20` }}>
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <ColorPicker 
                       color={profile.cardColors.totalSpend} 
@@ -842,7 +842,7 @@ function Orbit() {
                 {profile.fixedExpenses.map((item, i) => {
                   const color = profile.cardColors[`fixed_${item.id}`] || '#C5A059';
                   return (
-                    <div key={i} className="border p-4 rounded-[2px] flex flex-col justify-between transition-colors group relative" style={{ backgroundColor: `${color}05`, borderColor: '#E8E4D0' }}>
+                    <div key={i} className="border p-4 rounded-xl flex flex-col justify-between transition-colors group relative" style={{ backgroundColor: `${color}05`, borderColor: '#E8E4D0' }}>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <ColorPicker 
                           color={color} 
@@ -872,7 +872,7 @@ function Orbit() {
                     }, 0);
                   
                   return (
-                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px] flex flex-col justify-between transition-colors group relative" style={{ borderTopColor: color, borderTopWidth: '2px' }}>
+                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-colors group relative" style={{ borderTopColor: color, borderTopWidth: '2px' }}>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <ColorPicker 
                           color={color} 
@@ -889,7 +889,7 @@ function Orbit() {
             </div>
 
             {/* Orbiting Expenses List */}
-            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] shadow-sm">
+            <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-serif text-xl font-bold text-[#2C3338] flex items-center gap-3">
                   <RefreshCw size={20} className="text-[#C5A059]" />
@@ -905,7 +905,7 @@ function Orbit() {
               
               <div className="space-y-3">
                 {expenses.length === 0 ? (
-                  <div className="text-center py-8 border-2 border-dashed border-[#E8E4D0] rounded-[2px]">
+                  <div className="text-center py-8 border-2 border-dashed border-[#E8E4D0] rounded-xl">
                     <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">No orbits tracked yet</p>
                     <button 
                       onClick={() => setShowAddExpense(true)}
@@ -916,9 +916,9 @@ function Orbit() {
                   </div>
                 ) : (
                   expenses.map(exp => (
-                    <div key={exp.id} className="flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] group hover:border-[#C5A059] transition-all shadow-sm">
+                    <div key={exp.id} className="flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] transition-all shadow-sm">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-[2px] flex items-center justify-center">
+                        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center">
                           {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
                           {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
                           {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
@@ -935,14 +935,14 @@ function Orbit() {
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
                         <button 
                           onClick={() => editExpense(exp)}
-                          className="p-2 text-[#C5A059] hover:bg-[#C5A059]/10 rounded-[2px] transition-all"
+                          className="p-2 text-[#C5A059] hover:bg-[#C5A059]/10 rounded-xl transition-all"
                           title="Edit Orbit"
                         >
                           <Save size={14} />
                         </button>
                         <button 
                           onClick={() => removeExpense(exp.id)}
-                          className="p-2 text-[#8B0000] hover:bg-[#8B0000]/10 rounded-[2px] transition-all"
+                          className="p-2 text-[#8B0000] hover:bg-[#8B0000]/10 rounded-xl transition-all"
                           title="Remove Orbit"
                         >
                           ✕
@@ -960,7 +960,7 @@ function Orbit() {
                 <motion.section 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#FAF9F6] border border-[#C5A059]/30 p-8 rounded-[2px] relative overflow-hidden shadow-sm"
+                  className="bg-[#FAF9F6] border border-[#C5A059]/30 p-8 rounded-xl relative overflow-hidden shadow-sm"
                 >
                   <div className="absolute top-0 right-0 p-4">
                     <Zap size={40} className="text-[#C5A059]/10" />
@@ -1014,7 +1014,7 @@ function Orbit() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-4xl w-full rounded-[2px] shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="relative bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-4xl w-full rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]"
             >
               <div className="flex justify-between items-start mb-8">
                 <div>
@@ -1027,7 +1027,7 @@ function Orbit() {
                     setEditingExpenseId(null);
                     setNewExpense({ name: '', amount: 0, month: 1, frequency: 'annual', category: 'other' });
                   }}
-                  className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors"
+                  className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors"
                 >
                   ✕
                 </button>
@@ -1036,7 +1036,7 @@ function Orbit() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* Form Side */}
                 <div className="lg:col-span-5 space-y-6">
-                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px]">
+                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl">
                     <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#C5A059] mb-6">Expense Details</h3>
                     
                     <div className="space-y-6">
@@ -1046,7 +1046,7 @@ function Orbit() {
                           type="text" 
                           value={newExpense.name}
                           onChange={e => setNewExpense({...newExpense, name: e.target.value})}
-                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-[2px] text-sm focus:border-[#C5A059] outline-none transition-all font-serif italic"
+                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-serif italic"
                           placeholder="e.g. Car Insurance"
                         />
                       </div>
@@ -1058,7 +1058,7 @@ function Orbit() {
                             type="number" 
                             value={newExpense.amount}
                             onChange={e => setNewExpense({...newExpense, amount: Number(e.target.value)})}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-[2px] text-sm focus:border-[#C5A059] outline-none transition-all font-mono"
+                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono"
                           />
                         </div>
                         <div>
@@ -1066,7 +1066,7 @@ function Orbit() {
                           <select 
                             value={newExpense.month}
                             onChange={e => setNewExpense({...newExpense, month: Number(e.target.value)})}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-[2px] text-sm focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
+                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
                           >
                             {monthNames.map((name, i) => (
                               <option key={name} value={i + 1}>{name}</option>
@@ -1082,7 +1082,7 @@ function Orbit() {
                             <button
                               key={freq}
                               onClick={() => setNewExpense({...newExpense, frequency: freq as any})}
-                              className={`py-2 px-1 text-[9px] font-mono uppercase tracking-widest border rounded-[2px] transition-all ${newExpense.frequency === freq ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
+                              className={`py-2 px-1 text-[9px] font-mono uppercase tracking-widest border rounded-xl transition-all ${newExpense.frequency === freq ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
                             >
                               {freq}
                             </button>
@@ -1097,7 +1097,7 @@ function Orbit() {
                             <button
                               key={cat}
                               onClick={() => setNewExpense({...newExpense, category: cat})}
-                              className={`py-2 px-1 text-[9px] font-mono uppercase tracking-tighter border rounded-[2px] transition-all ${newExpense.category === cat ? 'bg-[#2C3338] border-[#2C3338] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#2C3338]'}`}
+                              className={`py-2 px-1 text-[9px] font-mono uppercase tracking-tighter border rounded-xl transition-all ${newExpense.category === cat ? 'bg-[#2C3338] border-[#2C3338] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#2C3338]'}`}
                             >
                               {cat}
                             </button>
@@ -1109,7 +1109,7 @@ function Orbit() {
                               type="text" 
                               value={newExpense.customCategory || ''}
                               onChange={e => setNewExpense({...newExpense, customCategory: e.target.value})}
-                              className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-2 rounded-[2px] text-[10px] focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
+                              className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-2 rounded-xl text-[10px] focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
                               placeholder="Write in category..."
                             />
                           </div>
@@ -1121,7 +1121,7 @@ function Orbit() {
                   <div className="pt-4">
                     <button 
                       onClick={handleAddExpense}
-                      className="w-full py-5 bg-[#C5A059] text-[#FAF9F6] font-bold rounded-[2px] hover:bg-[#B38F48] transition-all shadow-lg flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
+                      className="w-full py-5 bg-[#C5A059] text-[#FAF9F6] font-bold rounded-xl hover:bg-[#B38F48] transition-all shadow-lg flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
                     >
                       <Save size={18} />
                       {editingExpenseId ? 'Update Orbit' : 'Add to Orbit'}
@@ -1131,7 +1131,7 @@ function Orbit() {
 
                 {/* Presets Side */}
                 <div className="lg:col-span-7 space-y-6">
-                  <div className="bg-[#E8E4D0]/20 p-8 rounded-[2px] border border-[#E8E4D0] h-full">
+                  <div className="bg-[#E8E4D0]/20 p-8 rounded-xl border border-[#E8E4D0] h-full">
                     <div className="flex items-center justify-between mb-8">
                       <h3 className="font-mono text-[11px] uppercase tracking-widest text-[#2C3338] font-bold flex items-center gap-2">
                         <Zap size={14} className="text-[#C5A059]" />
@@ -1141,7 +1141,7 @@ function Orbit() {
                         <select 
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[#2C3338] focus:border-[#C5A059] focus:outline-none"
+                          className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[#2C3338] focus:border-[#C5A059] focus:outline-none"
                         >
                           {Object.keys(categorizedPresets).map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
@@ -1158,7 +1158,7 @@ function Orbit() {
                             setNewExpense({ ...preset, id: editingExpenseId || Date.now().toString() });
                             // Don't close modal, let user refine
                           }}
-                          className="flex flex-col items-start p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] hover:border-[#C5A059] hover:shadow-md transition-all group text-left relative"
+                          className="flex flex-col items-start p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl hover:border-[#C5A059] hover:shadow-md transition-all group text-left relative"
                         >
                           <div className="absolute top-2 right-2 text-[#C5A059] opacity-0 group-hover:opacity-100 transition-all">
                             <Plus size={14} />
@@ -1173,7 +1173,7 @@ function Orbit() {
                       ))}
                     </div>
                     
-                    <div className="mt-8 p-4 bg-[#FAF9F6]/50 border border-[#E8E4D0] rounded-[2px]">
+                    <div className="mt-8 p-4 bg-[#FAF9F6]/50 border border-[#E8E4D0] rounded-lg">
                       <p className="text-[10px] text-[#8C8670] italic leading-relaxed flex items-start gap-2">
                         <Info size={12} className="text-[#C5A059] shrink-0 mt-0.5" />
                         Select a preset to populate the form. You can then adjust the specific amount, month, or frequency before saving to your orbit.
@@ -1218,7 +1218,7 @@ function Orbit() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#FAF9F6] w-full max-w-2xl rounded-[2px] shadow-2xl relative z-10 overflow-hidden border border-[#E8E4D0]"
+              className="bg-[#FAF9F6] w-full max-w-2xl rounded-xl shadow-2xl relative z-10 overflow-hidden border border-[#E8E4D0]"
             >
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
@@ -1235,7 +1235,7 @@ function Orbit() {
                 </div>
 
                 <div className="space-y-8">
-                  <div className="p-6 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-[2px] text-center">
+                  <div className="p-6 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-lg text-center">
                     <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Your Monthly Set-Aside</p>
                     <p className="text-4xl font-serif font-bold text-[#2C3338]">${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
                   </div>

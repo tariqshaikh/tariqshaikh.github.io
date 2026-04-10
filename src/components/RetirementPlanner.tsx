@@ -547,11 +547,11 @@ export default function RetirementPlanner() {
       <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors group">
+            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors group">
               <ChevronLeft size={20} className="text-[#8C8670] group-hover:text-[#2C3338]" />
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#C5A059] rounded-[2px] flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#C5A059] rounded-xl flex items-center justify-center">
                 <TrendingUp size={24} className="text-[#FAF9F6]" />
               </div>
               <div>
@@ -569,7 +569,7 @@ export default function RetirementPlanner() {
                 <button className="text-[11px] font-mono uppercase tracking-widest text-[#2C3338] transition-colors flex items-center gap-1">
                   Tools <ChevronDown size={12} />
                 </button>
-                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
+                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                   <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Balance Sheet</button>
                   <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Retirement Planner</button>
                   <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator</button>
@@ -591,9 +591,9 @@ export default function RetirementPlanner() {
               )}
             </div>
             {user.photoURL ? (
-              <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-[2px] border border-[#E8E4D0]" referrerPolicy="no-referrer" />
+              <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-xl border border-[#E8E4D0]" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl flex items-center justify-center">
                 <UserIcon size={20} className="text-[#8C8670]" />
               </div>
             )}
@@ -638,7 +638,7 @@ export default function RetirementPlanner() {
                   </p>
                   
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="bg-[#FAF9F6] p-1 rounded-[2px] border border-[#E8E4D0] flex">
+                    <div className="bg-[#FAF9F6] p-1 rounded-xl border border-[#E8E4D0] flex">
                       <button
                         onClick={() => setPlanningType('Individual')}
                         className={`px-6 py-2 text-[10px] font-mono uppercase tracking-widest transition-all rounded-[1px] ${
@@ -662,7 +662,7 @@ export default function RetirementPlanner() {
                     </div>
                     <button 
                       onClick={() => setIsEditingNames(true)}
-                      className="p-2 hover:bg-[#E8E4D0] rounded-[2px] text-[#8C8670] hover:text-[#C5A059] transition-colors"
+                      className="p-2 hover:bg-[#E8E4D0] rounded-xl text-[#8C8670] hover:text-[#C5A059] transition-colors"
                       title="Edit Names"
                     >
                       <Edit2 size={14} />
@@ -696,7 +696,7 @@ export default function RetirementPlanner() {
                     </div>
                   </div>
                 </div>
-                <div className="w-full md:w-64 h-32 rounded-[2px] overflow-hidden border border-[#E8E4D0] relative group">
+                <div className="w-full md:w-64 h-32 rounded-xl overflow-hidden border border-[#E8E4D0] relative group">
                   <img 
                     src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800" 
                     alt="Luxury Office" 
@@ -710,12 +710,12 @@ export default function RetirementPlanner() {
                 </div>
               </div>
                 
-                <div className="flex items-center gap-2 bg-[#FAF9F6] p-1 rounded-[2px] border border-[#E8E4D0]">
+                <div className="flex items-center gap-2 bg-[#FAF9F6] p-1 rounded-xl border border-[#E8E4D0]">
                   {(['Retirement Outlook', 'Confidence', 'Comparisons'] as AnalysisSubTab[]).map(sub => (
                     <button
                       key={sub}
                       onClick={() => setActiveSubTab(sub)}
-                      className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest transition-all rounded-[1px] ${
+                      className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest transition-all rounded-lg ${
                         activeSubTab === sub
                         ? 'bg-[#C5A059] text-[#FAF9F6] font-bold'
                         : 'text-[#8C8670] hover:text-[#2C3338]'
@@ -728,7 +728,7 @@ export default function RetirementPlanner() {
 
                 {/* Scenario Explanation - Only show on Comparisons tab */}
                 {activeSubTab === 'Comparisons' && (
-                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] flex flex-col lg:flex-row gap-8 items-start lg:items-center">
+                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl flex flex-col lg:flex-row gap-8 items-start lg:items-center">
                     <div className="flex-1 space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-[#C5A059] rounded-full" />
@@ -746,7 +746,7 @@ export default function RetirementPlanner() {
                       </div>
                     </div>
 
-                    <div className="w-full lg:w-auto bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px]">
+                    <div className="w-full lg:w-auto bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl">
                       <label className="block text-[9px] font-mono uppercase tracking-widest text-[#8C8670] mb-3">Proposed Savings Increase (%)</label>
                       <div className="flex items-center gap-4">
                         <input 
@@ -765,7 +765,7 @@ export default function RetirementPlanner() {
                 )}
 
               {/* Chart Section */}
-              <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px]">
+              <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl">
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <Activity className="text-[#C5A059]" size={20} />
@@ -783,7 +783,7 @@ export default function RetirementPlanner() {
                         <option>Proposed Plan</option>
                       </select>
                     )}
-                    <button className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors text-[#8C8670] hover:text-[#2C3338]">
+                    <button className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors text-[#8C8670] hover:text-[#2C3338]">
                       <Download size={16} />
                     </button>
                   </div>
@@ -793,7 +793,7 @@ export default function RetirementPlanner() {
                   {activeSubTab === 'Retirement Outlook' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-full overflow-y-auto pr-2">
                       {/* Shrunk Probability Card */}
-                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] flex flex-col justify-center text-center relative overflow-hidden group hover:border-[#C5A059] transition-all">
+                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl flex flex-col justify-center text-center relative overflow-hidden group hover:border-[#C5A059] transition-all">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent opacity-50" />
                         <p className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Probability of Success</p>
                         <div className="flex items-baseline justify-center gap-1">
@@ -807,7 +807,7 @@ export default function RetirementPlanner() {
                       </div>
 
                       {/* Income Sources Card */}
-                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] flex flex-col justify-between">
+                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl flex flex-col justify-between">
                         <div>
                           <p className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] mb-4">Income Sources</p>
                           <div className="space-y-3">
@@ -832,7 +832,7 @@ export default function RetirementPlanner() {
                       </div>
 
                       {/* Expense Breakdown Card */}
-                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] flex flex-col justify-between">
+                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl flex flex-col justify-between">
                         <div>
                           <p className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] mb-4">Expense Breakdown</p>
                           <div className="space-y-3">
@@ -857,7 +857,7 @@ export default function RetirementPlanner() {
                       </div>
 
                       {/* Tax Efficiency Card */}
-                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] flex flex-col justify-between">
+                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl flex flex-col justify-between">
                         <div>
                           <p className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] mb-4">Tax Efficiency</p>
                           <div className="space-y-3">
@@ -967,7 +967,7 @@ export default function RetirementPlanner() {
                               <span className="text-[10px] font-mono text-[#8C8670] uppercase tracking-widest">Worst Case (Bottom 5%)</span>
                             </div>
                           </div>
-                          <div className="mt-4 p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px]">
+                          <div className="mt-4 p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl">
                             <p className="text-[11px] text-[#8C8670] leading-relaxed text-center italic">
                               This range represents 1,000 simulations of your plan. The "Worst Case" shows how you'd fare in a prolonged market downturn, while "Best Case" assumes favorable returns.
                             </p>
@@ -987,7 +987,7 @@ export default function RetirementPlanner() {
                     <p className="text-3xl font-serif font-bold text-[#2C3338]">
                       {formatCurrency(projectionData[projectionData.length - 1].balance)}
                     </p>
-                    <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] text-[10px] text-[#8C8670] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                    <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl text-[10px] text-[#8C8670] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                       The projected total value of all your investment accounts at the end of your plan (Age {lifeExpectancy}).
                     </div>
                   </div>
@@ -997,7 +997,7 @@ export default function RetirementPlanner() {
                       <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Income Stability</p>
                     </div>
                     <p className="text-3xl font-serif font-bold text-[#2C3338]">92%</p>
-                    <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] text-[10px] text-[#8C8670] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                    <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl text-[10px] text-[#8C8670] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                       A measure of how reliably your portfolio can support your desired lifestyle without depletion.
                     </div>
                   </div>
@@ -1018,9 +1018,9 @@ export default function RetirementPlanner() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {/* Static Retirement Age Card */}
-                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative group overflow-hidden">
+                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative group overflow-hidden">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#C5A059]">
+                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#C5A059]">
                         <UserIcon size={20} />
                       </div>
                       <span className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670]">RETIREMENT</span>
@@ -1067,9 +1067,9 @@ export default function RetirementPlanner() {
                   </div>
 
                   {/* Social Security Box */}
-                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative group overflow-hidden">
+                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative group overflow-hidden">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#C5A059]">
+                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#C5A059]">
                         <ShieldCheck size={20} />
                       </div>
                       <span className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670]">INCOME</span>
@@ -1101,9 +1101,9 @@ export default function RetirementPlanner() {
                   </div>
 
                   {/* Pensions Box */}
-                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative group overflow-hidden">
+                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative group overflow-hidden">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#C5A059]">
+                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#C5A059]">
                         <Briefcase size={20} />
                       </div>
                       <span className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670]">INCOME</span>
@@ -1126,7 +1126,7 @@ export default function RetirementPlanner() {
                         <span className="text-xs text-[#8C8670]">COLA Adj.</span>
                         <button 
                           onClick={() => setPension({...pension, cola: !pension.cola})}
-                          className={`text-xs font-mono font-bold px-2 py-0.5 rounded-[2px] transition-colors ${pension.cola ? 'bg-[#1E5C38]/20 text-[#1E5C38]' : 'bg-[#E8E4D0] text-[#8C8670]'}`}
+                          className={`text-xs font-mono font-bold px-2 py-0.5 rounded-xl transition-colors ${pension.cola ? 'bg-[#1E5C38]/20 text-[#1E5C38]' : 'bg-[#E8E4D0] text-[#8C8670]'}`}
                         >
                           {pension.cola ? 'YES' : 'NO'}
                         </button>
@@ -1135,9 +1135,9 @@ export default function RetirementPlanner() {
                   </div>
 
                   {/* Deferred Assets Box */}
-                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative group overflow-hidden">
+                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative group overflow-hidden">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#C5A059]">
+                      <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#C5A059]">
                         <TrendingUp size={20} />
                       </div>
                       <span className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670]">ASSETS</span>
@@ -1166,7 +1166,7 @@ export default function RetirementPlanner() {
                               <button
                                 key={status}
                                 onClick={() => setDeferredAssets({...deferredAssets, status: fullStatus})}
-                                className={`px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wider rounded-[2px] transition-colors ${
+                                className={`px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wider rounded-xl transition-colors ${
                                   isSelected ? 'bg-[#E8E4D0] text-[#C5A059]' : 'text-[#8C8670] hover:text-[#2C3338]'
                                 }`}
                               >
@@ -1180,9 +1180,9 @@ export default function RetirementPlanner() {
                   </div>
 
                   {goals.map(goal => (
-                    <div key={goal.id} className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-[2px] relative group overflow-hidden">
+                    <div key={goal.id} className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative group overflow-hidden">
                       <div className="flex items-center justify-between mb-4">
-                        <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#C5A059]">
+                        <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#C5A059]">
                           {goal.icon}
                         </div>
                         <span className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670]">{goal.category}</span>
@@ -1206,7 +1206,7 @@ export default function RetirementPlanner() {
               {/* Core Assumptions & Accounts */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-8">
-                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px]">
+                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl">
                     <div className="flex items-center gap-3 mb-8">
                       <Calculator className="text-[#C5A059]" size={24} />
                       <h3 className="text-2xl font-serif font-bold text-[#2C3338]">Core Assumptions</h3>
@@ -1220,7 +1220,7 @@ export default function RetirementPlanner() {
                             type="number" 
                             value={currentAge} 
                             onChange={(e) => setCurrentAge(Number(e.target.value))}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
+                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
                           />
                         </div>
                         <div>
@@ -1251,7 +1251,7 @@ export default function RetirementPlanner() {
                             step="0.1" 
                             value={inflationRate} 
                             onChange={(e) => setInflationRate(Number(e.target.value))}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
+                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
                           />
                         </div>
                         <div>
@@ -1261,7 +1261,7 @@ export default function RetirementPlanner() {
                             step="0.1" 
                             value={preRetirementReturn} 
                             onChange={(e) => setPreRetirementReturn(Number(e.target.value))}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
+                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
                           />
                         </div>
                         <div>
@@ -1271,14 +1271,14 @@ export default function RetirementPlanner() {
                             step="0.1" 
                             value={postRetirementReturn} 
                             onChange={(e) => setPostRetirementReturn(Number(e.target.value))}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
+                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-4 py-3 text-[#2C3338] font-mono focus:border-[#C5A059] focus:outline-none transition-colors" 
                           />
                         </div>
                       </div>
                     </div>
                   </section>
 
-                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px]">
+                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl">
                     <div className="flex items-center justify-between mb-8">
                       <div className="flex items-center gap-3">
                         <PieChart className="text-[#C5A059]" size={24} />
@@ -1301,7 +1301,7 @@ export default function RetirementPlanner() {
                                 <button
                                   key={status}
                                   onClick={() => setDeferredAssets({...deferredAssets, status: fullStatus})}
-                                  className={`px-2 py-1 text-[9px] font-mono uppercase tracking-widest rounded-[1px] transition-colors ${
+                                  className={`px-2 py-1 text-[9px] font-mono uppercase tracking-widest rounded-lg transition-colors ${
                                     isSelected ? 'bg-[#C5A059] text-black font-bold' : 'text-[#8C8670] hover:text-[#2C3338]'
                                   }`}
                                 >
@@ -1316,20 +1316,20 @@ export default function RetirementPlanner() {
 
                     <div className="space-y-4">
                       {combinedAccounts.map(acc => (
-                        <div key={acc.id} className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] group hover:border-[#C5A059]/50 transition-all overflow-hidden">
+                        <div key={acc.id} className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059]/50 transition-all overflow-hidden">
                           <div 
                             className="flex items-center justify-between p-4 cursor-pointer"
                             onClick={() => setExpandedAccountId(expandedAccountId === acc.id ? null : acc.id)}
                           >
                             <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#8C8670] group-hover:text-[#C5A059]">
+                              <div className="w-10 h-10 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#8C8670] group-hover:text-[#C5A059]">
                                 <DollarSign size={18} />
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
                                   <p className="text-sm font-bold text-[#2C3338]">{acc.name}</p>
                                   {manualAccounts.some(ma => ma.id === acc.id) && (
-                                    <span className="text-[8px] font-mono uppercase px-1 bg-[#C5A059]/20 text-[#C5A059] rounded-[1px]">Manual</span>
+                                    <span className="text-[8px] font-mono uppercase px-1 bg-[#C5A059]/20 text-[#C5A059] rounded-lg">Manual</span>
                                   )}
                                 </div>
                               </div>
@@ -1363,7 +1363,7 @@ export default function RetirementPlanner() {
                                           type="number"
                                           value={acc.annualContribution}
                                           onChange={(e) => handleUpdateAccountContribution(acc.id, Number(e.target.value))}
-                                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] pl-7 pr-4 py-2 text-[#2C3338] font-mono text-sm focus:border-[#C5A059] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl pl-7 pr-4 py-2 text-[#2C3338] font-mono text-sm focus:border-[#C5A059] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         />
                                       </div>
                                     </div>
@@ -1373,12 +1373,12 @@ export default function RetirementPlanner() {
                                         type="number"
                                         step="0.1"
                                         defaultValue={7.0}
-                                        className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] px-4 py-2 text-[#2C3338] font-mono text-sm focus:border-[#C5A059] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        className="w-full bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-4 py-2 text-[#2C3338] font-mono text-sm focus:border-[#C5A059] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                       />
                                     </div>
                                   </div>
 
-                                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px]">
+                                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl">
                                     <h5 className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] mb-3 flex items-center gap-2">
                                       <Calculator size={12} /> Projection Calculator
                                     </h5>
@@ -1424,7 +1424,7 @@ export default function RetirementPlanner() {
                   </section>
 
                   {/* Future Inflows Section */}
-                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px]">
+                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl">
                     <div className="flex items-center justify-between mb-8">
                       <div className="flex items-center gap-3">
                         <TrendingUp className="text-[#C5A059]" size={24} />
@@ -1440,12 +1440,12 @@ export default function RetirementPlanner() {
 
                     <div className="space-y-4">
                       {futureInflows.length === 0 ? (
-                        <div className="p-8 border border-dashed border-[#E8E4D0] rounded-[2px] text-center">
+                        <div className="p-8 border border-dashed border-[#E8E4D0] rounded-xl text-center">
                           <p className="text-xs text-[#6E8A96]">No manual inflows projected (e.g. inheritance, property sale).</p>
                         </div>
                       ) : (
                         futureInflows.map(inflow => (
-                          <div key={inflow.id} className="flex items-center justify-between p-4 bg-[#F5F2E1] border border-[#E8E4D0] rounded-[2px] group hover:border-[#C5A059] transition-all">
+                          <div key={inflow.id} className="flex items-center justify-between p-4 bg-[#F5F2E1] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] transition-all">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 bg-[#FAF9F6] flex items-center justify-center rounded-[2px] text-[#C5A059]">
                                 <Plus size={18} />
@@ -1475,7 +1475,7 @@ export default function RetirementPlanner() {
                 </div>
 
                 <div className="lg:col-span-4 space-y-8">
-                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] relative overflow-hidden">
+                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                       <ShieldCheck size={150} />
                     </div>
@@ -1501,20 +1501,20 @@ export default function RetirementPlanner() {
                         </p>
                       </div>
 
-                      <div className="p-4 bg-[#1E5C38]/10 border border-[#1E5C38]/20 rounded-[2px]">
+                      <div className="p-4 bg-[#1E5C38]/10 border border-[#1E5C38]/20 rounded-xl">
                         <p className="text-sm text-[#1E5C38] font-bold flex items-center gap-2">
                           <ShieldCheck size={16} /> On Track
                         </p>
                         <p className="text-xs text-[#6E8A96] mt-1">Your current trajectory exceeds your required portfolio target.</p>
                       </div>
                       
-                      <button className="w-full py-4 bg-[#C5A059] hover:bg-[#D4AF68] text-[#FAF9F6] font-mono text-xs uppercase tracking-widest font-bold rounded-[2px] transition-colors flex items-center justify-center gap-2 mt-4">
+                      <button className="w-full py-4 bg-[#C5A059] hover:bg-[#D4AF68] text-[#FAF9F6] font-mono text-xs uppercase tracking-widest font-bold rounded-xl transition-colors flex items-center justify-center gap-2 mt-4">
                         Run Full Monte Carlo <ArrowRight size={14} />
                       </button>
                     </div>
                   </section>
 
-                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px]">
+                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl">
                     <h3 className="font-serif text-lg font-bold text-[#2C3338] mb-6 flex items-center gap-3 italic">
                       <Info size={18} className="text-[#C5A059]" />
                       Strategic Insights
@@ -1558,7 +1558,7 @@ export default function RetirementPlanner() {
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
-                  <div className="relative h-48 rounded-[2px] overflow-hidden border border-[#E8E4D0]">
+                  <div className="relative h-48 rounded-xl overflow-hidden border border-[#E8E4D0]">
                     <img 
                       src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200" 
                       alt="Modern Architecture" 
@@ -1572,7 +1572,7 @@ export default function RetirementPlanner() {
                     </div>
                   </div>
 
-                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px]">
+                  <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl">
                     <h3 className="text-xl font-serif font-bold text-[#2C3338] mb-6">Market Crash Scenario (-25%)</h3>
                     <div className="h-[300px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
@@ -1589,7 +1589,7 @@ export default function RetirementPlanner() {
                         </AreaChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="mt-6 p-4 bg-[#8B0000]/10 border border-[#8B0000]/20 rounded-[2px]">
+                    <div className="mt-6 p-4 bg-[#8B0000]/10 border border-[#8B0000]/20 rounded-xl">
                       <p className="text-sm text-[#8B0000] font-bold">Impact Analysis</p>
                       <p className="text-xs text-[#6E8A96] mt-1">
                         A 25% market drop today would reduce your ending assets by approximately {formatCurrency(projectionData[projectionData.length-1].balance * 0.25)}.
@@ -1749,8 +1749,8 @@ export default function RetirementPlanner() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] space-y-6">
-                  <div className="w-12 h-12 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#C5A059]">
+                <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl space-y-6">
+                  <div className="w-12 h-12 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#C5A059]">
                     <ShieldCheck size={24} />
                   </div>
                   <h3 className="text-xl font-serif font-bold text-[#2C3338]">Part B Premiums</h3>
@@ -1763,8 +1763,8 @@ export default function RetirementPlanner() {
                   </div>
                 </div>
 
-                <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-[2px] space-y-6">
-                  <div className="w-12 h-12 bg-[#E8E4D0] flex items-center justify-center rounded-[2px] text-[#C5A059]">
+                <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl space-y-6">
+                  <div className="w-12 h-12 bg-[#E8E4D0] flex items-center justify-center rounded-xl text-[#C5A059]">
                     <Activity size={24} />
                   </div>
                   <h3 className="text-xl font-serif font-bold text-[#2C3338]">Part D & Medigap</h3>

@@ -305,7 +305,7 @@ export default function Homebase() {
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <div className="font-mono text-[13px] text-slate-500 px-2.5 py-0.5 border border-slate-200 rounded-full">21 counties · live verified data</div>
+          <div className="font-mono text-[13px] text-slate-500 px-2.5 py-0.5 border border-slate-200 rounded-xl">21 counties · live verified data</div>
         </div>
       </nav>
 
@@ -349,9 +349,9 @@ export default function Homebase() {
                 
                 {/* Pills inside input ONLY if !showResults */}
                 {!showResults && activeCounties.map(c => (
-                  <span key={c} className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-1.5 z-20">
+                  <span key={c} className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-xl text-[12px] font-bold border border-blue-100 flex items-center gap-1.5 z-20">
                     {c} County
-                    <button onClick={(e) => { e.stopPropagation(); setActiveCounties(activeCounties.filter(x => x !== c)); }} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
+                    <button onClick={(e) => { e.stopPropagation(); setActiveCounties(activeCounties.filter(x => x !== c)); }} className="hover:bg-[#0471A4] hover:text-white rounded-xl p-0.5 transition-colors">✕</button>
                   </span>
                 ))}
 
@@ -397,7 +397,7 @@ export default function Homebase() {
 
                 {/* Dropdown for County */}
                 {showCountyDropdown && (
-                  <div className={`absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
+                  <div className={`absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-80 overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
                     {/* Counties Section */}
                     {Object.entries(NJ_COUNTIES)
                       .filter(([name]) => name.toLowerCase().includes(countySearch.toLowerCase()))
@@ -476,10 +476,10 @@ export default function Homebase() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         key={c} 
-                        className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-2 shadow-sm shrink-0"
+                        className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-xl text-[12px] font-bold border border-blue-100 flex items-center gap-2 shadow-sm shrink-0"
                       >
                         <span>{c} County</span>
-                        <button onClick={() => setActiveCounties(activeCounties.filter(x => x !== c))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
+                        <button onClick={() => setActiveCounties(activeCounties.filter(x => x !== c))} className="hover:bg-[#0471A4] hover:text-white rounded-xl p-0.5 transition-colors">✕</button>
                       </motion.div>
                     ))}
                   </AnimatePresence>
@@ -509,9 +509,9 @@ export default function Homebase() {
                     </div>
 
                     {!showResults && selectedTowns.map(t => (
-                      <span key={t.name} className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-1.5 z-20">
+                      <span key={t.name} className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-xl text-[12px] font-bold border border-blue-100 flex items-center gap-1.5 z-20">
                         {t.name}
-                        <button onClick={(e) => { e.stopPropagation(); setSelectedTowns(selectedTowns.filter(x => x.name !== t.name)); }} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
+                        <button onClick={(e) => { e.stopPropagation(); setSelectedTowns(selectedTowns.filter(x => x.name !== t.name)); }} className="hover:bg-[#0471A4] hover:text-white rounded-xl p-0.5 transition-colors">✕</button>
                       </span>
                     ))}
 
@@ -528,7 +528,7 @@ export default function Homebase() {
 
                     {/* Dropdown for Town */}
                     {showTownDropdown && (
-                      <div className={`absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
+                      <div className={`absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[350px] overflow-y-auto ${showResults ? 'w-[420px]' : 'w-full'}`}>
                         {!townSearch && (
                           <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                             <span className="font-mono text-[11px] text-[#0471A4] uppercase tracking-widest font-bold">Hottest Markets</span>
@@ -584,18 +584,18 @@ export default function Homebase() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             key={t.name} 
-                            className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-full text-[12px] font-bold border border-blue-100 flex items-center gap-2 shadow-sm shrink-0"
+                            className="px-2 py-0.5 bg-blue-50 text-[#0471A4] rounded-xl text-[12px] font-bold border border-blue-100 flex items-center gap-2 shadow-sm shrink-0"
                           >
                             <div className="flex flex-col leading-none">
                               <div className="flex items-center gap-1.5">
                                 <span>{t.name}</span>
                                 {NJ_ENRICHED[t.name] ? 
-                                  <span className="w-1.5 h-1.5 rounded-full bg-green-600" title="Full data available"></span> : 
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600" title="Partial data available"></span>
+                                  <span className="w-1.5 h-1.5 rounded-xl bg-green-600" title="Full data available"></span> : 
+                                  <span className="w-1.5 h-1.5 rounded-xl bg-amber-600" title="Partial data available"></span>
                                 }
                               </div>
                             </div>
-                            <button onClick={() => setSelectedTowns(selectedTowns.filter(x => x.name !== t.name))} className="hover:bg-[#0471A4] hover:text-white rounded-full p-0.5 transition-colors">✕</button>
+                            <button onClick={() => setSelectedTowns(selectedTowns.filter(x => x.name !== t.name))} className="hover:bg-[#0471A4] hover:text-white rounded-xl p-0.5 transition-colors">✕</button>
                           </motion.div>
                         ))}
                       </AnimatePresence>
@@ -633,13 +633,13 @@ export default function Homebase() {
                 <div className="flex justify-center items-center gap-3 pt-4">
                   <button 
                     onClick={runComparison}
-                    className="px-6 py-2.5 bg-[#0471A4] text-white rounded-full text-sm font-bold hover:bg-[#035480] transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                    className="px-6 py-2.5 bg-[#0471A4] text-white rounded-xl text-sm font-bold hover:bg-[#035480] transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                   >
                     {selectedTowns.length === 1 ? 'View Town Data' : `Compare ${selectedTowns.length} Towns`}
                   </button>
                   <button 
                     onClick={handleClearAll}
-                    className="px-5 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 hover:text-[#0471A4] transition-all shadow-sm hover:shadow-md"
+                    className="px-5 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-xl text-sm font-bold hover:bg-slate-50 hover:text-[#0471A4] transition-all shadow-sm hover:shadow-md"
                   >
                     Clear All
                   </button>
@@ -675,7 +675,7 @@ export default function Homebase() {
                   <select 
                     value={sortKey}
                     onChange={(e) => setSortKey(e.target.value)}
-                    className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-[13px] font-mono text-slate-900 focus:outline-none focus:border-[#0471A4] cursor-pointer hover:border-[#0471A4] transition-all"
+                    className="px-4 py-1.5 bg-white border border-slate-200 rounded-xl text-[13px] font-mono text-slate-900 focus:outline-none focus:border-[#0471A4] cursor-pointer hover:border-[#0471A4] transition-all"
                   >
                     <option value="fit">Fit Score</option>
                     <option value="income">Income</option>
@@ -693,7 +693,7 @@ export default function Homebase() {
                 </div>
                 <button 
                   onClick={handleClearAll}
-                  className="px-4 py-1.5 bg-white text-slate-500 border border-slate-200 rounded-full text-[13px] font-mono hover:bg-slate-50 hover:text-[#0471A4] transition-all ml-2"
+                  className="px-4 py-1.5 bg-white text-slate-500 border border-slate-200 rounded-xl text-[13px] font-mono hover:bg-slate-50 hover:text-[#0471A4] transition-all ml-2"
                 >
                   Start Over
                 </button>

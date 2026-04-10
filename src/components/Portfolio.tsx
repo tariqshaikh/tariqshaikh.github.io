@@ -86,11 +86,11 @@ export default function Portfolio() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Project 1 */}
-          <div className="bg-white border border-slate-200 p-10 transition-all duration-200 hover:border-blue-600 hover:shadow-xl hover:shadow-blue-600/10 relative overflow-hidden rounded-[2px] group">
+          <div className="bg-white border border-slate-200 p-10 transition-all duration-200 hover:border-blue-600 hover:shadow-xl hover:shadow-blue-600/10 relative overflow-hidden rounded-xl group">
             <div className="absolute top-0 left-0 w-[3px] h-full bg-blue-600 scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-slate-400 tracking-widest">P — 001</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] uppercase tracking-wider bg-green-50 text-green-700 border border-green-100">Live</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-green-50 text-green-700 border border-green-100">Live</span>
             </div>
             <h3 className="text-[32px] leading-[1.1] mb-1.5 text-slate-900">
               <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-600 ml-1">NJ</span>
@@ -101,11 +101,11 @@ export default function Portfolio() {
             </p>
             <div className="flex flex-wrap gap-1.5 mb-8">
               {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
-                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] bg-blue-50 text-blue-600 border border-blue-100 tracking-widest uppercase">{tag}</span>
+                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 tracking-widest uppercase">{tag}</span>
               ))}
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Link to="/homebase" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-blue-600 text-white rounded-[2px] text-sm font-semibold hover:bg-blue-700 transition-all">
+              <Link to="/homebase" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all">
                 <ChevronRight size={13} /> Live Product
               </Link>
               <button onClick={() => openModal('prd-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-slate-900 border-2 border-slate-200 rounded-[4px] text-sm font-semibold hover:border-blue-600 hover:text-blue-600 hover:bg-white cursor-pointer transition-all">PRD</button>
@@ -114,11 +114,11 @@ export default function Portfolio() {
           </div>
 
           {/* Project 2 - Orbit */}
-          <div className="bg-[#2C3338] border border-[#3D4347] p-10 transition-all duration-200 hover:border-[#C5A059] hover:shadow-xl hover:shadow-[#C5A059]/10 relative overflow-hidden rounded-[2px] group">
+          <div className="bg-[#2C3338] border border-[#3D4347] p-10 transition-all duration-200 hover:border-[#C5A059] hover:shadow-xl hover:shadow-[#C5A059]/10 relative overflow-hidden rounded-xl group">
             <div className="absolute top-0 left-0 w-[3px] h-full bg-[#C5A059] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-[#8C8670] tracking-widest">P — 002</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Take a look!</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Take a look!</span>
             </div>
             <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
               <span className="font-serif font-bold italic">Orbit</span>
@@ -129,11 +129,11 @@ export default function Portfolio() {
             </p>
             <div className="flex flex-wrap gap-1.5 mb-8">
               {['Fintech', 'Simulation', 'Strategy'].map(tag => (
-                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] bg-slate-800 text-[#C5A059] border border-slate-700 tracking-widest uppercase">{tag}</span>
+                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-slate-800 text-[#C5A059] border border-slate-700 tracking-widest uppercase">{tag}</span>
               ))}
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Link to="/orbit" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#C5A059] text-slate-900 rounded-[2px] text-sm font-bold hover:bg-[#B38F48] transition-all">
+              <Link to="/orbit" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#C5A059] text-slate-900 rounded-lg text-sm font-bold hover:bg-[#B38F48] transition-all">
                 <ChevronRight size={13} /> View App
               </Link>
               <button onClick={() => openModal('prd-2')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-slate-700 rounded-[4px] text-sm font-semibold hover:border-[#C5A059] hover:text-[#C5A059] hover:bg-[#C5A059]/5 cursor-pointer transition-all">PRD</button>
@@ -142,10 +142,10 @@ export default function Portfolio() {
           </div>
 
           {/* Placeholder */}
-          <div className="bg-slate-50 border border-slate-200 p-10 relative overflow-hidden rounded-[2px] bg-placeholder">
+          <div className="bg-slate-50 border border-slate-200 p-10 relative overflow-hidden rounded-xl bg-placeholder">
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-slate-400 tracking-widest">P — 003</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-[2px] uppercase tracking-wider bg-white text-slate-400 border border-slate-200">Planned</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-white text-slate-400 border border-slate-200">Planned</span>
             </div>
             <div className="text-center py-12">
               <div className="text-6xl text-slate-200 font-serif leading-none mb-4">+</div>

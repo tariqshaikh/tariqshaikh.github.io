@@ -77,11 +77,11 @@ export default function CurrencyConverter() {
       <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#E8E4D0] rounded-[2px] transition-colors group">
+            <Link to="/orbit/dashboard" className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors group">
               <ChevronLeft size={20} className="text-[#8C8670] group-hover:text-[#2C3338]" />
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#C5A059] rounded-[2px] flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#C5A059] rounded-xl flex items-center justify-center">
                 <TrendingUp size={24} className="text-[#FAF9F6]" />
               </div>
               <div>
@@ -99,7 +99,7 @@ export default function CurrencyConverter() {
                 <button className="text-[11px] font-mono uppercase tracking-widest text-[#2C3338] transition-colors flex items-center gap-1">
                   Tools <ChevronDown size={12} />
                 </button>
-                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
+                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
                   <button onClick={() => navigate('/orbit/balance-sheet')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Balance Sheet</button>
                   <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Retirement Planner</button>
                   <button onClick={() => navigate('/orbit/simulator')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator</button>
@@ -121,9 +121,9 @@ export default function CurrencyConverter() {
               )}
             </div>
             {user.photoURL ? (
-              <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-[2px] border border-[#E8E4D0]" referrerPolicy="no-referrer" />
+              <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-xl border border-[#E8E4D0]" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl flex items-center justify-center">
                 <UserIcon size={20} className="text-[#8C8670]" />
               </div>
             )}
@@ -137,7 +137,7 @@ export default function CurrencyConverter() {
           <p className="text-[#8C8670] font-mono text-sm uppercase tracking-widest">Real-time global exchange rates</p>
         </div>
 
-        <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-[2px] shadow-xl">
+        <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-xl shadow-xl">
           <div className="space-y-8">
             <div className="space-y-3">
               <label className="text-[11px] font-mono text-[#8C8670] uppercase tracking-widest">Amount</label>
@@ -145,7 +145,7 @@ export default function CurrencyConverter() {
                 type="number" 
                 value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
-                className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px] text-[#2C3338] font-mono text-lg focus:outline-none focus:border-[#C5A059] transition-colors"
+                className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl text-[#2C3338] font-mono text-lg focus:outline-none focus:border-[#C5A059] transition-colors"
                 placeholder="Enter amount..."
               />
             </div>
@@ -157,7 +157,7 @@ export default function CurrencyConverter() {
                   list="currencies-from-page"
                   value={from}
                   onChange={(e) => setFrom(e.target.value.toUpperCase())}
-                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px] text-[#2C3338] font-mono text-lg focus:outline-none focus:border-[#C5A059] transition-colors uppercase"
+                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl text-[#2C3338] font-mono text-lg focus:outline-none focus:border-[#C5A059] transition-colors uppercase"
                   placeholder="USD"
                 />
                 <datalist id="currencies-from-page">
@@ -171,7 +171,7 @@ export default function CurrencyConverter() {
                   list="currencies-to-page"
                   value={to}
                   onChange={(e) => setTo(e.target.value.toUpperCase())}
-                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-[2px] text-[#2C3338] font-mono text-lg focus:outline-none focus:border-[#C5A059] transition-colors uppercase"
+                  className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl text-[#2C3338] font-mono text-lg focus:outline-none focus:border-[#C5A059] transition-colors uppercase"
                   placeholder="EUR"
                 />
                 <datalist id="currencies-to-page">
@@ -192,7 +192,7 @@ export default function CurrencyConverter() {
               </button>
             </div>
             
-            <div className="p-8 bg-[#FAF9F6] border border-[#E8E4D0] rounded-[2px] mt-8 text-center">
+            <div className="p-8 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl mt-8 text-center">
               <div className="text-[11px] font-mono text-[#8C8670] uppercase tracking-widest mb-3">Converted Amount</div>
               <div className="text-5xl font-serif font-bold text-[#2C3338] italic">
                 {loading ? '...' : `${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${to}`}

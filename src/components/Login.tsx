@@ -51,7 +51,7 @@ export default function Login() {
           
           <div className="relative z-10 max-w-xl">
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-14 h-14 bg-[#C5A059] rounded-[2px] flex items-center justify-center">
+              <div className="w-14 h-14 bg-[#C5A059] rounded-xl flex items-center justify-center">
                 <TrendingUp size={32} className="text-[#FAF9F6]" />
               </div>
               <div>
@@ -87,12 +87,12 @@ export default function Login() {
         {/* Right Side - Login Form */}
         <div className="flex-1 flex flex-col justify-center items-center px-6 py-20 bg-[#FAF9F6]">
           <div className="w-full max-w-md">
-            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-[2px] shadow-2xl">
+            <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-xl shadow-2xl">
               <h3 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">Welcome to Orbit</h3>
               <p className="text-[#8C8670] text-sm mb-8">Sign in to start tracking your financial future.</p>
               
               {error && (
-                <div className="mb-6 p-4 bg-[#8B0000]/10 border border-[#8B0000]/30 rounded-[2px] text-[#8B0000] text-sm leading-relaxed">
+                <div className="mb-6 p-4 bg-[#8B0000]/10 border border-[#8B0000]/30 rounded-xl text-[#8B0000] text-sm leading-relaxed">
                   {error}
                 </div>
               )}
@@ -101,7 +101,7 @@ export default function Login() {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 bg-[#2C3338] text-[#FAF9F6] py-3.5 px-4 rounded-[2px] font-semibold hover:bg-[#3D464D] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-3 bg-[#2C3338] text-[#FAF9F6] py-3.5 px-4 rounded-xl font-semibold hover:bg-[#3D464D] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-[#FAF9F6]/20 border-t-[#FAF9F6] rounded-full animate-spin" />
@@ -128,7 +128,7 @@ export default function Login() {
 
               <Link 
                 to="/orbit/dashboard"
-                className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#E8E4D0] text-[#2C3338] py-3.5 px-4 rounded-[2px] font-semibold hover:border-[#C5A059] hover:text-[#C5A059] transition-all group"
+                className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#E8E4D0] text-[#2C3338] py-3.5 px-4 rounded-xl font-semibold hover:border-[#C5A059] hover:text-[#C5A059] transition-all group"
               >
                 Continue as Guest <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
