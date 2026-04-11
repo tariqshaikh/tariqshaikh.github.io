@@ -279,6 +279,10 @@ function Orbit() {
     frequency: 'annual',
     category: 'other'
   });
+
+  useEffect(() => {
+    document.title = "Annual Orbit: Cash Flow Intelligence";
+  }, []);
   const [showAddExpense, setShowAddExpense] = useState(false);
 
   const monthNames = [
@@ -541,7 +545,7 @@ function Orbit() {
                 <TrendingUp size={24} className="text-[#FAF9F6]" />
               </div>
               <div>
-                <h1 className="text-2xl font-serif font-bold text-[#2C3338] italic leading-none">Orbit</h1>
+                <h1 className="text-2xl font-serif font-bold text-[#2C3338] italic leading-none">Annual Orbit</h1>
                 <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#C5A059] mt-1">Cash Flow Intelligence</p>
               </div>
             </div>
@@ -555,9 +559,11 @@ function Orbit() {
                     Tools <ChevronDown size={12} />
                   </button>
                   <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
-                    <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
-                    <button onClick={() => navigate('/orbit/retirement-planner')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Wealth Simulator <span className="text-[9px] text-[#C5A059] block">(In Production)</span></button>
                     <button onClick={() => navigate('/orbit')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
+                    <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
+                    <div className="px-4 py-2 text-[9px] font-mono uppercase tracking-widest text-[#8C8670]/50 border-t border-[#E8E4D0] mt-1 pt-3">Future Modules (TBD)</div>
+                    <button className="px-4 py-1 text-[11px] font-mono uppercase tracking-widest text-[#8C8670]/40 cursor-not-allowed text-left w-full">Wealth Simulator</button>
+                    <button className="px-4 py-1 text-[11px] font-mono uppercase tracking-widest text-[#8C8670]/40 cursor-not-allowed text-left w-full">Balance Sheet</button>
                   </div>
                 </div>
               </>
@@ -610,6 +616,35 @@ function Orbit() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Cash Flow Intelligence Header */}
+        <div className="mb-12 w-full">
+          <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic mb-6 leading-tight">Annual Orbit: Cash Flow Intelligence</h2>
+          
+          <div className="py-8 border-y border-[#E8E4D0]/60 flex flex-col md:flex-row gap-12 items-start">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-4">
+                <Zap size={16} className="text-[#C5A059]" />
+                <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-[#8C8670]">Intelligence Overview</span>
+              </div>
+              <p className="text-[#8C8670] text-sm leading-relaxed max-w-3xl">
+                Cash Flow Intelligence provides a dynamic view of your financial inflows and outflows. It helps you understand how your income sources, expenses, and investment growth interact to sustain your lifestyle throughout the year.
+              </p>
+            </div>
+            
+            <div className="md:w-80 shrink-0">
+              <div className="flex items-center gap-2 mb-4">
+                <Info size={14} className="text-[#C5A059]" />
+                <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-[#8C8670]">How to use</span>
+              </div>
+              <ul className="text-[11px] text-[#8C8670] space-y-2 leading-relaxed font-mono">
+                <li><span className="text-[#C5A059] mr-2">01.</span> Toggle Individual/Family views</li>
+                <li><span className="text-[#C5A059] mr-2">02.</span> Adjust Income & Fixed Expenses</li>
+                <li><span className="text-[#C5A059] mr-2">03.</span> Track irregular Orbiting bills</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {/* Mode Toggle */}
         <div className="flex justify-center mb-12">
           <div className="bg-[#E8E4D0]/30 p-1 rounded-xl border border-[#E8E4D0] flex">

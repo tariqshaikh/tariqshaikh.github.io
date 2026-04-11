@@ -118,7 +118,7 @@ export default function Portfolio() {
             <div className="absolute top-0 left-0 w-[3px] h-full bg-[#C5A059] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-[#8C8670] tracking-widest">P — 002</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Take a look!</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Take a look! (In Development)</span>
             </div>
             <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
               <span className="font-serif font-bold italic">Orbit</span>
