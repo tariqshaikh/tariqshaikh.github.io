@@ -58,9 +58,28 @@
         "netWorth": { "type": "number" }
       },
       "required": ["userId", "date", "netWorth"]
+    },
+    "VisitorLog": {
+      "title": "Visitor Log",
+      "description": "A record of a page visit.",
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "description": "The URL path visited." },
+        "referrer": { "type": "string", "description": "The referring URL." },
+        "userAgent": { "type": "string", "description": "The visitor's browser user agent." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the visit occurred." },
+        "userId": { "type": "string", "description": "The UID of the user if logged in." },
+        "sessionId": { "type": "string", "description": "A temporary session ID." },
+        "screenResolution": { "type": "string", "description": "The visitor's screen resolution." }
+      },
+      "required": ["path", "timestamp"]
     }
   },
   "firestore": {
+    "/visitorLogs/{logId}": {
+      "schema": "VisitorLog",
+      "description": "Publicly writable logs of page visits."
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile documents."

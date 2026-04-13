@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
+import { logVisit } from '../lib/analytics';
 import { ChevronLeft, ChevronDown, RefreshCw, TrendingUp, LogOut, User as UserIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, logout } from '../firebase';
@@ -14,6 +15,10 @@ export default function CurrencyConverter() {
   const [rates, setRates] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    logVisit('/orbit/currency-converter');
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {

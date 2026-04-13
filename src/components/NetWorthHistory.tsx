@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { logVisit } from '../lib/analytics';
 import { 
   ChevronLeft, 
   ChevronDown,
@@ -61,6 +62,11 @@ interface HistorySnapshot {
 
 export default function NetWorthHistory() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    logVisit('/orbit/history');
+  }, []);
+
   const [user, setUser] = useState<User | null>(null);
   const [history, setHistory] = useState<HistorySnapshot[]>([]);
   const [view, setView] = useState<'1m' | '3m' | '6m' | '1y' | '5y' | 'all' | 'ytd'>('all');

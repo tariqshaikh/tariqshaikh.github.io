@@ -9,6 +9,7 @@ import { Github, Linkedin, Mail, ExternalLink, ChevronRight, Menu, X, Terminal, 
 import { motion, AnimatePresence } from 'motion/react';
 import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { logVisit } from '../lib/analytics';
 
 export default function Portfolio() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -17,6 +18,7 @@ export default function Portfolio() {
 
   useEffect(() => {
     document.title = "Tariq Shaikh's Portfolio";
+    logVisit('/portfolio');
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     
@@ -202,7 +204,12 @@ export default function Portfolio() {
       </section>
 
       <footer className="px-12 py-9 border-t-3 border-red-700 bg-slate-900 flex items-center justify-between flex-wrap gap-4">
-        <div className="font-mono text-[13px] text-slate-500 tracking-wider uppercase">© 2026 Tariq Shaikh · PM Portfolio</div>
+        <div className="flex flex-col gap-1">
+          <div className="font-mono text-[13px] text-slate-500 tracking-wider uppercase">© 2026 Tariq Shaikh · PM Portfolio</div>
+          {user?.email === 'TShaikh92@gmail.com' && (
+            <Link to="/admin/visitors" className="font-mono text-[10px] text-slate-700 hover:text-blue-600 transition-colors uppercase tracking-widest">Admin: Visitor Insights</Link>
+          )}
+        </div>
         <div className="flex gap-6">
           <a href="mailto:tshaikh92@gmail.com" className="font-mono text-[13px] text-slate-400 hover:text-red-700 transition-colors tracking-wider">tshaikh92@gmail.com</a>
           <a href="tel:8483914393" className="font-mono text-[13px] text-slate-400 hover:text-red-700 transition-colors tracking-wider">848-391-4393</a>

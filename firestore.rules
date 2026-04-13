@@ -41,6 +41,12 @@ service cloud.firestore {
       return (isAuthenticated() && request.auth.uid == userId) || (userId == 'guest-user');
     }
 
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.email == "TShaikh92@gmail.com" && 
+             request.auth.token.email_verified == true;
+    }
+
     function isValidEmail(email) {
       return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }
@@ -154,6 +160,21 @@ service cloud.firestore {
     // Section Settings Rules
     match /users/{userId}/sectionSettings/{settingId} {
       allow read, write: if isOwner(userId);
+    }
+
+    // Visitor Log Rules
+    match /visitorLogs/{logId} {
+      // Allow anyone to log a visit
+      allow create: if request.resource.data.keys().hasAll(['path', 'timestamp']) &&
+                      request.resource.data.path is string &&
+                      request.resource.data.timestamp is timestamp &&
+                      request.resource.data.path.size() < 500;
+      
+      // Only the admin can see the logs
+      allow read: if isAdmin();
+      
+      // No updates or deletes allowed
+      allow update, delete: if false;
     }
   }
 }

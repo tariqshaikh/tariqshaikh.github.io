@@ -52,6 +52,7 @@ import {
   onAuthStateChanged, 
   User 
 } from 'firebase/auth';
+import { logVisit } from '../lib/analytics';
 import { 
   collection, 
   doc, 
@@ -282,6 +283,7 @@ function Orbit() {
 
   useEffect(() => {
     document.title = "Annual Orbit: Cash Flow Intelligence";
+    logVisit('/orbit');
   }, []);
   const [showAddExpense, setShowAddExpense] = useState(false);
 

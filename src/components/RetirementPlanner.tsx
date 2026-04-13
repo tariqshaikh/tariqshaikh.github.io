@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { logVisit } from '../lib/analytics';
 import { 
   ChevronLeft, 
   ChevronDown, 
@@ -108,6 +109,10 @@ export default function RetirementPlanner() {
     { id: 'g2', title: 'Travel', category: 'LIFESTYLE VACATION', value: 25000, period: 'Annual', icon: <Plane size={20} /> },
     { id: 'g3', title: 'Health Cost', category: 'RETIREMENT', value: 12000, period: 'Annual', icon: <Heart size={20} /> },
   ]);
+
+  useEffect(() => {
+    logVisit('/orbit/retirement-planner');
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {

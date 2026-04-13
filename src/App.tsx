@@ -14,6 +14,7 @@ import OrbitHome from './components/OrbitHome';
 import NetWorthHistory from './components/NetWorthHistory';
 import CurrencyConverter from './components/CurrencyConverter';
 import RetirementPlanner from './components/RetirementPlanner';
+import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/orbit/simulator" element={<Orbit />} />
         <Route path="/orbit/currency-converter" element={<CurrencyConverter />} />
         <Route path="/orbit/retirement-planner" element={<RetirementPlanner />} />
+        <Route path="/admin/visitors" element={<VisitorInsights />} />
       </Routes>
     </Router>
   );

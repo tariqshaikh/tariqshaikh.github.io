@@ -9,6 +9,7 @@ import { NJ_COUNTIES, NJ_ENRICHED, DIMS, COLORS } from '../constants';
 import { fetchLiveTownData } from '../services/geminiService';
 import { NJ_COUNTY_PATHS, NJ_STATE_OUTLINE, COUNTY_CENTERS } from '../mapData';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
+import { logVisit } from '../lib/analytics';
 
 // Regional Data
 const REGIONS = [
@@ -148,6 +149,7 @@ export default function Homebase() {
 
   useEffect(() => {
     document.title = "Homebase NJ";
+    logVisit('/homebase');
   }, []);
 
   useEffect(() => {

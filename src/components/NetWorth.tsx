@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { logVisit } from '../lib/analytics';
 import { 
   TrendingUp, 
   ChevronLeft, 
@@ -621,6 +622,10 @@ export default function NetWorth() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isAddingSection, setIsAddingSection] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    logVisit('/orbit/balance-sheet');
+  }, []);
 
   const sections = useMemo(() => {
     let base = DEFAULT_SECTIONS.map(s => {
