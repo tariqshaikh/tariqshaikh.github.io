@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, ExternalLink, ChevronRight, Menu, X, Terminal, Layers, Globe, Phone, LogIn, LayoutDashboard } from 'lucide-react';
+import { Github, Linkedin, Mail, ExternalLink, ChevronRight, Menu, X, Terminal, Layers, Globe, Phone, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -127,7 +127,7 @@ export default function Portfolio() {
             </h3>
             <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">Strategic wealth simulator</p>
             <p className="text-base leading-[1.75] text-slate-300 mb-7 pl-4 border-l-2 border-[#C5A059]/40">
-              Most people know what they spent yesterday, but not how it impacts their life 10 years from now. Orbit is a "What-If" engine for your financial future.
+              Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus.
             </p>
             <div className="flex flex-wrap gap-1.5 mb-8">
               {['Fintech', 'Simulation', 'Strategy'].map(tag => (
@@ -469,7 +469,7 @@ export default function Portfolio() {
                     <div className="mb-12">
                       <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#C5A059]/20">1. Executive Summary</h2>
                       <div className="bg-slate-900 border-l-4 border-[#C5A059] px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-300 italic rounded-r-md">
-                        "Most people know what they spent yesterday, but they are blindsided by the 'Orbiting' expenses that hit once or twice a year. Orbit is a strategic cash flow engine for your annual financial cycle."
+                        "Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus."
                       </div>
                       <p className="text-[16px] leading-[1.8] text-slate-600">
                         Orbit is a cash flow intelligence tool designed to help users manage irregular, non-monthly expenses (car insurance, annual fees, taxes). By visualizing the "Orbit" of these expenses, the app provides a clear 12-month trajectory, helping users build sinking funds and avoid financial surprises.

@@ -4,12 +4,15 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Info, ChevronRight, GripVertical, Zap } from 'lucide-react';
+import { Info, ChevronRight, GripVertical, Zap, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { NJ_COUNTIES, NJ_ENRICHED, DIMS, COLORS } from '../constants';
 import { fetchLiveTownData } from '../services/geminiService';
 import { NJ_COUNTY_PATHS, NJ_STATE_OUTLINE, COUNTY_CENTERS } from '../mapData';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { logVisit } from '../lib/analytics';
+import { auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { Link } from 'react-router-dom';
 
 // Regional Data
 const REGIONS = [
@@ -86,6 +89,7 @@ export default function Homebase() {
   const [liveTownData, setLiveTownData] = useState<Record<string, any>>({});
   const [liveLoading, setLiveLoading] = useState<Record<string, boolean>>({});
   const [isLiveMode, setIsLiveMode] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const countyDropdownRef = useRef<HTMLDivElement>(null);
@@ -150,6 +154,10 @@ export default function Homebase() {
   useEffect(() => {
     document.title = "Homebase NJ";
     logVisit('/homebase');
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -307,7 +315,31 @@ export default function Homebase() {
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <div className="font-mono text-[13px] text-slate-500 px-2.5 py-0.5 border border-slate-200 rounded-xl">21 counties · live verified data</div>
+          <div className="font-mono text-[13px] text-slate-500 px-2.5 py-0.5 border border-slate-200 rounded-xl hidden sm:block">21 counties · live verified data</div>
+          
+          {user ? (
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col items-end hidden md:flex">
+                <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest leading-none mb-1">Logged In</span>
+                <span className="text-[10px] font-bold text-slate-900 leading-none">{user.displayName || user.email}</span>
+              </div>
+              <button 
+                onClick={() => auth.signOut()}
+                className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-mono uppercase tracking-widest rounded-lg hover:bg-blue-600 transition-all shadow-sm"
+              >
+                <LogOut size={12} />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link 
+              to="/login?from=homebase" 
+              className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-[10px] font-mono uppercase tracking-widest rounded-lg hover:bg-blue-700 transition-all shadow-sm"
+            >
+              <LogIn size={12} />
+              Sign In
+            </Link>
+          )}
         </div>
       </nav>
 

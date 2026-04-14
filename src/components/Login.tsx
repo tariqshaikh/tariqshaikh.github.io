@@ -1,30 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { TrendingUp, ArrowRight, ShieldCheck, ChevronLeft } from 'lucide-react';
+import { TrendingUp, ArrowRight, ShieldCheck, ChevronLeft, Globe } from 'lucide-react';
 import { auth, signInWithGoogle } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Determine context from query param
+  const queryParams = new URLSearchParams(location.search);
+  const from = queryParams.get('from') || 'orbit';
+  const isHomebase = from === 'homebase';
+
+  const config = {
+    title: isHomebase ? 'Homebase NJ' : 'Orbit',
+    subtitle: isHomebase ? 'Find your perfect New Jersey town' : 'Strategic Wealth Intelligence',
+    description: isHomebase 
+      ? 'A comprehensive tool for comparing New Jersey towns based on schools, commute, safety, and affordability.'
+      : 'Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life\'s big decisions.',
+    icon: isHomebase ? Globe : TrendingUp,
+    color: isHomebase ? '#0471A4' : '#C5A059',
+    redirect: isHomebase ? '/homebase' : '/orbit/dashboard',
+    features: isHomebase ? [
+      'Side-by-side town comparison matrix',
+      'Dynamic priority weighting engine',
+      'Live verified data from 21 counties'
+    ] : [
+      'Project financial trajectory based on inflow/outflow',
+      'Visualize impact of daycare, cars, and investments',
+      'Secure, private, and encrypted data storage'
+    ]
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        navigate('/orbit/dashboard');
+        navigate(config.redirect);
       }
     });
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, config.redirect]);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError(null);
     try {
       await signInWithGoogle();
-      navigate('/orbit/dashboard');
+      navigate(config.redirect);
     } catch (err: any) {
       console.error("Login error:", err);
       if (err.code === 'auth/unauthorized-domain') {
@@ -35,6 +61,8 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+
+  const Icon = config.icon;
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#2C3338] font-sans flex flex-col selection:bg-[#C5A059]/30">
@@ -51,35 +79,29 @@ export default function Login() {
           
           <div className="relative z-10 max-w-xl">
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-14 h-14 bg-[#C5A059] rounded-xl flex items-center justify-center">
-                <TrendingUp size={32} className="text-[#FAF9F6]" />
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: config.color }}>
+                <Icon size={32} className="text-[#FAF9F6]" />
               </div>
               <div>
-                <h1 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-none">Orbit</h1>
-                <p className="text-[12px] font-mono uppercase tracking-[0.2em] text-[#C5A059] mt-2">Strategic Wealth Intelligence</p>
+                <h1 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-none">{config.title}</h1>
+                <p className="text-[12px] font-mono uppercase tracking-[0.2em] mt-2" style={{ color: config.color }}>{config.subtitle}</p>
               </div>
             </div>
             
             <h2 className="text-[clamp(32px,4vw,48px)] font-serif font-bold text-[#2C3338] leading-[1.1] mb-6">
-              Master your financial trajectory.
+              {isHomebase ? 'Find where you belong.' : 'Master your financial trajectory.'}
             </h2>
             <p className="text-[#8C8670] text-lg leading-relaxed mb-10 max-w-md">
-              A comprehensive dashboard for tracking net worth, analyzing historical performance, and planning your retirement strategy.
+              {config.description}
             </p>
             
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-sm text-[#2C3338]">
-                <ShieldCheck size={18} className="text-[#1E5C38]" />
-                <span>Secure, private, and encrypted data storage</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-[#2C3338]">
-                <ShieldCheck size={18} className="text-[#1E5C38]" />
-                <span>Real-time currency conversion and tracking</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-[#2C3338]">
-                <ShieldCheck size={18} className="text-[#1E5C38]" />
-                <span>Advanced retirement modeling and forecasting</span>
-              </div>
+              {config.features.map((feature, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm text-[#2C3338]">
+                  <ShieldCheck size={18} className="text-[#1E5C38]" />
+                  <span>{feature}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -88,8 +110,8 @@ export default function Login() {
         <div className="flex-1 flex flex-col justify-center items-center px-6 py-20 bg-[#FAF9F6]">
           <div className="w-full max-w-md">
             <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-10 rounded-xl shadow-2xl">
-              <h3 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">Welcome to Orbit</h3>
-              <p className="text-[#8C8670] text-sm mb-8">Sign in to start tracking your financial future.</p>
+              <h3 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">Welcome to {config.title}</h3>
+              <p className="text-[#8C8670] text-sm mb-8">Sign in to start tracking your {isHomebase ? 'town comparisons' : 'financial future'}.</p>
               
               {error && (
                 <div className="mb-6 p-4 bg-[#8B0000]/10 border border-[#8B0000]/30 rounded-xl text-[#8B0000] text-sm leading-relaxed">
@@ -127,7 +149,7 @@ export default function Login() {
               </div>
 
               <Link 
-                to="/orbit/dashboard"
+                to={config.redirect}
                 className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#E8E4D0] text-[#2C3338] py-3.5 px-4 rounded-xl font-semibold hover:border-[#C5A059] hover:text-[#C5A059] transition-all group"
               >
                 Continue as Guest <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />

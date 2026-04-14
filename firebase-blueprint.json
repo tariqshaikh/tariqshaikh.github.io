@@ -73,6 +73,33 @@
         "screenResolution": { "type": "string", "description": "The visitor's screen resolution." }
       },
       "required": ["path", "timestamp"]
+    },
+    "OrbitProfile": {
+      "title": "Orbit Profile",
+      "description": "User's income and fixed expenses for Orbit.",
+      "type": "object",
+      "properties": {
+        "primaryIncome": { "type": "object" },
+        "spouseIncome": { "type": "object" },
+        "fixedExpenses": { "type": "array" },
+        "savingsGoal": { "type": "number" },
+        "cardColors": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "OrbitExpense": {
+      "title": "Orbit Expense",
+      "description": "A recurring expense in the Orbit app.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "amount": { "type": "number" },
+        "month": { "type": "number" },
+        "frequency": { "type": "string" },
+        "category": { "type": "string" },
+        "customCategory": { "type": "string" }
+      }
     }
   },
   "firestore": {
@@ -95,6 +122,14 @@
     "/users/{userId}/netWorthHistory/{snapshotId}": {
       "schema": "NetWorthSnapshot",
       "description": "Historical net worth snapshots."
+    },
+    "/users/{userId}/orbitProfile/main": {
+      "schema": "OrbitProfile",
+      "description": "User's Orbit profile settings."
+    },
+    "/users/{userId}/orbitExpenses/{expenseId}": {
+      "schema": "OrbitExpense",
+      "description": "User's recurring Orbit expenses."
     }
   }
 }

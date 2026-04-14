@@ -57,6 +57,7 @@ import {
   collection, 
   doc, 
   setDoc, 
+  deleteDoc,
   getDocs, 
   query, 
   where, 
@@ -247,9 +248,7 @@ function Orbit() {
       { id: '1', label: 'Rent / Mortgage', amount: 2200 },
       { id: '2', label: 'Car Payment', amount: 450 },
       { id: '3', label: 'Student Loans', amount: 300 },
-      { id: '4', label: 'Utilities', amount: 250 },
-      { id: '5', label: 'Day Care', amount: 1200 },
-      { id: '6', label: 'Other', amount: 250 }
+      { id: '4', label: 'Day Care', amount: 1200 }
     ],
     savingsGoal: 1000,
     cardColors: {
@@ -399,6 +398,64 @@ function Orbit() {
     return () => unsubscribe();
   }, []);
 
+  // Load Profile and Expenses
+  useEffect(() => {
+    if (!user || user.uid === 'guest-user') return;
+
+    const profileRef = doc(db, 'users', user.uid, 'orbitProfile', 'main');
+    const unsubProfile = onSnapshot(profileRef, (doc) => {
+      if (doc.exists()) {
+        setProfile(doc.data() as FinanceProfile);
+      }
+    });
+
+    const expensesRef = collection(db, 'users', user.uid, 'orbitExpenses');
+    const unsubExpenses = onSnapshot(expensesRef, (snapshot) => {
+      const exps = snapshot.docs.map(d => ({ ...d.data(), id: d.id })) as RecurringExpense[];
+      if (exps.length > 0) {
+        setExpenses(exps);
+      }
+    });
+
+    return () => {
+      unsubProfile();
+      unsubExpenses();
+    };
+  }, [user]);
+
+  const saveProfile = async (newProfile: FinanceProfile) => {
+    if (!user || user.uid === 'guest-user') return;
+    setIsSaving(true);
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'orbitProfile', 'main'), {
+        ...newProfile,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'orbitProfile/main');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveExpense = async (exp: RecurringExpense) => {
+    if (!user || user.uid === 'guest-user') return;
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `orbitExpenses/${exp.id}`);
+    }
+  };
+
+  const deleteExpenseFromDb = async (id: string) => {
+    if (!user || user.uid === 'guest-user') return;
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `orbitExpenses/${id}`);
+    }
+  };
+
   // Validate connection to Firestore
   useEffect(() => {
     async function testConnection() {
@@ -479,18 +536,25 @@ function Orbit() {
     }
   };
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (newExpense.name && newExpense.amount) {
       const finalCategory = newExpense.category === 'other' ? (newExpense.customCategory || 'other') : newExpense.category;
       const expenseToSave = {
         ...newExpense,
         category: finalCategory
       };
+
       if (editingExpenseId) {
-        setExpenses(expenses.map(e => e.id === editingExpenseId ? { ...expenseToSave, id: editingExpenseId } as RecurringExpense : e));
+        const updated = { ...expenseToSave, id: editingExpenseId } as RecurringExpense;
+        setExpenses(expenses.map(e => e.id === editingExpenseId ? updated : e));
+        await saveExpense(updated);
       } else {
-        setExpenses([...expenses, { ...expenseToSave, id: Date.now().toString() } as RecurringExpense]);
+        const id = Date.now().toString();
+        const created = { ...expenseToSave, id } as RecurringExpense;
+        setExpenses([...expenses, created]);
+        await saveExpense(created);
       }
+
       setNewExpense({ name: '', amount: 0, month: 1, frequency: 'annual', category: 'other', customCategory: '' });
       setEditingExpenseId(null);
       setShowAddExpense(false);
@@ -508,29 +572,33 @@ function Orbit() {
     setShowAddExpense(true);
   };
 
-  const removeExpense = (id: string) => {
+  const removeExpense = async (id: string) => {
     setExpenses(expenses.filter(e => e.id !== id));
+    await deleteExpenseFromDb(id);
   };
 
   const addFixedExpense = () => {
-    setProfile({
+    const newProfile = {
       ...profile,
       fixedExpenses: [...profile.fixedExpenses, { id: Date.now().toString(), label: 'New Expense', amount: 0 }]
-    });
+    };
+    setProfile(newProfile);
   };
 
   const removeFixedExpense = (id: string) => {
-    setProfile({
+    const newProfile = {
       ...profile,
       fixedExpenses: profile.fixedExpenses.filter(e => e.id !== id)
-    });
+    };
+    setProfile(newProfile);
   };
 
   const updateFixedExpense = (id: string, updates: Partial<FixedExpense>) => {
-    setProfile({
+    const newProfile = {
       ...profile,
       fixedExpenses: profile.fixedExpenses.map(e => e.id === id ? { ...e, ...updates } : e)
-    });
+    };
+    setProfile(newProfile);
   };
 
   return (
@@ -588,11 +656,11 @@ function Orbit() {
                 )}
                 {user.uid === 'guest-user' ? (
                   <button 
-                    onClick={() => navigate('/login')}
-                    className="p-2.5 bg-[#FAF9F6] border border-[#E8E4D0] text-[#C5A059] rounded-xl hover:text-[#2C3338] hover:border-[#C5A059] transition-all"
-                    title="Sign In"
+                    onClick={() => navigate('/login?from=orbit')}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] rounded-xl text-[11px] font-mono uppercase tracking-widest hover:bg-[#B38F48] transition-all shadow-sm"
                   >
-                    <UserIcon size={18} />
+                    <LogIn size={14} />
+                    Sign In
                   </button>
                 ) : (
                   <button 
@@ -606,7 +674,7 @@ function Orbit() {
               </div>
             ) : (
               <button 
-                onClick={signInWithGoogle}
+                onClick={() => navigate('/login?from=orbit')}
                 className="flex items-center gap-2 px-6 py-2.5 bg-[#C5A059] text-[#FAF9F6] rounded-xl text-sm font-bold hover:bg-[#B38F48] transition-all"
               >
                 <LogIn size={18} />
@@ -629,7 +697,7 @@ function Orbit() {
                 <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-[#8C8670]">Intelligence Overview</span>
               </div>
               <p className="text-[#8C8670] text-sm leading-relaxed max-w-3xl">
-                Cash Flow Intelligence provides a dynamic view of your financial inflows and outflows. It helps you understand how your income sources, expenses, and investment growth interact to sustain your lifestyle throughout the year.
+                Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus.
               </p>
             </div>
             
@@ -698,10 +766,22 @@ function Orbit() {
           {/* Left Column: Controls */}
           <div className="lg:col-span-4 space-y-8">
             <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
-              <h2 className="font-serif text-xl font-bold text-[#2C3338] mb-8 flex items-center gap-3">
-                <Wallet size={20} className="text-[#C5A059]" />
-                Income & Fixed
-              </h2>
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="font-serif text-xl font-bold text-[#2C3338] flex items-center gap-3">
+                  <Wallet size={20} className="text-[#C5A059]" />
+                  Income & Fixed
+                </h2>
+                {user && user.uid !== 'guest-user' && (
+                  <button 
+                    onClick={() => saveProfile(profile)}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] text-[10px] font-mono uppercase tracking-widest rounded-xl hover:bg-[#B38F48] transition-all disabled:opacity-50 shadow-sm"
+                  >
+                    {isSaving ? <RefreshCw size={12} className="animate-spin" /> : <Save size={12} />}
+                    {isSaving ? 'Saving...' : 'Save Profile'}
+                  </button>
+                )}
+              </div>
               
               <div className="space-y-8">
                 {/* Primary Income */}
@@ -713,12 +793,16 @@ function Orbit() {
                       <div className="flex items-center gap-1 border-b border-[#E8E4D0] focus-within:border-[#C5A059]">
                         <span className="text-sm font-serif text-[#8C8670]">$</span>
                         <input 
-                          type="number"
-                          value={profile.primaryIncome.paycheckAmount}
-                          onChange={(e) => setProfile({
-                            ...profile, 
-                            primaryIncome: { ...profile.primaryIncome, paycheckAmount: Number(e.target.value) }
-                          })}
+                          type="text"
+                          inputMode="numeric"
+                          value={profile.primaryIncome.paycheckAmount === 0 ? '' : profile.primaryIncome.paycheckAmount.toString()}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            setProfile({
+                              ...profile, 
+                              primaryIncome: { ...profile.primaryIncome, paycheckAmount: val === '' ? 0 : parseInt(val, 10) }
+                            });
+                          }}
                           className="w-full bg-transparent py-1 text-sm font-serif outline-none"
                         />
                       </div>
@@ -726,12 +810,16 @@ function Orbit() {
                     <div>
                       <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Freq / Mo</label>
                       <input 
-                        type="number"
-                        value={profile.primaryIncome.frequencyPerMonth}
-                        onChange={(e) => setProfile({
-                          ...profile, 
-                          primaryIncome: { ...profile.primaryIncome, frequencyPerMonth: Number(e.target.value) }
-                        })}
+                        type="text"
+                        inputMode="numeric"
+                        value={profile.primaryIncome.frequencyPerMonth === 0 ? '' : profile.primaryIncome.frequencyPerMonth.toString()}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          setProfile({
+                            ...profile, 
+                            primaryIncome: { ...profile.primaryIncome, frequencyPerMonth: val === '' ? 0 : parseInt(val, 10) }
+                          });
+                        }}
                         className="w-full bg-transparent border-b border-[#E8E4D0] py-1 text-sm font-serif focus:border-[#C5A059] outline-none"
                       />
                     </div>
@@ -748,12 +836,16 @@ function Orbit() {
                         <div className="flex items-center gap-1 border-b border-[#E8E4D0] focus-within:border-[#C5A059]">
                           <span className="text-sm font-serif text-[#8C8670]">$</span>
                           <input 
-                            type="number"
-                            value={profile.spouseIncome.paycheckAmount}
-                            onChange={(e) => setProfile({
-                              ...profile, 
-                              spouseIncome: { ...profile.spouseIncome, paycheckAmount: Number(e.target.value) }
-                            })}
+                            type="text"
+                            inputMode="numeric"
+                            value={profile.spouseIncome.paycheckAmount === 0 ? '' : profile.spouseIncome.paycheckAmount.toString()}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              setProfile({
+                                ...profile, 
+                                spouseIncome: { ...profile.spouseIncome, paycheckAmount: val === '' ? 0 : parseInt(val, 10) }
+                              });
+                            }}
                             className="w-full bg-transparent py-1 text-sm font-serif outline-none"
                           />
                         </div>
@@ -761,12 +853,16 @@ function Orbit() {
                       <div>
                         <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Freq / Mo</label>
                         <input 
-                          type="number"
-                          value={profile.spouseIncome.frequencyPerMonth}
-                          onChange={(e) => setProfile({
-                            ...profile, 
-                            spouseIncome: { ...profile.spouseIncome, frequencyPerMonth: Number(e.target.value) }
-                          })}
+                          type="text"
+                          inputMode="numeric"
+                          value={profile.spouseIncome.frequencyPerMonth === 0 ? '' : profile.spouseIncome.frequencyPerMonth.toString()}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            setProfile({
+                              ...profile, 
+                              spouseIncome: { ...profile.spouseIncome, frequencyPerMonth: val === '' ? 0 : parseInt(val, 10) }
+                            });
+                          }}
                           className="w-full bg-transparent border-b border-[#E8E4D0] py-1 text-sm font-serif focus:border-[#C5A059] outline-none"
                         />
                       </div>
@@ -804,9 +900,13 @@ function Orbit() {
                       <div className="flex items-center gap-1">
                         <span className="text-sm font-serif font-bold text-[#2C3338]">$</span>
                         <input 
-                          type="number"
-                          value={exp.amount}
-                          onChange={(e) => updateFixedExpense(exp.id, { amount: Number(e.target.value) })}
+                          type="text"
+                          inputMode="numeric"
+                          value={exp.amount === 0 ? '' : exp.amount.toString()}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            updateFixedExpense(exp.id, { amount: val === '' ? 0 : parseInt(val, 10) });
+                          }}
                           className="w-20 bg-transparent text-right text-sm font-serif font-bold text-[#2C3338] focus:text-[#C5A059] outline-none"
                         />
                       </div>

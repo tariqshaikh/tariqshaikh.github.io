@@ -157,6 +157,16 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    // Orbit Profile Rules
+    match /users/{userId}/orbitProfile/{docId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Orbit Expenses Rules
+    match /users/{userId}/orbitExpenses/{expenseId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // Section Settings Rules
     match /users/{userId}/sectionSettings/{settingId} {
       allow read, write: if isOwner(userId);
