@@ -152,6 +152,7 @@ interface FinanceProfile {
   savingsGoal: number;
   cardColors: Record<string, string>;
   mode?: 'individual' | 'family';
+  hasSeededDefaults?: boolean;
 }
 
 // --- Components ---
@@ -247,10 +248,10 @@ const SliderInput = ({ label, value, min, max, step, onChange, unit = "", onSync
 );
 
 const DEFAULT_EXPENSES: RecurringExpense[] = [
-  { id: '1', name: 'Car Insurance', amount: 1200, month: 3, months: [3, 9], frequency: 'semi-annual', category: 'insurance' },
-  { id: '2', name: 'Amex Platinum Fee', amount: 695, month: 1, months: [1], frequency: 'annual', category: 'subscription' },
-  { id: '4', name: 'Amazon Prime', amount: 139, month: 7, months: [7], frequency: 'annual', category: 'subscription' },
-  { id: '5', name: 'Car Maintenance', amount: 400, month: 5, months: [2, 5, 8, 11], frequency: 'quarterly', category: 'maintenance' },
+  { id: 'default_car_ins', name: 'Car Insurance', amount: 1200, month: 3, months: [3, 9], frequency: 'semi-annual', category: 'insurance' },
+  { id: 'default_amex_plat', name: 'Amex Platinum Fee', amount: 695, month: 1, months: [1], frequency: 'annual', category: 'subscription' },
+  { id: 'default_amazon', name: 'Amazon Prime', amount: 139, month: 7, months: [7], frequency: 'annual', category: 'subscription' },
+  { id: 'default_car_maint', name: 'Car Maintenance', amount: 400, month: 5, months: [2, 5, 8, 11], frequency: 'quarterly', category: 'maintenance' },
 ];
 
 function Orbit() {
@@ -277,7 +278,8 @@ function Orbit() {
       surplus: '#C5A059',
       totalSpend: '#1E5C38'
     },
-    mode: 'individual'
+    mode: 'individual',
+    hasSeededDefaults: false
   });
 
   const [startDate, setStartDate] = useState<string>(`${new Date().getFullYear()}-01-01`);
@@ -406,7 +408,7 @@ function Orbit() {
     ]
   };
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('Credit Cards & Finance');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
   const [librarySearch, setLibrarySearch] = useState('');
   const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
 
@@ -428,26 +430,75 @@ function Orbit() {
     if (!user || user.uid === 'guest-user') return;
 
     const profileRef = doc(db, 'users', user.uid, 'orbitProfile', 'main');
-    const unsubProfile = onSnapshot(profileRef, (doc) => {
-      if (doc.exists()) {
-        const data = doc.data() as FinanceProfile;
-        // Only update if data is actually different to prevent auto-save loops
+    const unsubProfile = onSnapshot(profileRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as FinanceProfile;
+        
+        // One-time seeding check
+        if (data.hasSeededDefaults === undefined || data.hasSeededDefaults === false) {
+          DEFAULT_EXPENSES.forEach(exp => {
+            setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp).catch(console.error);
+          });
+          setDoc(docSnap.ref, { ...data, hasSeededDefaults: true }, { merge: true }).catch(console.error);
+          data.hasSeededDefaults = true;
+        }
+
         setProfile(prev => {
           if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
           return data;
+        });
+      } else {
+        // Profile doesn't exist yet, seed expenses now
+        DEFAULT_EXPENSES.forEach(exp => {
+          setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp).catch(console.error);
         });
       }
     });
 
     const expensesRef = collection(db, 'users', user.uid, 'orbitExpenses');
     const unsubExpenses = onSnapshot(expensesRef, (snapshot) => {
-      if (!snapshot.empty) {
-        const exps = snapshot.docs.map(d => ({ ...d.data(), id: d.id })) as RecurringExpense[];
-        setExpenses(exps);
-      } else {
-        // If Firestore is empty, seed with defaults
-        DEFAULT_EXPENSES.forEach(exp => saveExpense(exp));
+      const exps = snapshot.docs.map(d => ({ ...d.data(), id: d.id })) as RecurringExpense[];
+      
+      // Auto-cleanup duplicates of default expenses
+      const defaultNames = DEFAULT_EXPENSES.map(e => e.name);
+      const defaultIds = DEFAULT_EXPENSES.map(e => e.id);
+      
+      const duplicatesToDelete: string[] = [];
+      const uniqueExps: RecurringExpense[] = [];
+      const nameGroups: Record<string, RecurringExpense[]> = {};
+      
+      exps.forEach(exp => {
+        if (defaultNames.includes(exp.name)) {
+          if (!nameGroups[exp.name]) nameGroups[exp.name] = [];
+          nameGroups[exp.name].push(exp);
+        } else {
+          uniqueExps.push(exp);
+        }
+      });
+      
+      Object.entries(nameGroups).forEach(([name, group]) => {
+        if (group.length > 1) {
+          // Keep the one with the default ID, or the first one
+          const preferred = group.find(e => defaultIds.includes(e.id)) || group[0];
+          uniqueExps.push(preferred);
+          
+          group.forEach(e => {
+            if (e.id !== preferred.id) {
+              duplicatesToDelete.push(e.id);
+            }
+          });
+        } else {
+          uniqueExps.push(group[0]);
+        }
+      });
+      
+      if (duplicatesToDelete.length > 0) {
+        duplicatesToDelete.forEach(id => {
+          deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id)).catch(console.error);
+        });
       }
+      
+      setExpenses(uniqueExps);
     });
 
     return () => {
@@ -499,6 +550,33 @@ function Orbit() {
       await deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, `orbitExpenses/${id}`);
+    }
+  };
+
+  const loadDefaultExpenses = async () => {
+    if (!user || user.uid === 'guest-user') return;
+    setIsSaving(true);
+    try {
+      // 1. Find existing expenses that match the default names to avoid duplicates
+      const defaultNames = DEFAULT_EXPENSES.map(e => e.name);
+      const duplicatesToDelete = expenses.filter(e => 
+        defaultNames.includes(e.name) && !DEFAULT_EXPENSES.find(de => de.id === e.id)
+      );
+      
+      const deletePromises = duplicatesToDelete.map(exp => 
+        deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id))
+      );
+      await Promise.all(deletePromises);
+
+      // 2. Insert defaults with fixed IDs
+      const setPromises = DEFAULT_EXPENSES.map(exp => {
+        return setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp);
+      });
+      await Promise.all(setPromises);
+    } catch (error) {
+      console.error("Error loading default expenses", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1199,12 +1277,23 @@ function Orbit() {
                   <RefreshCw size={20} className="text-[#C5A059]" />
                   Orbiting Expenses
                 </h3>
-                <button 
-                  onClick={() => setShowAddExpense(true)}
-                  className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#2C3338] transition-colors"
-                >
-                  + Add Expense
-                </button>
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={loadDefaultExpenses}
+                    disabled={isSaving}
+                    className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#C5A059] transition-colors flex items-center gap-1 disabled:opacity-50 italic"
+                  >
+                    <Zap size={12} />
+                    Load Default Expenses
+                  </button>
+                  <button 
+                    onClick={() => setShowAddExpense(true)}
+                    className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#2C3338] transition-colors flex items-center gap-1"
+                  >
+                    <Plus size={12} />
+                    Add Expense
+                  </button>
+                </div>
               </div>
               
               <div className="space-y-3">
@@ -1508,6 +1597,7 @@ function Orbit() {
                           onChange={(e) => setSelectedCategory(e.target.value)}
                           className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[#2C3338] focus:border-[#C5A059] focus:outline-none"
                         >
+                          <option value="All Categories">All Categories</option>
                           {Object.keys(categorizedPresets).map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
                           ))}
@@ -1518,7 +1608,7 @@ function Orbit() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto max-h-[450px] pr-2 custom-scrollbar">
                       {Object.entries(categorizedPresets).flatMap(([cat, items]) => 
                         items.filter(p => 
-                          (cat === selectedCategory || librarySearch.length > 0) && 
+                          (selectedCategory === 'All Categories' || cat === selectedCategory || librarySearch.length > 0) && 
                           (p.name.toLowerCase().includes(librarySearch.toLowerCase()) || cat.toLowerCase().includes(librarySearch.toLowerCase()))
                         ).map((preset: any) => (
                           <button
