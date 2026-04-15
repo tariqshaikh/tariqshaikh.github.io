@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Plus,
   Menu,
+  Search,
   X
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -126,7 +127,8 @@ interface RecurringExpense {
   id: string;
   name: string;
   amount: number;
-  month: number; // 1-12
+  month: number; // Legacy single month (1-12)
+  months?: number[]; // New multiple months (1-12)
   frequency: 'annual' | 'semi-annual' | 'quarterly' | 'monthly' | 'bi-weekly' | 'weekly' | 'one-time';
   category: string;
   customCategory?: string;
@@ -244,6 +246,13 @@ const SliderInput = ({ label, value, min, max, step, onChange, unit = "", onSync
   </div>
 );
 
+const DEFAULT_EXPENSES: RecurringExpense[] = [
+  { id: '1', name: 'Car Insurance', amount: 1200, month: 3, months: [3, 9], frequency: 'semi-annual', category: 'insurance' },
+  { id: '2', name: 'Amex Platinum Fee', amount: 695, month: 1, months: [1], frequency: 'annual', category: 'subscription' },
+  { id: '4', name: 'Amazon Prime', amount: 139, month: 7, months: [7], frequency: 'annual', category: 'subscription' },
+  { id: '5', name: 'Car Maintenance', amount: 400, month: 5, months: [2, 5, 8, 11], frequency: 'quarterly', category: 'maintenance' },
+];
+
 function Orbit() {
   // --- State ---
   const [user, setUser] = useState<User | null>(null);
@@ -271,19 +280,16 @@ function Orbit() {
     mode: 'individual'
   });
 
+  const [startDate, setStartDate] = useState<string>(`${new Date().getFullYear()}-01-01`);
+  const [endDate, setEndDate] = useState<string>(`${new Date().getFullYear()}-12-31`);
+
   useEffect(() => {
     if (profile.mode) {
       setMode(profile.mode);
     }
   }, [profile.mode]);
 
-  const [expenses, setExpenses] = useState<RecurringExpense[]>([
-    { id: '1', name: 'Car Insurance', amount: 1200, month: 3, frequency: 'semi-annual', category: 'insurance' },
-    { id: '2', name: 'Amex Platinum Fee', amount: 695, month: 1, frequency: 'annual', category: 'subscription' },
-    { id: '3', name: 'Property Tax', amount: 4500, month: 10, frequency: 'annual', category: 'tax' },
-    { id: '4', name: 'Amazon Prime', amount: 139, month: 7, frequency: 'annual', category: 'subscription' },
-    { id: '5', name: 'Car Maintenance', amount: 400, month: 5, frequency: 'quarterly', category: 'maintenance' },
-  ]);
+  const [expenses, setExpenses] = useState<RecurringExpense[]>(DEFAULT_EXPENSES);
 
   const [isSaving, setIsSaving] = useState(false);
   const [aiResponse, setAiResponse] = useState<string>("");
@@ -294,6 +300,7 @@ function Orbit() {
     name: '',
     amount: 0,
     month: 1,
+    months: [1],
     frequency: 'annual',
     category: 'other'
   });
@@ -393,14 +400,14 @@ function Orbit() {
       { name: 'Costco Membership', amount: 65, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Gym Membership', amount: 60, frequency: 'monthly', category: 'subscription', month: 1 },
       { name: 'Professional Dues', amount: 300, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Property Tax', amount: 4500, frequency: 'annual', category: 'tax', month: 10 },
       { name: 'Cloud Storage (iCloud/Google)', amount: 120, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Newspaper/Journal Sub', amount: 150, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Custom Membership', amount: 0, frequency: 'annual', category: 'subscription', month: 1 },
     ]
   };
 
-  const [selectedCategory, setSelectedCategory] = useState<string>(Object.keys(categorizedPresets)[0]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('Credit Cards & Finance');
+  const [librarySearch, setLibrarySearch] = useState('');
   const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
 
   // --- Auth & Data Fetching ---
@@ -434,9 +441,12 @@ function Orbit() {
 
     const expensesRef = collection(db, 'users', user.uid, 'orbitExpenses');
     const unsubExpenses = onSnapshot(expensesRef, (snapshot) => {
-      const exps = snapshot.docs.map(d => ({ ...d.data(), id: d.id })) as RecurringExpense[];
-      if (exps.length > 0) {
+      if (!snapshot.empty) {
+        const exps = snapshot.docs.map(d => ({ ...d.data(), id: d.id })) as RecurringExpense[];
         setExpenses(exps);
+      } else {
+        // If Firestore is empty, seed with defaults
+        DEFAULT_EXPENSES.forEach(exp => saveExpense(exp));
       }
     });
 
@@ -507,6 +517,12 @@ function Orbit() {
   }, []);
 
   // --- Calculations ---
+  const monthsInRange = useMemo(() => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+  }, [startDate, endDate]);
+
   const monthlyIncome = useMemo(() => {
     const primary = profile.primaryIncome.paycheckAmount * profile.primaryIncome.frequencyPerMonth;
     const spouse = profile.spouseIncome.paycheckAmount * profile.spouseIncome.frequencyPerMonth;
@@ -517,20 +533,54 @@ function Orbit() {
     return profile.fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   }, [profile.fixedExpenses]);
 
-  const totalAnnualOrbitExpenses = useMemo(() => expenses.reduce((sum, e) => {
-    if (e.frequency === 'annual' || e.frequency === 'one-time') return sum + e.amount;
-    if (e.frequency === 'semi-annual') return sum + (e.amount * 2);
-    if (e.frequency === 'quarterly') return sum + (e.amount * 4);
-    if (e.frequency === 'monthly') return sum + (e.amount * 12);
-    if (e.frequency === 'bi-weekly') return sum + (e.amount * 26);
-    if (e.frequency === 'weekly') return sum + (e.amount * 52);
-    return sum;
-  }, 0), [expenses]);
+  const totalPeriodOrbitExpenses = useMemo(() => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const startTotalMonths = start.getFullYear() * 12 + start.getMonth();
+    const endTotalMonths = end.getFullYear() * 12 + end.getMonth();
 
-  const totalAnnualFixedExpenses = monthlyFixedExpenses * 12;
-  const totalAnnualIncome = monthlyIncome * 12;
-  const totalAnnualSpend = totalAnnualFixedExpenses + totalAnnualOrbitExpenses;
-  const annualSurplus = totalAnnualIncome - totalAnnualSpend;
+    return expenses.reduce((sum, e) => {
+      let occurrences = 0;
+      
+      if (e.frequency === 'monthly') {
+        occurrences = monthsInRange;
+      } else if (e.frequency === 'bi-weekly') {
+        occurrences = (26 / 12) * monthsInRange;
+      } else if (e.frequency === 'weekly') {
+        occurrences = (52 / 12) * monthsInRange;
+      } else {
+        // For annual, semi-annual, quarterly, one-time
+        const targetMonths: number[] = [];
+        
+        if (e.months && e.months.length > 0) {
+          e.months.forEach(m => targetMonths.push(m - 1));
+        } else {
+          // Fallback to legacy single month anchor
+          const anchorMonth = (e.month || 1) - 1; // 0-11
+          if (e.frequency === 'annual' || e.frequency === 'one-time') {
+            targetMonths.push(anchorMonth);
+          } else if (e.frequency === 'semi-annual') {
+            targetMonths.push(anchorMonth, (anchorMonth + 6) % 12);
+          } else if (e.frequency === 'quarterly') {
+            targetMonths.push(anchorMonth, (anchorMonth + 3) % 12, (anchorMonth + 6) % 12, (anchorMonth + 9) % 12);
+          }
+        }
+
+        for (let m = startTotalMonths; m <= endTotalMonths; m++) {
+          if (targetMonths.includes(m % 12)) {
+            occurrences++;
+          }
+        }
+      }
+      
+      return sum + (e.amount * occurrences);
+    }, 0);
+  }, [expenses, startDate, endDate, monthsInRange]);
+
+  const totalPeriodFixedExpenses = monthlyFixedExpenses * monthsInRange;
+  const totalPeriodIncome = monthlyIncome * monthsInRange;
+  const totalPeriodSpend = totalPeriodFixedExpenses + totalPeriodOrbitExpenses;
+  const periodSurplus = totalPeriodIncome - totalPeriodSpend;
 
   // --- AI Logic ---
   const askAiCoach = async () => {
@@ -542,17 +592,17 @@ function Orbit() {
       
       const ai = new GoogleGenAI({ apiKey });
       const prompt = `
-        As a strategic cash flow coach, analyze this annual financial outlook for a ${mode} setup:
-        - Annual Income: $${totalAnnualIncome.toLocaleString()}
-        - Annual Fixed Expenses (Mortgage, Utilities, etc): $${totalAnnualFixedExpenses.toLocaleString()}
-        - Annual "Orbiting" (Irregular) Expenses: $${totalAnnualOrbitExpenses.toLocaleString()}
-        - Total Annual Spend: $${totalAnnualSpend.toLocaleString()}
-        - Annual Surplus/Deficit: $${annualSurplus.toLocaleString()}
+        As a strategic cash flow coach, analyze this financial outlook for a ${mode} setup over a ${monthsInRange}-month period (${startDate} to ${endDate}):
+        - Total Period Income: $${totalPeriodIncome.toLocaleString()}
+        - Total Period Fixed Expenses: $${totalPeriodFixedExpenses.toLocaleString()}
+        - Total Period "Orbiting" (Irregular) Expenses: $${totalPeriodOrbitExpenses.toLocaleString()}
+        - Total Period Spend: $${totalPeriodSpend.toLocaleString()}
+        - Period Surplus/Deficit: $${periodSurplus.toLocaleString()}
         
         Irregular Expenses List:
         ${expenses.map(e => `- ${e.name}: $${e.amount} (${e.frequency})`).join('\n')}
         
-        Provide 3 high-impact strategic insights on how to manage this annual cycle. 
+        Provide 3 high-impact strategic insights on how to manage this specific timeline. 
         Focus on "Sinking Funds", optimizing payment timing, and ensuring the surplus is put to work.
         Since this is a ${mode} plan, tailor the advice accordingly.
         Keep it professional, punchy, and strategic. Use markdown.
@@ -577,7 +627,9 @@ function Orbit() {
       const finalCategory = newExpense.category === 'other' ? (newExpense.customCategory || 'other') : newExpense.category;
       const expenseToSave = {
         ...newExpense,
-        category: finalCategory
+        category: finalCategory,
+        // Ensure months is populated if missing
+        months: newExpense.months || [newExpense.month || 1]
       };
 
       if (editingExpenseId) {
@@ -591,7 +643,7 @@ function Orbit() {
         await saveExpense(created);
       }
 
-      setNewExpense({ name: '', amount: 0, month: 1, frequency: 'annual', category: 'other', customCategory: '' });
+      setNewExpense({ name: '', amount: 0, month: 1, months: [1], frequency: 'annual', category: 'other', customCategory: '' });
       setEditingExpenseId(null);
       setShowAddExpense(false);
     }
@@ -724,7 +776,12 @@ function Orbit() {
       <main className="max-w-7xl mx-auto px-6 py-12">
         {/* Cash Flow Intelligence Header */}
         <div className="mb-12 w-full">
-          <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic mb-6 leading-tight">Annual Orbit: Cash Flow Intelligence</h2>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div>
+              <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">Annual Orbit: Cash Flow Intelligence</h2>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-[#C5A059] mt-2">Cash Flow Timeline: {monthsInRange} Months</p>
+            </div>
+          </div>
           
           <div className="py-8 border-y border-[#E8E4D0]/60 flex flex-col md:flex-row gap-12 items-start">
             <div className="flex-1">
@@ -733,7 +790,7 @@ function Orbit() {
                 <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-[#8C8670]">Intelligence Overview</span>
               </div>
               <p className="text-[#8C8670] text-sm leading-relaxed max-w-3xl">
-                Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus.
+                Orbit is built to work with the actual money that <span className="text-[#2C3338] font-bold">hits your bank account</span>—not your gross salary, 401k, or pre-tax figures. By focusing on your net inflow, we accurately project your true cash flow trajectory and the impact of life's big decisions.
               </p>
             </div>
             
@@ -744,27 +801,61 @@ function Orbit() {
               </div>
               <ul className="text-[11px] text-[#8C8670] space-y-2 leading-relaxed font-mono">
                 <li><span className="text-[#C5A059] mr-2">01.</span> Toggle Individual/Family views</li>
-                <li><span className="text-[#C5A059] mr-2">02.</span> Adjust Income & Fixed Expenses</li>
-                <li><span className="text-[#C5A059] mr-2">03.</span> Track irregular Orbiting bills</li>
+                <li><span className="text-[#C5A059] mr-2">02.</span> Adjust your timeline</li>
+                <li><span className="text-[#C5A059] mr-2">03.</span> Adjust Income & Fixed Expenses</li>
+                <li><span className="text-[#C5A059] mr-2">04.</span> Track irregular Orbiting bills</li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-[#E8E4D0]/30 p-1 rounded-xl border border-[#E8E4D0] flex">
+        {/* Controls Bar: Mode Toggle & Date Range */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12 w-full">
+          {/* Mode Toggle */}
+          <div className="bg-[#E8E4D0]/30 p-1 rounded-xl border border-[#E8E4D0] flex shrink-0">
             <button 
               onClick={() => setProfile({...profile, mode: 'individual'})}
-              className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'individual' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
+              className={`px-8 py-2.5 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'individual' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
             >
               Individual
             </button>
             <button 
               onClick={() => setProfile({...profile, mode: 'family'})}
-              className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'family' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
+              className={`px-8 py-2.5 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'family' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
             >
               Family
+            </button>
+          </div>
+
+          {/* Date Range Selector */}
+          <div className="bg-[#E8E4D0]/10 p-4 rounded-2xl border border-[#E8E4D0]/60 flex flex-wrap items-center gap-8 ml-auto">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Start Date</label>
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">End Date</label>
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
+              />
+            </div>
+            <button 
+              onClick={() => {
+                setStartDate(`${new Date().getFullYear()}-01-01`);
+                setEndDate(`${new Date().getFullYear()}-12-31`);
+              }}
+              className="p-2 hover:bg-[#E8E4D0] rounded-xl text-[#C5A059] transition-colors"
+              title="Reset to Annual View"
+            >
+              <RefreshCw size={14} />
             </button>
           </div>
         </div>
@@ -772,27 +863,27 @@ function Orbit() {
         {/* Stats Grid (Full Width) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard 
-            label="Annual Income" 
-            value={`$${totalAnnualIncome.toLocaleString()}`} 
-            subValue="Gross yearly inflow"
+            label="Period Income" 
+            value={`$${totalPeriodIncome.toLocaleString()}`} 
+            subValue={`Total inflow over ${monthsInRange}mo`}
             icon={TrendingUp}
             color={profile.cardColors.income}
             onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, income: c}})}
           />
           <StatCard 
-            label="Annual Spend" 
-            value={`$${totalAnnualSpend.toLocaleString()}`} 
+            label="Period Spend" 
+            value={`$${totalPeriodSpend.toLocaleString()}`} 
             subValue="Fixed + Orbiting"
             icon={RefreshCw}
             color={profile.cardColors.spend}
             onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, spend: c}})}
           />
           <StatCard 
-            label="Annual Surplus" 
-            value={`$${annualSurplus.toLocaleString()}`} 
+            label="Period Surplus" 
+            value={`$${periodSurplus.toLocaleString()}`} 
             subValue="Potential savings"
             icon={Zap}
-            trend={annualSurplus > 0 ? 1 : -1}
+            trend={periodSurplus > 0 ? 1 : -1}
             color={profile.cardColors.surplus}
             onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, surplus: c}})}
           />
@@ -967,7 +1058,7 @@ function Orbit() {
               <div className="p-4 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-xl flex justify-between items-center">
                 <div>
                   <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Monthly Set-Aside</p>
-                  <p className="text-2xl font-serif font-bold text-[#2C3338]">${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} <span className="text-sm text-[#8C8670] font-sans font-normal">/ mo</span></p>
+                  <p className="text-2xl font-serif font-bold text-[#2C3338]">${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} <span className="text-sm text-[#8C8670] font-sans font-normal">/ mo</span></p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center group-hover:bg-[#C5A059] transition-colors">
                   <ChevronRight size={16} className="text-[#C5A059] group-hover:text-white transition-colors" />
@@ -1003,10 +1094,12 @@ function Orbit() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: profile.cardColors.totalSpend }}>Total Annual Spend</h3>
-                    <div className="text-3xl font-serif font-bold text-[#2C3338]">${totalAnnualSpend.toLocaleString()}</div>
+                    <h3 className="text-[10px] font-mono uppercase tracking-widest mb-1" style={{ color: profile.cardColors.totalSpend }}>Total Period Spend</h3>
+                    <div className="text-3xl font-serif font-bold text-[#2C3338]">${totalPeriodSpend.toLocaleString()}</div>
                   </div>
-                  <div className="text-[10px] font-mono mt-4" style={{ color: `${profile.cardColors.totalSpend}99` }}>Jan 1 - Dec 31</div>
+                  <div className="text-[10px] font-mono mt-4" style={{ color: `${profile.cardColors.totalSpend}99` }}>
+                    {new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}
+                  </div>
                 </div>
 
                 {/* Fixed Expense Cards */}
@@ -1022,8 +1115,8 @@ function Orbit() {
                         />
                       </div>
                       <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10">{item.label}</h3>
-                      <div className="text-lg font-serif font-bold text-[#2C3338] mt-2 relative z-10">${(item.amount * 12).toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10">Annual Total</div>
+                      <div className="text-lg font-serif font-bold text-[#2C3338] mt-2 relative z-10">${(item.amount * monthsInRange).toLocaleString()}</div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10">Period Total</div>
                     </div>
                   );
                 })}
@@ -1038,16 +1131,47 @@ function Orbit() {
                     'other': '#8C8670'
                   };
                   const color = profile.cardColors[`cat_${cat}`] || categoryColors[cat as string] || '#2C3338';
+                  
+                  const start = new Date(startDate);
+                  const end = new Date(endDate);
+                  const startTotalMonths = start.getFullYear() * 12 + start.getMonth();
+                  const endTotalMonths = end.getFullYear() * 12 + end.getMonth();
+
                   const catTotal = expenses
                     .filter(e => e.category === cat)
                     .reduce((sum, e) => {
-                      if (e.frequency === 'annual' || e.frequency === 'one-time') return sum + e.amount;
-                      if (e.frequency === 'semi-annual') return sum + (e.amount * 2);
-                      if (e.frequency === 'quarterly') return sum + (e.amount * 4);
-                      if (e.frequency === 'monthly') return sum + (e.amount * 12);
-                      if (e.frequency === 'bi-weekly') return sum + (e.amount * 26);
-                      if (e.frequency === 'weekly') return sum + (e.amount * 52);
-                      return sum;
+                      let occurrences = 0;
+                      
+                      if (e.frequency === 'monthly') {
+                        occurrences = monthsInRange;
+                      } else if (e.frequency === 'bi-weekly') {
+                        occurrences = (26 / 12) * monthsInRange;
+                      } else if (e.frequency === 'weekly') {
+                        occurrences = (52 / 12) * monthsInRange;
+                      } else {
+                        const targetMonths: number[] = [];
+                        
+                        if (e.months && e.months.length > 0) {
+                          e.months.forEach(m => targetMonths.push(m - 1));
+                        } else {
+                          const anchorMonth = (e.month || 1) - 1;
+                          if (e.frequency === 'annual' || e.frequency === 'one-time') {
+                            targetMonths.push(anchorMonth);
+                          } else if (e.frequency === 'semi-annual') {
+                            targetMonths.push(anchorMonth, (anchorMonth + 6) % 12);
+                          } else if (e.frequency === 'quarterly') {
+                            targetMonths.push(anchorMonth, (anchorMonth + 3) % 12, (anchorMonth + 6) % 12, (anchorMonth + 9) % 12);
+                          }
+                        }
+
+                        for (let m = startTotalMonths; m <= endTotalMonths; m++) {
+                          if (targetMonths.includes(m % 12)) {
+                            occurrences++;
+                          }
+                        }
+                      }
+                      
+                      return sum + (e.amount * occurrences);
                     }, 0);
                   
                   return (
@@ -1060,7 +1184,7 @@ function Orbit() {
                         />
                       </div>
                       <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10">Orbit: {cat}</h3>
-                      <div className="text-xl font-serif font-bold text-[#2C3338] mt-2 relative z-10">${catTotal.toLocaleString()}</div>
+                      <div className="text-xl font-serif font-bold text-[#2C3338] mt-2 relative z-10">${Math.round(catTotal).toLocaleString()}</div>
                       <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10">Irregular Hits</div>
                     </div>
                   );
@@ -1241,17 +1365,68 @@ function Orbit() {
                             className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono"
                           />
                         </div>
-                        <div>
-                          <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Month</label>
-                          <select 
-                            value={newExpense.month}
-                            onChange={e => setNewExpense({...newExpense, month: Number(e.target.value)})}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
-                          >
-                            {monthNames.map((name, i) => (
-                              <option key={name} value={i + 1}>{name}</option>
-                            ))}
-                          </select>
+                        <div className="col-span-2">
+                          <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-3">
+                            {['monthly', 'bi-weekly', 'weekly'].includes(newExpense.frequency || '') 
+                              ? 'Month (Reference Only)' 
+                              : 'Select Active Months'}
+                          </label>
+                          
+                          {['monthly', 'bi-weekly', 'weekly'].includes(newExpense.frequency || '') ? (
+                            <div className="p-3 bg-[#E8E4D0]/10 border border-[#E8E4D0] rounded-xl text-[10px] font-mono text-[#8C8670] italic">
+                              This expense occurs every {newExpense.frequency === 'monthly' ? 'month' : 'week'}. All months in your timeline are automatically included.
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-4 gap-2">
+                              {monthNames.map((name, i) => {
+                                const monthNum = i + 1;
+                                const isSelected = newExpense.months?.includes(monthNum);
+                                const maxMonths = newExpense.frequency === 'annual' || newExpense.frequency === 'one-time' ? 1 : 
+                                                 newExpense.frequency === 'semi-annual' ? 2 : 
+                                                 newExpense.frequency === 'quarterly' ? 4 : 12;
+
+                                return (
+                                  <button
+                                    key={name}
+                                    onClick={() => {
+                                      const currentMonths = newExpense.months || [];
+                                      let nextMonths: number[];
+                                      
+                                      if (isSelected) {
+                                        nextMonths = currentMonths.filter(m => m !== monthNum);
+                                      } else {
+                                        // If at limit, replace the first one (or just don't add if we want strict)
+                                        // Replacing feels more intuitive for "picking"
+                                        if (currentMonths.length >= maxMonths) {
+                                          nextMonths = [...currentMonths.slice(1), monthNum];
+                                        } else {
+                                          nextMonths = [...currentMonths, monthNum];
+                                        }
+                                      }
+                                      setNewExpense({ ...newExpense, months: nextMonths, month: nextMonths[0] || 1 });
+                                    }}
+                                    className={`py-2 px-1 text-[9px] font-mono uppercase tracking-tighter border rounded-lg transition-all ${isSelected ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
+                                  >
+                                    {name.substring(0, 3)}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                          
+                          {/* Validation Hint */}
+                          {!['monthly', 'bi-weekly', 'weekly'].includes(newExpense.frequency || '') && (
+                            <div className="flex justify-between items-center mt-2">
+                              <p className="text-[9px] text-[#8C8670] font-mono italic">
+                                {newExpense.frequency === 'annual' || newExpense.frequency === 'one-time' ? 'Select 1 month' : 
+                                 newExpense.frequency === 'semi-annual' ? 'Select 2 months' : 
+                                 newExpense.frequency === 'quarterly' ? 'Select 4 months' : ''}
+                              </p>
+                              {(newExpense.months?.length || 0) === 0 && (
+                                <p className="text-[9px] text-[#8B0000] font-mono italic">Selection required</p>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -1312,12 +1487,22 @@ function Orbit() {
                 {/* Presets Side */}
                 <div className="lg:col-span-7 space-y-6">
                   <div className="bg-[#E8E4D0]/20 p-8 rounded-xl border border-[#E8E4D0] h-full">
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                       <h3 className="font-mono text-[11px] uppercase tracking-widest text-[#2C3338] font-bold flex items-center gap-2">
                         <Zap size={14} className="text-[#C5A059]" />
                         Orbit Library
                       </h3>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                        <div className="relative flex-1 sm:flex-none">
+                          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C8670]" />
+                          <input 
+                            type="text"
+                            placeholder="Search library..."
+                            value={librarySearch}
+                            onChange={(e) => setLibrarySearch(e.target.value)}
+                            className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl pl-8 pr-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[#2C3338] focus:border-[#C5A059] focus:outline-none w-full"
+                          />
+                        </div>
                         <select 
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value)}
@@ -1331,26 +1516,32 @@ function Orbit() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto max-h-[450px] pr-2 custom-scrollbar">
-                      {(categorizedPresets as any)[selectedCategory].map((preset: any) => (
-                        <button
-                          key={preset.name}
-                          onClick={() => {
-                            setNewExpense({ ...preset, id: editingExpenseId || Date.now().toString() });
-                            // Don't close modal, let user refine
-                          }}
-                          className="flex flex-col items-start p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl hover:border-[#C5A059] hover:shadow-md transition-all group text-left relative"
-                        >
-                          <div className="absolute top-2 right-2 text-[#C5A059] opacity-0 group-hover:opacity-100 transition-all">
-                            <Plus size={14} />
-                          </div>
-                          <div className="text-xs font-bold text-[#2C3338] mb-1 group-hover:text-[#C5A059] transition-colors">{preset.name}</div>
-                          <div className="text-[9px] text-[#8C8670] font-mono uppercase tracking-tighter flex items-center gap-2">
-                            <span>${preset.amount.toLocaleString()}</span>
-                            <span className="w-1 h-1 bg-[#E8E4D0] rounded-full" />
-                            <span>{preset.frequency}</span>
-                          </div>
-                        </button>
-                      ))}
+                      {Object.entries(categorizedPresets).flatMap(([cat, items]) => 
+                        items.filter(p => 
+                          (cat === selectedCategory || librarySearch.length > 0) && 
+                          (p.name.toLowerCase().includes(librarySearch.toLowerCase()) || cat.toLowerCase().includes(librarySearch.toLowerCase()))
+                        ).map((preset: any) => (
+                          <button
+                            key={preset.name}
+                            onClick={() => {
+                              const months = preset.months || [preset.month || 1];
+                              setNewExpense({ ...preset, months, id: editingExpenseId || Date.now().toString() });
+                              // Don't close modal, let user refine
+                            }}
+                            className="flex flex-col items-start p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl hover:border-[#C5A059] hover:shadow-md transition-all group text-left relative"
+                          >
+                            <div className="absolute top-2 right-2 text-[#C5A059] opacity-0 group-hover:opacity-100 transition-all">
+                              <Plus size={14} />
+                            </div>
+                            <div className="text-xs font-bold text-[#2C3338] mb-1 group-hover:text-[#C5A059] transition-colors">{preset.name}</div>
+                            <div className="text-[9px] text-[#8C8670] font-mono uppercase tracking-tighter flex items-center gap-2">
+                              <span>${preset.amount.toLocaleString()}</span>
+                              <span className="w-1 h-1 bg-[#E8E4D0] rounded-full" />
+                              <span>{preset.frequency}</span>
+                            </div>
+                          </button>
+                        ))
+                      )}
                     </div>
                     
                     <div className="mt-8 p-4 bg-[#FAF9F6]/50 border border-[#E8E4D0] rounded-lg">
@@ -1417,7 +1608,7 @@ function Orbit() {
                 <div className="space-y-8">
                   <div className="p-6 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-lg text-center">
                     <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Your Monthly Set-Aside</p>
-                    <p className="text-4xl font-serif font-bold text-[#2C3338]">${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
+                    <p className="text-4xl font-serif font-bold text-[#2C3338]">${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
                   </div>
 
                   <div className="space-y-6">
@@ -1426,7 +1617,7 @@ function Orbit() {
                         <span className="text-[#C5A059] font-mono text-[11px]">01.</span> Where does this number come from?
                       </h4>
                       <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        We took your total annual orbiting expenses (${totalAnnualOrbitExpenses.toLocaleString()}) and divided it by 12. This smooths out the "spikes" of irregular bills (like annual premiums or holidays) into a flat, predictable monthly cost.
+                        We took your total period orbiting expenses (${Math.round(totalPeriodOrbitExpenses).toLocaleString()}) and divided it by the number of months in your timeline ({monthsInRange}). This smooths out the "spikes" of irregular bills into a flat, predictable monthly cost for this specific window.
                       </p>
                     </div>
 
@@ -1453,7 +1644,7 @@ function Orbit() {
                         <span className="text-[#C5A059] font-mono text-[11px]">04.</span> The Golden Rule: Automate It
                       </h4>
                       <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        Set up an automatic transfer from your checking to your HYSA for exactly ${Math.round(totalAnnualOrbitExpenses / 12).toLocaleString()} on the 1st of every month (or split it per paycheck). When an orbiting bill is due, transfer the exact amount back to checking and pay it.
+                        Set up an automatic transfer from your checking to your HYSA for exactly ${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} on the 1st of every month (or split it per paycheck). When an orbiting bill is due, transfer the exact amount back to checking and pay it.
                       </p>
                     </div>
                   </div>

@@ -658,6 +658,7 @@ export default function Waves() {
         - "summary": 2-3 sentences summarizing the vibe and overall appeal.
         - "whyVisit": 2-3 sentences on why people visit this location.
         - "whenToVisit": 2-3 sentences on the best times to visit and crowd levels.
+        - "averageDailySpend": Estimated average cost per day in USD for food, lodging, and local transport (number).
         - "seasons": { "high": "string", "low": "string", "shoulder": "string" } describing the months for each season.
         - "weatherCard": { "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "tempHigh": number, "tempLow": number, "note": string (e.g., "Perfect beach weather"), "month": string (e.g., "October" or "Peak Summer") } representing the absolute BEST time to visit.
         - "monthlyData": Array of exactly 12 objects (Jan-Dec). Each has: "month" (e.g., "JAN"), "flightCost" (estimated average round-trip flight cost in USD from a major global hub, number), "temp" (average high temperature in Fahrenheit, number), "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "note": "Short weather context for this month", "isIdeal" (boolean, true for the 2-3 best months to visit), and "crowdLevel" (number 1-10, where 10 is most crowded).
