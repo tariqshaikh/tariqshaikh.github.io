@@ -889,51 +889,86 @@ export default function Waves() {
           </div>
         </header>
 
-        {/* Year-Round Flights & Climate - MOVED UP */}
-        <section className="mb-20">
-          <div className="flex items-center justify-between mb-8">
+        {/* Year-Round Flights & Climate - MOVED UP & ENHANCED */}
+        <section className="mb-24">
+          <div className="flex items-center justify-between mb-12">
             <div className="flex items-center gap-3">
               <Plane size={24} className="text-cyan-400" />
-              <h2 className="text-3xl md:text-4xl text-white font-serif">Flights & Climate</h2>
+              <h2 className="text-3xl md:text-5xl text-white font-serif">Flights & Climate</h2>
             </div>
-            <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest font-medium">
+            <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-                <span className="text-slate-400">Ideal</span>
+                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></span>
+                <span className="text-slate-300">Ideal Window</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-slate-700"></span>
-                <span className="text-slate-500">Average</span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span className="text-slate-500">Quiet</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  <span className="text-slate-500">Moderate</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                  <span className="text-slate-500">Peak</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 md:p-12 overflow-x-auto">
-            <div className="min-w-[800px] flex items-end justify-between gap-4 h-64">
-              {data.monthlyData.map((m, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center group">
-                  <div className="w-full flex flex-col items-center gap-2 mb-4">
-                    <span className="text-[10px] text-slate-500 font-medium group-hover:text-cyan-400 transition-colors">${m.flightCost}</span>
-                    <div 
-                      className={`w-full rounded-t-xl transition-all duration-500 relative ${m.isIdeal ? 'bg-gradient-to-t from-cyan-600 to-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'bg-white/10 group-hover:bg-white/20'}`}
-                      style={{ height: `${(m.flightCost / 2000) * 160}px` }}
-                    >
-                      {m.isIdeal && (
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                          <Sparkles size={12} className="text-cyan-400 animate-pulse" />
+          <div className="bg-[#0B1221]/50 border border-white/10 rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
+            
+            {/* 12-Month Chart */}
+            <div className="relative z-10">
+              <div className="flex items-end justify-between h-72 gap-2 md:gap-4">
+                {(() => {
+                  const maxCost = Math.max(...data.monthlyData.map(d => d.flightCost), 500);
+                  return data.monthlyData.map((item, i) => {
+                    const heightPercent = Math.max(15, (item.flightCost / maxCost) * 100);
+                    const crowdColor = item.crowdLevel > 7 ? 'bg-rose-500' : item.crowdLevel > 4 ? 'bg-amber-500' : 'bg-emerald-500';
+                    const crowdShadow = item.crowdLevel > 7 ? 'shadow-[0_0_10px_rgba(244,63,94,0.4)]' : item.crowdLevel > 4 ? 'shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 'shadow-[0_0_10px_rgba(16,185,129,0.4)]';
+                    
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-6 group h-full">
+                        <div className="w-full relative flex items-end justify-center h-full">
+                          {item.isIdeal && (
+                            <div className="absolute -top-8 flex flex-col items-center">
+                              <Sparkles size={14} className="text-cyan-400 animate-pulse" />
+                            </div>
+                          )}
+                          <motion.div 
+                            initial={{ height: 0 }}
+                            animate={{ height: `${heightPercent}%` }}
+                            transition={{ duration: 1, delay: i * 0.05, ease: "easeOut" }}
+                            className={`w-full max-w-[56px] rounded-t-xl transition-all duration-500 relative group-hover:opacity-100 ${
+                              item.isIdeal 
+                                ? 'bg-gradient-to-t from-cyan-900/50 to-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] opacity-100' 
+                                : 'bg-white/5 opacity-40 group-hover:bg-white/10'
+                            }`}
+                          >
+                            {/* Tooltip */}
+                            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-[#050B14] border border-white/10 rounded-xl px-4 py-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 pointer-events-none z-30 whitespace-nowrap flex flex-col items-center shadow-2xl">
+                              <span className="text-white font-bold text-base">${item.flightCost}</span>
+                              <span className="text-slate-400 text-[9px] uppercase tracking-widest font-medium">{item.temp}°F Avg</span>
+                            </div>
+                          </motion.div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-4">
-                    <div 
-                      className={`h-full transition-all duration-1000 ${m.crowdLevel > 7 ? 'bg-rose-500' : m.crowdLevel > 4 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                      style={{ width: `${m.crowdLevel * 10}%` }}
-                    />
-                  </div>
-                  <span className={`text-[10px] font-bold tracking-tighter ${m.isIdeal ? 'text-cyan-400' : 'text-slate-600'}`}>{m.month}</span>
-                </div>
-              ))}
+                        
+                        {/* Crowd Level Indicator - ENHANCED COLORS */}
+                        <div className="w-full flex flex-col items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${crowdColor} ${crowdShadow} transition-all duration-500 group-hover:scale-125`}></div>
+                          <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${item.isIdeal ? 'text-cyan-400' : 'text-slate-600 group-hover:text-slate-400'}`}>
+                            {item.month}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
             </div>
           </div>
         </section>
@@ -957,8 +992,8 @@ export default function Waves() {
           
           {/* Weather Card - Integrated & Interactive */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-[10px] uppercase tracking-widest text-cyan-400 font-medium">Climate Snapshot</span>
+            <div className="flex items-center justify-between mb-8">
+              <span className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold">Climate Snapshot</span>
               {(() => {
                 const monthData = data.monthlyData[activeMonthIndex];
                 const cond = monthData?.condition || "Sunny";
@@ -967,69 +1002,73 @@ export default function Waves() {
                 return <ThermometerSun size={24} className="text-cyan-400" />;
               })()}
             </div>
-            
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-5xl text-white font-light">{data.monthlyData[activeMonthIndex]?.temp || 0}°</span>
-              <span className="text-xl text-slate-400">Fahrenheit</span>
-            </div>
-            
-            <p className="text-sm text-slate-300 font-light leading-relaxed mb-8 min-h-[40px]">
-              {data.monthlyData[activeMonthIndex]?.note || "Select a month to see local weather context."}
-            </p>
 
-            <div className="grid grid-cols-6 gap-2 pt-6 border-t border-white/5">
+            {/* 12 Months Navigation - MOVED TO TOP & EQUAL SPACING */}
+            <div className="flex items-center justify-between gap-1 mb-10 border-b border-white/5 pb-6">
               {data.monthlyData.map((m, idx) => {
                 const isCurrentMonth = idx === new Date().getMonth();
                 return (
                   <button
                     key={m.month}
                     onClick={() => setActiveMonthIndex(idx)}
-                    className={`text-[9px] py-2 rounded-lg transition-all border ${
+                    className={`flex-1 text-[8px] py-2 rounded-lg transition-all border font-bold ${
                       activeMonthIndex === idx 
                         ? 'bg-cyan-500 border-cyan-400 text-white shadow-[0_0_10px_rgba(34,211,238,0.4)]' 
                         : isCurrentMonth
                           ? 'bg-white/10 border-white/20 text-white'
-                          : 'bg-transparent border-transparent text-slate-500 hover:text-slate-300'
+                          : 'bg-transparent border-transparent text-slate-600 hover:text-slate-300'
                     }`}
                   >
-                    {m.month}
+                    {m.month.substring(0, 1)}
                   </button>
                 );
               })}
             </div>
+            
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-6xl text-white font-light tracking-tighter">{data.monthlyData[activeMonthIndex]?.temp || 0}°</span>
+              <span className="text-xl text-slate-500">F</span>
+            </div>
+            
+            <p className="text-sm text-slate-300 font-light leading-relaxed mb-4 min-h-[60px]">
+              {data.monthlyData[activeMonthIndex]?.note || "Select a month to see local weather context."}
+            </p>
           </div>
         </section>
 
         {/* Food & Culture Section - Editorial Redesign */}
-        <section className="mb-24">
-          <div className="flex items-center gap-3 mb-12">
-            <Sparkles size={24} className="text-cyan-400" />
-            <h2 className="text-3xl md:text-5xl text-white font-serif">The Culinary Journey</h2>
+        <section className="mb-32">
+          <div className="flex items-center gap-4 mb-16">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
+              <Sparkles size={28} className="text-cyan-400" />
+            </div>
+            <h2 className="text-4xl md:text-6xl text-white font-serif tracking-tight">The Culinary Journey</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
             {/* Left Column: Categories */}
-            <div className="lg:col-span-8 space-y-16">
+            <div className="lg:col-span-8 space-y-24">
               {data.foodAndCulture.categories.map((cat, idx) => (
                 <div key={idx} className="relative">
-                  <div className="flex items-baseline gap-4 mb-8">
-                    <span className="text-4xl font-serif text-white/10">0{idx + 1}</span>
-                    <h3 className="text-2xl text-white font-serif border-b border-white/10 pb-2 flex-1">{cat.title}</h3>
+                  <div className="flex items-center gap-6 mb-12">
+                    <span className="text-6xl font-serif text-white/5 select-none">0{idx + 1}</span>
+                    <h3 className="text-3xl text-white font-serif border-b border-white/10 pb-4 flex-1">{cat.title}</h3>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {cat.items.map((item, i) => (
-                      <div key={i} className="group flex gap-6 items-start">
-                        <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-white/10">
+                      <div key={i} className="group flex flex-col gap-6 items-start">
+                        <div className="w-full aspect-square rounded-[2.5rem] overflow-hidden border border-white/10 relative">
                           <img 
-                            src={`https://picsum.photos/seed/${item.imageKeyword}/200/200`} 
+                            src={`https://picsum.photos/seed/${item.imageKeyword}/600/600`} 
                             alt={item.name}
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
                             referrerPolicy="no-referrer"
                           />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#050B14]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>
-                        <div>
-                          <h4 className="text-white font-medium mb-1 group-hover:text-cyan-400 transition-colors">{item.name}</h4>
-                          <p className="text-xs text-slate-400 font-light leading-relaxed">
+                        <div className="px-2">
+                          <h4 className="text-xl text-white font-serif mb-3 group-hover:text-cyan-400 transition-colors">{item.name}</h4>
+                          <p className="text-sm text-slate-400 font-light leading-relaxed">
                             {item.description}
                           </p>
                         </div>
@@ -1040,115 +1079,71 @@ export default function Waves() {
               ))}
             </div>
 
-            {/* Right Column: Etiquette & Must-Haves */}
-            <div className="lg:col-span-4 space-y-12">
-              <div className="bg-[#0B1221] border border-white/10 rounded-[2rem] p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <CheckCircle2 size={80} />
-                </div>
-                <h4 className="text-white font-serif text-xl mb-8">The Must-Haves</h4>
-                <div className="space-y-6">
-                  {data.foodAndCulture.mustTry.map((item, i) => (
-                    <div key={i} className="flex items-center gap-4 group">
-                      <div className="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-[10px] font-bold">
-                        {i + 1}
+            {/* Right Column: Etiquette & Must-Haves - CLEANED UP */}
+            <div className="lg:col-span-4">
+              <div className="sticky top-12 space-y-12">
+                <div className="bg-[#0B1221] border border-white/10 rounded-[3rem] p-10 relative overflow-hidden shadow-2xl">
+                  <div className="absolute top-0 right-0 p-6 opacity-5">
+                    <CheckCircle2 size={120} />
+                  </div>
+                  <h4 className="text-white font-serif text-2xl mb-10">The Must-Haves</h4>
+                  <div className="space-y-8">
+                    {data.foodAndCulture.mustTry.map((item, i) => (
+                      <div key={i} className="flex items-center gap-5 group">
+                        <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs font-bold transition-all group-hover:bg-cyan-500 group-hover:text-white">
+                          {i + 1}
+                        </div>
+                        <span className="text-base text-slate-300 group-hover:text-white transition-colors">{item}</span>
                       </div>
-                      <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div className="bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-white/5 rounded-[2rem] p-8">
-                <h4 className="text-white font-serif text-xl mb-8 flex items-center gap-3">
-                  <Users size={20} className="text-indigo-400" />
-                  Local Etiquette
-                </h4>
-                <div className="space-y-8">
-                  {data.foodAndCulture.culturalEtiquette.map((item, i) => (
-                    <div key={i}>
-                      <h5 className="text-xs uppercase tracking-widest text-indigo-400 font-bold mb-2">{item.title}</h5>
-                      <p className="text-sm text-slate-400 font-light leading-relaxed italic">
-                        "{item.description}"
-                      </p>
-                    </div>
-                  ))}
+                <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/10 rounded-[3rem] p-10 shadow-2xl">
+                  <h4 className="text-white font-serif text-2xl mb-10 flex items-center gap-4">
+                    <Users size={24} className="text-indigo-400" />
+                    Local Etiquette
+                  </h4>
+                  <div className="space-y-10">
+                    {data.foodAndCulture.culturalEtiquette.map((item, i) => (
+                      <div key={i} className="relative pl-6 border-l-2 border-indigo-500/20 hover:border-indigo-500 transition-colors">
+                        <h5 className="text-[10px] uppercase tracking-[0.2em] text-indigo-400 font-bold mb-3">{item.title}</h5>
+                        <p className="text-sm text-slate-400 font-light leading-relaxed italic">
+                          "{item.description}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Year-Round Flights & Climate */}
-        <section className="mb-20">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl md:text-4xl text-white font-serif">Year-Round Flights & Climate</h2>
-            <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest text-slate-500">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                <span>Ideal</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-white/10"></div>
-                <span>Average</span>
-              </div>
-            </div>
+        {/* Top Activities - Bento Grid */}
+        <section className="mb-24">
+          <div className="flex items-center gap-3 mb-12">
+            <MapPin size={24} className="text-cyan-400" />
+            <h2 className="text-3xl md:text-4xl text-white font-serif">Top Activities</h2>
           </div>
-
-          <div className="bg-[#0B1221]/50 border border-white/10 rounded-3xl p-8 relative overflow-hidden">
-            {/* 12-Month Chart */}
-            <div className="pt-12 pb-4">
-              <div className="flex items-end justify-between h-64 gap-1 md:gap-2 relative z-10">
-                {(() => {
-                  const maxCost = Math.max(...data.monthlyData.map(d => d.flightCost), 500);
-                  return data.monthlyData.map((item, i) => {
-                    const heightPercent = Math.max(15, (item.flightCost / maxCost) * 100);
-                    
-                    return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full">
-                        <div className="w-full relative flex items-end justify-center h-full">
-                          {item.isIdeal && (
-                            <div className="absolute -top-6 flex flex-col items-center">
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)] animate-pulse"></span>
-                            </div>
-                          )}
-                          <motion.div 
-                            initial={{ height: 0 }}
-                            animate={{ height: `${heightPercent}%` }}
-                            transition={{ duration: 1, delay: i * 0.05, ease: "easeOut" }}
-                            className={`w-full max-w-[48px] rounded-t-sm transition-all duration-500 relative group-hover:opacity-100 ${
-                              item.isIdeal 
-                                ? 'bg-gradient-to-t from-cyan-900/50 to-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.3)] opacity-100' 
-                                : 'bg-white/10 opacity-50 group-hover:bg-white/20'
-                            }`}
-                          >
-                            {/* Tooltip */}
-                            <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-[#050B14] border border-white/10 rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30 whitespace-nowrap flex flex-col items-center shadow-xl">
-                              <span className="text-white font-medium text-sm">${item.flightCost}</span>
-                              <span className="text-slate-400 text-[10px] uppercase tracking-widest">{item.temp}°F Avg</span>
-                            </div>
-                          </motion.div>
-                        </div>
-                        
-                        {/* Crowd Level Indicator */}
-                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden flex gap-0.5">
-                          {Array.from({ length: 10 }).map((_, idx) => (
-                            <div 
-                              key={idx} 
-                              className={`flex-1 h-full rounded-full ${idx < item.crowdLevel ? (item.crowdLevel > 7 ? 'bg-rose-500' : 'bg-cyan-500/50') : 'bg-transparent'}`}
-                            />
-                          ))}
-                        </div>
-
-                        <span className={`text-[10px] tracking-widest uppercase ${item.isIdeal ? 'text-cyan-400 font-medium' : 'text-slate-500'}`}>
-                          {item.month}
-                        </span>
-                      </div>
-                    );
-                  });
-                })()}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {data.topActivities.map((act, i) => (
+              <div key={i} className="group relative h-80 rounded-[2rem] overflow-hidden border border-white/10">
+                <img 
+                  src={`https://picsum.photos/seed/${act.imageKeyword}/800/600`} 
+                  alt={act.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050B14] via-[#050B14]/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h4 className="text-xl text-white font-serif mb-2">{act.title}</h4>
+                  <p className="text-xs text-slate-300 font-light line-clamp-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">
+                    {act.description}
+                  </p>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -1172,33 +1167,6 @@ export default function Waves() {
                 <div className="flex flex-col justify-center">
                   <h4 className="text-2xl text-white font-serif mb-4">{act.title}</h4>
                   <p className="text-sm text-slate-400 font-light leading-relaxed">
-                    {act.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Top Activities - Bento Grid */}
-        <section className="mb-24">
-          <div className="flex items-center gap-3 mb-12">
-            <MapPin size={24} className="text-cyan-400" />
-            <h2 className="text-3xl md:text-4xl text-white font-serif">Top Activities</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.topActivities.map((act, i) => (
-              <div key={i} className="group relative h-80 rounded-[2rem] overflow-hidden border border-white/10">
-                <img 
-                  src={`https://picsum.photos/seed/${act.imageKeyword}/800/600`} 
-                  alt={act.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050B14] via-[#050B14]/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-0 left-0 p-8">
-                  <h4 className="text-xl text-white font-serif mb-2">{act.title}</h4>
-                  <p className="text-xs text-slate-300 font-light line-clamp-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">
                     {act.description}
                   </p>
                 </div>
