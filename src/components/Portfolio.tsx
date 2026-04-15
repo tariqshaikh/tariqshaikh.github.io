@@ -66,7 +66,7 @@ export default function Portfolio() {
             Product Manager · New York Metro
           </div>
           <h1 className="font-serif text-[clamp(64px,10vw,136px)] font-black leading-[0.9] tracking-tight mb-3.5 text-slate-900 animate-fade-up delay-100">
-            Tariq<br /><span className="italic text-red-700">Shaikh</span>
+            Tariq<br /><span className="italic text-blue-900">Shaikh</span>
           </h1>
           <p className="font-serif text-[clamp(18px,2.5vw,32px)] font-normal italic text-slate-500 animate-fade-up delay-200">
             Product Manager
@@ -80,38 +80,43 @@ export default function Portfolio() {
 
       {/* Projects */}
       <section id="projects" className="px-12 py-24 bg-white border-t border-slate-200">
-        <div className="flex items-center gap-5 mb-13">
-          <span className="font-mono text-[13px] text-red-700 font-bold tracking-widest">01</span>
-          <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-slate-900">Selected Work</h2>
-          <div className="flex-1 h-px bg-slate-200" />
+        <div className="flex flex-col mb-13">
+          <div className="flex items-center gap-5">
+            <span className="font-mono text-[13px] text-blue-600 font-bold tracking-widest">01</span>
+            <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-slate-900">Selected Work</h2>
+            <div className="flex-1 h-px bg-slate-200" />
+          </div>
+          <p className="mt-4 text-slate-500 font-serif italic text-lg max-w-2xl">
+            A curated selection of purpose-built applications, designed to solve genuine personal needs and demonstrate a product-driven approach to engineering.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Project 1 */}
-          <div className="bg-white border border-slate-200 p-10 transition-all duration-200 hover:border-blue-600 hover:shadow-xl hover:shadow-blue-600/10 relative overflow-hidden rounded-xl group">
-            <div className="absolute top-0 left-0 w-[3px] h-full bg-blue-600 scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
+          <div className="bg-[#0F172A] border border-[#1E293B] p-10 transition-all duration-200 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/20 relative overflow-hidden rounded-xl group">
+            <div className="absolute top-0 left-0 w-[3px] h-full bg-blue-500 scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-slate-400 tracking-widest">P — 001</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-green-50 text-green-700 border border-green-100">Live</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30">Live</span>
             </div>
-            <h3 className="text-[32px] leading-[1.1] mb-1.5 text-slate-900">
-              <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-600 ml-1">NJ</span>
+            <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
+              <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-500 ml-1">NJ</span>
             </h3>
-            <p className="text-[15px] text-slate-500 italic mb-4.5 font-serif">A homebuyer's decision tool</p>
-            <p className="text-base leading-[1.75] text-slate-600 mb-7 pl-4 border-l-2 border-blue-600/20">
+            <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">A homebuyer's decision tool</p>
+            <p className="text-base leading-[1.75] text-slate-300 mb-7 pl-4 border-l-2 border-blue-500/40">
               Every home buyer in NJ has 6 browser tabs open — Zillow, GreatSchools, NJ Transit, WalkScore, crime maps. I collapsed them into one weighted comparison tool built for real decisions.
             </p>
             <div className="flex flex-wrap gap-1.5 mb-8">
               {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
-                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 tracking-widest uppercase">{tag}</span>
+                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 tracking-widest uppercase">{tag}</span>
               ))}
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Link to="/homebase" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all">
+              <Link to="/homebase" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-500 transition-all">
                 <ChevronRight size={13} /> Live Product
               </Link>
-              <button onClick={() => openModal('prd-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-slate-900 border-2 border-slate-200 rounded-[4px] text-sm font-semibold hover:border-blue-600 hover:text-blue-600 hover:bg-white cursor-pointer transition-all">PRD</button>
-              <button onClick={() => openModal('roadmap-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-slate-900 border-2 border-slate-200 rounded-[4px] text-sm font-semibold hover:border-blue-600 hover:text-blue-600 hover:bg-white cursor-pointer transition-all">Roadmap</button>
+              <button onClick={() => openModal('prd-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-slate-700 rounded-[4px] text-sm font-semibold hover:border-blue-500 hover:text-blue-400 hover:bg-blue-500/10 cursor-pointer transition-all">PRD</button>
+              <button onClick={() => openModal('roadmap-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-slate-700 rounded-[4px] text-sm font-semibold hover:border-blue-500 hover:text-blue-400 hover:bg-blue-500/10 cursor-pointer transition-all">Roadmap</button>
             </div>
           </div>
 
@@ -143,15 +148,31 @@ export default function Portfolio() {
             </div>
           </div>
 
-          {/* Placeholder */}
-          <div className="bg-slate-50 border border-slate-200 p-10 relative overflow-hidden rounded-xl bg-placeholder">
+          {/* Project 3 - Waves */}
+          <div className="bg-[#1A2E35] border border-[#257E8C]/30 p-10 transition-all duration-200 hover:border-[#137D97] hover:shadow-xl hover:shadow-[#137D97]/20 relative overflow-hidden rounded-xl group">
+            <div className="absolute top-0 left-0 w-[3px] h-full bg-[#137D97] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
-              <span className="font-mono text-[13px] text-slate-400 tracking-widest">P — 003</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-white text-slate-400 border border-slate-200">Planned</span>
+              <span className="font-mono text-[13px] text-[#7EAAC7] tracking-widest">P — 003</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#137D97]/20 text-[#C9DCE6] border border-[#137D97]/30">Take a look! (In Development)</span>
             </div>
-            <div className="text-center py-12">
-              <div className="text-6xl text-slate-200 font-serif leading-none mb-4">+</div>
-              <p className="text-[15px] text-slate-400 leading-[1.6] max-w-[240px] mx-auto">Next project in ideation. Check back soon.</p>
+            <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
+              <span className="font-serif font-bold italic">Waves</span>
+            </h3>
+            <p className="text-[15px] text-[#7EAAC7] italic mb-4.5 font-serif">Dream trip planner & destination intelligence</p>
+            <p className="text-base leading-[1.75] text-[#C9DCE6] mb-7 pl-4 border-l-2 border-[#137D97]/50">
+              Your personal oracle for dream trip planning. Discover exactly when you should go, what's happening locally, and how to make that one specific bucket-list journey a reality.
+            </p>
+            <div className="flex flex-wrap gap-1.5 mb-8">
+              {['Travel', 'Data Viz', 'Collaboration'].map(tag => (
+                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-[#0C868F]/20 text-[#C9DCE6] border border-[#0C868F]/40 tracking-widest uppercase">{tag}</span>
+              ))}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Link to="/waves" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#137D97] text-white rounded-lg text-sm font-bold hover:bg-[#0C868F] transition-all">
+                <ChevronRight size={13} /> View App
+              </Link>
+              <button onClick={() => openModal('prd-3')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-[#C9DCE6] border-2 border-[#257E8C]/50 rounded-[4px] text-sm font-semibold hover:border-[#137D97] hover:text-[#137D97] hover:bg-[#137D97]/10 cursor-pointer transition-all">PRD</button>
+              <button onClick={() => openModal('roadmap-3')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-[#C9DCE6] border-2 border-[#257E8C]/50 rounded-[4px] text-sm font-semibold hover:border-[#137D97] hover:text-[#137D97] hover:bg-[#137D97]/10 cursor-pointer transition-all">Roadmap</button>
             </div>
           </div>
         </div>
@@ -159,7 +180,7 @@ export default function Portfolio() {
 
       <section id="process" className="px-12 py-24 bg-slate-900">
         <div className="flex items-center gap-5 mb-13">
-          <span className="font-mono text-[13px] text-red-700 tracking-widest">02</span>
+          <span className="font-mono text-[13px] text-blue-400 tracking-widest">02</span>
           <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-white">How I Work</h2>
           <div className="flex-1 h-px bg-white/15" />
         </div>
@@ -171,7 +192,7 @@ export default function Portfolio() {
             { num: '04', title: 'Learn & iterate', desc: 'What did users actually do? What confused them? What did I get wrong? V2 is always better than V1.' },
           ].map((step, i) => (
             <div key={i} className={`p-10 border-white/12 ${i !== 3 ? 'lg:border-r' : ''} ${i % 2 === 0 ? 'sm:border-r lg:border-r' : ''}`}>
-              <div className="font-serif text-[52px] font-black text-red-700/20 leading-none mb-4">{step.num}</div>
+              <div className="font-serif text-[52px] font-black text-blue-400/30 leading-none mb-4">{step.num}</div>
               <div className="font-serif text-xl font-bold mb-2.5 text-white">{step.title}</div>
               <p className="text-[15px] leading-[1.75] text-white/70">{step.desc}</p>
             </div>
@@ -183,7 +204,7 @@ export default function Portfolio() {
       <section id="about" className="px-12 py-24 bg-slate-50 border-t border-slate-200">
         <div className="max-w-3xl">
           <div className="flex items-center gap-5 mb-8">
-            <span className="font-mono text-[13px] text-red-700 font-bold tracking-widest">03</span>
+            <span className="font-mono text-[13px] text-blue-600 font-bold tracking-widest">03</span>
             <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-slate-900">About</h2>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
@@ -690,6 +711,142 @@ export default function Portfolio() {
                                   <div className="flex items-center gap-2">
                                     <div className={`w-2 h-2 rounded-full shrink-0 ${item.dot}`} />
                                     <h4 className="font-bold text-[14px] text-slate-900 leading-tight group-hover:text-[#C5A059] transition-colors">{item.t}</h4>
+                                  </div>
+                                </div>
+                                <p className="text-[13px] text-slate-400 leading-relaxed mb-3">{item.d}</p>
+                                <div className="font-mono text-[10px] uppercase tracking-wider text-slate-400 bg-white inline-block px-2 py-1 rounded border border-slate-100">{item.s}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+              {activeModal === 'prd-3' && (
+                <>
+                  <div className="px-10 py-8 border-b border-slate-200 flex items-start justify-between gap-4 bg-white sticky top-0 z-10">
+                    <div>
+                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#137D97] mb-2">Product Requirements Document</div>
+                      <div className="text-4xl leading-none">
+                        <span className="font-serif font-bold text-slate-900 italic">Waves</span>
+                      </div>
+                      <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Status: Draft</span>
+                        <span>|</span>
+                        <span>Author: TShaikh92</span>
+                        <span>|</span>
+                        <span>Updated: April 2026</span>
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-slate-900 transition-colors">✕</button>
+                  </div>
+                  
+                  <div className="p-10 max-w-4xl mx-auto bg-white">
+                    <div className="prose prose-slate prose-lg max-w-none">
+                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">1. Executive Summary</h2>
+                      <p className="text-slate-600 leading-relaxed mb-8">
+                        <strong>Problem:</strong> Travelers know where they want to go, but figuring out the best time to book is a stressful, manual process of checking multiple sites and guessing price trends. Coordinating this with friends makes it exponentially harder.
+                        <br/><br/>
+                        <strong>Solution:</strong> Waves is a collaborative flight price tracker that visualizes historical pricing trends, provides AI-driven seasonality context, and allows groups to track and vote on the best travel windows together.
+                      </p>
+
+                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">2. Target Audience</h2>
+                      <ul className="list-disc pl-6 text-slate-600 space-y-3 mb-8">
+                        <li><strong>The Deal Hunter:</strong> Flexible travelers who want to maximize their budget and are willing to wait for a price drop.</li>
+                        <li><strong>The Group Organizer:</strong> The person responsible for coordinating a trip for 3+ people, trying to find a date that works for everyone's budget.</li>
+                        <li><strong>The Data Nerd:</strong> Users who want to see the historical trends and understand the "why" behind pricing before booking.</li>
+                      </ul>
+
+                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">3. Core Features (MVP)</h2>
+                      <div className="space-y-6 mb-8">
+                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                          <h4 className="font-bold text-slate-900 text-xl mb-2 flex items-center gap-2"><span className="text-[#137D97]">01.</span> Price Trend Visualization</h4>
+                          <p className="text-slate-600">A 90-day interactive area chart showing historical and projected flight prices for a specific route, helping users identify the "waves" in pricing.</p>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                          <h4 className="font-bold text-slate-900 text-xl mb-2 flex items-center gap-2"><span className="text-[#137D97]">02.</span> AI Seasonality Insights</h4>
+                          <p className="text-slate-600">Integration with Google Gemini to provide instant context on weather, local events, and why prices might be spiking or dropping during a specific window.</p>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                          <h4 className="font-bold text-slate-900 text-xl mb-2 flex items-center gap-2"><span className="text-[#137D97]">03.</span> Trip Crew Collaboration</h4>
+                          <p className="text-slate-600">A shared workspace where invited friends can view the same price trends, set their own alerts, and vote on preferred travel dates.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+              {activeModal === 'roadmap-3' && (
+                <>
+                  <div className="px-10 py-8 border-b border-slate-200 flex items-start justify-between gap-4 bg-white sticky top-0 z-10">
+                    <div>
+                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#137D97] mb-2">Product Roadmap</div>
+                      <div className="text-4xl leading-none">
+                        <span className="font-serif font-bold text-slate-900 italic">Waves</span>
+                      </div>
+                      <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-600"></span> Status: Live (v1.0)</span>
+                        <span>|</span>
+                        <span>Author: TShaikh92</span>
+                        <span>|</span>
+                        <span>Updated: April 2026</span>
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-slate-900 transition-colors">✕</button>
+                  </div>
+                  
+                  <div className="p-10 bg-white">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                      {[
+                        { 
+                          badge: 'V1 — Current', 
+                          badgeClass: 'bg-green-50 text-green-700 border border-green-100', 
+                          title: 'Core Tracking', 
+                          time: 'Q2 2026',
+                          items: [
+                            { t: 'Trend Visualization', d: 'Interactive area charts showing 90-day price fluctuations.', s: 'Done', dot: 'bg-green-600' },
+                            { t: 'AI Insights', d: 'Gemini integration for weather and event context.', s: 'Done', dot: 'bg-green-600' },
+                            { t: 'Basic Collaboration', d: 'UI for Trip Crew and shared viewing.', s: 'Done', dot: 'bg-green-600' },
+                          ]
+                        },
+                        { 
+                          badge: 'V2 — Up Next', 
+                          badgeClass: 'bg-blue-50 text-blue-600 border border-blue-100', 
+                          title: 'Live Data & Alerts', 
+                          time: 'Q3 2026',
+                          items: [
+                            { t: 'Flight API Integration', d: 'Replace mock data with live Skyscanner or Google Flights API data.', s: 'Planned', dot: 'bg-blue-600' },
+                            { t: 'Push Notifications', d: 'Real-time alerts when prices drop below the user\'s target threshold.', s: 'Planned', dot: 'bg-blue-600' },
+                            { t: 'Active Voting', d: 'Allow crew members to officially vote on dates and lock in a decision.', s: 'Planned', dot: 'bg-blue-600' },
+                          ]
+                        },
+                        { 
+                          badge: 'V3 — Scaling', 
+                          badgeClass: 'bg-slate-50 text-slate-400 border border-slate-200', 
+                          title: 'Booking & Export', 
+                          time: 'Q4 2026',
+                          items: [
+                            { t: 'Direct Booking Links', d: 'Deep links to airlines to book the specific deal found.', s: 'Ideation', dot: 'bg-slate-400' },
+                            { t: 'Data Export', d: 'Export historical trends to CSV for power users.', s: 'Ideation', dot: 'bg-slate-400' },
+                          ]
+                        }
+                      ].map((phase, i) => (
+                        <div key={i} className="bg-white border border-slate-100 rounded-xl p-6 flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
+                          <div className="mb-5">
+                            <span className={`font-mono text-[11px] px-2.5 py-1 rounded uppercase tracking-widest font-bold whitespace-nowrap ${phase.badgeClass}`}>{phase.badge}</span>
+                          </div>
+                          <h3 className="font-serif text-2xl font-bold text-slate-900 mb-2">{phase.title}</h3>
+                          <div className="font-mono text-[13px] text-slate-400 mb-6 pb-4 border-b border-slate-100">{phase.time}</div>
+                          
+                          <div className="space-y-4 flex-1">
+                            {phase.items.map((item, j) => (
+                              <div key={j} className="bg-white border border-slate-50 p-4 rounded-lg shadow-sm hover:border-[#137D97] transition-colors group">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full shrink-0 ${item.dot}`} />
+                                    <h4 className="font-bold text-[14px] text-slate-900 leading-tight group-hover:text-[#137D97] transition-colors">{item.t}</h4>
                                   </div>
                                 </div>
                                 <p className="text-[13px] text-slate-400 leading-relaxed mb-3">{item.d}</p>

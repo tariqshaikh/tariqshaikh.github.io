@@ -16,6 +16,7 @@ import CurrencyConverter from './components/CurrencyConverter';
 import RetirementPlanner from './components/RetirementPlanner';
 import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
+import Waves from './components/Waves';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/homebase" element={<Homebase />} />
         <Route path="/orbit" element={<Orbit />} />
+        <Route path="/waves" element={<Waves />} />
         <Route path="/orbit/dashboard" element={<Orbit />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />

@@ -149,48 +149,57 @@ interface FinanceProfile {
   fixedExpenses: FixedExpense[];
   savingsGoal: number;
   cardColors: Record<string, string>;
+  mode?: 'individual' | 'family';
 }
 
 // --- Components ---
 
 const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const colors = ['#C5A059', '#1E5C38', '#8B0000', '#6E8A96', '#2C3338', '#8C8670'];
+  const colors = [
+    '#6366F1', '#10B981', '#F59E0B', '#F43F5E', '#06B6D4', '#8B5CF6',
+    '#B5EAD7', '#E0BBE4', '#95D5EE', '#FFDAC1', '#FFB7B2', '#E2F0CB',
+    '#C5A059', '#1E5C38', '#8B0000', '#6E8A96', '#2C3338', '#8C8670'
+  ];
   
   return (
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1 hover:bg-[#E8E4D0] rounded-xl text-[#8C8670] transition-colors"
+        className={`p-1 rounded-xl text-[#8C8670] transition-colors ${isOpen ? 'bg-[#E8E4D0] text-[#2C3338]' : 'hover:bg-[#E8E4D0]'}`}
       >
         <Menu size={14} />
       </button>
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 p-2 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl z-50 flex gap-2">
-          {colors.map(c => (
-            <button
-              key={c}
-              onClick={() => { onChange(c); setIsOpen(false); }}
-              className={`w-4 h-4 rounded-full border ${color === c ? 'border-[#2C3338]' : 'border-transparent'}`}
-              style={{ backgroundColor: c }}
-            />
-          ))}
-        </div>
+        <>
+          <div className="fixed inset-0 z-[40]" onClick={() => setIsOpen(false)} />
+          <div className="absolute top-full right-0 mt-1 p-3 bg-white border border-[#E8E4D0] rounded-xl shadow-2xl z-[50] grid grid-cols-6 gap-2 w-48 backdrop-blur-sm bg-white/95">
+            {colors.map(c => (
+              <button
+                key={c}
+                onClick={() => { onChange(c); setIsOpen(false); }}
+                className={`w-5 h-5 rounded-full border transition-transform hover:scale-110 ${color === c ? 'border-[#2C3338] ring-2 ring-[#2C3338]/20' : 'border-transparent'}`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 };
 
 const StatCard = ({ label, value, subValue, icon: Icon, trend, color = '#C5A059', onColorChange }: any) => (
-  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative overflow-visible group shadow-sm transition-colors" style={{ borderTopColor: color, borderTopWidth: '3px' }}>
+  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative overflow-visible group shadow-sm transition-all hover:shadow-md" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
+    <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
     <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: color }} />
-    <div className="flex justify-between items-start mb-4">
-      <div className="p-2 rounded-xl" style={{ backgroundColor: `${color}15` }}>
+    <div className="flex justify-between items-start mb-4 relative z-10">
+      <div className="p-2.5 rounded-xl shadow-sm" style={{ backgroundColor: `${color}20` }}>
         <Icon size={20} style={{ color }} />
       </div>
       <div className="flex items-center gap-2">
         {trend && (
-          <div className={`flex items-center gap-1 text-xs font-mono ${trend > 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
+          <div className={`flex items-center gap-1 text-xs font-mono font-bold ${trend > 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
             {trend > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
             {Math.abs(trend)}%
           </div>
@@ -198,9 +207,11 @@ const StatCard = ({ label, value, subValue, icon: Icon, trend, color = '#C5A059'
         {onColorChange && <ColorPicker color={color} onChange={onColorChange} />}
       </div>
     </div>
-    <div className="font-mono text-[11px] uppercase tracking-widest text-[#8C8670] mb-1">{label}</div>
-    <div className="text-3xl font-serif font-bold text-[#2C3338] mb-1">{value}</div>
-    <div className="text-[13px] text-[#8C8670] italic">{subValue}</div>
+    <div className="relative z-10">
+      <div className="font-mono text-[11px] uppercase tracking-widest text-[#8C8670] mb-1 font-bold">{label}</div>
+      <div className="text-3xl font-serif font-bold text-[#2C3338] mb-1">{value}</div>
+      <div className="text-[13px] text-[#8C8670] italic">{subValue}</div>
+    </div>
   </div>
 );
 
@@ -256,8 +267,15 @@ function Orbit() {
       spend: '#8B0000',
       surplus: '#C5A059',
       totalSpend: '#1E5C38'
-    }
+    },
+    mode: 'individual'
   });
+
+  useEffect(() => {
+    if (profile.mode) {
+      setMode(profile.mode);
+    }
+  }, [profile.mode]);
 
   const [expenses, setExpenses] = useState<RecurringExpense[]>([
     { id: '1', name: 'Car Insurance', amount: 1200, month: 3, frequency: 'semi-annual', category: 'insurance' },
@@ -405,7 +423,12 @@ function Orbit() {
     const profileRef = doc(db, 'users', user.uid, 'orbitProfile', 'main');
     const unsubProfile = onSnapshot(profileRef, (doc) => {
       if (doc.exists()) {
-        setProfile(doc.data() as FinanceProfile);
+        const data = doc.data() as FinanceProfile;
+        // Only update if data is actually different to prevent auto-save loops
+        setProfile(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return data;
+        });
       }
     });
 
@@ -422,6 +445,19 @@ function Orbit() {
       unsubExpenses();
     };
   }, [user]);
+
+  // --- Auto-save Profile ---
+  useEffect(() => {
+    if (!user || user.uid === 'guest-user' || !isAuthReady) return;
+
+    const timer = setTimeout(() => {
+      // Only save if profile has changed from what's on the server
+      // This is handled by the debounce and the deep equality check in onSnapshot
+      saveProfile(profile);
+    }, 2000); // Increased debounce to 2 seconds to reduce flashing
+
+    return () => clearTimeout(timer);
+  }, [profile, user, isAuthReady]);
 
   const saveProfile = async (newProfile: FinanceProfile) => {
     if (!user || user.uid === 'guest-user') return;
@@ -719,13 +755,13 @@ function Orbit() {
         <div className="flex justify-center mb-12">
           <div className="bg-[#E8E4D0]/30 p-1 rounded-xl border border-[#E8E4D0] flex">
             <button 
-              onClick={() => setMode('individual')}
+              onClick={() => setProfile({...profile, mode: 'individual'})}
               className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'individual' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
             >
               Individual
             </button>
             <button 
-              onClick={() => setMode('family')}
+              onClick={() => setProfile({...profile, mode: 'family'})}
               className={`px-8 py-2 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'family' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
             >
               Family
@@ -772,14 +808,12 @@ function Orbit() {
                   Income & Fixed
                 </h2>
                 {user && user.uid !== 'guest-user' && (
-                  <button 
-                    onClick={() => saveProfile(profile)}
-                    disabled={isSaving}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] text-[10px] font-mono uppercase tracking-widest rounded-xl hover:bg-[#B38F48] transition-all disabled:opacity-50 shadow-sm"
-                  >
-                    {isSaving ? <RefreshCw size={12} className="animate-spin" /> : <Save size={12} />}
-                    {isSaving ? 'Saving...' : 'Save Profile'}
-                  </button>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl">
+                    <div className={`w-2 h-2 rounded-full ${isSaving ? 'bg-[#C5A059] animate-pulse' : 'bg-[#1E5C38]'}`} />
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">
+                      {isSaving ? 'Saving...' : 'Synced'}
+                    </span>
+                  </div>
                 )}
               </div>
               
@@ -979,23 +1013,31 @@ function Orbit() {
                 {profile.fixedExpenses.map((item, i) => {
                   const color = profile.cardColors[`fixed_${item.id}`] || '#C5A059';
                   return (
-                    <div key={i} className="border p-4 rounded-xl flex flex-col justify-between transition-colors group relative" style={{ backgroundColor: `${color}05`, borderColor: '#E8E4D0' }}>
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div key={i} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
+                      <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <ColorPicker 
                           color={color} 
                           onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`fixed_${item.id}`]: c}})} 
                         />
                       </div>
-                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6">{item.label}</h3>
-                      <div className="text-lg font-serif font-bold text-[#2C3338] mt-2">${(item.amount * 12).toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic">Annual Total</div>
+                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10">{item.label}</h3>
+                      <div className="text-lg font-serif font-bold text-[#2C3338] mt-2 relative z-10">${(item.amount * 12).toLocaleString()}</div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10">Annual Total</div>
                     </div>
                   );
                 })}
 
                 {/* Orbiting Expense Categories */}
                 {Array.from(new Set(expenses.map(e => e.category))).map((cat, i) => {
-                  const color = profile.cardColors[`cat_${cat}`] || '#2C3338';
+                  const categoryColors: Record<string, string> = {
+                    'insurance': '#4A90E2',
+                    'subscription': '#9013FE',
+                    'tax': '#D0021B',
+                    'maintenance': '#F5A623',
+                    'other': '#8C8670'
+                  };
+                  const color = profile.cardColors[`cat_${cat}`] || categoryColors[cat as string] || '#2C3338';
                   const catTotal = expenses
                     .filter(e => e.category === cat)
                     .reduce((sum, e) => {
@@ -1009,16 +1051,17 @@ function Orbit() {
                     }, 0);
                   
                   return (
-                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-colors group relative" style={{ borderTopColor: color, borderTopWidth: '2px' }}>
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
+                      <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <ColorPicker 
                           color={color} 
                           onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`cat_${cat}`]: c}})} 
                         />
                       </div>
-                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6">Orbit: {cat}</h3>
-                      <div className="text-lg font-serif font-bold text-[#2C3338] mt-2">${catTotal.toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic">Irregular Hits</div>
+                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10">Orbit: {cat}</h3>
+                      <div className="text-xl font-serif font-bold text-[#2C3338] mt-2 relative z-10">${catTotal.toLocaleString()}</div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10">Irregular Hits</div>
                     </div>
                   );
                 })}
