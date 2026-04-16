@@ -70,6 +70,8 @@ import {
   orderBy
 } from 'firebase/firestore';
 
+import SurplusAllocationModal from './SurplusAllocationModal';
+
 // --- Error Boundary ---
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -1477,9 +1479,13 @@ function Orbit() {
                         <div>
                           <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Amount ($)</label>
                           <input 
-                            type="number" 
-                            value={newExpense.amount}
-                            onChange={e => setNewExpense({...newExpense, amount: Number(e.target.value)})}
+                            type="text"
+                            inputMode="numeric"
+                            value={newExpense.amount === 0 ? '' : newExpense.amount?.toString()}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              setNewExpense({...newExpense, amount: val === '' ? 0 : parseInt(val, 10)});
+                            }}
                             className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono"
                           />
                         </div>
@@ -1777,77 +1783,12 @@ function Orbit() {
       {/* Surplus Allocation Modal */}
       <AnimatePresence>
         {showSurplusModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowSurplusModal(false)}
-              className="absolute inset-0 bg-[#2C3338]/40 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#FAF9F6] w-full max-w-2xl rounded-xl shadow-2xl relative z-10 overflow-hidden border border-[#E8E4D0]"
-            >
-              <div className="p-8">
-                <button 
-                  onClick={() => setShowSurplusModal(false)}
-                  className="absolute top-6 right-6 p-2 rounded-xl text-[#8C8670] hover:bg-[#E8E4D0] transition-colors"
-                >
-                  <X size={20} />
-                </button>
-                
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-[#1E5C38]/10 rounded-xl">
-                    <Zap size={24} className="text-[#1E5C38]" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-serif font-bold text-[#2C3338]">Surplus Allocation</h2>
-                    <p className="text-[11px] font-mono tracking-widest uppercase text-[#8C8670] mt-1">Capital Deployment Strategy</p>
-                  </div>
-                </div>
-
-                <div className="mb-8">
-                  <p className="text-sm text-[#8C8670] leading-relaxed">
-                    You have a projected surplus of <span className="font-serif font-bold text-[#1E5C38]">${periodSurplus.toLocaleString()}</span> over this {monthsInRange}-month period (Avg <span className="font-serif font-bold text-[#2C3338]">${Math.round(normalizedMonthlySurplus).toLocaleString()}</span>/mo). 
-                    Here is where you can begin allocating this excess capital into growth vehicles.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    { name: 'High-Yield Savings (HYSA)', desc: 'Store cash securely with ~4-5% APY yield', color: '#1E5C38', icon: Wallet },
-                    { name: 'Index Funds / Equities', desc: 'S&P 500, broad market ETFs', color: '#6366F1', icon: TrendingUp },
-                    { name: 'Real Estate Fund', desc: 'REITs, Syndications, Direct Property', color: '#C5A059', icon: Zap },
-                    { name: 'Debt Paydown', desc: 'Accelerated payments on high-interest liabilities', color: '#8B0000', icon: RefreshCw }
-                  ].map((vehicle, idx) => (
-                    <div key={idx} className="p-4 border border-[#E8E4D0] rounded-xl flex items-center justify-between hover:border-[#C5A059] transition-colors group cursor-pointer">
-                      <div className="flex items-center gap-4">
-                        <div className="p-2 rounded-lg" style={{ backgroundColor: `${vehicle.color}15` }}>
-                          <vehicle.icon size={18} style={{ color: vehicle.color }} />
-                        </div>
-                        <div>
-                          <h4 className="font-serif font-bold text-[#2C3338]">{vehicle.name}</h4>
-                          <p className="text-[11px] font-mono text-[#8C8670] mt-1">{vehicle.desc}</p>
-                        </div>
-                      </div>
-                      <button className="text-[10px] font-mono tracking-widest text-[#C5A059] uppercase opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                        Setup <ChevronRight size={12} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 p-4 bg-[#C5A059]/5 border border-[#C5A059]/30 rounded-xl">
-                  <p className="text-xs text-[#8C8670] font-mono leading-relaxed text-center">
-                    * Note: Surplus allocation features are coming soon in a future update!
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          <SurplusAllocationModal
+            periodSurplus={periodSurplus}
+            monthsInRange={monthsInRange}
+            normalizedMonthlySurplus={normalizedMonthlySurplus}
+            onClose={() => setShowSurplusModal(false)}
+          />
         )}
       </AnimatePresence>
     </div>
