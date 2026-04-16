@@ -23,6 +23,7 @@ import {
   AlertCircle,
   Wallet,
   ShieldCheck,
+  ShoppingCart,
   Plus,
   Menu,
   Search,
@@ -134,7 +135,9 @@ interface RecurringExpense {
   customCategory?: string;
 }
 
-interface PersonIncome {
+interface IncomeSource {
+  id: string;
+  label: string;
   paycheckAmount: number;
   frequencyPerMonth: number;
 }
@@ -146,12 +149,10 @@ interface FixedExpense {
 }
 
 interface FinanceProfile {
-  primaryIncome: PersonIncome;
-  spouseIncome: PersonIncome;
+  incomes: IncomeSource[];
   fixedExpenses: FixedExpense[];
   savingsGoal: number;
   cardColors: Record<string, string>;
-  mode?: 'individual' | 'family';
   hasSeededDefaults?: boolean;
 }
 
@@ -192,25 +193,19 @@ const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string)
   );
 };
 
-const StatCard = ({ label, value, subValue, icon: Icon, trend, color = '#C5A059', onColorChange }: any) => (
-  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative overflow-visible group shadow-sm transition-all hover:shadow-md" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
+const StatCard = ({ label, value, subValue, icon: Icon, color = '#C5A059', onColorChange, onClick }: any) => (
+  <div className={`bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl relative overflow-visible group shadow-sm transition-all hover:shadow-md hover:z-50 ${onClick ? 'cursor-pointer hover:border-[#C5A059]' : ''}`} style={{ borderTopColor: color, borderTopWidth: '4px' }} onClick={onClick}>
     <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
-    <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: color }} />
-    <div className="flex justify-between items-start mb-4 relative z-10">
-      <div className="p-2.5 rounded-xl shadow-sm" style={{ backgroundColor: `${color}20` }}>
+    <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ backgroundColor: color }} />
+    <div className="flex justify-between items-start mb-4 relative z-50">
+      <div className="p-2.5 rounded-xl shadow-sm pointer-events-none" style={{ backgroundColor: `${color}20` }}>
         <Icon size={20} style={{ color }} />
       </div>
       <div className="flex items-center gap-2">
-        {trend && (
-          <div className={`flex items-center gap-1 text-xs font-mono font-bold ${trend > 0 ? 'text-[#1E5C38]' : 'text-[#8B0000]'}`}>
-            {trend > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-            {Math.abs(trend)}%
-          </div>
-        )}
         {onColorChange && <ColorPicker color={color} onChange={onColorChange} />}
       </div>
     </div>
-    <div className="relative z-10">
+    <div className="relative z-10 pointer-events-none">
       <div className="font-mono text-[11px] uppercase tracking-widest text-[#8C8670] mb-1 font-bold">{label}</div>
       <div className="text-3xl font-serif font-bold text-[#2C3338] mb-1">{value}</div>
       <div className="text-[13px] text-[#8C8670] italic">{subValue}</div>
@@ -252,6 +247,8 @@ const DEFAULT_EXPENSES: RecurringExpense[] = [
   { id: 'default_amex_plat', name: 'Amex Platinum Fee', amount: 695, month: 1, months: [1], frequency: 'annual', category: 'subscription' },
   { id: 'default_amazon', name: 'Amazon Prime', amount: 139, month: 7, months: [7], frequency: 'annual', category: 'subscription' },
   { id: 'default_car_maint', name: 'Car Maintenance', amount: 400, month: 5, months: [2, 5, 8, 11], frequency: 'quarterly', category: 'maintenance' },
+  { id: 'default_groceries', name: 'Groceries', amount: 800, month: 1, months: [1], frequency: 'monthly', category: 'food' },
+  { id: 'default_restaurants', name: 'Restaurants & Fast Food', amount: 400, month: 1, months: [1], frequency: 'monthly', category: 'food' },
 ];
 
 function Orbit() {
@@ -263,8 +260,9 @@ function Orbit() {
   const [mode, setMode] = useState<'individual' | 'family'>('individual');
   
   const [profile, setProfile] = useState<FinanceProfile>({
-    primaryIncome: { paycheckAmount: 3500, frequencyPerMonth: 2 },
-    spouseIncome: { paycheckAmount: 0, frequencyPerMonth: 0 },
+    incomes: [
+      { id: 'inc_1', label: 'Income Stream 1', paycheckAmount: 3500, frequencyPerMonth: 2 }
+    ],
     fixedExpenses: [
       { id: '1', label: 'Rent / Mortgage', amount: 2200 },
       { id: '2', label: 'Car Payment', amount: 450 },
@@ -278,18 +276,11 @@ function Orbit() {
       surplus: '#C5A059',
       totalSpend: '#1E5C38'
     },
-    mode: 'individual',
     hasSeededDefaults: false
   });
 
   const [startDate, setStartDate] = useState<string>(`${new Date().getFullYear()}-01-01`);
   const [endDate, setEndDate] = useState<string>(`${new Date().getFullYear()}-12-31`);
-
-  useEffect(() => {
-    if (profile.mode) {
-      setMode(profile.mode);
-    }
-  }, [profile.mode]);
 
   const [expenses, setExpenses] = useState<RecurringExpense[]>(DEFAULT_EXPENSES);
 
@@ -411,6 +402,7 @@ function Orbit() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
   const [librarySearch, setLibrarySearch] = useState('');
   const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
+  const [showSurplusModal, setShowSurplusModal] = useState(false);
 
   // --- Auth & Data Fetching ---
   useEffect(() => {
@@ -432,8 +424,22 @@ function Orbit() {
     const profileRef = doc(db, 'users', user.uid, 'orbitProfile', 'main');
     const unsubProfile = onSnapshot(profileRef, (docSnap) => {
       if (docSnap.exists()) {
-        const data = docSnap.data() as FinanceProfile;
+        const data = docSnap.data() as any;
         
+        // Migration: Convert old primaryIncome/spouseIncome to incomes array
+        if (!data.incomes) {
+          data.incomes = [];
+          if (data.primaryIncome) {
+            data.incomes.push({ id: 'inc_primary', label: 'Income Stream 1', ...data.primaryIncome });
+          }
+          if (data.spouseIncome && data.spouseIncome.paycheckAmount > 0) {
+            data.incomes.push({ id: 'inc_spouse', label: 'Income Stream 2', ...data.spouseIncome });
+          }
+          if (data.incomes.length === 0) {
+            data.incomes.push({ id: 'inc_1', label: 'Income Stream 1', paycheckAmount: 3500, frequencyPerMonth: 2 });
+          }
+        }
+
         // One-time seeding check
         if (data.hasSeededDefaults === undefined || data.hasSeededDefaults === false) {
           DEFAULT_EXPENSES.forEach(exp => {
@@ -596,16 +602,14 @@ function Orbit() {
 
   // --- Calculations ---
   const monthsInRange = useMemo(() => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+    const [sYear, sMonth] = startDate.split('-').map(Number);
+    const [eYear, eMonth] = endDate.split('-').map(Number);
+    return Math.max(1, (eYear - sYear) * 12 + (eMonth - sMonth) + 1);
   }, [startDate, endDate]);
 
   const monthlyIncome = useMemo(() => {
-    const primary = profile.primaryIncome.paycheckAmount * profile.primaryIncome.frequencyPerMonth;
-    const spouse = profile.spouseIncome.paycheckAmount * profile.spouseIncome.frequencyPerMonth;
-    return primary + spouse;
-  }, [profile.primaryIncome, profile.spouseIncome]);
+    return profile.incomes.reduce((sum, inc) => sum + (inc.paycheckAmount * inc.frequencyPerMonth), 0);
+  }, [profile.incomes]);
 
   const monthlyFixedExpenses = useMemo(() => {
     return profile.fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
@@ -660,6 +664,24 @@ function Orbit() {
   const totalPeriodSpend = totalPeriodFixedExpenses + totalPeriodOrbitExpenses;
   const periodSurplus = totalPeriodIncome - totalPeriodSpend;
 
+  // 1-Month Normalized Calculations (Independent of calendar range)
+  const normalizedMonthlyOrbit = useMemo(() => {
+    return expenses.reduce((sum, e) => {
+      const amt = Number(e.amount) || 0;
+      if (e.frequency === 'monthly') return sum + amt;
+      if (e.frequency === 'bi-weekly') return sum + (amt * (26 / 12));
+      if (e.frequency === 'weekly') return sum + (amt * (52 / 12));
+      if (e.frequency === 'annual' || e.frequency === 'one-time') return sum + (amt / 12);
+      if (e.frequency === 'semi-annual') return sum + ((amt * 2) / 12);
+      if (e.frequency === 'quarterly') return sum + ((amt * 4) / 12);
+      if (e.frequency === 'custom') return sum + ((amt * (e.months?.length || 1)) / 12);
+      return sum;
+    }, 0);
+  }, [expenses]);
+
+  const normalizedMonthlySpend = monthlyFixedExpenses + normalizedMonthlyOrbit;
+  const normalizedMonthlySurplus = monthlyIncome - normalizedMonthlySpend;
+
   // --- AI Logic ---
   const askAiCoach = async () => {
     setIsAiLoading(true);
@@ -670,7 +692,7 @@ function Orbit() {
       
       const ai = new GoogleGenAI({ apiKey });
       const prompt = `
-        As a strategic cash flow coach, analyze this financial outlook for a ${mode} setup over a ${monthsInRange}-month period (${startDate} to ${endDate}):
+        As a strategic cash flow coach, analyze this financial outlook over a ${monthsInRange}-month period (${startDate} to ${endDate}):
         - Total Period Income: $${totalPeriodIncome.toLocaleString()}
         - Total Period Fixed Expenses: $${totalPeriodFixedExpenses.toLocaleString()}
         - Total Period "Orbiting" (Irregular) Expenses: $${totalPeriodOrbitExpenses.toLocaleString()}
@@ -682,7 +704,7 @@ function Orbit() {
         
         Provide 3 high-impact strategic insights on how to manage this specific timeline. 
         Focus on "Sinking Funds", optimizing payment timing, and ensuring the surplus is put to work.
-        Since this is a ${mode} plan, tailor the advice accordingly.
+        Since this is a tailored plan, provide advice accordingly.
         Keep it professional, punchy, and strategic. Use markdown.
       `;
       
@@ -743,8 +765,29 @@ function Orbit() {
     await deleteExpenseFromDb(id);
   };
 
-  const addFixedExpense = () => {
-    const newProfile = {
+  const addIncome = () => {
+    const newId = Date.now().toString();
+    setProfile({
+      ...profile,
+      incomes: [...profile.incomes, { id: newId, label: 'New Income', paycheckAmount: 0, frequencyPerMonth: 2 }]
+    });
+  };
+
+  const updateIncome = (id: string, updates: Partial<IncomeSource>) => {
+    setProfile({
+      ...profile,
+      incomes: profile.incomes.map(inc => inc.id === id ? { ...inc, ...updates } : inc)
+    });
+  };
+
+  const removeIncome = (id: string) => {
+    setProfile({
+      ...profile,
+      incomes: profile.incomes.filter(inc => inc.id !== id)
+    });
+  };
+
+  const addFixedExpense = () => {    const newProfile = {
       ...profile,
       fixedExpenses: [...profile.fixedExpenses, { id: Date.now().toString(), label: 'New Expense', amount: 0 }]
     };
@@ -878,35 +921,19 @@ function Orbit() {
                 <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-[#8C8670]">How to use</span>
               </div>
               <ul className="text-[11px] text-[#8C8670] space-y-2 leading-relaxed font-mono">
-                <li><span className="text-[#C5A059] mr-2">01.</span> Toggle Individual/Family views</li>
-                <li><span className="text-[#C5A059] mr-2">02.</span> Adjust your timeline</li>
-                <li><span className="text-[#C5A059] mr-2">03.</span> Adjust Income & Fixed Expenses</li>
+                <li><span className="text-[#C5A059] mr-2">01.</span> Adjust your timeline</li>
+                <li><span className="text-[#C5A059] mr-2">02.</span> Add all Income Streams</li>
+                <li><span className="text-[#C5A059] mr-2">03.</span> Adjust Fixed Expenses</li>
                 <li><span className="text-[#C5A059] mr-2">04.</span> Track irregular Orbiting bills</li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Controls Bar: Mode Toggle & Date Range */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12 w-full">
-          {/* Mode Toggle */}
-          <div className="bg-[#E8E4D0]/30 p-1 rounded-xl border border-[#E8E4D0] flex shrink-0">
-            <button 
-              onClick={() => setProfile({...profile, mode: 'individual'})}
-              className={`px-8 py-2.5 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'individual' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
-            >
-              Individual
-            </button>
-            <button 
-              onClick={() => setProfile({...profile, mode: 'family'})}
-              className={`px-8 py-2.5 text-[11px] font-mono uppercase tracking-widest transition-all ${mode === 'family' ? 'bg-[#C5A059] text-[#FAF9F6] font-bold shadow-md rounded-xl' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
-            >
-              Family
-            </button>
-          </div>
-
+        {/* Controls Bar: Date Range */}
+        <div className="flex flex-col lg:flex-row items-center justify-end gap-8 mb-12 w-full">
           {/* Date Range Selector */}
-          <div className="bg-[#E8E4D0]/10 p-4 rounded-2xl border border-[#E8E4D0]/60 flex flex-wrap items-center gap-8 ml-auto">
+          <div className="bg-[#E8E4D0]/10 p-4 rounded-2xl border border-[#E8E4D0]/60 flex flex-wrap items-center gap-8">
             <div className="flex flex-col gap-1.5">
               <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Start Date</label>
               <input 
@@ -961,10 +988,29 @@ function Orbit() {
             value={`$${periodSurplus.toLocaleString()}`} 
             subValue="Potential savings"
             icon={Zap}
-            trend={periodSurplus > 0 ? 1 : -1}
             color={profile.cardColors.surplus}
             onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, surplus: c}})}
+            onClick={() => setShowSurplusModal(true)}
           />
+        </div>
+
+        {/* 1-Month Snapshot Sub-Bars */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {/* 1 Month Income */}
+          <div className="bg-[#FAF9F6]/50 border border-[#E8E4D0]/60 p-3 rounded-lg flex justify-between items-center shadow-sm">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">1-Month Snapshot</span>
+            <span className="font-serif font-bold text-[#2C3338]">${Math.round(monthlyIncome).toLocaleString()}</span>
+          </div>
+          {/* 1 Month Spend */}
+          <div className="bg-[#FAF9F6]/50 border border-[#E8E4D0]/60 p-3 rounded-lg flex justify-between items-center shadow-sm">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">1-Month Snapshot</span>
+            <span className="font-serif font-bold text-[#2C3338]">${Math.round(normalizedMonthlySpend).toLocaleString()}</span>
+          </div>
+          {/* 1 Month Surplus */}
+          <div className="bg-[#FAF9F6]/50 border border-[#E8E4D0]/60 p-3 rounded-lg flex justify-between items-center shadow-sm border-b-2" style={{ borderBottomColor: profile.cardColors.surplus }}>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">1-Month Snapshot</span>
+            <span className="font-serif font-bold text-[#2C3338]">${Math.round(normalizedMonthlySurplus).toLocaleString()}</span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -986,92 +1032,71 @@ function Orbit() {
                 )}
               </div>
               
-              <div className="space-y-8">
-                {/* Primary Income */}
-                <div className="p-4 bg-[#E8E4D0]/10 rounded-xl border border-[#E8E4D0]/50">
-                  <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#C5A059] mb-4">Primary Income</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Paycheck</label>
-                      <div className="flex items-center gap-1 border-b border-[#E8E4D0] focus-within:border-[#C5A059]">
-                        <span className="text-sm font-serif text-[#8C8670]">$</span>
-                        <input 
-                          type="text"
-                          inputMode="numeric"
-                          value={profile.primaryIncome.paycheckAmount === 0 ? '' : profile.primaryIncome.paycheckAmount.toString()}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9]/g, '');
-                            setProfile({
-                              ...profile, 
-                              primaryIncome: { ...profile.primaryIncome, paycheckAmount: val === '' ? 0 : parseInt(val, 10) }
-                            });
-                          }}
-                          className="w-full bg-transparent py-1 text-sm font-serif outline-none"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Freq / Mo</label>
+              <div className="space-y-6">
+                {/* Income Streams */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670]">Income Streams</h3>
+                    <button 
+                      onClick={addIncome}
+                      className="text-[9px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#2C3338] transition-colors"
+                    >
+                      + Add Income
+                    </button>
+                  </div>
+                  
+                  {profile.incomes.map((income) => (
+                    <div key={income.id} className="p-4 bg-[#E8E4D0]/10 rounded-xl border border-[#E8E4D0]/50 relative group">
+                      <button 
+                        onClick={() => removeIncome(income.id)}
+                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 text-[#8B0000] hover:bg-[#8B0000]/10 p-1.5 rounded-lg transition-all"
+                        title="Remove Income"
+                      >
+                        ✕
+                      </button>
+                      
                       <input 
                         type="text"
-                        inputMode="numeric"
-                        value={profile.primaryIncome.frequencyPerMonth === 0 ? '' : profile.primaryIncome.frequencyPerMonth.toString()}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          setProfile({
-                            ...profile, 
-                            primaryIncome: { ...profile.primaryIncome, frequencyPerMonth: val === '' ? 0 : parseInt(val, 10) }
-                          });
-                        }}
-                        className="w-full bg-transparent border-b border-[#E8E4D0] py-1 text-sm font-serif focus:border-[#C5A059] outline-none"
+                        value={income.label}
+                        onChange={(e) => updateIncome(income.id, { label: e.target.value })}
+                        className="font-mono text-[10px] uppercase tracking-widest text-[#C5A059] mb-4 bg-transparent border-b border-transparent hover:border-[#E8E4D0] focus:border-[#C5A059] outline-none w-3/4"
+                        placeholder="Income Name"
                       />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Spouse Income if Family Mode */}
-                {mode === 'family' && (
-                  <div className="p-4 bg-[#E8E4D0]/10 rounded-xl border border-[#E8E4D0]/50">
-                    <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#C5A059] mb-4">Spouse Income</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Paycheck</label>
-                        <div className="flex items-center gap-1 border-b border-[#E8E4D0] focus-within:border-[#C5A059]">
-                          <span className="text-sm font-serif text-[#8C8670]">$</span>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Paycheck</label>
+                          <div className="flex items-center gap-1 border-b border-[#E8E4D0] focus-within:border-[#C5A059]">
+                            <span className="text-sm font-serif text-[#8C8670]">$</span>
+                            <input 
+                              type="text"
+                              inputMode="numeric"
+                              value={income.paycheckAmount === 0 ? '' : income.paycheckAmount.toString()}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9]/g, '');
+                                updateIncome(income.id, { paycheckAmount: val === '' ? 0 : parseInt(val, 10) });
+                              }}
+                              className="w-full bg-transparent py-1 text-sm font-serif outline-none"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Freq / Mo</label>
                           <input 
                             type="text"
                             inputMode="numeric"
-                            value={profile.spouseIncome.paycheckAmount === 0 ? '' : profile.spouseIncome.paycheckAmount.toString()}
+                            value={income.frequencyPerMonth === 0 ? '' : income.frequencyPerMonth.toString()}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^0-9]/g, '');
-                              setProfile({
-                                ...profile, 
-                                spouseIncome: { ...profile.spouseIncome, paycheckAmount: val === '' ? 0 : parseInt(val, 10) }
-                              });
+                              updateIncome(income.id, { frequencyPerMonth: val === '' ? 0 : parseInt(val, 10) });
                             }}
-                            className="w-full bg-transparent py-1 text-sm font-serif outline-none"
+                            className="w-full bg-transparent border-b border-[#E8E4D0] py-1 text-sm font-serif focus:border-[#C5A059] outline-none"
                           />
                         </div>
                       </div>
-                      <div>
-                        <label className="block text-[9px] font-mono uppercase text-[#8C8670] mb-1">Freq / Mo</label>
-                        <input 
-                          type="text"
-                          inputMode="numeric"
-                          value={profile.spouseIncome.frequencyPerMonth === 0 ? '' : profile.spouseIncome.frequencyPerMonth.toString()}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9]/g, '');
-                            setProfile({
-                              ...profile, 
-                              spouseIncome: { ...profile.spouseIncome, frequencyPerMonth: val === '' ? 0 : parseInt(val, 10) }
-                            });
-                          }}
-                          className="w-full bg-transparent border-b border-[#E8E4D0] py-1 text-sm font-serif focus:border-[#C5A059] outline-none"
-                        />
-                      </div>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
 
                 {/* Fixed Expenses */}
                 <div className="space-y-4">
@@ -1253,17 +1278,17 @@ function Orbit() {
                     }, 0);
                   
                   return (
-                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
+                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:z-50" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
                       <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <div className={`absolute top-2 right-2 transition-opacity z-50 ${profile.cardColors[`cat_${cat}`] ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                         <ColorPicker 
                           color={color} 
                           onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`cat_${cat}`]: c}})} 
                         />
                       </div>
-                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10">Orbit: {cat}</h3>
-                      <div className="text-xl font-serif font-bold text-[#2C3338] mt-2 relative z-10">${Math.round(catTotal).toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10">Irregular Hits</div>
+                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10 pointer-events-none">Orbit: {cat}</h3>
+                      <div className="text-xl font-serif font-bold text-[#2C3338] mt-2 relative z-10 pointer-events-none">${Math.round(catTotal).toLocaleString()}</div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10 pointer-events-none">Irregular Hits</div>
                     </div>
                   );
                 })}
@@ -1316,12 +1341,16 @@ function Orbit() {
                           {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
                           {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
                           {exp.category === 'maintenance' && <Home size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'other' && <Zap size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
+                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance', 'food'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
                         </div>
                         <div>
                           <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
                           <div className="text-[10px] text-[#8C8670] font-mono uppercase tracking-tighter">
-                            ${exp.amount.toLocaleString()} • {exp.frequency} • {monthNames[exp.month - 1]}
+                            ${exp.amount.toLocaleString()} • {exp.frequency} 
+                            {['annual', 'semi-annual', 'quarterly', 'custom'].includes(exp.frequency) && 
+                              ` • ${(exp.months && exp.months.length > 0) ? exp.months.map(m => monthNames[m - 1]).join(', ') : monthNames[exp.month - 1]}`
+                            }
                           </div>
                         </div>
                       </div>
@@ -1738,6 +1767,83 @@ function Orbit() {
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Surplus Allocation Modal */}
+      <AnimatePresence>
+        {showSurplusModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSurplusModal(false)}
+              className="absolute inset-0 bg-[#2C3338]/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-[#FAF9F6] w-full max-w-2xl rounded-xl shadow-2xl relative z-10 overflow-hidden border border-[#E8E4D0]"
+            >
+              <div className="p-8">
+                <button 
+                  onClick={() => setShowSurplusModal(false)}
+                  className="absolute top-6 right-6 p-2 rounded-xl text-[#8C8670] hover:bg-[#E8E4D0] transition-colors"
+                >
+                  <X size={20} />
+                </button>
+                
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-[#1E5C38]/10 rounded-xl">
+                    <Zap size={24} className="text-[#1E5C38]" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-serif font-bold text-[#2C3338]">Surplus Allocation</h2>
+                    <p className="text-[11px] font-mono tracking-widest uppercase text-[#8C8670] mt-1">Capital Deployment Strategy</p>
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <p className="text-sm text-[#8C8670] leading-relaxed">
+                    You have a projected surplus of <span className="font-serif font-bold text-[#1E5C38]">${periodSurplus.toLocaleString()}</span> over this {monthsInRange}-month period (Avg <span className="font-serif font-bold text-[#2C3338]">${Math.round(normalizedMonthlySurplus).toLocaleString()}</span>/mo). 
+                    Here is where you can begin allocating this excess capital into growth vehicles.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { name: 'High-Yield Savings (HYSA)', desc: 'Store cash securely with ~4-5% APY yield', color: '#1E5C38', icon: Wallet },
+                    { name: 'Index Funds / Equities', desc: 'S&P 500, broad market ETFs', color: '#6366F1', icon: TrendingUp },
+                    { name: 'Real Estate Fund', desc: 'REITs, Syndications, Direct Property', color: '#C5A059', icon: Zap },
+                    { name: 'Debt Paydown', desc: 'Accelerated payments on high-interest liabilities', color: '#8B0000', icon: RefreshCw }
+                  ].map((vehicle, idx) => (
+                    <div key={idx} className="p-4 border border-[#E8E4D0] rounded-xl flex items-center justify-between hover:border-[#C5A059] transition-colors group cursor-pointer">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-lg" style={{ backgroundColor: `${vehicle.color}15` }}>
+                          <vehicle.icon size={18} style={{ color: vehicle.color }} />
+                        </div>
+                        <div>
+                          <h4 className="font-serif font-bold text-[#2C3338]">{vehicle.name}</h4>
+                          <p className="text-[11px] font-mono text-[#8C8670] mt-1">{vehicle.desc}</p>
+                        </div>
+                      </div>
+                      <button className="text-[10px] font-mono tracking-widest text-[#C5A059] uppercase opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                        Setup <ChevronRight size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 p-4 bg-[#C5A059]/5 border border-[#C5A059]/30 rounded-xl">
+                  <p className="text-xs text-[#8C8670] font-mono leading-relaxed text-center">
+                    * Note: Surplus allocation features are coming soon in a future update!
+                  </p>
                 </div>
               </div>
             </motion.div>
