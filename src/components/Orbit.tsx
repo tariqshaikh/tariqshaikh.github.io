@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, Component } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, Component, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   TrendingUp, 
@@ -69,8 +69,6 @@ import {
   limit,
   orderBy
 } from 'firebase/firestore';
-
-import SurplusAllocationModal from './SurplusAllocationModal';
 
 // --- Error Boundary ---
 interface ErrorBoundaryProps {
@@ -404,7 +402,6 @@ function Orbit() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
   const [librarySearch, setLibrarySearch] = useState('');
   const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
-  const [showSurplusModal, setShowSurplusModal] = useState(false);
 
   // --- Auth & Data Fetching ---
   useEffect(() => {
@@ -420,13 +417,16 @@ function Orbit() {
   }, []);
 
   // Load Profile and Expenses
+  const isProfileLoaded = useRef(false);
   useEffect(() => {
+    isProfileLoaded.current = false; // Reset on user change
     if (!user || user.uid === 'guest-user') return;
 
     const profileRef = doc(db, 'users', user.uid, 'orbitProfile', 'main');
     const unsubProfile = onSnapshot(profileRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data() as any;
+        delete data.updatedAt; // Strip timestamp to allow deep comparison
         
         // Migration: Convert old primaryIncome/spouseIncome to incomes array
         if (!data.incomes) {
@@ -451,10 +451,10 @@ function Orbit() {
           data.hasSeededDefaults = true;
         }
 
-        setProfile(prev => {
-          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
-          return data;
-        });
+        if (!isProfileLoaded.current) {
+          setProfile(data);
+          isProfileLoaded.current = true;
+        }
       } else {
         // Profile doesn't exist yet, seed expenses now
         DEFAULT_EXPENSES.forEach(exp => {
@@ -992,7 +992,7 @@ function Orbit() {
             icon={Zap}
             color={profile.cardColors.surplus}
             onColorChange={(c: string) => setProfile({...profile, cardColors: {...profile.cardColors, surplus: c}})}
-            onClick={() => setShowSurplusModal(true)}
+            onClick={() => navigate('/orbit/capital-deployment', { state: { periodSurplus, monthsInRange, normalizedMonthlySurplus } })}
           />
         </div>
 
@@ -1780,17 +1780,7 @@ function Orbit() {
         )}
       </AnimatePresence>
 
-      {/* Surplus Allocation Modal */}
-      <AnimatePresence>
-        {showSurplusModal && (
-          <SurplusAllocationModal
-            periodSurplus={periodSurplus}
-            monthsInRange={monthsInRange}
-            normalizedMonthlySurplus={normalizedMonthlySurplus}
-            onClose={() => setShowSurplusModal(false)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Surplus Allocation Modal logic removed */}
     </div>
   );
 }

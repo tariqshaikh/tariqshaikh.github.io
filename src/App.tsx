@@ -18,6 +18,8 @@ import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
 import Waves from './components/Waves';
 
+import CapitalDeployment from './components/CapitalDeployment';
+
 export default function App() {
   return (
     <Router>
@@ -35,6 +37,7 @@ export default function App() {
         <Route path="/orbit/simulator" element={<Orbit />} />
         <Route path="/orbit/currency-converter" element={<CurrencyConverter />} />
         <Route path="/orbit/retirement-planner" element={<RetirementPlanner />} />
+        <Route path="/orbit/capital-deployment" element={<CapitalDeployment />} />
         <Route path="/admin/visitors" element={<VisitorInsights />} />
       </Routes>
     </Router>

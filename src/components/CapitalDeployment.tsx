@@ -1,17 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   X, Zap, Wallet, TrendingUp, RefreshCw, ChevronRight, 
   Home, DollarSign, Edit2, Plus, PieChart, Info, Settings,
-  ArrowUpRight, ArrowDownRight, ChevronLeft, Building, Play
+  ArrowUpRight, ArrowDownRight, ChevronLeft, Building, Play, ChevronDown, ChevronUp
 } from 'lucide-react';
-
-interface SurplusAllocationModalProps {
-  periodSurplus: number;
-  monthsInRange: number;
-  normalizedMonthlySurplus: number;
-  onClose: () => void;
-}
 
 interface RealEstateProperty {
   id: string;
@@ -56,13 +50,20 @@ const DEFAULT_PREFS: Preferences = {
   }
 };
 
-export default function SurplusAllocationModal({
-  periodSurplus,
-  monthsInRange,
-  normalizedMonthlySurplus,
-  onClose
-}: SurplusAllocationModalProps) {
-  
+export default function CapitalDeployment() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { 
+    periodSurplus = 0, 
+    monthsInRange = 12, 
+    normalizedMonthlySurplus = 0 
+  } = location.state || {};
+
+  const onClose = () => {
+    navigate('/orbit');
+  };
+
   const [prefs, setPrefs] = useState<Preferences>(() => {
     const saved = localStorage.getItem('orbit_surplus_prefs');
     return saved ? JSON.parse(saved) : DEFAULT_PREFS;
@@ -108,7 +109,10 @@ export default function SurplusAllocationModal({
   const renderPrefQ1 = () => (
     <div className="p-8">
       <h2 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">How hands-on do you want to be?</h2>
-      <p className="text-[#8C8670] text-sm mb-8">Personalize your capital deployment strategy.</p>
+      <div className="flex items-center justify-between mb-8">
+        <p className="text-[#8C8670] text-sm">Personalize your capital deployment strategy.</p>
+        <button onClick={() => setCurrentStep('DASHBOARD')} className="text-xs font-mono tracking-widest uppercase text-[#8C8670] hover:text-[#C5A059] transition-colors">Skip</button>
+      </div>
       
       <div className="space-y-4">
         {[
@@ -134,7 +138,10 @@ export default function SurplusAllocationModal({
 
   const renderPrefQ2 = () => (
     <div className="p-8">
-      <button onClick={() => setCurrentStep('PREF_Q1')} className="text-[#8C8670] hover:text-[#C5A059] mb-4"><ChevronLeft size={20}/></button>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => setCurrentStep('PREF_Q1')} className="text-[#8C8670] hover:text-[#C5A059]"><ChevronLeft size={20}/></button>
+        <button onClick={() => setCurrentStep('DASHBOARD')} className="text-xs font-mono tracking-widest uppercase text-[#8C8670] hover:text-[#C5A059] transition-colors">Skip</button>
+      </div>
       <h2 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">How do you feel about market volatility?</h2>
       
       <div className="space-y-4 mt-8">
@@ -161,7 +168,10 @@ export default function SurplusAllocationModal({
 
   const renderPrefQ3 = () => (
     <div className="p-8">
-      <button onClick={() => setCurrentStep('PREF_Q2')} className="text-[#8C8670] hover:text-[#C5A059] mb-4"><ChevronLeft size={20}/></button>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => setCurrentStep('PREF_Q2')} className="text-[#8C8670] hover:text-[#C5A059]"><ChevronLeft size={20}/></button>
+        <button onClick={() => setCurrentStep('DASHBOARD')} className="text-xs font-mono tracking-widest uppercase text-[#8C8670] hover:text-[#C5A059] transition-colors">Skip</button>
+      </div>
       <h2 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">Which vehicles interest you most?</h2>
       <p className="text-[#8C8670] text-sm mb-8">Select all that apply.</p>
       
@@ -196,7 +206,10 @@ export default function SurplusAllocationModal({
 
   const renderPrefQ4 = () => (
     <div className="p-8">
-      <button onClick={() => setCurrentStep('PREF_Q3')} className="text-[#8C8670] hover:text-[#C5A059] mb-4"><ChevronLeft size={20}/></button>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => setCurrentStep('PREF_Q3')} className="text-[#8C8670] hover:text-[#C5A059]"><ChevronLeft size={20}/></button>
+        <button onClick={() => setCurrentStep('DASHBOARD')} className="text-xs font-mono tracking-widest uppercase text-[#8C8670] hover:text-[#C5A059] transition-colors">Skip</button>
+      </div>
       <h2 className="text-2xl font-serif font-bold text-[#2C3338] mb-6">When do you need this money?</h2>
       
       <div className="space-y-4">
@@ -223,6 +236,9 @@ export default function SurplusAllocationModal({
 
   const renderPrefQ5 = () => (
     <div className="p-8 text-center">
+      <div className="flex items-center justify-end mb-4">
+        <button onClick={() => setCurrentStep('DASHBOARD')} className="text-xs font-mono tracking-widest uppercase text-[#8C8670] hover:text-[#C5A059] transition-colors">Skip</button>
+      </div>
       <h2 className="text-2xl font-serif font-bold text-[#2C3338] mb-8">Do you own any investment properties?</h2>
       <div className="grid grid-cols-2 gap-6">
         <button
@@ -367,6 +383,8 @@ export default function SurplusAllocationModal({
     );
   };
 
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
   const renderDashboard = () => {
     const totalEq = prefs.properties.reduce((sum, p) => sum + p.equity, 0);
     const totalCashflow = prefs.properties.reduce((sum, p) => sum + (p.rentCollected - p.mortgagePayment), 0);
@@ -449,8 +467,11 @@ export default function SurplusAllocationModal({
 
             <div className="space-y-6">
               {/* Equities */}
-              <div className={`p-5 rounded-2xl border ${prefs.vehicles.includes('Index Funds/Stocks') ? 'border-[#6366F1]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'}`}>
-                <div className="flex justify-between items-start mb-4">
+              <div className={`rounded-2xl border transition-all ${prefs.vehicles.includes('Index Funds/Stocks') ? 'border-[#6366F1]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'} ${expandedCard === 'equities' ? 'shadow-md pb-5' : ''}`}>
+                <div 
+                  className="flex justify-between items-start p-5 cursor-pointer"
+                  onClick={() => setExpandedCard(expandedCard === 'equities' ? null : 'equities')}
+                >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-[#6366F1]/10 rounded-lg">
                       <TrendingUp size={18} className="text-[#6366F1]" />
@@ -460,22 +481,44 @@ export default function SurplusAllocationModal({
                       <p className="text-[11px] font-mono text-[#8C8670]">S&P 500, ETFs | Est. 8-10% return</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-[#6366F1]">{prefs.allocations.equities}%</div>
-                    <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.equities/100)).toLocaleString()}/mo</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-[#6366F1]">{prefs.allocations.equities}%</div>
+                      <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.equities/100)).toLocaleString()}/mo</div>
+                    </div>
+                    <div className="text-[#8C8670]">
+                      {expandedCard === 'equities' ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                    </div>
                   </div>
                 </div>
-                <input type="range" min="0" max="100" value={prefs.allocations.equities} onChange={(e) => updateAllocation('equities', Number(e.target.value))} className="w-full accent-[#6366F1]" />
-                {prefs.vehicles.includes('Index Funds/Stocks') && (
-                  <div className="mt-3 text-[10px] font-mono text-[#2C3338] flex items-center gap-1 bg-[#6366F1]/5 p-2 rounded block">
-                    <span className="text-[#6366F1]">✓</span> You prefer stocks — consider auto-investing this sum.
-                  </div>
-                )}
+                
+                <AnimatePresence>
+                  {expandedCard === 'equities' && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-5 overflow-hidden"
+                    >
+                      <div className="pt-2">
+                        <input type="range" min="0" max="100" value={prefs.allocations.equities} onChange={(e) => updateAllocation('equities', Number(e.target.value))} className="w-full accent-[#6366F1]" />
+                        {prefs.vehicles.includes('Index Funds/Stocks') && (
+                          <div className="mt-4 text-[10px] font-mono text-[#2C3338] flex items-center gap-1 bg-[#6366F1]/5 p-3 rounded-lg border border-[#6366F1]/10">
+                            <span className="text-[#6366F1]">✓</span> You prefer stocks — consider auto-investing this sum.
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* HYSA */}
-              <div className={`p-5 rounded-2xl border ${prefs.vehicles.includes('HYSA') ? 'border-[#1E5C38]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'}`}>
-                <div className="flex justify-between items-start mb-4">
+              <div className={`rounded-2xl border transition-all ${prefs.vehicles.includes('HYSA') ? 'border-[#1E5C38]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'} ${expandedCard === 'hysa' ? 'shadow-md pb-5' : ''}`}>
+                <div 
+                  className="flex justify-between items-start p-5 cursor-pointer"
+                  onClick={() => setExpandedCard(expandedCard === 'hysa' ? null : 'hysa')}
+                >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-[#1E5C38]/10 rounded-lg">
                       <Wallet size={18} className="text-[#1E5C38]" />
@@ -485,22 +528,44 @@ export default function SurplusAllocationModal({
                       <p className="text-[11px] font-mono text-[#8C8670]">Emergency fund | Est. 4-5% APY</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-[#1E5C38]">{prefs.allocations.hysa}%</div>
-                    <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.hysa/100)).toLocaleString()}/mo</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-[#1E5C38]">{prefs.allocations.hysa}%</div>
+                      <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.hysa/100)).toLocaleString()}/mo</div>
+                    </div>
+                    <div className="text-[#8C8670]">
+                      {expandedCard === 'hysa' ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                    </div>
                   </div>
                 </div>
-                <input type="range" min="0" max="100" value={prefs.allocations.hysa} onChange={(e) => updateAllocation('hysa', Number(e.target.value))} className="w-full accent-[#1E5C38]" />
-                {prefs.riskTolerance === 'conservative' && (
-                  <div className="mt-3 text-[10px] font-mono text-[#2C3338] flex items-center gap-1 bg-[#1E5C38]/5 p-2 rounded block">
-                    <span className="text-[#1E5C38]">✓</span> Matches your conservative risk preference perfectly.
-                  </div>
-                )}
+
+                <AnimatePresence>
+                  {expandedCard === 'hysa' && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-5 overflow-hidden"
+                    >
+                      <div className="pt-2">
+                        <input type="range" min="0" max="100" value={prefs.allocations.hysa} onChange={(e) => updateAllocation('hysa', Number(e.target.value))} className="w-full accent-[#1E5C38]" />
+                        {prefs.riskTolerance === 'conservative' && (
+                          <div className="mt-4 text-[10px] font-mono text-[#2C3338] flex items-center gap-1 bg-[#1E5C38]/5 p-3 rounded-lg border border-[#1E5C38]/10">
+                            <span className="text-[#1E5C38]">✓</span> Matches your conservative risk preference perfectly.
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Real Estate */}
-              <div className={`p-5 rounded-2xl border ${prefs.vehicles.includes('Real Estate') || prefs.ownsRealEstate ? 'border-[#C5A059]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'}`}>
-                <div className="flex justify-between items-start mb-4">
+              <div className={`rounded-2xl border transition-all ${prefs.vehicles.includes('Real Estate') || prefs.ownsRealEstate ? 'border-[#C5A059]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'} ${expandedCard === 'realEstate' ? 'shadow-md pb-5' : ''}`}>
+                <div 
+                  className="flex justify-between items-start p-5 cursor-pointer"
+                  onClick={() => setExpandedCard(expandedCard === 'realEstate' ? null : 'realEstate')}
+                >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-[#C5A059]/10 rounded-lg">
                       <Home size={18} className="text-[#C5A059]" />
@@ -510,26 +575,48 @@ export default function SurplusAllocationModal({
                       <p className="text-[11px] font-mono text-[#8C8670]">REITs, Direct | Est. 6-12% return</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-[#C5A059]">{prefs.allocations.realEstate}%</div>
-                    <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.realEstate/100)).toLocaleString()}/mo</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-[#C5A059]">{prefs.allocations.realEstate}%</div>
+                      <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.realEstate/100)).toLocaleString()}/mo</div>
+                    </div>
+                    <div className="text-[#8C8670]">
+                      {expandedCard === 'realEstate' ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                    </div>
                   </div>
                 </div>
-                <input type="range" min="0" max="100" value={prefs.allocations.realEstate} onChange={(e) => updateAllocation('realEstate', Number(e.target.value))} className="w-full accent-[#C5A059]" />
-                {prefs.ownsRealEstate ? (
-                  <div className="mt-3 text-[10px] font-mono text-[#2C3338] flex items-center gap-1 bg-[#C5A059]/5 p-2 rounded block">
-                    You have <span className="font-bold text-[#C5A059]">${(totalEq/1000).toFixed(0)}k</span> in RE equity. Use this to save for the next down payment.
-                  </div>
-                ) : !prefs.vehicles.includes('Real Estate') ? (
-                  <div className="mt-3 text-[10px] font-mono text-[#8C8670] italic">
-                    You indicated lower interest in real estate.
-                  </div>
-                ) : null}
+
+                <AnimatePresence>
+                  {expandedCard === 'realEstate' && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-5 overflow-hidden"
+                    >
+                      <div className="pt-2">
+                        <input type="range" min="0" max="100" value={prefs.allocations.realEstate} onChange={(e) => updateAllocation('realEstate', Number(e.target.value))} className="w-full accent-[#C5A059]" />
+                        {prefs.ownsRealEstate ? (
+                          <div className="mt-4 text-[10px] font-mono text-[#2C3338] flex items-center gap-1 bg-[#C5A059]/5 p-3 rounded-lg border border-[#C5A059]/10">
+                            You have <span className="font-bold text-[#C5A059]">{(totalEq/1000).toFixed(0)}k</span> in RE equity. Use this to save for the next down payment.
+                          </div>
+                        ) : !prefs.vehicles.includes('Real Estate') ? (
+                          <div className="mt-4 text-[10px] font-mono text-[#8C8670] italic">
+                            You indicated lower interest in real estate.
+                          </div>
+                        ) : null}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
                {/* Debt */}
-               <div className={`p-5 rounded-2xl border ${prefs.vehicles.includes('Debt Paydown') ? 'border-[#8B0000]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'}`}>
-                <div className="flex justify-between items-start mb-4">
+               <div className={`rounded-2xl border transition-all ${prefs.vehicles.includes('Debt Paydown') ? 'border-[#8B0000]/40 bg-white' : 'border-[#E8E4D0] opacity-60 bg-[#FAF9F6]'} ${expandedCard === 'debt' ? 'shadow-md pb-5' : ''}`}>
+                <div 
+                  className="flex justify-between items-start p-5 cursor-pointer"
+                  onClick={() => setExpandedCard(expandedCard === 'debt' ? null : 'debt')}
+                >
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-[#8B0000]/10 rounded-lg">
                       <RefreshCw size={18} className="text-[#8B0000]" />
@@ -539,12 +626,31 @@ export default function SurplusAllocationModal({
                       <p className="text-[11px] font-mono text-[#8C8670]">Guaranteed return = interest rate</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-[#8B0000]">{prefs.allocations.debt}%</div>
-                    <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.debt/100)).toLocaleString()}/mo</div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-[#8B0000]">{prefs.allocations.debt}%</div>
+                      <div className="text-[10px] font-mono text-[#8C8670] uppercase">${Math.round(normalizedMonthlySurplus * (prefs.allocations.debt/100)).toLocaleString()}/mo</div>
+                    </div>
+                    <div className="text-[#8C8670]">
+                      {expandedCard === 'debt' ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                    </div>
                   </div>
                 </div>
-                <input type="range" min="0" max="100" value={prefs.allocations.debt} onChange={(e) => updateAllocation('debt', Number(e.target.value))} className="w-full accent-[#8B0000]" />
+
+                <AnimatePresence>
+                  {expandedCard === 'debt' && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-5 overflow-hidden"
+                    >
+                      <div className="pt-2">
+                        <input type="range" min="0" max="100" value={prefs.allocations.debt} onChange={(e) => updateAllocation('debt', Number(e.target.value))} className="w-full accent-[#8B0000]" />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
             </div>
@@ -565,37 +671,39 @@ export default function SurplusAllocationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-12">
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="absolute inset-0 bg-[#2C3338]/60 backdrop-blur-md"
-      />
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-[#FAF9F6] w-full max-w-3xl h-[85vh] rounded-2xl shadow-2xl relative z-10 overflow-hidden flex flex-col"
-      >
+    <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center">
+      <div className="w-full max-w-3xl flex-1 bg-white md:my-8 md:border border-[#E8E4D0] md:shadow-xl md:rounded-2xl overflow-hidden flex flex-col relative">
+        
         {currentStep !== 'DASHBOARD' && (
-           <button onClick={onClose} className="absolute top-6 right-6 p-2 rounded-xl text-[#8C8670] hover:bg-[#E8E4D0] transition-colors z-20">
-             <X size={20} />
-           </button>
+           <div className="absolute top-6 right-6 z-20">
+             <button onClick={onClose} className="p-2 rounded-xl text-[#8C8670] hover:bg-[#FAF9F6] border border-transparent hover:border-[#E8E4D0] transition-all flex items-center gap-2">
+               <span className="text-[10px] font-mono uppercase tracking-widest hidden sm:block">Exit</span>
+               <X size={20} />
+             </button>
+           </div>
         )}
 
         <div className="flex-1 overflow-y-auto">
-          {currentStep === 'PREF_Q1' && renderPrefQ1()}
-          {currentStep === 'PREF_Q2' && renderPrefQ2()}
-          {currentStep === 'PREF_Q3' && renderPrefQ3()}
-          {currentStep === 'PREF_Q4' && renderPrefQ4()}
-          {currentStep === 'PREF_Q5' && renderPrefQ5()}
-          {currentStep === 'RE_SETUP' && renderReSetup()}
-          {currentStep === 'RECOMMENDATION' && renderRecommendation()}
-          {currentStep === 'DASHBOARD' && renderDashboard()}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {currentStep === 'PREF_Q1' && renderPrefQ1()}
+              {currentStep === 'PREF_Q2' && renderPrefQ2()}
+              {currentStep === 'PREF_Q3' && renderPrefQ3()}
+              {currentStep === 'PREF_Q4' && renderPrefQ4()}
+              {currentStep === 'PREF_Q5' && renderPrefQ5()}
+              {currentStep === 'RE_SETUP' && renderReSetup()}
+              {currentStep === 'RECOMMENDATION' && renderRecommendation()}
+              {currentStep === 'DASHBOARD' && renderDashboard()}
+            </motion.div>
+          </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
