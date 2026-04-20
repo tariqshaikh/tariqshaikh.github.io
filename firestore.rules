@@ -167,6 +167,11 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    // Statement Uploads Rules
+    match /users/{userId}/statementUploads/{uploadId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // Section Settings Rules
     match /users/{userId}/sectionSettings/{settingId} {
       allow read, write: if isOwner(userId);

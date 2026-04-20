@@ -100,6 +100,19 @@
         "category": { "type": "string" },
         "customCategory": { "type": "string" }
       }
+    },
+    "StatementUpload": {
+      "title": "Statement Upload",
+      "description": "Log of uploaded credit card statements and parsed results.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fileName": { "type": "string" },
+        "uploadDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["processed", "failed"] },
+        "expensesFound": { "type": "number" }
+      },
+      "required": ["fileName", "uploadDate", "status", "expensesFound"]
     }
   },
   "firestore": {
@@ -130,6 +143,10 @@
     "/users/{userId}/orbitExpenses/{expenseId}": {
       "schema": "OrbitExpense",
       "description": "User's recurring Orbit expenses."
+    },
+    "/users/{userId}/statementUploads/{uploadId}": {
+      "schema": "StatementUpload",
+      "description": "User's imported statement logs."
     }
   }
 }

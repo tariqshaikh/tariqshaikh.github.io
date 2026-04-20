@@ -27,7 +27,10 @@ import {
   Plus,
   Menu,
   Search,
-  X
+  X,
+  Database,
+  Plane,
+  Activity
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -69,6 +72,8 @@ import {
   limit,
   orderBy
 } from 'firebase/firestore';
+
+import StatementImportModal from './StatementImportModal';
 
 // --- Error Boundary ---
 interface ErrorBoundaryProps {
@@ -169,19 +174,19 @@ const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string)
   return (
     <div className="relative">
       <button 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
         className={`p-1 rounded-xl text-[#8C8670] transition-colors ${isOpen ? 'bg-[#E8E4D0] text-[#2C3338]' : 'hover:bg-[#E8E4D0]'}`}
       >
         <Menu size={14} />
       </button>
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-[40]" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 z-[40]" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }} />
           <div className="absolute top-full right-0 mt-1 p-3 bg-white border border-[#E8E4D0] rounded-xl shadow-2xl z-[50] grid grid-cols-6 gap-2 w-48 backdrop-blur-sm bg-white/95">
             {colors.map(c => (
               <button
                 key={c}
-                onClick={() => { onChange(c); setIsOpen(false); }}
+                onClick={(e) => { e.stopPropagation(); onChange(c); setIsOpen(false); }}
                 className={`w-5 h-5 rounded-full border transition-transform hover:scale-110 ${color === c ? 'border-[#2C3338] ring-2 ring-[#2C3338]/20' : 'border-transparent'}`}
                 style={{ backgroundColor: c }}
               />
@@ -246,7 +251,7 @@ const DEFAULT_EXPENSES: RecurringExpense[] = [
   { id: 'default_car_ins', name: 'Car Insurance', amount: 1200, month: 3, months: [3, 9], frequency: 'semi-annual', category: 'insurance' },
   { id: 'default_amex_plat', name: 'Amex Platinum Fee', amount: 695, month: 1, months: [1], frequency: 'annual', category: 'subscription' },
   { id: 'default_amazon', name: 'Amazon Prime', amount: 139, month: 7, months: [7], frequency: 'annual', category: 'subscription' },
-  { id: 'default_car_maint', name: 'Car Maintenance', amount: 400, month: 5, months: [2, 5, 8, 11], frequency: 'quarterly', category: 'maintenance' },
+  { id: 'default_car_maint', name: 'Car Maintenance', amount: 400, month: 5, months: [2, 5, 8, 11], frequency: 'quarterly', category: 'maintenance_and_utilities' },
   { id: 'default_groceries', name: 'Groceries', amount: 800, month: 1, months: [1], frequency: 'monthly', category: 'food' },
   { id: 'default_restaurants', name: 'Restaurants & Fast Food', amount: 400, month: 1, months: [1], frequency: 'monthly', category: 'food' },
 ];
@@ -285,9 +290,8 @@ function Orbit() {
   const [expenses, setExpenses] = useState<RecurringExpense[]>(DEFAULT_EXPENSES);
 
   const [isSaving, setIsSaving] = useState(false);
-  const [aiResponse, setAiResponse] = useState<string>("");
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [showAiCoach, setShowAiCoach] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedOrbitCategory, setSelectedOrbitCategory] = useState<string | null>(null);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [newExpense, setNewExpense] = useState<Partial<RecurringExpense>>({
     name: '',
@@ -357,22 +361,22 @@ function Orbit() {
       { name: 'Custom Insurance', amount: 0, frequency: 'annual', category: 'insurance', month: 1 },
     ],
     'Home & Auto Maintenance': [
-      { name: 'Car Maintenance', amount: 400, frequency: 'quarterly', category: 'maintenance', month: 5 },
-      { name: 'Home Maintenance', amount: 1000, frequency: 'quarterly', category: 'maintenance', month: 3 },
-      { name: 'HVAC Service', amount: 200, frequency: 'annual', category: 'maintenance', month: 4 },
-      { name: 'Pest Control', amount: 150, frequency: 'quarterly', category: 'maintenance', month: 1 },
-      { name: 'Pool Opening/Closing', amount: 600, frequency: 'semi-annual', category: 'maintenance', month: 5 },
-      { name: 'Gutter Cleaning', amount: 200, frequency: 'semi-annual', category: 'maintenance', month: 4 },
-      { name: 'Landscaping Mulch', amount: 500, frequency: 'annual', category: 'maintenance', month: 4 },
-      { name: 'Custom Maintenance', amount: 0, frequency: 'annual', category: 'maintenance', month: 1 },
+      { name: 'Car Maintenance', amount: 400, frequency: 'quarterly', category: 'maintenance_and_utilities', month: 5 },
+      { name: 'Home Maintenance', amount: 1000, frequency: 'quarterly', category: 'maintenance_and_utilities', month: 3 },
+      { name: 'HVAC Service', amount: 200, frequency: 'annual', category: 'maintenance_and_utilities', month: 4 },
+      { name: 'Pest Control', amount: 150, frequency: 'quarterly', category: 'maintenance_and_utilities', month: 1 },
+      { name: 'Pool Opening/Closing', amount: 600, frequency: 'semi-annual', category: 'maintenance_and_utilities', month: 5 },
+      { name: 'Gutter Cleaning', amount: 200, frequency: 'semi-annual', category: 'maintenance_and_utilities', month: 4 },
+      { name: 'Landscaping Mulch', amount: 500, frequency: 'annual', category: 'maintenance_and_utilities', month: 4 },
+      { name: 'Custom Maintenance', amount: 0, frequency: 'annual', category: 'maintenance_and_utilities', month: 1 },
     ],
     'Travel & Leisure': [
-      { name: 'Annual Vacation', amount: 5000, frequency: 'annual', category: 'other', month: 7 },
-      { name: 'Holiday Travel', amount: 2000, frequency: 'annual', category: 'other', month: 12 },
+      { name: 'Annual Vacation', amount: 5000, frequency: 'annual', category: 'vacation', month: 7 },
+      { name: 'Holiday Travel', amount: 2000, frequency: 'annual', category: 'vacation', month: 12 },
       { name: 'TSA PreCheck / Global Entry', amount: 100, frequency: 'one-time', category: 'other', month: 1 },
       { name: 'National Parks Pass', amount: 80, frequency: 'annual', category: 'subscription', month: 5 },
-      { name: 'Ski Pass', amount: 800, frequency: 'annual', category: 'subscription', month: 10 },
-      { name: 'Custom Travel', amount: 0, frequency: 'annual', category: 'other', month: 1 },
+      { name: 'Ski Pass', amount: 800, frequency: 'annual', category: 'vacation', month: 10 },
+      { name: 'Custom Travel', amount: 0, frequency: 'annual', category: 'vacation', month: 1 },
     ],
     'Education & Learning': [
       { name: 'Tuition Payment', amount: 10000, frequency: 'semi-annual', category: 'other', month: 8 },
@@ -391,7 +395,7 @@ function Orbit() {
     'Memberships & Subscriptions': [
       { name: 'Amazon Prime', amount: 139, frequency: 'annual', category: 'subscription', month: 7 },
       { name: 'Costco Membership', amount: 65, frequency: 'annual', category: 'subscription', month: 1 },
-      { name: 'Gym Membership', amount: 60, frequency: 'monthly', category: 'subscription', month: 1 },
+      { name: 'Gym Membership', amount: 60, frequency: 'monthly', category: 'health_and_fitness', month: 1 },
       { name: 'Professional Dues', amount: 300, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Cloud Storage (iCloud/Google)', amount: 120, frequency: 'annual', category: 'subscription', month: 1 },
       { name: 'Newspaper/Journal Sub', amount: 150, frequency: 'annual', category: 'subscription', month: 1 },
@@ -684,46 +688,6 @@ function Orbit() {
   const normalizedMonthlySpend = monthlyFixedExpenses + normalizedMonthlyOrbit;
   const normalizedMonthlySurplus = monthlyIncome - normalizedMonthlySpend;
 
-  // --- AI Logic ---
-  const askAiCoach = async () => {
-    setIsAiLoading(true);
-    setShowAiCoach(true);
-    try {
-      const apiKey = typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '';
-      if (!apiKey) throw new Error("Gemini API Key is missing");
-      
-      const ai = new GoogleGenAI({ apiKey });
-      const prompt = `
-        As a strategic cash flow coach, analyze this financial outlook over a ${monthsInRange}-month period (${startDate} to ${endDate}):
-        - Total Period Income: $${totalPeriodIncome.toLocaleString()}
-        - Total Period Fixed Expenses: $${totalPeriodFixedExpenses.toLocaleString()}
-        - Total Period "Orbiting" (Irregular) Expenses: $${totalPeriodOrbitExpenses.toLocaleString()}
-        - Total Period Spend: $${totalPeriodSpend.toLocaleString()}
-        - Period Surplus/Deficit: $${periodSurplus.toLocaleString()}
-        
-        Irregular Expenses List:
-        ${expenses.map(e => `- ${e.name}: $${e.amount} (${e.frequency})`).join('\n')}
-        
-        Provide 3 high-impact strategic insights on how to manage this specific timeline. 
-        Focus on "Sinking Funds", optimizing payment timing, and ensuring the surplus is put to work.
-        Since this is a tailored plan, provide advice accordingly.
-        Keep it professional, punchy, and strategic. Use markdown.
-      `;
-      
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
-      
-      setAiResponse(response.text || "I'm analyzing your cash flow orbit...");
-    } catch (error) {
-      console.error("AI Coach Error:", error);
-      setAiResponse("I'm having trouble analyzing your orbits right now. Please try again later.");
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
   const handleAddExpense = async () => {
     if (newExpense.name && newExpense.amount) {
       const finalCategory = newExpense.category === 'other' ? (newExpense.customCategory || 'other') : newExpense.category;
@@ -752,7 +716,7 @@ function Orbit() {
   };
 
   const editExpense = (exp: RecurringExpense) => {
-    const isStandard = ['insurance', 'tax', 'subscription', 'maintenance'].includes(exp.category);
+    const isStandard = ['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'maintenance', 'health_and_fitness', 'vacation', 'food'].includes(exp.category);
     setNewExpense({
       ...exp,
       category: isStandard ? exp.category : 'other',
@@ -1181,11 +1145,17 @@ function Orbit() {
                   <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">Comprehensive view of all annual payments</p>
                 </div>
                 <button 
-                  onClick={askAiCoach}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#C5A059] text-[#FAF9F6] rounded-xl text-xs font-bold hover:bg-[#B38F48] transition-all"
+                  onClick={() => setShowImportModal(true)}
+                  disabled={!user || user.uid === 'guest-user'}
+                  title={!user || user.uid === 'guest-user' ? "Please sign in to import statements" : ""}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    (!user || user.uid === 'guest-user') 
+                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
+                      : 'bg-[#1E5C38] text-[#FAF9F6] hover:bg-[#154629]'
+                  }`}
                 >
-                  <Zap size={14} />
-                  AI Insights
+                  <Database size={14} />
+                  Import Statement
                 </button>
               </div>
 
@@ -1233,6 +1203,10 @@ function Orbit() {
                     'subscription': '#9013FE',
                     'tax': '#D0021B',
                     'maintenance': '#F5A623',
+                    'maintenance_and_utilities': '#F5A623',
+                    'food': '#10B981',
+                    'health_and_fitness': '#F43F5E',
+                    'vacation': '#06B6D4',
                     'other': '#8C8670'
                   };
                   const color = profile.cardColors[`cat_${cat}`] || categoryColors[cat as string] || '#2C3338';
@@ -1280,7 +1254,12 @@ function Orbit() {
                     }, 0);
                   
                   return (
-                    <div key={cat} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:z-50" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
+                    <div 
+                      key={cat} 
+                      onClick={() => setSelectedOrbitCategory(cat as string)}
+                      className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:border-[#C5A059] cursor-pointer" 
+                      style={{ borderTopColor: color, borderTopWidth: '4px' }}
+                    >
                       <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
                       <div className={`absolute top-2 right-2 transition-opacity z-50 ${profile.cardColors[`cat_${cat}`] ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                         <ColorPicker 
@@ -1288,9 +1267,9 @@ function Orbit() {
                           onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`cat_${cat}`]: c}})} 
                         />
                       </div>
-                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10 pointer-events-none">Orbit: {cat}</h3>
+                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10 pointer-events-none">Orbit: {String(cat).replace(/_/g, ' ')}</h3>
                       <div className="text-xl font-serif font-bold text-[#2C3338] mt-2 relative z-10 pointer-events-none">${Math.round(catTotal).toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10 pointer-events-none">Irregular Hits</div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10 pointer-events-none">View Expenses</div>
                     </div>
                   );
                 })}
@@ -1336,40 +1315,42 @@ function Orbit() {
                   </div>
                 ) : (
                   expenses.map(exp => (
-                    <div key={exp.id} className="flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] transition-all shadow-sm">
+                    <div 
+                      key={exp.id} 
+                      onClick={() => editExpense(exp)}
+                      className="flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] cursor-pointer transition-all shadow-sm"
+                    >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center">
                           {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
                           {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
                           {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'maintenance' && <Home size={18} className="text-[#C5A059]" />}
+                          {(exp.category.includes('maintenance') || exp.category.includes('utilities')) && <Home size={18} className="text-[#C5A059]" />}
                           {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
-                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance', 'food'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
+                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'maintenance', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
                         </div>
                         <div>
                           <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
-                          <div className="text-[10px] text-[#8C8670] font-mono uppercase tracking-tighter">
-                            ${exp.amount.toLocaleString()} • {exp.frequency} 
+                          <div className="text-[10px] text-[#8C8670] font-mono uppercase tracking-tighter mt-1">
+                            ${exp.amount.toLocaleString()} • {exp.frequency.replace('-', ' ')} 
                             {['annual', 'semi-annual', 'quarterly', 'custom'].includes(exp.frequency) && 
                               ` • ${(exp.months && exp.months.length > 0) ? exp.months.map(m => monthNames[m - 1]).join(', ') : monthNames[exp.month - 1]}`
                             }
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors" title="Edit Orbit">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </div>
                         <button 
-                          onClick={() => editExpense(exp)}
-                          className="p-2 text-[#C5A059] hover:bg-[#C5A059]/10 rounded-xl transition-all"
-                          title="Edit Orbit"
-                        >
-                          <Save size={14} />
-                        </button>
-                        <button 
-                          onClick={() => removeExpense(exp.id)}
-                          className="p-2 text-[#8B0000] hover:bg-[#8B0000]/10 rounded-xl transition-all"
+                          onClick={(e) => { e.stopPropagation(); removeExpense(exp.id); }}
+                          className="p-2 text-[#8B0000] hover:bg-[#8B0000]/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
                           title="Remove Orbit"
                         >
-                          ✕
+                          <X size={16} />
                         </button>
                       </div>
                     </div>
@@ -1377,47 +1358,113 @@ function Orbit() {
                 )}
               </div>
             </section>
-
-            {/* AI Coach Section */}
-            <AnimatePresence>
-              {showAiCoach && (
-                <motion.section 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#FAF9F6] border border-[#C5A059]/30 p-8 rounded-xl relative overflow-hidden shadow-sm"
-                >
-                  <div className="absolute top-0 right-0 p-4">
-                    <Zap size={40} className="text-[#C5A059]/10" />
-                  </div>
-                  
-                  <h2 className="font-serif text-xl font-bold text-[#2C3338] mb-6 flex items-center gap-3">
-                    <MessageSquare size={20} className="text-[#C5A059]" />
-                    Strategic Insights
-                  </h2>
-
-                  {isAiLoading ? (
-                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                      <div className="w-12 h-12 border-4 border-[#C5A059]/20 border-t-[#C5A059] rounded-full animate-spin" />
-                      <p className="font-mono text-sm text-[#8C8670] animate-pulse">Analyzing market trajectories...</p>
-                    </div>
-                  ) : (
-                    <div className="prose prose-slate max-w-none prose-p:text-[#2C3338] prose-li:text-[#2C3338] prose-strong:text-[#C5A059] prose-h3:text-[#2C3338] prose-h3:font-serif">
-                      <div dangerouslySetInnerHTML={{ __html: aiResponse.replace(/\n/g, '<br/>') }} />
-                    </div>
-                  )}
-                  
-                  <button 
-                    onClick={() => setShowAiCoach(false)}
-                    className="mt-8 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors"
-                  >
-                    Dismiss Analysis
-                  </button>
-                </motion.section>
-              )}
-            </AnimatePresence>
           </div>
         </div>
       </main>
+
+      {/* Import Modal */}
+      <AnimatePresence>
+        {showImportModal && user && (
+          <StatementImportModal 
+            userId={user.uid}
+            onClose={() => setShowImportModal(false)}
+            onExpensesExtracted={(extractedExpenses) => {
+              // Iterate and save them
+              const newExpenses = [...expenses];
+              extractedExpenses.forEach((exp: any) => {
+                newExpenses.push(exp);
+                saveExpense(exp).catch(console.error);
+              });
+              setExpenses(newExpenses);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Category Details Modal */}
+      <AnimatePresence>
+        {selectedOrbitCategory && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedOrbitCategory(null)}
+              className="absolute inset-0 bg-[#2C3338]/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-2xl w-full rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="font-serif text-2xl font-bold text-[#2C3338] capitalize">
+                    {selectedOrbitCategory?.replace(/_/g, ' ')} Orbit
+                  </h3>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">
+                    Expenses in this category
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setSelectedOrbitCategory(null)}
+                  className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors"
+                >
+                  <X size={20} className="text-[#8C8670]" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {expenses.filter(e => e.category === selectedOrbitCategory).length === 0 ? (
+                  <p className="text-sm font-mono text-[#8C8670]">No expenses in this category.</p>
+                ) : (
+                  expenses.filter(e => e.category === selectedOrbitCategory).map(exp => (
+                    <div 
+                      key={exp.id} 
+                      onClick={() => {
+                        setSelectedOrbitCategory(null);
+                        editExpense(exp);
+                      }}
+                      className="flex justify-between items-center p-4 bg-white border border-[#E8E4D0] rounded-xl cursor-pointer hover:border-[#C5A059] hover:shadow-sm transition-all"
+                      title="Edit Expense"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center">
+                          {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
+                          {(exp.category.includes('maintenance') || exp.category.includes('utilities')) && <Home size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
+                          {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
+                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'maintenance', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
+                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">
+                            {exp.frequency.replace('-', ' ')} • 
+                            {exp.months && exp.months.length > 0
+                              ? ` ${exp.months.map(m => new Date(2000, m - 1).toLocaleString('default', { month: 'short' })).join(', ')}`
+                              : ` Month ${exp.month}`
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right flex items-center gap-4">
+                        <div className="font-serif font-bold text-[#2C3338]">${exp.amount.toLocaleString()}</div>
+                        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Add Expense Modal */}
       <AnimatePresence>
@@ -1571,14 +1618,14 @@ function Orbit() {
 
                       <div>
                         <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Category</label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {['insurance', 'tax', 'subscription', 'maintenance', 'other'].map(cat => (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'health_and_fitness', 'vacation', 'food', 'other'].map(cat => (
                             <button
                               key={cat}
                               onClick={() => setNewExpense({...newExpense, category: cat})}
                               className={`py-2 px-1 text-[9px] font-mono uppercase tracking-tighter border rounded-xl transition-all ${newExpense.category === cat ? 'bg-[#2C3338] border-[#2C3338] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#2C3338]'}`}
                             >
-                              {cat}
+                              {cat.replace(/_/g, ' ')}
                             </button>
                           ))}
                         </div>
