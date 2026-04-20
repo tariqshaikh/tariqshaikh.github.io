@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, Component, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, Reorder, useDragControls } from 'motion/react';
 import { 
   TrendingUp, 
   Target, 
@@ -27,10 +27,12 @@ import {
   Plus,
   Menu,
   Search,
+  Filter,
   X,
   Database,
   Plane,
-  Activity
+  Activity,
+  GripVertical
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -138,7 +140,70 @@ interface RecurringExpense {
   frequency: 'annual' | 'semi-annual' | 'quarterly' | 'monthly' | 'bi-weekly' | 'weekly' | 'one-time';
   category: string;
   customCategory?: string;
+  sortOrder?: number;
 }
+
+const ReorderItem: React.FC<{ 
+  exp: RecurringExpense, 
+  onEdit: (e: RecurringExpense) => void,
+  onRemove: (id: string) => void,
+  itemProps?: any
+}> = ({ exp, onEdit, onRemove, itemProps }) => {
+  const controls = useDragControls();
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  return (
+    <Reorder.Item 
+      value={exp}
+      dragListener={false}
+      dragControls={controls}
+      onDragStart={() => { (itemProps as any).onDragStart?.() }}
+      onDragEnd={() => { (itemProps as any).onDragEnd?.() }}
+      className="flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] cursor-pointer transition-all shadow-sm active:shadow-md active:scale-[1.005]"
+      onClick={() => onEdit(exp)}
+    >
+      <div className="flex items-center gap-4">
+        <div 
+          onPointerDown={(e) => controls.start(e)}
+          className="text-[#8C8670]/30 group-hover:text-[#C5A059] transition-colors cursor-grab active:cursor-grabbing p-1 -ml-1"
+        >
+          <GripVertical size={20} />
+        </div>
+        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center">
+            {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
+            {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
+            {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
+            {(exp.category.includes('maintenance') || exp.category.includes('utilities')) ? <Home size={18} className="text-[#C5A059]" /> : null}
+            {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
+            {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
+            {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
+            {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
+        </div>
+        <div>
+          <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
+          <div className="text-[10px] text-[#8C8670] font-mono uppercase tracking-tighter mt-1">
+            ${exp.amount.toLocaleString()} • {exp.frequency.replace('-', ' ')} 
+            {exp.frequency !== 'monthly' && ['annual', 'semi-annual', 'quarterly', 'custom'].includes(exp.frequency) && 
+              ` • ${(exp.months && exp.months.length > 0) ? exp.months.map(m => monthNames[m - 1]).join(', ') : monthNames[exp.month - 1]}`
+            }
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors" title="Edit Orbit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+        </div>
+        <button 
+          onClick={(e) => { e.stopPropagation(); onRemove(exp.id); }}
+          className="p-2 text-[#8B0000] hover:bg-[#8B0000]/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+          title="Remove Orbit"
+        >
+          <X size={16} />
+        </button>
+      </div>
+    </Reorder.Item>
+  );
+};
 
 interface IncomeSource {
   id: string;
@@ -422,6 +487,7 @@ function Orbit() {
 
   // Load Profile and Expenses
   const isProfileLoaded = useRef(false);
+  const isDragging = useRef(false);
   useEffect(() => {
     isProfileLoaded.current = false; // Reset on user change
     if (!user || user.uid === 'guest-user') return;
@@ -469,7 +535,11 @@ function Orbit() {
 
     const expensesRef = collection(db, 'users', user.uid, 'orbitExpenses');
     const unsubExpenses = onSnapshot(expensesRef, (snapshot) => {
+      if (isDragging.current) return;
       const exps = snapshot.docs.map(d => ({ ...d.data(), id: d.id })) as RecurringExpense[];
+      
+      // Sort by sortOrder if available
+      exps.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
       
       // Auto-cleanup duplicates of default expenses
       const defaultNames = DEFAULT_EXPENSES.map(e => e.name);
@@ -509,6 +579,14 @@ function Orbit() {
           deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id)).catch(console.error);
         });
       }
+
+      // Migrate old categories
+      uniqueExps.forEach(exp => {
+        if (exp.category === 'maintenance') {
+          exp.category = 'maintenance_and_utilities';
+          setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp).catch(console.error);
+        }
+      });
       
       setExpenses(uniqueExps);
     });
@@ -550,9 +628,27 @@ function Orbit() {
   const saveExpense = async (exp: RecurringExpense) => {
     if (!user || user.uid === 'guest-user') return;
     try {
-      await setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp);
+      await setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), {
+        ...exp,
+        sortOrder: exp.sortOrder ?? expenses.length
+      });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `orbitExpenses/${exp.id}`);
+    }
+  };
+
+  const saveExpensesOrder = async (newOrder: RecurringExpense[]) => {
+    if (!user || user.uid === 'guest-user') return;
+    try {
+      const batch = newOrder.map((exp, idx) => {
+        return setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), {
+          ...exp,
+          sortOrder: idx
+        }, { merge: true });
+      });
+      await Promise.all(batch);
+    } catch (error) {
+      console.error("Error saving expenses order:", error);
     }
   };
 
@@ -665,6 +761,39 @@ function Orbit() {
     }, 0);
   }, [expenses, startDate, endDate, monthsInRange]);
 
+  const next90DaysOrbitHits = useMemo(() => {
+    const today = new Date();
+    const currentTotalMonth = today.getFullYear() * 12 + today.getMonth();
+    const future3TotalMonth = currentTotalMonth + 3;
+
+    return expenses.reduce((sum, e) => {
+      // We only care about non-monthly for the "hits" feeling
+      if (e.frequency === 'monthly' || e.frequency === 'weekly' || e.frequency === 'bi-weekly') return sum;
+      
+      let occurrences = 0;
+      const targetMonths: number[] = [];
+      if (e.months && e.months.length > 0) {
+        e.months.forEach(m => targetMonths.push(m - 1));
+      } else {
+        const anchorMonth = (e.month || 1) - 1;
+        if (e.frequency === 'annual' || e.frequency === 'one-time') {
+          targetMonths.push(anchorMonth);
+        } else if (e.frequency === 'semi-annual') {
+          targetMonths.push(anchorMonth, (anchorMonth + 6) % 12);
+        } else if (e.frequency === 'quarterly') {
+          targetMonths.push(anchorMonth, (anchorMonth + 3) % 12, (anchorMonth + 6) % 12, (anchorMonth + 9) % 12);
+        }
+      }
+
+      for (let m = currentTotalMonth; m < future3TotalMonth; m++) {
+        if (targetMonths.includes(m % 12)) {
+          occurrences++;
+        }
+      }
+      return sum + (e.amount * occurrences);
+    }, 0);
+  }, [expenses]);
+
   const totalPeriodFixedExpenses = monthlyFixedExpenses * monthsInRange;
   const totalPeriodIncome = monthlyIncome * monthsInRange;
   const totalPeriodSpend = totalPeriodFixedExpenses + totalPeriodOrbitExpenses;
@@ -716,7 +845,7 @@ function Orbit() {
   };
 
   const editExpense = (exp: RecurringExpense) => {
-    const isStandard = ['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'maintenance', 'health_and_fitness', 'vacation', 'food'].includes(exp.category);
+    const isStandard = ['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'health_and_fitness', 'vacation', 'food'].includes(exp.category);
     setNewExpense({
       ...exp,
       category: isStandard ? exp.category : 'other',
@@ -897,7 +1026,7 @@ function Orbit() {
         </div>
 
         {/* Controls Bar: Date Range */}
-        <div className="flex flex-col lg:flex-row items-center justify-end gap-8 mb-12 w-full">
+        <div id="date-controls" className="flex flex-col lg:flex-row items-center justify-end gap-8 mb-12 w-full scroll-mt-24">
           {/* Date Range Selector */}
           <div className="bg-[#E8E4D0]/10 p-4 rounded-2xl border border-[#E8E4D0]/60 flex flex-wrap items-center gap-8">
             <div className="flex flex-col gap-1.5">
@@ -1116,22 +1245,33 @@ function Orbit() {
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-serif text-lg font-bold text-[#2C3338] flex items-center gap-2">
-                  <Info size={16} className="text-[#C5A059]" />
-                  Sinking Fund Strategy
+                  <ShieldCheck size={16} className="text-[#C5A059]" />
+                  The Bill Smoother
                 </h2>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] opacity-0 group-hover:opacity-100 transition-opacity">
-                  Click to learn more
+                  Learn how it works
                 </span>
               </div>
               
-              <div className="p-4 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-xl flex justify-between items-center">
-                <div>
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Monthly Set-Aside</p>
-                  <p className="text-2xl font-serif font-bold text-[#2C3338]">${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} <span className="text-sm text-[#8C8670] font-sans font-normal">/ mo</span></p>
+              <div className="space-y-4">
+                <div className="p-4 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-xl flex justify-between items-center">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Monthly Neutralizer</p>
+                    <p className="text-2xl font-serif font-bold text-[#2C3338]">${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} <span className="text-sm text-[#8C8670] font-sans font-normal">/ mo</span></p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center group-hover:bg-[#C5A059] transition-colors">
+                    <ChevronRight size={16} className="text-[#C5A059] group-hover:text-white transition-colors" />
+                  </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center group-hover:bg-[#C5A059] transition-colors">
-                  <ChevronRight size={16} className="text-[#C5A059] group-hover:text-white transition-colors" />
-                </div>
+
+                {next90DaysOrbitHits > 0 && (
+                  <div className="flex items-center gap-3 px-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#8B0000] animate-pulse" />
+                    <p className="text-[10px] font-mono uppercase tracking-tight text-[#8C8670]">
+                      <span className="text-[#8B0000] font-bold">${next90DaysOrbitHits.toLocaleString()}</span> in orbiting hits due in next 90 days
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -1139,10 +1279,51 @@ function Orbit() {
           <div className="lg:col-span-8 space-y-8">
             {/* Fluid Expense Grid */}
             <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Annual Finance Orbit</h2>
-                  <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">Comprehensive view of all annual payments</p>
+                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Finance Orbit</h2>
+                  <div className="flex flex-wrap items-center gap-3 mt-3">
+                    <button 
+                      onClick={() => {
+                        const now = new Date();
+                        const year = now.getFullYear();
+                        const month = String(now.getMonth() + 1).padStart(2, '0');
+                        const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+                        setStartDate(`${year}-${month}-01`);
+                        setEndDate(`${year}-${month}-${lastDay}`);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all ${
+                        startDate.includes(`-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`) && monthsInRange === 1
+                        ? 'bg-[#C5A059] text-white font-bold' 
+                        : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
+                      }`}
+                    >
+                      Monthly Orbit
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const year = new Date().getFullYear();
+                        setStartDate(`${year}-01-01`);
+                        setEndDate(`${year}-12-31`);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all ${
+                        startDate.endsWith('-01-01') && endDate.endsWith('-12-31') && monthsInRange === 12
+                        ? 'bg-[#C5A059] text-white font-bold' 
+                        : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
+                      }`}
+                    >
+                      Annual Orbit
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const el = document.getElementById('date-controls');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0] transition-all"
+                    >
+                      Custom Frame
+                    </button>
+                  </div>
                 </div>
                 <button 
                   onClick={() => setShowImportModal(true)}
@@ -1189,9 +1370,13 @@ function Orbit() {
                           onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`fixed_${item.id}`]: c}})} 
                         />
                       </div>
-                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10">{item.label}</h3>
-                      <div className="text-lg font-serif font-bold text-[#2C3338] mt-2 relative z-10">${(item.amount * monthsInRange).toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10">Period Total</div>
+                      <div className="flex-1">
+                        <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors font-bold relative z-10 leading-tight mb-1">
+                          {item.label}
+                        </h3>
+                        <div className="text-xl font-serif font-bold text-[#2C3338] relative z-10">${(item.amount * monthsInRange).toLocaleString()}</div>
+                      </div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-3 italic relative z-10 group-hover:text-[#C5A059] transition-colors">Period Total</div>
                     </div>
                   );
                 })}
@@ -1202,7 +1387,6 @@ function Orbit() {
                     'insurance': '#4A90E2',
                     'subscription': '#9013FE',
                     'tax': '#D0021B',
-                    'maintenance': '#F5A623',
                     'maintenance_and_utilities': '#F5A623',
                     'food': '#10B981',
                     'health_and_fitness': '#F43F5E',
@@ -1267,9 +1451,13 @@ function Orbit() {
                           onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`cat_${cat}`]: c}})} 
                         />
                       </div>
-                      <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors pr-6 font-bold relative z-10 pointer-events-none">Orbit: {String(cat).replace(/_/g, ' ')}</h3>
-                      <div className="text-xl font-serif font-bold text-[#2C3338] mt-2 relative z-10 pointer-events-none">${Math.round(catTotal).toLocaleString()}</div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-2 italic relative z-10 pointer-events-none">View Expenses</div>
+                      <div className="flex-1">
+                        <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors font-bold relative z-10 leading-tight mb-1">
+                          {String(cat).replace(/_/g, ' ')}
+                        </h3>
+                        <div className="text-xl font-serif font-bold text-[#2C3338] relative z-10 pointer-events-none">${Math.round(catTotal).toLocaleString()}</div>
+                      </div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-3 italic relative z-10 pointer-events-none group-hover:text-[#C5A059] transition-colors">View Expenses</div>
                     </div>
                   );
                 })}
@@ -1314,47 +1502,30 @@ function Orbit() {
                     </button>
                   </div>
                 ) : (
-                  expenses.map(exp => (
-                    <div 
-                      key={exp.id} 
-                      onClick={() => editExpense(exp)}
-                      className="flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] cursor-pointer transition-all shadow-sm"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center">
-                          {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
-                          {(exp.category.includes('maintenance') || exp.category.includes('utilities')) && <Home size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
-                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'maintenance', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
-                          <div className="text-[10px] text-[#8C8670] font-mono uppercase tracking-tighter mt-1">
-                            ${exp.amount.toLocaleString()} • {exp.frequency.replace('-', ' ')} 
-                            {['annual', 'semi-annual', 'quarterly', 'custom'].includes(exp.frequency) && 
-                              ` • ${(exp.months && exp.months.length > 0) ? exp.months.map(m => monthNames[m - 1]).join(', ') : monthNames[exp.month - 1]}`
-                            }
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors" title="Edit Orbit">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                        </div>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); removeExpense(exp.id); }}
-                          className="p-2 text-[#8B0000] hover:bg-[#8B0000]/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                          title="Remove Orbit"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
+                  <Reorder.Group 
+                    axis="y" 
+                    values={expenses} 
+                    onReorder={(newOrder) => {
+                      setExpenses(newOrder);
+                    }}
+                    className="space-y-3"
+                  >
+                    {expenses.map(exp => (
+                      <ReorderItem 
+                        key={exp.id} 
+                        exp={exp} 
+                        onEdit={editExpense} 
+                        onRemove={removeExpense}
+                        itemProps={{
+                          onDragStart: () => { isDragging.current = true; },
+                          onDragEnd: () => { 
+                            isDragging.current = false;
+                            saveExpensesOrder(expenses); 
+                          }
+                        }}
+                      />
+                    ))}
+                  </Reorder.Group>
                 )}
               </div>
             </section>
@@ -1419,7 +1590,9 @@ function Orbit() {
                 {expenses.filter(e => e.category === selectedOrbitCategory).length === 0 ? (
                   <p className="text-sm font-mono text-[#8C8670]">No expenses in this category.</p>
                 ) : (
-                  expenses.filter(e => e.category === selectedOrbitCategory).map(exp => (
+                  expenses
+                    .filter(e => e.category === selectedOrbitCategory)
+                    .map(exp => (
                     <div 
                       key={exp.id} 
                       onClick={() => {
@@ -1434,20 +1607,25 @@ function Orbit() {
                           {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
                           {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
                           {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
-                          {(exp.category.includes('maintenance') || exp.category.includes('utilities')) && <Home size={18} className="text-[#C5A059]" />}
+                          {(exp.category.includes('maintenance') || exp.category.includes('utilities')) ? <Home size={18} className="text-[#C5A059]" /> : null}
                           {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
                           {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
                           {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
-                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'maintenance', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
+                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
                         </div>
                         <div>
                           <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
                           <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">
-                            {exp.frequency.replace('-', ' ')} • 
-                            {exp.months && exp.months.length > 0
-                              ? ` ${exp.months.map(m => new Date(2000, m - 1).toLocaleString('default', { month: 'short' })).join(', ')}`
-                              : ` Month ${exp.month}`
-                            }
+                            {exp.frequency.replace('-', ' ')}
+                            {exp.frequency !== 'monthly' && (
+                              <>
+                                {' • '}
+                                {exp.months && exp.months.length > 0
+                                  ? `${exp.months.map(m => new Date(2000, m - 1).toLocaleString('default', { month: 'short' })).join(', ')}`
+                                  : `Month ${exp.month}`
+                                }
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1746,7 +1924,7 @@ function Orbit() {
           </div>
         </div>
       </footer>
-      {/* Sinking Fund Modal */}
+      {/* Smoothing Modal */}
       <AnimatePresence>
         {showSinkingFundModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -1766,8 +1944,8 @@ function Orbit() {
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
                   <h2 className="font-serif text-2xl font-bold text-[#2C3338] flex items-center gap-3">
-                    <Info size={24} className="text-[#C5A059]" />
-                    Sinking Fund Strategy
+                    <ShieldCheck size={24} className="text-[#C5A059]" />
+                    The Smoothing Strategy
                   </h2>
                   <button 
                     onClick={() => setShowSinkingFundModal(false)}
@@ -1779,45 +1957,39 @@ function Orbit() {
 
                 <div className="space-y-8">
                   <div className="p-6 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-lg text-center">
-                    <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Your Monthly Set-Aside</p>
+                    <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Monthly Target</p>
                     <p className="text-4xl font-serif font-bold text-[#2C3338]">${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
+                    <p className="mt-4 text-[10px] font-mono text-[#8C8670] uppercase">Eliminates ${Math.round(totalPeriodOrbitExpenses).toLocaleString()} in annual spikes</p>
                   </div>
 
                   <div className="space-y-6">
                     <div className="border-b border-[#E8E4D0] pb-6">
                       <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
-                        <span className="text-[#C5A059] font-mono text-[11px]">01.</span> Where does this number come from?
+                        <span className="text-[#C5A059] font-mono text-[11px]">01.</span> Why does this feel high?
                       </h4>
                       <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        We took your total period orbiting expenses (${Math.round(totalPeriodOrbitExpenses).toLocaleString()}) and divided it by the number of months in your timeline ({monthsInRange}). This smooths out the "spikes" of irregular bills into a flat, predictable monthly cost for this specific window.
+                        It feels high because you're seeing the "all-in" cost of your lifestyle. Usually, these bills surprise you one by one. By setting aside <strong>${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()}</strong> every month, you're effectively paying the "subscription price" for your annual life. No more panic when the car insurance or tax bill arrives.
                       </p>
                     </div>
 
                     <div className="border-b border-[#E8E4D0] pb-6">
                       <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
-                        <span className="text-[#C5A059] font-mono text-[11px]">02.</span> Where should I keep this money?
+                        <span className="text-[#C5A059] font-mono text-[11px]">02.</span> Use the "Orbit Reserve"
                       </h4>
                       <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        <strong>Open a separate High-Yield Savings Account (HYSA).</strong> Do not keep this in your main checking account. Mixing it with your daily spending money leads to accidental spending. A separate HYSA keeps it safe, liquid, and earns you interest while it waits to be deployed.
-                      </p>
-                    </div>
-
-                    <div className="border-b border-[#E8E4D0] pb-6">
-                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
-                        <span className="text-[#C5A059] font-mono text-[11px]">03.</span> How long do I do this?
-                      </h4>
-                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        <strong>Perpetually.</strong> This is not a temporary savings goal; it is a permanent cash flow management system. As long as you have irregular expenses orbiting your life, you must feed the sinking fund.
+                        Move this amount into a separate account labeled <strong>"Orbit Reserve"</strong> at the start of each month. When an infrequent bill turns up, you don't take it out of your paycheck—you take it out of the Reserve. Your checking account stays smooth and predictable.
                       </p>
                     </div>
 
                     <div className="pt-2">
                       <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
-                        <span className="text-[#C5A059] font-mono text-[11px]">04.</span> The Golden Rule: Automate It
+                        <span className="text-[#C5A059] font-mono text-[11px]">03.</span> Imminent Hits
                       </h4>
-                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        Set up an automatic transfer from your checking to your HYSA for exactly ${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} on the 1st of every month (or split it per paycheck). When an orbiting bill is due, transfer the exact amount back to checking and pay it.
-                      </p>
+                      <div className="p-4 bg-[#8B0000]/5 border border-[#8B0000]/10 rounded-lg">
+                        <p className="text-[13px] text-[#2C3338]">
+                          In the next 90 days, you have <strong>${next90DaysOrbitHits.toLocaleString()}</strong> in non-monthly bills due. Every dollar you smooth out today is one less dollar you have to scramble for tomorrow.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
