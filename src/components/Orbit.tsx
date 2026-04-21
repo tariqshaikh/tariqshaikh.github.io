@@ -141,16 +141,41 @@ interface RecurringExpense {
   category: string;
   customCategory?: string;
   sortOrder?: number;
+  paymentType?: 'automated' | 'manual';
+  notes?: string;
 }
+
+const getMonthlyReserveAmount = (exp: RecurringExpense) => {
+  if (exp.frequency === 'monthly') return exp.amount;
+  if (exp.frequency === 'annual' || exp.frequency === 'one-time') return exp.amount / 12;
+  if (exp.frequency === 'semi-annual') return exp.amount / 6;
+  if (exp.frequency === 'quarterly') return exp.amount / 3;
+  if (exp.frequency === 'bi-weekly') return (exp.amount * 26) / 12;
+  if (exp.frequency === 'weekly') return (exp.amount * 52) / 12;
+  return exp.amount;
+};
+
+const getMonthlyReserveExplainer = (exp: RecurringExpense) => {
+  if (exp.frequency === 'monthly') return '';
+  if (exp.frequency === 'annual' || exp.frequency === 'one-time') return `$${exp.amount.toLocaleString()} annually ÷ 12`;
+  if (exp.frequency === 'semi-annual') return `$${exp.amount.toLocaleString()} semi-annually ÷ 6`;
+  if (exp.frequency === 'quarterly') return `$${exp.amount.toLocaleString()} quarterly ÷ 3`;
+  if (exp.frequency === 'bi-weekly') return `$${exp.amount.toLocaleString()} bi-weekly (x26 payments ÷ 12)`;
+  if (exp.frequency === 'weekly') return `$${exp.amount.toLocaleString()} weekly (x52 payments ÷ 12)`;
+  return '';
+};
 
 const ReorderItem: React.FC<{ 
   exp: RecurringExpense, 
   onEdit: (e: RecurringExpense) => void,
   onRemove: (id: string) => void,
-  itemProps?: any
-}> = ({ exp, onEdit, onRemove, itemProps }) => {
+  itemProps?: any,
+  isMonthlyOrbit?: boolean
+}> = ({ exp, onEdit, onRemove, itemProps, isMonthlyOrbit }) => {
   const controls = useDragControls();
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  const displayAmount = isMonthlyOrbit && exp.frequency !== 'monthly' ? getMonthlyReserveAmount(exp) : exp.amount;
   
   return (
     <Reorder.Item 
@@ -159,7 +184,7 @@ const ReorderItem: React.FC<{
       dragControls={controls}
       onDragStart={() => { (itemProps as any).onDragStart?.() }}
       onDragEnd={() => { (itemProps as any).onDragEnd?.() }}
-      className="flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] cursor-pointer transition-all shadow-sm active:shadow-md active:scale-[1.005]"
+      className={`flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] cursor-pointer transition-all shadow-sm active:shadow-md active:scale-[1.005] ${isMonthlyOrbit && exp.frequency !== 'monthly' ? 'border-b-[#C5A059] border-b-2' : ''}`}
       onClick={() => onEdit(exp)}
     >
       <div className="flex items-center gap-4">
@@ -180,12 +205,29 @@ const ReorderItem: React.FC<{
             {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
         </div>
         <div>
-          <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
+          <div className="text-sm font-bold text-[#2C3338] flex items-center gap-2">
+            {exp.name}
+            {exp.paymentType && (
+              <span className={`text-[8px] font-mono font-bold uppercase tracking-widest px-1.5 py-0.5 rounded leading-none ${exp.paymentType === 'automated' ? 'bg-[#1E5C38]/10 text-[#1E5C38]' : 'bg-[#C5A059]/10 text-[#C5A059]'}`}>
+                {exp.paymentType}
+              </span>
+            )}
+          </div>
           <div className="text-[10px] text-[#8C8670] font-mono uppercase tracking-tighter mt-1">
-            ${exp.amount.toLocaleString()} • {exp.frequency.replace('-', ' ')} 
+            <span className={isMonthlyOrbit && exp.frequency !== 'monthly' ? 'text-[#C5A059] font-bold' : ''}>
+              ${displayAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            </span>
+            {' • '} 
+            {exp.frequency.replace('-', ' ')} 
             {exp.frequency !== 'monthly' && ['annual', 'semi-annual', 'quarterly', 'custom'].includes(exp.frequency) && 
               ` • ${(exp.months && exp.months.length > 0) ? exp.months.map(m => monthNames[m - 1]).join(', ') : monthNames[exp.month - 1]}`
             }
+            {isMonthlyOrbit && exp.frequency !== 'monthly' && (
+              <div className="text-[10px] text-[#C5A059] font-bold mt-1.5 tracking-tight leading-none flex flex-col gap-0.5">
+                <span className="uppercase font-sans">Monthly Reserve</span>
+                <span className="text-[9px] opacity-80 italic lowercase font-sans font-medium">{getMonthlyReserveExplainer(exp)}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -216,6 +258,11 @@ interface FixedExpense {
   id: string;
   label: string;
   amount: number;
+  dueDate?: number; // legacy single
+  dueDates?: number[]; // multiple days
+  paymentFrequency?: 1 | 2;
+  paymentType?: 'automated' | 'manual';
+  notes?: string;
 }
 
 interface FinanceProfile {
@@ -358,13 +405,16 @@ function Orbit() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedOrbitCategory, setSelectedOrbitCategory] = useState<string | null>(null);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
+  const [showCustomCalendar, setShowCustomCalendar] = useState(false);
   const [newExpense, setNewExpense] = useState<Partial<RecurringExpense>>({
     name: '',
     amount: 0,
-    month: 1,
-    months: [1],
+    months: [],
     frequency: 'annual',
-    category: 'other'
+    category: 'other',
+    paymentType: undefined,
+    notes: ''
   });
 
   useEffect(() => {
@@ -436,12 +486,18 @@ function Orbit() {
       { name: 'Custom Maintenance', amount: 0, frequency: 'annual', category: 'maintenance_and_utilities', month: 1 },
     ],
     'Travel & Leisure': [
-      { name: 'Annual Vacation', amount: 5000, frequency: 'annual', category: 'vacation', month: 7 },
-      { name: 'Holiday Travel', amount: 2000, frequency: 'annual', category: 'vacation', month: 12 },
+      { name: 'Major Annual Vacation', amount: 5000, frequency: 'annual', category: 'vacation', month: 7 },
+      { name: 'Quarterly Getaways', amount: 800, frequency: 'quarterly', category: 'vacation', month: 3 },
+      { name: 'Monthly Weekend Trips', amount: 300, frequency: 'monthly', category: 'vacation', month: 1 },
+      { name: 'Holiday Travel (Flights)', amount: 1500, frequency: 'annual', category: 'vacation', month: 12 },
+      { name: 'Spring Break Trip', amount: 1200, frequency: 'annual', category: 'vacation', month: 4 },
+      { name: 'Camping & Outdoors', amount: 400, frequency: 'semi-annual', category: 'vacation', month: 5 },
+      { name: 'Ski / Snowboard Season', amount: 1000, frequency: 'annual', category: 'vacation', month: 11 },
+      { name: 'Staycation Fund', amount: 100, frequency: 'monthly', category: 'vacation', month: 1 },
+      { name: 'Passport / Travel Fees', amount: 160, frequency: 'one-time', category: 'other', month: 1 },
       { name: 'TSA PreCheck / Global Entry', amount: 100, frequency: 'one-time', category: 'other', month: 1 },
       { name: 'National Parks Pass', amount: 80, frequency: 'annual', category: 'subscription', month: 5 },
-      { name: 'Ski Pass', amount: 800, frequency: 'annual', category: 'vacation', month: 10 },
-      { name: 'Custom Travel', amount: 0, frequency: 'annual', category: 'vacation', month: 1 },
+      { name: 'Custom Travel Adventure', amount: 0, frequency: 'annual', category: 'vacation', month: 1 },
     ],
     'Education & Learning': [
       { name: 'Tuition Payment', amount: 10000, frequency: 'semi-annual', category: 'other', month: 8 },
@@ -724,6 +780,15 @@ function Orbit() {
     const endTotalMonths = end.getFullYear() * 12 + end.getMonth();
 
     return expenses.reduce((sum, e) => {
+      if (monthsInRange === 1 && e.frequency !== 'monthly') {
+        const annualTotal = e.frequency === 'bi-weekly' ? e.amount * 26 
+                          : e.frequency === 'weekly' ? e.amount * 52 
+                          : e.frequency === 'quarterly' ? e.amount * 4 
+                          : e.frequency === 'semi-annual' ? e.amount * 2 
+                          : e.amount; // annual or one-time
+        return sum + (annualTotal / 12);
+      }
+
       let occurrences = 0;
       
       if (e.frequency === 'monthly') {
@@ -823,8 +888,9 @@ function Orbit() {
       const expenseToSave = {
         ...newExpense,
         category: finalCategory,
-        // Ensure months is populated if missing
-        months: newExpense.months || [newExpense.month || 1]
+        // Optional months - can be empty
+        months: newExpense.months || [],
+        month: newExpense.months && newExpense.months.length > 0 ? newExpense.months[0] : 0
       };
 
       if (editingExpenseId) {
@@ -838,7 +904,16 @@ function Orbit() {
         await saveExpense(created);
       }
 
-      setNewExpense({ name: '', amount: 0, month: 1, months: [1], frequency: 'annual', category: 'other', customCategory: '' });
+      setNewExpense({ 
+        name: '', 
+        amount: 0, 
+        months: [], 
+        frequency: 'annual', 
+        category: 'other', 
+        customCategory: '',
+        paymentType: undefined,
+        notes: ''
+      });
       setEditingExpenseId(null);
       setShowAddExpense(false);
     }
@@ -968,7 +1043,10 @@ function Orbit() {
                   </button>
                 ) : (
                   <button 
-                    onClick={logout}
+                    onClick={async () => {
+                      await logout();
+                      navigate('/login');
+                    }}
                     className="p-2.5 bg-[#FAF9F6] border border-[#E8E4D0] text-[#8C8670] rounded-xl hover:text-[#2C3338] hover:border-[#8B0000] transition-all"
                     title="Sign Out"
                   >
@@ -990,6 +1068,32 @@ function Orbit() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Guest Mode Banner */}
+        {user?.uid === 'guest-user' && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+                <AlertCircle className="text-amber-600" size={24} />
+              </div>
+              <div className="text-center sm:text-left">
+                <h4 className="font-serif text-lg font-bold text-amber-900">You are currently in Guest Mode</h4>
+                <p className="text-sm text-amber-800/80 leading-relaxed">Your Orbit progress will <span className="font-bold underline">not be saved</span>. Sign in or create an account to persist your cash flow intelligence across devices.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => navigate('/login?from=orbit')}
+              className="w-full sm:w-auto px-8 py-3 bg-[#C5A059] text-white font-bold rounded-xl hover:bg-[#B38F48] transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              <LogIn size={18} />
+              Secure My Data
+            </button>
+          </motion.div>
+        )}
+
         {/* Cash Flow Intelligence Header */}
         <div className="mb-12 w-full">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
@@ -1022,41 +1126,6 @@ function Orbit() {
                 <li><span className="text-[#C5A059] mr-2">04.</span> Track irregular Orbiting bills</li>
               </ul>
             </div>
-          </div>
-        </div>
-
-        {/* Controls Bar: Date Range */}
-        <div id="date-controls" className="flex flex-col lg:flex-row items-center justify-end gap-8 mb-12 w-full scroll-mt-24">
-          {/* Date Range Selector */}
-          <div className="bg-[#E8E4D0]/10 p-4 rounded-2xl border border-[#E8E4D0]/60 flex flex-wrap items-center gap-8">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Start Date</label>
-              <input 
-                type="date" 
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">End Date</label>
-              <input 
-                type="date" 
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
-              />
-            </div>
-            <button 
-              onClick={() => {
-                setStartDate(`${new Date().getFullYear()}-01-01`);
-                setEndDate(`${new Date().getFullYear()}-12-31`);
-              }}
-              className="p-2 hover:bg-[#E8E4D0] rounded-xl text-[#C5A059] transition-colors"
-              title="Reset to Annual View"
-            >
-              <RefreshCw size={14} />
-            </button>
           </div>
         </div>
 
@@ -1220,18 +1289,27 @@ function Orbit() {
                           className="text-[11px] font-mono uppercase tracking-tighter text-[#8C8670] bg-transparent outline-none focus:text-[#2C3338] w-full"
                         />
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm font-serif font-bold text-[#2C3338]">$</span>
-                        <input 
-                          type="text"
-                          inputMode="numeric"
-                          value={exp.amount === 0 ? '' : exp.amount.toString()}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9]/g, '');
-                            updateFixedExpense(exp.id, { amount: val === '' ? 0 : parseInt(val, 10) });
-                          }}
-                          className="w-20 bg-transparent text-right text-sm font-serif font-bold text-[#2C3338] focus:text-[#C5A059] outline-none"
-                        />
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-serif font-bold text-[#2C3338]">$</span>
+                          <input 
+                            type="text"
+                            inputMode="numeric"
+                            value={exp.amount === 0 ? '' : exp.amount.toString()}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              updateFixedExpense(exp.id, { amount: val === '' ? 0 : parseInt(val, 10) });
+                            }}
+                            className="w-16 bg-transparent text-right text-sm font-serif font-bold text-[#2C3338] focus:text-[#C5A059] outline-none"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => setEditingFixedExpense(exp)}
+                          className="p-1.5 text-[#8C8670] hover:text-[#C5A059] hover:bg-[#C5A059]/5 rounded transition-all"
+                          title="Monthly Fixed Details"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -1280,56 +1358,111 @@ function Orbit() {
             {/* Fluid Expense Grid */}
             <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                <div>
-                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Finance Orbit</h2>
-                  <div className="flex flex-wrap items-center gap-3 mt-3">
+                <div className="w-full">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Finance Orbit</h2>
                     <button 
-                      onClick={() => {
-                        const now = new Date();
-                        const year = now.getFullYear();
-                        const month = String(now.getMonth() + 1).padStart(2, '0');
-                        const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
-                        setStartDate(`${year}-${month}-01`);
-                        setEndDate(`${year}-${month}-${lastDay}`);
-                      }}
-                      className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all ${
-                        startDate.includes(`-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`) && monthsInRange === 1
-                        ? 'bg-[#C5A059] text-white font-bold' 
-                        : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
+                      onClick={() => setShowImportModal(true)}
+                      disabled={!user || user.uid === 'guest-user'}
+                      className={`md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                        (!user || user.uid === 'guest-user') 
+                          ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
+                          : 'bg-[#1E5C38] text-[#FAF9F6] hover:bg-[#154629]'
                       }`}
                     >
-                      Monthly Orbit
+                      <Database size={12} />
+                      Import
                     </button>
-                    <button 
-                      onClick={() => {
-                        const year = new Date().getFullYear();
-                        setStartDate(`${year}-01-01`);
-                        setEndDate(`${year}-12-31`);
-                      }}
-                      className={`px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all ${
-                        startDate.endsWith('-01-01') && endDate.endsWith('-12-31') && monthsInRange === 12
-                        ? 'bg-[#C5A059] text-white font-bold' 
-                        : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
-                      }`}
-                    >
-                      Annual Orbit
-                    </button>
-                    <button 
-                      onClick={() => {
-                        const el = document.getElementById('date-controls');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="px-3 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0] transition-all"
-                    >
-                      Custom Frame
-                    </button>
+                  </div>
+                  
+                  <div className="flex flex-col gap-4 mt-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button 
+                        onClick={() => {
+                          const year = new Date().getFullYear();
+                          setStartDate(`${year}-01-01`);
+                          setEndDate(`${year}-12-31`);
+                          setShowCustomCalendar(false);
+                        }}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all ${
+                          startDate.endsWith('-01-01') && endDate.endsWith('-12-31') && monthsInRange === 12 && !showCustomCalendar
+                          ? 'bg-[#C5A059] text-white font-bold shadow-md' 
+                          : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
+                        }`}
+                      >
+                        Annual Orbit
+                      </button>
+                      <button 
+                        onClick={() => {
+                          const now = new Date();
+                          const year = now.getFullYear();
+                          const month = String(now.getMonth() + 1).padStart(2, '0');
+                          const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+                          setStartDate(`${year}-${month}-01`);
+                          setEndDate(`${year}-${month}-${lastDay}`);
+                          setShowCustomCalendar(false);
+                        }}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all ${
+                          startDate.includes(`-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`) && monthsInRange === 1 && !showCustomCalendar
+                          ? 'bg-[#C5A059] text-white font-bold shadow-md' 
+                          : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
+                        }`}
+                      >
+                        Monthly Orbit
+                      </button>
+                      <button 
+                        onClick={() => setShowCustomCalendar(!showCustomCalendar)}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all ${
+                          showCustomCalendar
+                          ? 'bg-[#2C3338] text-white font-bold shadow-md' 
+                          : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
+                        }`}
+                      >
+                        Custom Frame
+                      </button>
+                    </div>
+
+                    <AnimatePresence>
+                      {showCustomCalendar && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="bg-[#E8E4D0]/10 p-4 rounded-xl border border-[#E8E4D0]/60 flex flex-wrap items-end gap-6 mt-2">
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Start Date</label>
+                              <input 
+                                type="date" 
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">End Date</label>
+                              <input 
+                                type="date" 
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[10px] font-mono text-[#8C8670] uppercase">{monthsInRange} mo active</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowImportModal(true)}
                   disabled={!user || user.uid === 'guest-user'}
                   title={!user || user.uid === 'guest-user' ? "Please sign in to import statements" : ""}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                     (!user || user.uid === 'guest-user') 
                       ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
                       : 'bg-[#1E5C38] text-[#FAF9F6] hover:bg-[#154629]'
@@ -1343,7 +1476,7 @@ function Orbit() {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {/* Total Spend Card (Large) */}
                 <div className="col-span-2 border p-6 rounded-xl flex flex-col justify-between relative group" style={{ backgroundColor: `${profile.cardColors.totalSpend}05`, borderColor: `${profile.cardColors.totalSpend}20` }}>
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
                     <ColorPicker 
                       color={profile.cardColors.totalSpend} 
                       onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, totalSpend: c}})} 
@@ -1362,21 +1495,35 @@ function Orbit() {
                 {profile.fixedExpenses.map((item, i) => {
                   const color = profile.cardColors[`fixed_${item.id}`] || '#C5A059';
                   return (
-                    <div key={i} className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md" style={{ borderTopColor: color, borderTopWidth: '4px' }}>
+                    <div 
+                      key={i} 
+                      onClick={() => setEditingFixedExpense(item)}
+                      className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md cursor-pointer hover:border-[#C5A059] hover:z-50" 
+                      style={{ borderTopColor: color, borderTopWidth: '4px' }}
+                    >
                       <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-50" onClick={e => e.stopPropagation()}>
                         <ColorPicker 
                           color={color} 
                           onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`fixed_${item.id}`]: c}})} 
                         />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors font-bold relative z-10 leading-tight mb-1">
-                          {item.label}
-                        </h3>
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors font-bold relative z-10 leading-tight">
+                            {item.label}
+                          </h3>
+                        </div>
                         <div className="text-xl font-serif font-bold text-[#2C3338] relative z-10">${(item.amount * monthsInRange).toLocaleString()}</div>
                       </div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-3 italic relative z-10 group-hover:text-[#C5A059] transition-colors">Period Total</div>
+                      <div className="flex justify-between items-center mt-3 relative z-10">
+                        <div className="text-[8px] font-mono text-[#8C8670]/60 italic group-hover:text-[#C5A059] transition-colors">Period Total</div>
+                        {item.paymentType && (
+                          <div className={`text-[8px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded ${item.paymentType === 'automated' ? 'bg-[#1E5C38]/10 text-[#1E5C38]' : 'bg-[#C5A059]/10 text-[#C5A059]'}`}>
+                            {item.paymentType}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -1403,6 +1550,10 @@ function Orbit() {
                   const catTotal = expenses
                     .filter(e => e.category === cat)
                     .reduce((sum, e) => {
+                      if (monthsInRange === 1 && e.frequency !== 'monthly') {
+                        return sum + getMonthlyReserveAmount(e);
+                      }
+                      
                       let occurrences = 0;
                       
                       if (e.frequency === 'monthly') {
@@ -1438,12 +1589,12 @@ function Orbit() {
                     }, 0);
                   
                   return (
-                    <div 
-                      key={cat} 
-                      onClick={() => setSelectedOrbitCategory(cat as string)}
-                      className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:border-[#C5A059] cursor-pointer" 
-                      style={{ borderTopColor: color, borderTopWidth: '4px' }}
-                    >
+                      <div 
+                        key={cat} 
+                        onClick={() => setSelectedOrbitCategory(cat as string)}
+                        className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:border-[#C5A059] cursor-pointer hover:z-50" 
+                        style={{ borderTopColor: color, borderTopWidth: '4px' }}
+                      >
                       <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
                       <div className={`absolute top-2 right-2 transition-opacity z-50 ${profile.cardColors[`cat_${cat}`] ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                         <ColorPicker 
@@ -1516,6 +1667,7 @@ function Orbit() {
                         exp={exp} 
                         onEdit={editExpense} 
                         onRemove={removeExpense}
+                        isMonthlyOrbit={monthsInRange === 1}
                         itemProps={{
                           onDragStart: () => { isDragging.current = true; },
                           onDragEnd: () => { 
@@ -1539,6 +1691,8 @@ function Orbit() {
           <StatementImportModal 
             userId={user.uid}
             onClose={() => setShowImportModal(false)}
+            existingFixedExpenses={profile.fixedExpenses}
+            existingOrbitExpenses={expenses}
             onExpensesExtracted={(extractedExpenses) => {
               // Iterate and save them
               const newExpenses = [...expenses];
@@ -1599,11 +1753,11 @@ function Orbit() {
                         setSelectedOrbitCategory(null);
                         editExpense(exp);
                       }}
-                      className="flex justify-between items-center p-4 bg-white border border-[#E8E4D0] rounded-xl cursor-pointer hover:border-[#C5A059] hover:shadow-sm transition-all"
+                      className={`flex justify-between items-center p-4 bg-white border border-[#E8E4D0] rounded-xl cursor-pointer hover:border-[#C5A059] hover:shadow-sm transition-all ${monthsInRange === 1 && exp.frequency !== 'monthly' ? 'border-b-[#C5A059] border-b-2' : ''}`}
                       title="Edit Expense"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center shrink-0">
                           {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
                           {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
                           {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
@@ -1613,9 +1767,9 @@ function Orbit() {
                           {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
                           {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
                         </div>
-                        <div>
-                          <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
-                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold text-[#2C3338] truncate">{exp.name}</div>
+                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mt-1 whitespace-nowrap">
                             {exp.frequency.replace('-', ' ')}
                             {exp.frequency !== 'monthly' && (
                               <>
@@ -1629,9 +1783,19 @@ function Orbit() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right flex items-center gap-4">
-                        <div className="font-serif font-bold text-[#2C3338]">${exp.amount.toLocaleString()}</div>
-                        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors">
+                      <div className="flex items-center gap-6">
+                        <div className="text-right flex flex-col items-end min-w-[120px]">
+                          <div className={`font-serif font-bold text-lg ${monthsInRange === 1 && exp.frequency !== 'monthly' ? 'text-[#C5A059]' : 'text-[#2C3338]'}`}>
+                            ${(monthsInRange === 1 && exp.frequency !== 'monthly' ? getMonthlyReserveAmount(exp) : exp.amount).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                          </div>
+                          {monthsInRange === 1 && exp.frequency !== 'monthly' && (
+                            <div className="text-[10px] text-[#C5A059] font-bold tracking-tight flex flex-col gap-0.5 items-end">
+                              <span className="uppercase font-sans">Monthly Reserve</span>
+                              <span className="text-[9px] opacity-80 italic lowercase font-sans font-medium whitespace-nowrap">{getMonthlyReserveExplainer(exp)}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors shrink-0">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                         </div>
                       </div>
@@ -1767,13 +1931,10 @@ function Orbit() {
                           {!['monthly', 'bi-weekly', 'weekly'].includes(newExpense.frequency || '') && (
                             <div className="flex justify-between items-center mt-2">
                               <p className="text-[9px] text-[#8C8670] font-mono italic">
-                                {newExpense.frequency === 'annual' || newExpense.frequency === 'one-time' ? 'Select 1 month' : 
-                                 newExpense.frequency === 'semi-annual' ? 'Select 2 months' : 
-                                 newExpense.frequency === 'quarterly' ? 'Select 4 months' : ''}
+                                {newExpense.frequency === 'annual' || newExpense.frequency === 'one-time' ? 'Select 1 month (Optional)' : 
+                                 newExpense.frequency === 'semi-annual' ? 'Select 2 months (Optional)' : 
+                                 newExpense.frequency === 'quarterly' ? 'Select 4 months (Optional)' : ''}
                               </p>
-                              {(newExpense.months?.length || 0) === 0 && (
-                                <p className="text-[9px] text-[#8B0000] font-mono italic">Selection required</p>
-                              )}
                             </div>
                           )}
                         </div>
@@ -1818,6 +1979,46 @@ function Orbit() {
                             />
                           </div>
                         )}
+                      </div>
+
+                      <div>
+                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Payment Method</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button 
+                            onClick={() => setNewExpense({ 
+                              ...newExpense, 
+                              paymentType: newExpense.paymentType === 'automated' ? undefined : 'automated' 
+                            })}
+                            className={`py-3 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border ${newExpense.paymentType === 'automated' ? 'bg-[#1E5C38] text-white border-[#1E5C38]' : 'bg-[#FAF9F6] text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              <RefreshCw size={12} className={newExpense.paymentType === 'automated' ? 'animate-spin-slow' : ''} />
+                              Automated
+                            </div>
+                          </button>
+                          <button 
+                            onClick={() => setNewExpense({ 
+                              ...newExpense, 
+                              paymentType: newExpense.paymentType === 'manual' ? undefined : 'manual' 
+                            })}
+                            className={`py-3 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border ${newExpense.paymentType === 'manual' ? 'bg-[#C5A059] text-white border-[#C5A059]' : 'bg-[#FAF9F6] text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              <Zap size={12} />
+                              Manual
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Strategic Notes</label>
+                        <textarea 
+                          value={newExpense.notes || ''}
+                          onChange={e => setNewExpense({...newExpense, notes: e.target.value})}
+                          placeholder="e.g. Log in to renew, account ID..."
+                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-[10px] focus:border-[#C5A059] outline-none transition-all font-sans h-20 resize-none"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1924,7 +2125,175 @@ function Orbit() {
           </div>
         </div>
       </footer>
-      {/* Smoothing Modal */}
+      {/* Fixed Expense Details Modal */}
+      <AnimatePresence>
+        {editingFixedExpense && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setEditingFixedExpense(null)}
+              className="absolute inset-0 bg-[#2C3338]/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-[#FAF9F6] w-full max-w-lg rounded-xl shadow-2xl relative z-10 overflow-hidden border border-[#E8E4D0]"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] flex items-center gap-3 italic">
+                    {editingFixedExpense.label} Details
+                  </h2>
+                  <button 
+                    onClick={() => setEditingFixedExpense(null)}
+                    className="text-[#8C8670] hover:text-[#2C3338] transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                  <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Monthly Amount</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C8670] font-serif font-bold">$</span>
+                        <input 
+                          type="number"
+                          value={editingFixedExpense.amount || ''}
+                          onChange={(e) => setEditingFixedExpense({ ...editingFixedExpense, amount: parseInt(e.target.value) || 0 })}
+                          className="bg-white border border-[#E8E4D0] rounded-xl pl-8 pr-4 py-3 text-lg font-serif text-[#2C3338] focus:border-[#C5A059] outline-none w-full"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Frequency</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[1, 2].map(num => (
+                          <button
+                            key={num}
+                            onClick={() => {
+                              const currentDates = editingFixedExpense.dueDates || (editingFixedExpense.dueDate ? [editingFixedExpense.dueDate] : []);
+                              let nextDates = [...currentDates];
+                              if (num === 1) nextDates = nextDates.slice(0, 1);
+                              else if (nextDates.length < 2) nextDates.push(0);
+                              
+                              setEditingFixedExpense({
+                                ...editingFixedExpense,
+                                paymentFrequency: num as 1 | 2,
+                                dueDates: nextDates
+                              });
+                            }}
+                            className={`py-3 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border ${editingFixedExpense.paymentFrequency === num || (!editingFixedExpense.paymentFrequency && num === 1) ? 'bg-[#2C3338] text-white border-[#2C3338]' : 'bg-white text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
+                          >
+                            {num}x Month
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">
+                      {editingFixedExpense.paymentFrequency === 2 ? 'Days of Month Paid' : 'Day of Month Paid'}
+                    </label>
+                    <div className="flex gap-4">
+                      {Array.from({ length: editingFixedExpense.paymentFrequency || 1 }).map((_, idx) => {
+                        const currentDates = editingFixedExpense.dueDates || (editingFixedExpense.dueDate ? [editingFixedExpense.dueDate] : []);
+                        return (
+                          <div key={idx} className="flex-1 relative">
+                            <input 
+                              type="number"
+                              min="1"
+                              max="31"
+                              placeholder={`Date ${idx + 1}`}
+                              value={currentDates[idx] || ''}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                const nextDates = [...currentDates];
+                                nextDates[idx] = val;
+                                setEditingFixedExpense({ ...editingFixedExpense, dueDates: nextDates, dueDate: nextDates[0] });
+                              }}
+                              className="bg-white border border-[#E8E4D0] rounded-xl px-4 py-3 text-lg font-serif text-[#2C3338] focus:border-[#C5A059] outline-none w-full"
+                            />
+                            {currentDates[idx] > 0 && (
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[#C5A059] font-bold">
+                                {idx === 0 ? '1st' : '2nd'}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Payment Method</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button 
+                        onClick={() => setEditingFixedExpense({ 
+                          ...editingFixedExpense, 
+                          paymentType: editingFixedExpense.paymentType === 'automated' ? undefined : 'automated' 
+                        })}
+                        className={`py-3 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border ${editingFixedExpense.paymentType === 'automated' ? 'bg-[#1E5C38] text-white border-[#1E5C38]' : 'bg-white text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
+                      >
+                       <div className="flex items-center justify-center gap-2">
+                         <RefreshCw size={12} className={editingFixedExpense.paymentType === 'automated' ? 'animate-spin-slow' : ''} />
+                         Automated
+                       </div>
+                      </button>
+                      <button 
+                        onClick={() => setEditingFixedExpense({ 
+                          ...editingFixedExpense, 
+                          paymentType: editingFixedExpense.paymentType === 'manual' ? undefined : 'manual' 
+                        })}
+                        className={`py-3 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border ${editingFixedExpense.paymentType === 'manual' ? 'bg-[#C5A059] text-white border-[#C5A059]' : 'bg-white text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
+                      >
+                       <div className="flex items-center justify-center gap-2">
+                         <Zap size={12} />
+                         Manual
+                       </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Strategic Notes</label>
+                    <textarea 
+                      placeholder="e.g. Paid via Checking, Login: user123..."
+                      value={editingFixedExpense.notes || ''}
+                      onChange={(e) => setEditingFixedExpense({ ...editingFixedExpense, notes: e.target.value })}
+                      className="bg-white border border-[#E8E4D0] rounded-xl px-4 py-3 text-sm font-sans text-[#2C3338] focus:border-[#C5A059] outline-none w-full h-24 resize-none"
+                    />
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      if (editingFixedExpense) {
+                        const updatedFixedExpenses = profile.fixedExpenses.map(fe => 
+                          fe.id === editingFixedExpense.id ? editingFixedExpense : fe
+                        );
+                        const newProfile = { ...profile, fixedExpenses: updatedFixedExpenses };
+                        setProfile(newProfile);
+                        saveProfile(newProfile); // Save immediately
+                        setEditingFixedExpense(null);
+                      }
+                    }}
+                    className="w-full bg-[#2C3338] text-white py-4 rounded-xl font-mono uppercase tracking-[0.2em] text-xs hover:bg-[#1C2125] transition-all shadow-lg active:scale-[0.98]"
+                  >
+                    Save Orbit Details
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Monthly Reserve Modal */}
       <AnimatePresence>
         {showSinkingFundModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -1943,9 +2312,9 @@ function Orbit() {
             >
               <div className="p-8">
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] flex items-center gap-3">
+                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] flex items-center gap-3 italic">
                     <ShieldCheck size={24} className="text-[#C5A059]" />
-                    The Smoothing Strategy
+                    The Monthly Reserve
                   </h2>
                   <button 
                     onClick={() => setShowSinkingFundModal(false)}
@@ -1957,9 +2326,9 @@ function Orbit() {
 
                 <div className="space-y-8">
                   <div className="p-6 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-lg text-center">
-                    <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Monthly Target</p>
-                    <p className="text-4xl font-serif font-bold text-[#2C3338]">${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
-                    <p className="mt-4 text-[10px] font-mono text-[#8C8670] uppercase">Eliminates ${Math.round(totalPeriodOrbitExpenses).toLocaleString()} in annual spikes</p>
+                    <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Monthly Reserve</p>
+                    <p className="text-4xl font-serif font-bold text-[#2C3338]">${(totalPeriodOrbitExpenses / monthsInRange).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
+                    <p className="mt-4 text-[10px] font-mono text-[#8C8670] uppercase">Eliminates ${totalPeriodOrbitExpenses.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} in annual spikes</p>
                   </div>
 
                   <div className="space-y-6">
@@ -1968,7 +2337,7 @@ function Orbit() {
                         <span className="text-[#C5A059] font-mono text-[11px]">01.</span> Why does this feel high?
                       </h4>
                       <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        It feels high because you're seeing the "all-in" cost of your lifestyle. Usually, these bills surprise you one by one. By setting aside <strong>${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()}</strong> every month, you're effectively paying the "subscription price" for your annual life. No more panic when the car insurance or tax bill arrives.
+                        It feels high because you're seeing the "all-in" cost of your lifestyle. Usually, these bills surprise you one by one. By setting aside <strong>${(totalPeriodOrbitExpenses / monthsInRange).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong> every month, you're effectively paying the "subscription price" for your annual life. No more panic when the car insurance or tax bill arrives.
                       </p>
                     </div>
 

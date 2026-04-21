@@ -21,6 +21,8 @@ interface StatementImportModalProps {
   userId: string;
   onClose: () => void;
   onExpensesExtracted: (expenses: Partial<any>[]) => void;
+  existingFixedExpenses?: any[];
+  existingOrbitExpenses?: any[];
 }
 
 interface ParsedExpense {
@@ -30,6 +32,9 @@ interface ParsedExpense {
   category: string;
   confidence: number; // 0-100
   selected?: boolean;
+  historicalAverage?: number;
+  useAverage?: boolean;
+  hitCount?: number;
 }
 
 interface UploadLog {
@@ -51,6 +56,7 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
   
   const [history, setHistory] = useState<UploadLog[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -121,21 +127,25 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
       
       const ai = new GoogleGenAI({ apiKey });
       const promptText = `
-        You are a financial AI assistant. Analyze the following credit card statement data (which may be CSV, plain text, or PDF).
-        Identify ONLY recurring, fixed, or seasonal expenses (e.g., streaming subscriptions, software, insurance, quarterly bills, club dues, specific utility patterns, yearly memberships).
-        IGNORE variable, day-to-day spending (e.g., coffee shops, individual grocery trips, restaurants, amazon random purchases, gas stations).
+        You are a financial AI assistant. Analyze the following credit card statement data.
+        Identify ONLY recurring, fixed, or seasonal expenses.
+        IGNORE variable, day-to-day spending (coffee, groceries, restaurants, etc).
 
-        For each recurring expense you find, categorize it into one of these based on context: 'insurance', 'subscription', 'tax', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation', or 'other'.
-        
-        CRITICAL CATEGORIZATION RULES:
-        - Credit card annual membership fees (e.g., "Chase Sapphire", "Amex Platinum") MUST be categorized as 'subscription'.
-        - Utility bills (e.g., "PSEG", "ConEdison", water, electric, gas, internet) MUST be categorized as 'maintenance_and_utilities'.
-        - Gyms, boutique fitness, and health memberships (e.g., "Solidcore", "Equinox", "Peloton") MUST be categorized as 'health_and_fitness'.
-        
-        Estimate its frequency: 'annual', 'semi-annual', 'quarterly', 'monthly', 'bi-weekly', 'weekly', or 'one-time'.
-        Also provide a confidence score from 0 to 100 on how certain you are it is a recurring/fixed expense.
+        DATA CLEANING RULES:
+        - For "name": Clean up vendor names. Convert ALL CAPS bank descriptions (e.g. "NETFLIX.COM* 800-456-7890") into clean, human-readable Title Case names (e.g. "Netflix"). 
+        - Keep proper acronyms uppercase if they make sense (e.g., "PSEG", "NJ").
+        - Strip transaction codes, phone numbers, and web suffixes if they clutter the primary name.
 
-        Respond explicitly in JSON format as an array of objects.
+        CATEGORIZATION RULES:
+        - Categories: 'insurance', 'subscription', 'tax', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation', or 'other'.
+        - Membership fees -> 'subscription'.
+        - Utility bills -> 'maintenance_and_utilities'.
+        - Gyms/Health -> 'health_and_fitness'.
+        
+        Estimate frequency: 'annual', 'semi-annual', 'quarterly', 'monthly', 'bi-weekly', 'weekly', or 'one-time'.
+        Confidence score: 0 to 100.
+
+        Respond explicitly in JSON array format.
         Structure:
         [
           {
@@ -146,8 +156,6 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
             "confidence": 95
           }
         ]
-
-        Only return the JSON array, no markdown wrappers and no explanation.
       `;
 
       let allContents: any[] = [promptText];
@@ -198,15 +206,63 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
       if (jsonStr.startsWith('```')) jsonStr = jsonStr.substring(3);
       if (jsonStr.endsWith('```')) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
 
-      const parsed = JSON.parse(jsonStr) as ParsedExpense[];
+      const toTitleCase = (str: string) => {
+        return str.toLowerCase().split(' ').map(word => {
+          return (word.charAt(0).toUpperCase() + word.slice(1));
+        }).join(' ');
+      };
+
+      const parsed = (JSON.parse(jsonStr) as ParsedExpense[]).map(p => ({
+        ...p,
+        name: p.name === p.name.toUpperCase() ? toTitleCase(p.name) : p.name
+      }));
       
-      // Default to selected true for high confidence
       const configured = parsed.map(p => ({
         ...p,
-        selected: p.confidence > 70
+        selected: p.confidence > 70,
+        useAverage: false
       }));
 
-      setParsedExpenses(configured);
+      // Enrich with intelligence
+      if (userId !== 'guest-user' && configured.length > 0) {
+        setIsEnriching(true);
+        try {
+          const enriched = await Promise.all(configured.map(async (p) => {
+            const normalizedName = p.name.trim().toLowerCase();
+            const intelQuery = query(collection(db, 'users', userId, 'expenseIntelligence'), orderBy('date', 'desc'));
+            const snapshot = await getDocs(intelQuery);
+            
+            const hits: number[] = [];
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              if (data.merchantName.trim().toLowerCase() === normalizedName) {
+                hits.push(data.amount);
+              }
+            });
+
+            if (hits.length > 0) {
+              const avg = hits.reduce((a, b) => a + b, 0) / hits.length;
+              return {
+                ...p,
+                historicalAverage: avg,
+                hitCount: hits.length,
+                // If the new amount is significantly different (e.g. >20%), 
+                // maybe suggest average? But for now just show it.
+              };
+            }
+            return p;
+          }));
+          setParsedExpenses(enriched);
+        } catch (err) {
+          console.error("Enrichment failed", err);
+          setParsedExpenses(configured);
+        } finally {
+          setIsEnriching(false);
+        }
+      } else {
+        setParsedExpenses(configured);
+      }
+
       setStep('review');
 
       // Log successful uploads to history if logged in
@@ -252,14 +308,33 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
     }
   };
 
-  const importSelected = () => {
+  const importSelected = async () => {
     const selected = parsedExpenses.filter(p => p.selected);
+    
+    // Save hits to intelligence for future imports
+    if (userId !== 'guest-user') {
+      try {
+        const intelPromises = selected.map(p => 
+          addDoc(collection(db, 'users', userId, 'expenseIntelligence'), {
+            merchantName: p.name,
+            amount: p.amount,
+            date: serverTimestamp(),
+            category: p.category
+          })
+        );
+        await Promise.all(intelPromises);
+      } catch (e) {
+        console.error("Failed to save intelligence hits", e);
+      }
+    }
+
     const configuredForOrbit = selected.map(p => {
+       const finalAmount = p.useAverage && p.historicalAverage ? p.historicalAverage : p.amount;
        // Convert to Orbit expense format
        return {
          id: 'orbit_imp_' + Date.now() + Math.random().toString(36).substr(2, 5),
          name: p.name,
-         amount: p.amount,
+         amount: finalAmount,
          frequency: p.frequency,
          category: p.category,
          month: new Date().getMonth() + 1,
@@ -431,41 +506,87 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
                       <div className="bg-slate-50 p-3 grid grid-cols-12 gap-4 border-b border-slate-200 text-xs font-mono uppercase tracking-widest text-[#8C8670]">
                         <div className="col-span-1 text-center">Add</div>
                         <div className="col-span-4">Vendor</div>
-                        <div className="col-span-3">Category / Freq</div>
-                        <div className="col-span-2 text-right">Amount</div>
+                        <div className="col-span-1">Freq</div>
+                        <div className="col-span-4 text-right">Amount Strategy</div>
                         <div className="col-span-2 text-right">Confidence</div>
                       </div>
                       <div className="max-h-80 overflow-y-auto">
-                        {parsedExpenses.map((expense, idx) => (
-                          <div 
-                            key={idx} 
-                            className={`p-4 grid grid-cols-12 gap-4 items-center border-b border-slate-100 last:border-0 transition-colors ${expense.selected ? 'bg-[#1E5C38]/5' : ''}`}
-                            onClick={() => {
-                              const newList = [...parsedExpenses];
-                              newList[idx].selected = !newList[idx].selected;
-                              setParsedExpenses(newList);
-                            }}
-                          >
-                            <div className="col-span-1 flex justify-center">
-                              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${expense.selected ? 'bg-[#1E5C38] border-[#1E5C38]' : 'border-slate-300'}`}>
-                                {expense.selected && <CheckCircle size={14} className="text-white" />}
-                              </div>
+                        {Array.from(new Set(parsedExpenses.map(p => p.category))).map((category: string) => (
+                          <div key={category} className="contents">
+                            <div className="col-span-12 bg-slate-50/50 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-[#C5A059] border-b border-slate-100 flex justify-between items-center">
+                              <span>{category.replace(/_/g, ' ')}</span>
                             </div>
-                            <div className="col-span-4 font-medium text-slate-900 truncate">
-                              {expense.name}
-                            </div>
-                            <div className="col-span-3">
-                              <div className="text-sm font-medium capitalize">{expense.category}</div>
-                              <div className="text-xs text-slate-500 capitalize">{expense.frequency}</div>
-                            </div>
-                            <div className="col-span-2 text-right font-serif font-bold text-slate-900">
-                              ${expense.amount.toFixed(2)}
-                            </div>
-                            <div className="col-span-2 flex justify-end">
-                              <span className={`text-xs font-bold px-2 py-1 rounded-full ${expense.confidence > 80 ? 'bg-green-100 text-green-700' : expense.confidence > 50 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}>
-                                {expense.confidence}%
-                              </span>
-                            </div>
+                            {parsedExpenses
+                              .map((p, i) => ({ ...p, originalIndex: i }))
+                              .filter(p => p.category === category)
+                              .map((expense) => (
+                                <div 
+                                  key={expense.originalIndex} 
+                                  className={`p-4 grid grid-cols-12 gap-4 items-center border-b border-slate-100 last:border-0 transition-colors ${expense.selected ? 'bg-[#1E5C38]/5' : 'hover:bg-slate-50 opacity-60'}`}
+                                >
+                                  <div className="col-span-1 flex justify-center">
+                                    <button 
+                                      onClick={() => {
+                                        const newList = [...parsedExpenses];
+                                        newList[expense.originalIndex].selected = !newList[expense.originalIndex].selected;
+                                        setParsedExpenses(newList);
+                                      }}
+                                      className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${expense.selected ? 'bg-[#1E5C38] border-[#1E5C38]' : 'border-slate-300'}`}
+                                    >
+                                      {expense.selected && <CheckCircle size={14} className="text-white" />}
+                                    </button>
+                                  </div>
+                                  <div className="col-span-4 font-medium text-slate-900 truncate">
+                                    {expense.name}
+                                    {expense.hitCount && expense.hitCount > 0 && (
+                                      <div className="text-[8px] text-[#C5A059] font-mono font-bold mt-0.5 flex items-center gap-1">
+                                        <History size={8} /> {expense.hitCount} Past Hits
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="col-span-1 text-[10px] text-slate-500 capitalize font-mono">
+                                    {expense.frequency.substring(0, 3)}
+                                  </div>
+                                  <div className="col-span-4 text-right">
+                                    <div className="flex flex-col items-end gap-1">
+                                      <div className="flex items-center gap-2 bg-slate-100/50 p-1 rounded-lg">
+                                        <button
+                                          onClick={() => {
+                                            const newList = [...parsedExpenses];
+                                            newList[expense.originalIndex].useAverage = false;
+                                            setParsedExpenses(newList);
+                                          }}
+                                          className={`px-2 py-1 rounded text-[9px] font-mono transition-all ${!expense.useAverage ? 'bg-white text-[#2C3338] shadow-sm font-bold' : 'text-[#8C8670]'}`}
+                                        >
+                                          Current: ${expense.amount.toFixed(0)}
+                                        </button>
+                                        {expense.historicalAverage && (
+                                          <button
+                                            onClick={() => {
+                                              const newList = [...parsedExpenses];
+                                              newList[expense.originalIndex].useAverage = true;
+                                              setParsedExpenses(newList);
+                                            }}
+                                            className={`px-2 py-1 rounded text-[9px] font-mono transition-all ${expense.useAverage ? 'bg-[#C5A059] text-white shadow-sm font-bold' : 'text-[#8C8670]'}`}
+                                          >
+                                            Avg: ${expense.historicalAverage.toFixed(0)}
+                                          </button>
+                                        )}
+                                      </div>
+                                      {expense.historicalAverage && !expense.useAverage && Math.abs(expense.amount - expense.historicalAverage) > (expense.historicalAverage * 0.15) && (
+                                        <div className="text-[8px] text-amber-600 font-mono italic animate-pulse">
+                                          {expense.amount < expense.historicalAverage ? 'Lower than average' : 'Higher than average'}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="col-span-2 flex justify-end">
+                                    <span className={`text-[9px] font-bold px-2 py-1 rounded-full ${expense.confidence > 80 ? 'bg-green-100 text-green-700' : expense.confidence > 50 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}>
+                                      {expense.confidence}%
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
                           </div>
                         ))}
                       </div>
