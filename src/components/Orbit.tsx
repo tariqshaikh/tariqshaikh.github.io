@@ -32,7 +32,8 @@ import {
   Database,
   Plane,
   Activity,
-  GripVertical
+  GripVertical,
+  Loader2
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -254,6 +255,15 @@ interface IncomeSource {
   frequencyPerMonth: number;
 }
 
+interface AutomatedInvestment {
+  id: string;
+  label: string;
+  amount: number;
+  investmentType: 'brokerage' | '401k' | 'ira' | 'crypto' | 'other';
+  frequency: 'monthly' | 'bi-weekly' | 'weekly';
+  notes?: string;
+}
+
 interface FixedExpense {
   id: string;
   label: string;
@@ -268,12 +278,144 @@ interface FixedExpense {
 interface FinanceProfile {
   incomes: IncomeSource[];
   fixedExpenses: FixedExpense[];
+  automatedInvestments?: AutomatedInvestment[];
   savingsGoal: number;
   cardColors: Record<string, string>;
   hasSeededDefaults?: boolean;
 }
 
+
 // --- Components ---
+
+const ExpenseTrendGraph = ({ merchantName, userId }: { merchantName: string, userId: string }) => {
+  const [data, setData] = useState<{ date: Date, amount: number }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!merchantName || !userId || userId === 'guest-user') return;
+    setLoading(true);
+    
+    const intelRef = collection(db, 'users', userId, 'expenseIntelligence');
+    const unsubscribe = onSnapshot(intelRef, (snapshot) => {
+      const hits: { date: Date, amount: number }[] = [];
+      const normalizedTarget = merchantName.trim().toLowerCase();
+      
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const pName = d.merchantName?.trim().toLowerCase() || '';
+        
+        // Slightly smarter matching: check for substrings in either direction
+        if (pName && (pName.includes(normalizedTarget) || normalizedTarget.includes(pName))) {
+          let hitDate: Date;
+          if (d.date?.toDate) {
+            hitDate = d.date.toDate();
+          } else if (d.date instanceof Date) {
+            hitDate = d.date;
+          } else if (typeof d.date === 'string' || typeof d.date === 'number') {
+            hitDate = new Date(d.date);
+          } else {
+            hitDate = new Date();
+          }
+
+          hits.push({
+            date: hitDate,
+            amount: d.amount
+          });
+        }
+      });
+
+      // Sort by date ascending
+      hits.sort((a, b) => a.date.getTime() - b.date.getTime());
+      
+      // Deduplicate/Group by date to avoid multiple points on same exact MS
+      const uniqueHits: { date: Date, amount: number }[] = [];
+      const seenKeys = new Set<string>();
+      
+      hits.forEach(hit => {
+        const dateKey = hit.date.toISOString().split('T')[0];
+        const compositeKey = `${dateKey}_${hit.amount}`;
+        
+        if (!seenKeys.has(compositeKey)) {
+          seenKeys.add(compositeKey);
+          uniqueHits.push(hit);
+        }
+      });
+
+      setData(uniqueHits);
+      setLoading(false);
+    }, (err) => {
+      console.error("Failed to sync trend data", err);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [merchantName, userId]);
+
+  if (loading && data.length === 0) return <div className="text-[10px] text-[#8C8670] mt-4 flex items-center gap-2"><Loader2 size={12} className="animate-spin" /> Analyzing historical trends...</div>;
+  if (data.length < 2) {
+    return (
+      <div className="mt-8 pt-6 border-t border-[#E8E4D0]">
+        <div className="flex justify-between items-center mb-4">
+           <h4 className="text-xs font-mono uppercase tracking-widest text-[#8C8670] flex items-center gap-1">
+             <Activity size={12} className="text-[#C5A059]" />
+             Historical Trend
+           </h4>
+        </div>
+        <div className="bg-[#FAF9F6] border border-[#E8E4D0] border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center">
+            <Activity size={24} className="text-[#8C8670] mb-2 opacity-30" />
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Not Enough Data</p>
+            <p className="text-[10px] text-[#8C8670] max-w-[200px] mt-1 opacity-70">Import more statements containing this merchant to see price fluctuations.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const firstAmt = data[0].amount;
+  const lastAmt = data[data.length - 1].amount;
+  const pctChange = ((lastAmt - firstAmt) / firstAmt) * 100;
+
+  const chartData = data.map((d, i) => ({
+    name: d.date.toLocaleDateString(undefined, { month: 'short', year: '2-digit' }),
+    amount: d.amount,
+  }));
+
+  return (
+    <div className="mt-8 pt-6 border-t border-[#E8E4D0]">
+      <div className="flex justify-between items-center mb-4">
+        <h4 className="text-xs font-mono uppercase tracking-widest text-[#8C8670] flex items-center gap-1">
+          <Activity size={12} className="text-[#C5A059]" />
+          Historical Trend
+        </h4>
+        <div className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${pctChange > 0 ? 'bg-red-100 text-red-700' : pctChange < 0 ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+          {pctChange > 0 ? <TrendingUp size={10} /> : pctChange < 0 ? <TrendingUp size={10} className="rotate-180" /> : null}
+          {Math.abs(pctChange).toFixed(1)}% {pctChange > 0 ? 'Increase' : pctChange < 0 ? 'Decrease' : 'Stable'}
+        </div>
+      </div>
+      <div className="h-32 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+             <defs>
+              <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#C5A059" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#C5A059" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E8E4D0" />
+            <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} stroke="#8C8670" />
+            <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#2C3338', border: 'none', borderRadius: '8px', color: '#FAF9F6', fontSize: '12px' }}
+              itemStyle={{ color: '#C5A059' }}
+              formatter={(val: number) => [`$${val.toFixed(2)}`, 'Amount']}
+            />
+            <Area type="monotone" dataKey="amount" stroke="#C5A059" fillOpacity={1} fill="url(#colorAmount)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
 
 const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -526,7 +668,6 @@ function Orbit() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
   const [librarySearch, setLibrarySearch] = useState('');
-  const [showSinkingFundModal, setShowSinkingFundModal] = useState(false);
 
   // --- Auth & Data Fetching ---
   useEffect(() => {
@@ -567,6 +708,10 @@ function Orbit() {
             data.incomes.push({ id: 'inc_1', label: 'Income Stream 1', paycheckAmount: 3500, frequencyPerMonth: 2 });
           }
         }
+        
+        if (!data.automatedInvestments) {
+          data.automatedInvestments = [];
+        }
 
         // One-time seeding check
         if (data.hasSeededDefaults === undefined || data.hasSeededDefaults === false) {
@@ -597,42 +742,60 @@ function Orbit() {
       // Sort by sortOrder if available
       exps.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
       
-      // Auto-cleanup duplicates of default expenses
-      const defaultNames = DEFAULT_EXPENSES.map(e => e.name);
+      // Auto-cleanup all duplicates (especially from multiple statement imports)
       const defaultIds = DEFAULT_EXPENSES.map(e => e.id);
       
       const duplicatesToDelete: string[] = [];
       const uniqueExps: RecurringExpense[] = [];
-      const nameGroups: Record<string, RecurringExpense[]> = {};
+      const seenNormalizedNames = new Map<string, RecurringExpense>();
       
       exps.forEach(exp => {
-        if (defaultNames.includes(exp.name)) {
-          if (!nameGroups[exp.name]) nameGroups[exp.name] = [];
-          nameGroups[exp.name].push(exp);
-        } else {
-          uniqueExps.push(exp);
-        }
-      });
-      
-      Object.entries(nameGroups).forEach(([name, group]) => {
-        if (group.length > 1) {
-          // Keep the one with the default ID, or the first one
-          const preferred = group.find(e => defaultIds.includes(e.id)) || group[0];
-          uniqueExps.push(preferred);
-          
-          group.forEach(e => {
-            if (e.id !== preferred.id) {
-              duplicatesToDelete.push(e.id);
+        if (!exp.name) return;
+        // Aggressive normalization: lowercase and remove all non-alphanumeric characters
+        const normalized = exp.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        
+        // Simple fuzzy/substring check: if "NetFlix" exists, "Netflix.com" should match
+        let matchedNormalized: string | null = null;
+        
+        // Find existing match that is a substring or vice versa
+        // only for names longer than 4 chars to avoid false positives with small names
+        for (const [existingNorm, existingExp] of seenNormalizedNames.entries()) {
+          if (normalized.length > 4 && existingNorm.length > 4) {
+            if (normalized.includes(existingNorm) || existingNorm.includes(normalized)) {
+              matchedNormalized = existingNorm;
+              break;
             }
-          });
+          } else if (normalized === existingNorm) {
+            matchedNormalized = existingNorm;
+            break;
+          }
+        }
+
+        if (matchedNormalized) {
+          const preferred = seenNormalizedNames.get(matchedNormalized)!;
+          // Priority: 1. Default ID, 2. Existing Orbit ID, 3. Earliest ID
+          const isExpPreferred = defaultIds.includes(exp.id) && !defaultIds.includes(preferred.id);
+          
+          if (isExpPreferred) {
+            duplicatesToDelete.push(preferred.id);
+            seenNormalizedNames.set(normalized, exp);
+            // Replace in unique list
+            const idx = uniqueExps.findIndex(e => e.id === preferred.id);
+            if (idx !== -1) uniqueExps[idx] = exp;
+          } else {
+            duplicatesToDelete.push(exp.id);
+          }
         } else {
-          uniqueExps.push(group[0]);
+          seenNormalizedNames.set(normalized, exp);
+          uniqueExps.push(exp);
         }
       });
       
       if (duplicatesToDelete.length > 0) {
         duplicatesToDelete.forEach(id => {
-          deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id)).catch(console.error);
+          deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id)).catch(err => {
+            console.error(`Cleanup failed for ${id}:`, err);
+          });
         });
       }
 
@@ -957,7 +1120,8 @@ function Orbit() {
     });
   };
 
-  const addFixedExpense = () => {    const newProfile = {
+  const addFixedExpense = () => {
+    const newProfile = {
       ...profile,
       fixedExpenses: [...profile.fixedExpenses, { id: Date.now().toString(), label: 'New Expense', amount: 0 }]
     };
@@ -976,6 +1140,36 @@ function Orbit() {
     const newProfile = {
       ...profile,
       fixedExpenses: profile.fixedExpenses.map(e => e.id === id ? { ...e, ...updates } : e)
+    };
+    setProfile(newProfile);
+  };
+
+  const addAutomatedInvestment = () => {
+    const newProfile = {
+      ...profile,
+      automatedInvestments: [...(profile.automatedInvestments || []), { 
+        id: Date.now().toString(), 
+        label: 'New Investment', 
+        amount: 0, 
+        investmentType: 'brokerage' as const, 
+        frequency: 'monthly' as const 
+      }]
+    };
+    setProfile(newProfile);
+  };
+
+  const removeAutomatedInvestment = (id: string) => {
+    const newProfile = {
+      ...profile,
+      automatedInvestments: (profile.automatedInvestments || []).filter(i => i.id !== id)
+    };
+    setProfile(newProfile);
+  };
+
+  const updateAutomatedInvestment = (id: string, updates: Partial<AutomatedInvestment>) => {
+    const newProfile = {
+      ...profile,
+      automatedInvestments: (profile.automatedInvestments || []).map(i => i.id === id ? { ...i, ...updates } : i)
     };
     setProfile(newProfile);
   };
@@ -1314,42 +1508,6 @@ function Orbit() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </section>
-
-            <section 
-              onClick={() => setShowSinkingFundModal(true)}
-              className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl shadow-sm cursor-pointer hover:border-[#C5A059] transition-all group"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="font-serif text-lg font-bold text-[#2C3338] flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-[#C5A059]" />
-                  The Bill Smoother
-                </h2>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] opacity-0 group-hover:opacity-100 transition-opacity">
-                  Learn how it works
-                </span>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="p-4 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-xl flex justify-between items-center">
-                  <div>
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Monthly Neutralizer</p>
-                    <p className="text-2xl font-serif font-bold text-[#2C3338]">${Math.round(totalPeriodOrbitExpenses / monthsInRange).toLocaleString()} <span className="text-sm text-[#8C8670] font-sans font-normal">/ mo</span></p>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center group-hover:bg-[#C5A059] transition-colors">
-                    <ChevronRight size={16} className="text-[#C5A059] group-hover:text-white transition-colors" />
-                  </div>
-                </div>
-
-                {next90DaysOrbitHits > 0 && (
-                  <div className="flex items-center gap-3 px-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#8B0000] animate-pulse" />
-                    <p className="text-[10px] font-mono uppercase tracking-tight text-[#8C8670]">
-                      <span className="text-[#8B0000] font-bold">${next90DaysOrbitHits.toLocaleString()}</span> in orbiting hits due in next 90 days
-                    </p>
-                  </div>
-                )}
               </div>
             </section>
           </div>
@@ -1864,6 +2022,12 @@ function Orbit() {
                         />
                       </div>
                       
+                      {user && newExpense.name && newExpense.name.length > 2 && (
+                        <div className="mt-2">
+                          <ExpenseTrendGraph merchantName={newExpense.name} userId={user.uid} />
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Amount ($)</label>
@@ -2270,6 +2434,10 @@ function Orbit() {
                     />
                   </div>
 
+                  {user && editingFixedExpense.label && editingFixedExpense.label.length > 2 && (
+                    <ExpenseTrendGraph merchantName={editingFixedExpense.label} userId={user.uid} />
+                  )}
+
                   <button 
                     onClick={() => {
                       if (editingFixedExpense) {
@@ -2286,81 +2454,6 @@ function Orbit() {
                   >
                     Save Orbit Details
                   </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Monthly Reserve Modal */}
-      <AnimatePresence>
-        {showSinkingFundModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowSinkingFundModal(false)}
-              className="absolute inset-0 bg-[#2C3338]/40 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#FAF9F6] w-full max-w-2xl rounded-xl shadow-2xl relative z-10 overflow-hidden border border-[#E8E4D0]"
-            >
-              <div className="p-8">
-                <div className="flex justify-between items-center mb-8">
-                  <h2 className="font-serif text-2xl font-bold text-[#2C3338] flex items-center gap-3 italic">
-                    <ShieldCheck size={24} className="text-[#C5A059]" />
-                    The Monthly Reserve
-                  </h2>
-                  <button 
-                    onClick={() => setShowSinkingFundModal(false)}
-                    className="text-[#8C8670] hover:text-[#2C3338] transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-
-                <div className="space-y-8">
-                  <div className="p-6 bg-[#C5A059]/5 border border-[#C5A059]/20 rounded-lg text-center">
-                    <p className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Monthly Reserve</p>
-                    <p className="text-4xl font-serif font-bold text-[#2C3338]">${(totalPeriodOrbitExpenses / monthsInRange).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-xl text-[#8C8670] font-sans font-normal">/ mo</span></p>
-                    <p className="mt-4 text-[10px] font-mono text-[#8C8670] uppercase">Eliminates ${totalPeriodOrbitExpenses.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} in annual spikes</p>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="border-b border-[#E8E4D0] pb-6">
-                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
-                        <span className="text-[#C5A059] font-mono text-[11px]">01.</span> Why does this feel high?
-                      </h4>
-                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        It feels high because you're seeing the "all-in" cost of your lifestyle. Usually, these bills surprise you one by one. By setting aside <strong>${(totalPeriodOrbitExpenses / monthsInRange).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong> every month, you're effectively paying the "subscription price" for your annual life. No more panic when the car insurance or tax bill arrives.
-                      </p>
-                    </div>
-
-                    <div className="border-b border-[#E8E4D0] pb-6">
-                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
-                        <span className="text-[#C5A059] font-mono text-[11px]">02.</span> Use the "Orbit Reserve"
-                      </h4>
-                      <p className="text-[14px] text-[#8C8670] leading-relaxed">
-                        Move this amount into a separate account labeled <strong>"Orbit Reserve"</strong> at the start of each month. When an infrequent bill turns up, you don't take it out of your paycheck—you take it out of the Reserve. Your checking account stays smooth and predictable.
-                      </p>
-                    </div>
-
-                    <div className="pt-2">
-                      <h4 className="text-base font-bold text-[#2C3338] mb-2 flex items-center gap-2">
-                        <span className="text-[#C5A059] font-mono text-[11px]">03.</span> Imminent Hits
-                      </h4>
-                      <div className="p-4 bg-[#8B0000]/5 border border-[#8B0000]/10 rounded-lg">
-                        <p className="text-[13px] text-[#2C3338]">
-                          In the next 90 days, you have <strong>${next90DaysOrbitHits.toLocaleString()}</strong> in non-monthly bills due. Every dollar you smooth out today is one less dollar you have to scramble for tomorrow.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </motion.div>

@@ -11,10 +11,11 @@ import {
   History,
   Info,
   Zap,
-  Download
+  Download,
+  RefreshCw
 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
-import { collection, addDoc, query, orderBy, getDocs, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, setDoc, doc, query, orderBy, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 
 interface StatementImportModalProps {
@@ -30,11 +31,13 @@ interface ParsedExpense {
   amount: number;
   frequency: 'annual' | 'semi-annual' | 'quarterly' | 'monthly' | 'bi-weekly' | 'weekly' | 'one-time';
   category: string;
+  date?: string; // YYYY-MM-DD
   confidence: number; // 0-100
   selected?: boolean;
   historicalAverage?: number;
   useAverage?: boolean;
   hitCount?: number;
+  alreadyTracking?: boolean;
 }
 
 interface UploadLog {
@@ -67,6 +70,10 @@ export default function StatementImportModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    loadHistory();
+  }, [userId]);
+
+  useEffect(() => {
     if (activeTab === 'history') {
       loadHistory();
     }
@@ -76,31 +83,57 @@ export default function StatementImportModal({
     if (userId === 'guest-user') return;
     setIsLoadingHistory(true);
     try {
-      // Check primary collection
-      const q = query(collection(db, 'users', userId, 'statementUploads'), orderBy('uploadDate', 'desc'));
-      const snapshot = await getDocs(q);
+      // 1. Check primary and legacy collections without strict ordering (safer for mixed schemas)
+      const collRef = collection(db, 'users', userId, 'statementUploads');
+      const legacyCollRef = collection(db, 'users', userId, 'statementUploadHistory');
+      const alternateLegacyCollRef = collection(db, 'users', userId, 'uploads'); // Just in case
+      
+      const [snapshot, legacySnapshot, altSnapshot] = await Promise.all([
+        getDocs(collRef).catch(() => ({ docs: [], forEach: () => {} })),
+        getDocs(legacyCollRef).catch(() => ({ docs: [], forEach: () => {} })),
+        getDocs(alternateLegacyCollRef).catch(() => ({ docs: [], forEach: () => {} }))
+      ]);
+
       const logs: UploadLog[] = [];
+      
       snapshot.forEach(doc => {
         logs.push({ id: doc.id, ...doc.data() } as UploadLog);
       });
 
-      // Check legacy collection for backward compatibility if empty
-      if (logs.length === 0) {
-        const legacyQ = query(collection(db, 'users', userId, 'statementUploadHistory'), orderBy('date', 'desc'));
-        const legacySnapshot = await getDocs(legacyQ);
-        legacySnapshot.forEach(doc => {
-          const data = doc.data();
+      legacySnapshot.forEach(doc => {
+        const data = doc.data();
+        if (!logs.find(l => l.id === doc.id)) {
           logs.push({ 
             id: doc.id, 
-            fileName: data.fileName, 
-            uploadDate: data.date, 
-            status: data.status,
-            expensesFound: data.expenseCount 
+            fileName: data.fileName || 'Legacy Statement', 
+            uploadDate: data.date || data.uploadDate || null, 
+            status: data.status || 'processed',
+            expensesFound: data.expenseCount || data.expensesFound || 0 
           } as any);
-        });
-      }
+        }
+      });
 
-      setHistory(logs);
+      altSnapshot.docs.forEach(doc => {
+        const data = doc.data() as any;
+        if (!logs.find(l => l.id === doc.id)) {
+          logs.push({
+            id: doc.id,
+            fileName: data.name || data.fileName || 'Old Upload',
+            uploadDate: data.date || data.uploadDate || data.timestamp || null,
+            status: data.status || 'processed',
+            expensesFound: data.count || data.expensesFound || 0
+          } as any);
+        }
+      });
+
+      // 2. Client-side sort to avoid silent query failures due to missing indexes or fields
+      const sortedLogs = logs.sort((a, b) => {
+        const dateA = a.uploadDate?.toDate ? a.uploadDate.toDate() : (a.uploadDate instanceof Date ? a.uploadDate : new Date(0));
+        const dateB = b.uploadDate?.toDate ? b.uploadDate.toDate() : (b.uploadDate instanceof Date ? b.uploadDate : new Date(0));
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      setHistory(sortedLogs);
     } catch (e) {
       console.error("Failed to load history", e);
     } finally {
@@ -155,8 +188,16 @@ export default function StatementImportModal({
         Identify ONLY recurring, fixed, or seasonal expenses.
         IGNORE variable, day-to-day spending (coffee, groceries, restaurants, etc).
 
+        HISTORICAL TIMELINE RULE:
+        - If a merchant/expense appears multiple times (e.g. a monthly Netflix charge appearing 3 times in a long statement), return EACH individual occurrence as a separate object in the JSON array. This is critical for building a historical trend timeline. DO NOT consolidate them into a single entry.
+
         DATA CLEANING RULES:
         - For "name": Clean up vendor names. Convert ALL CAPS bank descriptions (e.g. "NETFLIX.COM* 800-456-7890") into clean, human-readable Title Case names (e.g. "Netflix"). 
+        - STRIP ALL NON-BRANDING TEXT: Remove suffixes like "Annual Membership", "Fee", "Member Fee", "Subscription", "Service", "Monthly", bank codes, phone numbers, and location info.
+        - Example: "CHASE SAPPHIRE ANNUAL MEMBERSHIP" -> "Chase Sapphire".
+        - Example: "AMEX PLATINUM FEE" -> "Amex Platinum".
+        - Example: "NETFLIX.COM INTERNET" -> "Netflix".
+        
         - Keep proper acronyms uppercase if they make sense (e.g., "PSEG", "NJ").
         - Strip transaction codes, phone numbers, and web suffixes if they clutter the primary name.
 
@@ -177,6 +218,7 @@ export default function StatementImportModal({
             "amount": 15.99,
             "frequency": "monthly",
             "category": "subscription",
+            "date": "YYYY-MM-DD",
             "confidence": 95
           }
         ]
@@ -218,7 +260,7 @@ export default function StatementImportModal({
       }
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: allContents
       });
 
@@ -251,44 +293,67 @@ export default function StatementImportModal({
       if (userId !== 'guest-user' && configured.length > 0) {
         setIsEnriching(true);
         try {
-          const enriched = await Promise.all(configured.map(async (p) => {
-            const normalizedNew = p.name.trim().toLowerCase();
-            
-            // 1. Check existing Orbit data (current active state)
-            const currentHits: number[] = [];
-            
-            if (existingOrbitExpenses) {
-              existingOrbitExpenses.forEach(e => {
-                const normalizedExisting = e.name.trim().toLowerCase();
-                if (normalizedExisting.includes(normalizedNew) || normalizedNew.includes(normalizedExisting)) {
-                  currentHits.push(e.amount);
-                }
-              });
-            }
-            
-            if (existingFixedExpenses) {
-              existingFixedExpenses.forEach(e => {
-                const normalizedExisting = e.label.trim().toLowerCase();
-                if (normalizedExisting.includes(normalizedNew) || normalizedNew.includes(normalizedExisting)) {
-                  currentHits.push(e.amount);
-                }
-              });
-            }
+          // 1. Pre-process current Orbit data once
+          const currentOrbitHits: Record<string, number[]> = {};
+          
+          if (existingOrbitExpenses) {
+            existingOrbitExpenses.forEach(e => {
+              const name = e.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+              if (!currentOrbitHits[name]) currentOrbitHits[name] = [];
+              currentOrbitHits[name].push(e.amount);
+            });
+          }
+          
+          if (existingFixedExpenses) {
+            existingFixedExpenses.forEach(e => {
+              const name = e.label.toLowerCase().replace(/[^a-z0-9]/g, '');
+              if (!currentOrbitHits[name]) currentOrbitHits[name] = [];
+              currentOrbitHits[name].push(e.amount);
+            });
+          }
 
-            // 2. Check historical intelligence collection (past imports)
-            const intelQuery = query(collection(db, 'users', userId, 'expenseIntelligence'), orderBy('date', 'desc'));
-            const snapshot = await getDocs(intelQuery);
-            
-            const historicalHits: number[] = [];
-            snapshot.forEach(doc => {
-              const data = doc.data();
-              const normalizedHist = data.merchantName.trim().toLowerCase();
-              if (normalizedHist.includes(normalizedNew) || normalizedNew.includes(normalizedHist)) {
-                historicalHits.push(data.amount);
+          // 2. Fetch historical intelligence once
+          const intelQuery = query(collection(db, 'users', userId, 'expenseIntelligence'));
+          const snapshot = await getDocs(intelQuery);
+          const historyHits: Record<string, number[]> = {};
+          
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const name = (data.merchantName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (!historyHits[name]) historyHits[name] = [];
+            historyHits[name].push(data.amount);
+          });
+
+          // 3. Map with fuzzy matching in memory
+          const enriched = configured.map(p => {
+            const normalizedNew = p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const allHits: number[] = [];
+            let isAlreadyTracking = false;
+
+            // Check current hits
+            Object.entries(currentOrbitHits).forEach(([name, hits]) => {
+              // Substring check for near-duplicates
+              if (normalizedNew.length > 4 && name.length > 4) {
+                if (name.includes(normalizedNew) || normalizedNew.includes(name)) {
+                  allHits.push(...hits);
+                  isAlreadyTracking = true;
+                }
+              } else if (name === normalizedNew) {
+                allHits.push(...hits);
+                isAlreadyTracking = true;
               }
             });
 
-            const allHits = [...currentHits, ...historicalHits];
+            // Check history hits
+            Object.entries(historyHits).forEach(([name, hits]) => {
+              if (normalizedNew.length > 4 && name.length > 4) {
+                if (name.includes(normalizedNew) || normalizedNew.includes(name)) {
+                  allHits.push(...hits);
+                }
+              } else if (name === normalizedNew) {
+                allHits.push(...hits);
+              }
+            });
 
             if (allHits.length > 0) {
               const avg = allHits.reduce((a, b) => a + b, 0) / allHits.length;
@@ -296,11 +361,22 @@ export default function StatementImportModal({
                 ...p,
                 historicalAverage: avg,
                 hitCount: allHits.length,
-                useAverage: false // Default to showing current, let user toggle
+                useAverage: false,
+                alreadyTracking: isAlreadyTracking,
+                selected: isAlreadyTracking ? false : p.selected // Default to unselected if tracking
               };
             }
+            
+            if (isAlreadyTracking) {
+               return {
+                  ...p,
+                  alreadyTracking: true,
+                  selected: false
+               }
+            }
             return p;
-          }));
+          });
+          
           setParsedExpenses(enriched);
         } catch (err) {
           console.error("Enrichment failed", err);
@@ -327,6 +403,33 @@ export default function StatementImportModal({
           })
         );
         await Promise.all(promises);
+
+        // Save raw hits to intelligence IMMEDIATELY
+        try {
+          const intelPromises = configured.map(p => {
+            let hitDate = new Date();
+            if (p.date) {
+              const parsedDate = new Date(p.date);
+              // Ensure it's a valid date
+              if (!isNaN(parsedDate.getTime())) {
+                hitDate = parsedDate;
+              }
+            }
+
+            const dateStr = p.date || hitDate.toISOString().split('T')[0];
+            const uniqueId = `intel_${p.name.trim().toLowerCase().replace(/\s+/g, '_')}_${p.amount}_${dateStr}`;
+
+            return setDoc(doc(db, 'users', userId, 'expenseIntelligence', uniqueId), {
+              merchantName: p.name,
+              amount: p.amount,
+              date: hitDate,
+              category: p.category
+            });
+          });
+          await Promise.all(intelPromises);
+        } catch (err) {
+          console.error("Failed to seed intelligence", err);
+        }
       }
 
     } catch (e: any) {
@@ -359,23 +462,6 @@ export default function StatementImportModal({
 
   const importSelected = async () => {
     const selected = parsedExpenses.filter(p => p.selected);
-    
-    // Save hits to intelligence for future imports
-    if (userId !== 'guest-user') {
-      try {
-        const intelPromises = selected.map(p => 
-          addDoc(collection(db, 'users', userId, 'expenseIntelligence'), {
-            merchantName: p.name,
-            amount: p.amount,
-            date: serverTimestamp(),
-            category: p.category
-          })
-        );
-        await Promise.all(intelPromises);
-      } catch (e) {
-        console.error("Failed to save intelligence hits", e);
-      }
-    }
 
     const configuredForOrbit = selected.map(p => {
        const finalAmount = p.useAverage && p.historicalAverage ? p.historicalAverage : p.amount;
@@ -587,11 +673,18 @@ export default function StatementImportModal({
                                   </div>
                                   <div className="col-span-4 font-medium text-slate-900 truncate">
                                     {expense.name}
-                                    {expense.hitCount && expense.hitCount > 0 && (
-                                      <div className="text-[8px] text-[#C5A059] font-mono font-bold mt-0.5 flex items-center gap-1">
-                                        <History size={8} /> {expense.hitCount} Past Hits
-                                      </div>
-                                    )}
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      {expense.alreadyTracking && (
+                                        <span className="text-[8px] bg-[#1E5C38]/10 text-[#1E5C38] px-1.5 py-0.5 rounded font-mono font-bold uppercase">
+                                          Already Tracking
+                                        </span>
+                                      )}
+                                      {expense.hitCount && expense.hitCount > 0 && (
+                                        <div className="text-[8px] text-[#C5A059] font-mono font-bold flex items-center gap-1">
+                                          <History size={8} /> {expense.hitCount} Past Hits
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                   <div className="col-span-1 text-[10px] text-slate-500 capitalize font-mono">
                                     {expense.frequency.substring(0, 3)}
@@ -653,13 +746,21 @@ export default function StatementImportModal({
                     >
                       Start Over
                     </button>
-                    <button
-                      onClick={importSelected}
-                      disabled={parsedExpenses.filter(p => p.selected).length === 0}
-                      className="px-6 py-3 bg-[#1E5C38] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#154629] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Import {parsedExpenses.filter(p => p.selected).length} Items to Orbit
-                    </button>
+                    {parsedExpenses.filter(p => p.selected).length > 0 ? (
+                      <button
+                        onClick={importSelected}
+                        className="px-6 py-3 bg-[#1E5C38] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#154629] transition-colors"
+                      >
+                        Import {parsedExpenses.filter(p => p.selected).length} Items to Orbit
+                      </button>
+                    ) : (
+                      <button
+                        onClick={onClose}
+                        className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-200 transition-colors"
+                      >
+                        Log Data & Close
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -668,9 +769,19 @@ export default function StatementImportModal({
 
           {activeTab === 'history' && (
             <div className="space-y-6">
-              <div>
-                <h3 className="font-serif text-xl font-bold text-slate-900 mb-1">Past Imports</h3>
-                <p className="text-sm text-slate-600">A log of all files you've scanned using the Magic Import tool.</p>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-serif text-xl font-bold text-slate-900 mb-1">Past Imports</h3>
+                  <p className="text-sm text-slate-600">A log of all files you've scanned using the Magic Import tool.</p>
+                </div>
+                <button 
+                  onClick={loadHistory}
+                  disabled={isLoadingHistory}
+                  className="p-2 text-slate-400 hover:text-[#1E5C38] transition-colors rounded-lg hover:bg-slate-100"
+                  title="Refresh History"
+                >
+                  <RefreshCw size={18} className={isLoadingHistory ? 'animate-spin' : ''} />
+                </button>
               </div>
 
               {userId === 'guest-user' ? (
@@ -682,7 +793,10 @@ export default function StatementImportModal({
               ) : history.length === 0 ? (
                 <div className="bg-slate-50 p-10 rounded-xl flex flex-col justify-center items-center text-slate-500 text-sm border border-slate-200">
                   <History size={32} className="mb-3 text-slate-300" />
-                  No statements imported yet.
+                  <p className="font-bold text-slate-700 mb-1">No statements imported yet.</p>
+                  <p className="text-center text-slate-500 text-xs max-w-sm mt-2">
+                    If you uploaded statements previously while acting as a guest, they were not saved. Please reupload them now that you are logged in.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-3">

@@ -172,6 +172,18 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    match /users/{userId}/statementUploadHistory/{uploadId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /users/{userId}/uploads/{uploadId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /users/{userId}/expenseIntelligence/{docId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // Section Settings Rules
     match /users/{userId}/sectionSettings/{settingId} {
       allow read, write: if isOwner(userId);
