@@ -46,7 +46,13 @@ interface UploadLog {
   rawFileContent?: string;
 }
 
-export default function StatementImportModal({ userId, onClose, onExpensesExtracted }: StatementImportModalProps) {
+export default function StatementImportModal({ 
+  userId, 
+  onClose, 
+  onExpensesExtracted,
+  existingFixedExpenses,
+  existingOrbitExpenses
+}: StatementImportModalProps) {
   const [activeTab, setActiveTab] = useState<'import' | 'history'>('import');
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -70,12 +76,30 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
     if (userId === 'guest-user') return;
     setIsLoadingHistory(true);
     try {
+      // Check primary collection
       const q = query(collection(db, 'users', userId, 'statementUploads'), orderBy('uploadDate', 'desc'));
       const snapshot = await getDocs(q);
       const logs: UploadLog[] = [];
       snapshot.forEach(doc => {
         logs.push({ id: doc.id, ...doc.data() } as UploadLog);
       });
+
+      // Check legacy collection for backward compatibility if empty
+      if (logs.length === 0) {
+        const legacyQ = query(collection(db, 'users', userId, 'statementUploadHistory'), orderBy('date', 'desc'));
+        const legacySnapshot = await getDocs(legacyQ);
+        legacySnapshot.forEach(doc => {
+          const data = doc.data();
+          logs.push({ 
+            id: doc.id, 
+            fileName: data.fileName, 
+            uploadDate: data.date, 
+            status: data.status,
+            expensesFound: data.expenseCount 
+          } as any);
+        });
+      }
+
       setHistory(logs);
     } catch (e) {
       console.error("Failed to load history", e);
@@ -228,26 +252,51 @@ export default function StatementImportModal({ userId, onClose, onExpensesExtrac
         setIsEnriching(true);
         try {
           const enriched = await Promise.all(configured.map(async (p) => {
-            const normalizedName = p.name.trim().toLowerCase();
+            const normalizedNew = p.name.trim().toLowerCase();
+            
+            // 1. Check existing Orbit data (current active state)
+            const currentHits: number[] = [];
+            
+            if (existingOrbitExpenses) {
+              existingOrbitExpenses.forEach(e => {
+                const normalizedExisting = e.name.trim().toLowerCase();
+                if (normalizedExisting.includes(normalizedNew) || normalizedNew.includes(normalizedExisting)) {
+                  currentHits.push(e.amount);
+                }
+              });
+            }
+            
+            if (existingFixedExpenses) {
+              existingFixedExpenses.forEach(e => {
+                const normalizedExisting = e.label.trim().toLowerCase();
+                if (normalizedExisting.includes(normalizedNew) || normalizedNew.includes(normalizedExisting)) {
+                  currentHits.push(e.amount);
+                }
+              });
+            }
+
+            // 2. Check historical intelligence collection (past imports)
             const intelQuery = query(collection(db, 'users', userId, 'expenseIntelligence'), orderBy('date', 'desc'));
             const snapshot = await getDocs(intelQuery);
             
-            const hits: number[] = [];
+            const historicalHits: number[] = [];
             snapshot.forEach(doc => {
               const data = doc.data();
-              if (data.merchantName.trim().toLowerCase() === normalizedName) {
-                hits.push(data.amount);
+              const normalizedHist = data.merchantName.trim().toLowerCase();
+              if (normalizedHist.includes(normalizedNew) || normalizedNew.includes(normalizedHist)) {
+                historicalHits.push(data.amount);
               }
             });
 
-            if (hits.length > 0) {
-              const avg = hits.reduce((a, b) => a + b, 0) / hits.length;
+            const allHits = [...currentHits, ...historicalHits];
+
+            if (allHits.length > 0) {
+              const avg = allHits.reduce((a, b) => a + b, 0) / allHits.length;
               return {
                 ...p,
                 historicalAverage: avg,
-                hitCount: hits.length,
-                // If the new amount is significantly different (e.g. >20%), 
-                // maybe suggest average? But for now just show it.
+                hitCount: allHits.length,
+                useAverage: false // Default to showing current, let user toggle
               };
             }
             return p;
