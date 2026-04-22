@@ -65,6 +65,7 @@ import {
   collection, 
   doc, 
   setDoc, 
+  updateDoc,
   deleteDoc,
   getDocs, 
   query, 
@@ -171,27 +172,61 @@ const ReorderItem: React.FC<{
   onEdit: (e: RecurringExpense) => void,
   onRemove: (id: string) => void,
   itemProps?: any,
-  isMonthlyOrbit?: boolean
-}> = ({ exp, onEdit, onRemove, itemProps, isMonthlyOrbit }) => {
+  isMonthlyOrbit?: boolean,
+  isDraggingId: string | null,
+  setDraggingId: (id: string | null) => void,
+  hoveredTargetId: string | null,
+  setHoveredTargetId: (id: string | null) => void
+}> = ({ exp, onEdit, onRemove, itemProps, isMonthlyOrbit, isDraggingId, setDraggingId, hoveredTargetId, setHoveredTargetId }) => {
   const controls = useDragControls();
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const displayAmount = isMonthlyOrbit && exp.frequency !== 'monthly' ? getMonthlyReserveAmount(exp) : exp.amount;
+  const isTarget = hoveredTargetId === exp.id && isDraggingId !== null && isDraggingId !== exp.id;
+  const isBeingDragged = isDraggingId === exp.id;
   
   return (
     <Reorder.Item 
       value={exp}
       dragListener={false}
       dragControls={controls}
-      onDragStart={() => { (itemProps as any).onDragStart?.() }}
-      onDragEnd={() => { (itemProps as any).onDragEnd?.() }}
-      className={`flex justify-between items-center p-4 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl group hover:border-[#C5A059] cursor-pointer transition-all shadow-sm active:shadow-md active:scale-[1.005] ${isMonthlyOrbit && exp.frequency !== 'monthly' ? 'border-b-[#C5A059] border-b-2' : ''}`}
-      onClick={() => onEdit(exp)}
+      onDragStart={() => { 
+        setDraggingId(exp.id);
+        (itemProps as any).onDragStart?.(); 
+      }}
+      onDrag={(e, info) => {
+        const element = document.elementFromPoint(info.point.x, info.point.y);
+        const targetCard = element?.closest('[data-expense-id]');
+        const targetId = targetCard?.getAttribute('data-expense-id');
+        
+        if (targetId && targetId !== exp.id) {
+          setHoveredTargetId(targetId);
+        } else {
+          setHoveredTargetId(null);
+        }
+      }}
+      onDragEnd={() => { 
+        (itemProps as any).onDragEnd?.(); 
+      }}
+      className={`flex justify-between items-stretch bg-[#FAF9F6] border rounded-xl group transition-all shadow-sm active:shadow-md active:scale-[1.005] select-none overflow-hidden ${
+        isTarget ? 'border-[#8B0000] bg-red-50 scale-[0.98] ring-2 ring-[#8B0000] ring-opacity-20' : 
+        'border-[#E8E4D0] hover:border-[#C5A059]'
+      } ${isMonthlyOrbit && exp.frequency !== 'monthly' ? 'border-b-[#C5A059] border-b-2' : ''} ${
+        isBeingDragged ? 'z-50 pointer-events-none' : 'z-10'
+      }`}
+      data-expense-id={exp.id}
     >
-      <div className="flex items-center gap-4">
+      <div 
+        className="flex items-center gap-4 p-4 flex-1 cursor-pointer"
+        onClick={() => !isBeingDragged && !isDeleting && onEdit(exp)}
+      >
         <div 
-          onPointerDown={(e) => controls.start(e)}
-          className="text-[#8C8670]/30 group-hover:text-[#C5A059] transition-colors cursor-grab active:cursor-grabbing p-1 -ml-1"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            controls.start(e);
+          }}
+          className="text-[#8C8670]/30 group-hover:text-[#C5A059] transition-colors cursor-grab active:cursor-grabbing p-1 -ml-1 h-full flex items-center"
         >
           <GripVertical size={20} />
         </div>
@@ -232,17 +267,43 @@ const ReorderItem: React.FC<{
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors" title="Edit Orbit">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-        </div>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onRemove(exp.id); }}
-          className="p-2 text-[#8B0000] hover:bg-[#8B0000]/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-          title="Remove Orbit"
-        >
-          <X size={16} />
-        </button>
+      
+      <div className="flex items-center p-2 border-l border-transparent group-hover:border-[#E8E4D0]/40 transition-colors">
+        {!isDeleting ? (
+          <button 
+            onClick={(e) => { 
+              e.preventDefault();
+              e.stopPropagation(); 
+              setIsDeleting(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 text-[#8B0000] bg-[#8B0000]/0 hover:bg-[#8B0000]/10 rounded-xl transition-all sm:opacity-0 group-hover:opacity-100"
+            title="Remove Orbit"
+          >
+            <X size={14} />
+            <span className="text-[10px] font-mono uppercase tracking-widest font-bold hidden sm:inline">Delete</span>
+          </button>
+        ) : (
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDeleting(false);
+              }}
+              className="px-2 py-2 text-[#8C8670] hover:bg-[#E8E4D0]/30 rounded-lg text-[9px] font-mono uppercase"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                onRemove(exp.id); 
+              }}
+              className="px-3 py-2 bg-[#8B0000] text-white rounded-lg text-[9px] font-mono uppercase font-bold hover:bg-[#A00000] transition-colors shadow-sm"
+            >
+              Confirm
+            </button>
+          </div>
+        )}
       </div>
     </Reorder.Item>
   );
@@ -542,8 +603,14 @@ function Orbit() {
   const [endDate, setEndDate] = useState<string>(`${new Date().getFullYear()}-12-31`);
 
   const [expenses, setExpenses] = useState<RecurringExpense[]>(DEFAULT_EXPENSES);
+  const [pendingMerges, setPendingMerges] = useState<{ source: RecurringExpense, target: RecurringExpense }[]>([]);
+  const [showMergeReview, setShowMergeReview] = useState(false);
+  const [isMerging, setIsMerging] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeletingFromModal, setIsDeletingFromModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedOrbitCategory, setSelectedOrbitCategory] = useState<string | null>(null);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
@@ -727,10 +794,29 @@ function Orbit() {
           isProfileLoaded.current = true;
         }
       } else {
-        // Profile doesn't exist yet, seed expenses now
+        // Profile doesn't exist yet, create it and seed expenses
+        const initialProfile = {
+          incomes: [{ id: 'inc_1', label: 'Income Stream 1', paycheckAmount: 3500, frequencyPerMonth: 2 }],
+          fixedExpenses: [],
+          automatedInvestments: [],
+          savingsAmount: 0,
+          wealthBuildingAmount: 0,
+          payPeriodStartingBalance: 0,
+          customReserveMonths: 6,
+          emergencyFundGoal: 0,
+          hasSeededDefaults: true
+        };
+        
         DEFAULT_EXPENSES.forEach(exp => {
           setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp).catch(console.error);
         });
+        
+        setDoc(docSnap.ref, initialProfile).catch(console.error);
+        // It will trigger another onSnapshot, but we can set it now just in case
+        if (!isProfileLoaded.current) {
+           setProfile(initialProfile);
+           isProfileLoaded.current = true;
+        }
       }
     });
 
@@ -742,72 +828,14 @@ function Orbit() {
       // Sort by sortOrder if available
       exps.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
       
-      // Auto-cleanup all duplicates (especially from multiple statement imports)
-      const defaultIds = DEFAULT_EXPENSES.map(e => e.id);
-      
-      const duplicatesToDelete: string[] = [];
-      const uniqueExps: RecurringExpense[] = [];
-      const seenNormalizedNames = new Map<string, RecurringExpense>();
-      
+      // Migrate old categories silenty
       exps.forEach(exp => {
-        if (!exp.name) return;
-        // Aggressive normalization: lowercase and remove all non-alphanumeric characters
-        const normalized = exp.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        
-        // Simple fuzzy/substring check: if "NetFlix" exists, "Netflix.com" should match
-        let matchedNormalized: string | null = null;
-        
-        // Find existing match that is a substring or vice versa
-        // only for names longer than 4 chars to avoid false positives with small names
-        for (const [existingNorm, existingExp] of seenNormalizedNames.entries()) {
-          if (normalized.length > 4 && existingNorm.length > 4) {
-            if (normalized.includes(existingNorm) || existingNorm.includes(normalized)) {
-              matchedNormalized = existingNorm;
-              break;
-            }
-          } else if (normalized === existingNorm) {
-            matchedNormalized = existingNorm;
-            break;
-          }
-        }
-
-        if (matchedNormalized) {
-          const preferred = seenNormalizedNames.get(matchedNormalized)!;
-          // Priority: 1. Default ID, 2. Existing Orbit ID, 3. Earliest ID
-          const isExpPreferred = defaultIds.includes(exp.id) && !defaultIds.includes(preferred.id);
-          
-          if (isExpPreferred) {
-            duplicatesToDelete.push(preferred.id);
-            seenNormalizedNames.set(normalized, exp);
-            // Replace in unique list
-            const idx = uniqueExps.findIndex(e => e.id === preferred.id);
-            if (idx !== -1) uniqueExps[idx] = exp;
-          } else {
-            duplicatesToDelete.push(exp.id);
-          }
-        } else {
-          seenNormalizedNames.set(normalized, exp);
-          uniqueExps.push(exp);
-        }
-      });
-      
-      if (duplicatesToDelete.length > 0) {
-        duplicatesToDelete.forEach(id => {
-          deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id)).catch(err => {
-            console.error(`Cleanup failed for ${id}:`, err);
-          });
-        });
-      }
-
-      // Migrate old categories
-      uniqueExps.forEach(exp => {
         if (exp.category === 'maintenance') {
-          exp.category = 'maintenance_and_utilities';
-          setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp).catch(console.error);
+          updateDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), { category: 'maintenance_and_utilities' }).catch(console.error);
         }
       });
       
-      setExpenses(uniqueExps);
+      setExpenses(exps);
     });
 
     return () => {
@@ -818,7 +846,7 @@ function Orbit() {
 
   // --- Auto-save Profile ---
   useEffect(() => {
-    if (!user || user.uid === 'guest-user' || !isAuthReady) return;
+    if (!user || user.uid === 'guest-user' || !isAuthReady || !isProfileLoaded.current) return;
 
     const timer = setTimeout(() => {
       // Only save if profile has changed from what's on the server
@@ -877,33 +905,6 @@ function Orbit() {
       await deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, `orbitExpenses/${id}`);
-    }
-  };
-
-  const loadDefaultExpenses = async () => {
-    if (!user || user.uid === 'guest-user') return;
-    setIsSaving(true);
-    try {
-      // 1. Find existing expenses that match the default names to avoid duplicates
-      const defaultNames = DEFAULT_EXPENSES.map(e => e.name);
-      const duplicatesToDelete = expenses.filter(e => 
-        defaultNames.includes(e.name) && !DEFAULT_EXPENSES.find(de => de.id === e.id)
-      );
-      
-      const deletePromises = duplicatesToDelete.map(exp => 
-        deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id))
-      );
-      await Promise.all(deletePromises);
-
-      // 2. Insert defaults with fixed IDs
-      const setPromises = DEFAULT_EXPENSES.map(exp => {
-        return setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp);
-      });
-      await Promise.all(setPromises);
-    } catch (error) {
-      console.error("Error loading default expenses", error);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -1045,6 +1046,100 @@ function Orbit() {
   const normalizedMonthlySpend = monthlyFixedExpenses + normalizedMonthlyOrbit;
   const normalizedMonthlySurplus = monthlyIncome - normalizedMonthlySpend;
 
+  // --- Merge Helpers ---
+  const getSignificantWords = (name: string) => {
+    if (!name) return [];
+    return name.toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .map(w => w.trim())
+      .filter(w => w.length > 2)
+      .filter(w => !['the', 'and', 'annual', 'membership', 'fee', 'subscription', 'service', 'payment', 'bill', 'com', 'monthly', 'yearly', 'inc', 'llc'].includes(w));
+  };
+
+  const unifyTrendData = async (sourceName: string, targetName: string) => {
+    if (!user) return;
+    const intelQuery = query(
+      collection(db, 'users', user.uid, 'expenseIntelligence'), 
+      where('merchantName', '==', sourceName)
+    );
+    const snap = await getDocs(intelQuery);
+    const intelPromises = snap.docs.map(d => updateDoc(d.ref, { merchantName: targetName }));
+    await Promise.all(intelPromises);
+  };
+
+  const analyzeMerges = () => {
+    const defaultIds = DEFAULT_EXPENSES.map(e => e.id);
+    const merges: { source: RecurringExpense, target: RecurringExpense }[] = [];
+    const processedIds = new Set<string>();
+    const seenNormalized = new Map<string, RecurringExpense>();
+
+    // Sort to keep default entities or older entities as targets
+    const sorted = [...expenses].sort((a, b) => {
+      const aDef = defaultIds.includes(a.id);
+      const bDef = defaultIds.includes(b.id);
+      if (aDef && !bDef) return -1;
+      if (!aDef && bDef) return 1;
+      return a.id.localeCompare(b.id);
+    });
+
+    sorted.forEach(exp => {
+      if (!exp.name || processedIds.has(exp.id)) return;
+      const words = getSignificantWords(exp.name);
+      if (words.length === 0) words.push(exp.name.toLowerCase().replace(/[^a-z0-9]/g, '').trim());
+
+      let match: RecurringExpense | null = null;
+      for (const [normWordsStr, existing] of seenNormalized.entries()) {
+        const normWords = JSON.parse(normWordsStr) as string[];
+        const overlap = words.filter(w => normWords.includes(w)).length;
+        const isSubset = (words.length > 0 && overlap === words.length) || (normWords.length > 0 && overlap === normWords.length);
+        
+        // Exact string match fallback just in case
+        const exactMatch = exp.name.toLowerCase().trim() === existing.name.toLowerCase().trim();
+
+        if (exactMatch || (overlap > 0 && isSubset) || (overlap >= 2)) {
+          match = existing;
+          break;
+        }
+      }
+
+      if (match) {
+        // Target should be the one that already has more data / is older, which is handled by sorting
+        merges.push({ source: exp, target: match });
+        processedIds.add(exp.id);
+      } else {
+        seenNormalized.set(JSON.stringify(words), exp);
+      }
+    });
+
+    if (merges.length > 0) {
+      setPendingMerges(merges);
+      setShowMergeReview(true);
+    } else {
+      alert("No obvious duplicates found in your Orbit.");
+    }
+  };
+
+  const handleApplyMerges = async () => {
+    if (!user) return;
+    setIsMerging(true);
+    try {
+      for (const merge of pendingMerges) {
+        try {
+          await unifyTrendData(merge.source.name, merge.target.name);
+          await removeExpense(merge.source.id);
+        } catch (e) {
+          console.error(`Failed to merge ${merge.source.name}`, e);
+        }
+      }
+      setShowMergeReview(false);
+      setPendingMerges([]);
+    } catch (err) {
+      console.error("Cleanup failed", err);
+    } finally {
+      setIsMerging(false);
+    }
+  };
+
   const handleAddExpense = async () => {
     if (newExpense.name && newExpense.amount) {
       const finalCategory = newExpense.category === 'other' ? (newExpense.customCategory || 'other') : newExpense.category;
@@ -1094,8 +1189,20 @@ function Orbit() {
   };
 
   const removeExpense = async (id: string) => {
-    setExpenses(expenses.filter(e => e.id !== id));
-    await deleteExpenseFromDb(id);
+    // 1. Immediate UI update
+    setExpenses(prev => prev.filter(e => e.id !== id));
+    
+    // 2. Database update
+    if (user && user.uid !== 'guest-user') {
+      try {
+        await deleteExpenseFromDb(id);
+      } catch (err) {
+        console.error("Failed to delete expense from DB:", err);
+        // Fallback: If DB write fails, the next onSnapshot from Firestore 
+        // will naturally restore the item to the list, so we don't need
+        // to manually re-fetch here which causes double-flicker.
+      }
+    }
   };
 
   const addIncome = () => {
@@ -1782,12 +1889,12 @@ function Orbit() {
                 </h3>
                 <div className="flex items-center gap-4">
                   <button 
-                    onClick={loadDefaultExpenses}
-                    disabled={isSaving}
-                    className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#C5A059] transition-colors flex items-center gap-1 disabled:opacity-50 italic"
+                    onClick={analyzeMerges}
+                    className="text-[10px] font-mono uppercase tracking-widest text-[#8B0000] hover:text-[#FF4444] transition-colors flex items-center gap-1 italic mr-2"
+                    title="Find and merge duplicate entries"
                   >
-                    <Zap size={12} />
-                    Load Default Expenses
+                    <Activity size={12} className="animate-pulse" />
+                    Merge Duplicates
                   </button>
                   <button 
                     onClick={() => setShowAddExpense(true)}
@@ -1826,10 +1933,16 @@ function Orbit() {
                         onEdit={editExpense} 
                         onRemove={removeExpense}
                         isMonthlyOrbit={monthsInRange === 1}
+                        isDraggingId={draggingId}
+                        setDraggingId={setDraggingId}
+                        hoveredTargetId={hoveredTargetId}
+                        setHoveredTargetId={setHoveredTargetId}
                         itemProps={{
                           onDragStart: () => { isDragging.current = true; },
-                          onDragEnd: () => { 
+                          onDragEnd: async () => { 
                             isDragging.current = false;
+                            setDraggingId(null);
+                            setHoveredTargetId(null);
                             saveExpensesOrder(expenses); 
                           }
                         }}
@@ -2195,6 +2308,52 @@ function Orbit() {
                       <Save size={18} />
                       {editingExpenseId ? 'Update Orbit' : 'Add to Orbit'}
                     </button>
+
+                    {editingExpenseId && (
+                      <div className="mt-8 pt-6 border-t border-[#E8E4D0] space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertCircle size={14} className="text-[#8B0000]" />
+                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#8B0000] font-bold">Maintenance Zone</h4>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                          {!isDeletingFromModal ? (
+                            <button 
+                              type="button"
+                              onClick={() => setIsDeletingFromModal(true)}
+                              className="flex-1 py-3 border border-[#E8E4D0] text-[#8C8670] hover:bg-red-50 hover:text-red-700 hover:border-red-200 rounded-xl transition-all flex items-center justify-center gap-2 text-[10px] font-mono uppercase tracking-widest"
+                            >
+                              <X size={14} />
+                              Delete from Orbit
+                            </button>
+                          ) : (
+                            <div className="flex-1 flex gap-2">
+                              <button 
+                                type="button"
+                                onClick={() => setIsDeletingFromModal(false)}
+                                className="flex-1 py-3 bg-[#E8E4D0]/30 text-[#8C8670] rounded-xl text-[10px] font-mono uppercase tracking-widest hover:bg-[#E8E4D0]/50 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button 
+                                type="button"
+                                onClick={async () => {
+                                  if (!editingExpenseId) return;
+                                  const targetId = editingExpenseId;
+                                  setIsDeletingFromModal(false);
+                                  setShowAddExpense(false);
+                                  setEditingExpenseId(null);
+                                  await removeExpense(targetId);
+                                }}
+                                className="flex-1 py-3 bg-[#8B0000] text-white rounded-xl text-[10px] font-mono uppercase tracking-widest hover:bg-[#A00000] transition-colors shadow-lg"
+                              >
+                                Confirm Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -2461,7 +2620,102 @@ function Orbit() {
         )}
       </AnimatePresence>
 
-      {/* Surplus Allocation Modal logic removed */}
+      {/* Merge Review Modal */}
+      <AnimatePresence>
+        {showMergeReview && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-[#2C3338]/60 backdrop-blur-md"
+              onClick={() => setShowMergeReview(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-[#FAF9F6] border border-[#E8E4D0] w-full max-w-2xl rounded-2xl shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="p-8 border-b border-[#E8E4D0] bg-white">
+                <div className="flex justify-between items-start mb-2">
+                  <h2 className="font-serif text-3xl font-bold text-[#2C3338] italic">Consolidate Duplicates</h2>
+                  <button onClick={() => setShowMergeReview(false)} className="p-2 hover:bg-[#FAF9F6] rounded-full transition-colors text-[#8C8670]">
+                    <X size={20} />
+                  </button>
+                </div>
+                <p className="text-sm text-[#8C8670] italic">The system detected these near-duplicates. Review and merge to unify your trend data into a single master orbit.</p>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+                {pendingMerges.length === 0 ? (
+                  <div className="text-center py-12">
+                     <ShieldCheck size={48} className="mx-auto text-[#1E5C38] mb-4 opacity-20" />
+                    <p className="font-mono text-xs uppercase tracking-widest text-[#8C8670]">All orbits are completely unique!</p>
+                  </div>
+                ) : (
+                  pendingMerges.map((merge, idx) => (
+                    <div key={idx} className="bg-white border border-[#E8E4D0] p-6 rounded-2xl relative group">
+                      <div className="grid grid-cols-11 items-center gap-4">
+                        <div className="col-span-11 sm:col-span-5">
+                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8B0000] font-bold mb-1">Source (Will Delete)</div>
+                          <div className="p-4 bg-red-50/50 border border-red-100 rounded-xl relative overflow-hidden">
+                            <div className="absolute inset-0 bg-red-500/5 mix-blend-multiply" />
+                            <div className="text-sm font-bold text-[#2C3338] truncate relative z-10">{merge.source.name}</div>
+                            <div className="text-[10px] font-mono text-[#8B0000] mt-1 relative z-10">${merge.source.amount.toLocaleString()} • {merge.source.frequency}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="col-span-11 sm:col-span-1 flex justify-center py-2 sm:py-0">
+                          <ChevronRight size={24} className="text-[#C5A059] opacity-40 rotate-90 sm:rotate-0" />
+                        </div>
+
+                        <div className="col-span-11 sm:col-span-5">
+                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#1E5C38] font-bold mb-1">Target (Will Keep)</div>
+                          <div className="p-4 bg-green-50/50 border border-green-100 rounded-xl relative overflow-hidden">
+                            <div className="absolute inset-0 bg-green-500/5 mix-blend-multiply" />
+                            <div className="text-sm font-bold text-[#2C3338] truncate relative z-10">{merge.target.name}</div>
+                            <div className="text-[10px] font-mono text-[#1E5C38] mt-1 relative z-10">${merge.target.amount.toLocaleString()} • {merge.target.frequency}</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        onClick={() => {
+                          setPendingMerges(pendingMerges.filter((_, i) => i !== idx));
+                        }}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-[#E8E4D0] rounded-full flex items-center justify-center text-[#8C8670] hover:bg-[#8B0000] hover:text-white transition-all shadow-sm"
+                        title="Don't merge these"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="p-8 bg-white border-t border-[#E8E4D0]">
+                {pendingMerges.length > 0 && (
+                  <button 
+                    onClick={handleApplyMerges}
+                    disabled={isMerging}
+                    className="w-full bg-[#C5A059] text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-[#B38F48] transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
+                  >
+                    {isMerging ? <Loader2 size={16} className="animate-spin" /> : <Database size={16} />}
+                    Merge {pendingMerges.length} {pendingMerges.length === 1 ? 'Duplicate' : 'Duplicates'}
+                  </button>
+                )}
+                <button 
+                  onClick={() => setShowMergeReview(false)}
+                  className="w-full mt-4 text-[10px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

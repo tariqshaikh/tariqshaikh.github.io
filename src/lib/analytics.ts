@@ -18,9 +18,12 @@ export const logVisit = async (path: string) => {
     };
 
     await addDoc(collection(db, 'visitorLogs'), logData);
-  } catch (error) {
-    // Silently fail to not interrupt user experience
-    console.error('Analytics error:', error);
+  } catch (error: any) {
+    // Silently fail to not interrupt user experience, but ignore 'already-exists' retries from Firebase offline cache
+    const errMsg = typeof error === 'string' ? error : error?.message || '';
+    if (error?.code !== 'already-exists' && !errMsg.includes('already exists')) {
+      console.error('Analytics error:', error);
+    }
   }
 };
 
