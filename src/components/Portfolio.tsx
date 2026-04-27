@@ -125,7 +125,7 @@ export default function Portfolio() {
             <div className="absolute top-0 left-0 w-[3px] h-full bg-[#C5A059] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
             <div className="flex items-center justify-between mb-6">
               <span className="font-mono text-[13px] text-[#8C8670] tracking-widest">P — 002</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Take a look! (In Development)</span>
+              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Live</span>
             </div>
             <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
               <span className="font-serif font-bold italic">Orbit</span>
@@ -475,11 +475,11 @@ export default function Portfolio() {
                         <span className="font-serif font-bold text-white italic">Orbit</span>
                       </div>
                       <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#C5A059]"></span> Status: In Development</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> Status: Live</span>
                         <span>|</span>
                         <span>Author: TShaikh92</span>
                         <span>|</span>
-                        <span>Target: Q3 2026</span>
+                        <span>Target: Q2 2026</span>
                       </div>
                     </div>
                     <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-white transition-colors">✕</button>
@@ -523,26 +523,33 @@ export default function Portfolio() {
                     <div className="mb-12">
                       <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">3. Core Features (MVP)</h2>
                       <div className="space-y-6 mt-6">
-                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-[#F7FBFF]">
+                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-green-50/30">
                           <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
                             Orbit Expense Engine
                           </h3>
-                          <p className="text-[15px] text-[#6E8A96]">A dedicated system for logging non-monthly expenses (Annual, Semi-Annual, Quarterly, Monthly, Weekly) with specific month-of-impact tracking.</p>
+                          <p className="text-[15px] text-[#6E8A96]">A dedicated system for logging non-monthly expenses with specific month-of-impact tracking and automatic sinking fund calculations.</p>
                         </div>
-                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-green-50/30">
                           <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
+                            <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
                             12-Month Cash Flow Visualizer
                           </h3>
-                          <p className="text-[15px] text-[#6E8A96]">An interactive grid showing projected annual spend, highlighting "Danger Zones" and categorizing irregular hits into a clear visual dashboard.</p>
+                          <p className="text-[15px] text-[#6E8A96]">Interactive grid showing projected annual spend, surplus tracking, and visual "Danger Zone" identification.</p>
                         </div>
-                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-green-50/30">
                           <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#C5A059]" />
-                            Sinking Fund Logic
+                            <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
+                            Statement Analyzer (AI)
                           </h3>
-                          <p className="text-[15px] text-[#6E8A96]">Automatically calculates the exact monthly amount needed to be set aside to cover all orbiting expenses without stress.</p>
+                          <p className="text-[15px] text-[#6E8A96]">Upload financial statements to automatically detect and categorize recurring orbiting expenses using Gemini Pro.</p>
+                        </div>
+                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-blue-50/30">
+                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-600" />
+                            Merchant Intelligence (Next)
+                          </h3>
+                          <p className="text-[15px] text-[#6E8A96]">Granular merchant-level aggregation (Trader Joe's, ShopRite) and categorical drill-downs for high-fidelity spend analysis.</p>
                         </div>
                       </div>
                     </div>
@@ -652,11 +659,11 @@ export default function Portfolio() {
                         <span className="font-serif font-bold text-white italic">Orbit</span>
                       </div>
                       <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#C5A059]"></span> Status: In Development</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> Status: Live</span>
                         <span>|</span>
                         <span>Author: TShaikh92</span>
                         <span>|</span>
-                        <span>Updated: Q1 2026</span>
+                        <span>Updated: April 2026</span>
                       </div>
                     </div>
                     <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-white transition-colors">✕</button>
@@ -687,12 +694,23 @@ export default function Portfolio() {
                           ]
                         },
                         { 
-                          badge: 'V3 — Wealth', 
-                          badgeClass: 'bg-slate-50 text-slate-400 border border-slate-200', 
-                          title: 'Surplus Deployment', 
-                          time: 'Q3 2026',
+                          badge: 'V3 — Wealth & Analysis', 
+                          badgeClass: 'bg-green-50 text-green-700 border border-green-100', 
+                          title: 'Deployment & Insights', 
+                          time: 'Q2 2026',
                           items: [
-                            { t: 'Surplus Ideas', d: 'Actionable strategies for deploying the Annual Surplus into investments.', s: 'Discovery', dot: 'bg-slate-400' },
+                            { t: 'Surplus Deployment', d: 'Actionable strategies for deploying annual surplus into investments.', s: 'Discovery', dot: 'bg-green-600' },
+                            { t: 'Category Drill-downs', d: 'Interactive sub-categorization (e.g. Food → Groceries/Dining).', s: 'Next', dot: 'bg-blue-600' },
+                            { t: 'Merchant Aggregation', d: 'Bundle recurring merchant spend into single line items.', s: 'Next', dot: 'bg-blue-600' },
+                          ]
+                        },
+                        { 
+                          badge: 'V4 — Vision', 
+                          badgeClass: 'bg-slate-50 text-slate-400 border border-slate-200', 
+                          title: 'Advanced Automation', 
+                          time: 'Q3 2026+',
+                          items: [
+                            { t: 'Dynamic Orbit Sync', d: 'Auto-adjust reserve goals based on real-time spend trends.', s: 'Backlog', dot: 'bg-slate-400' },
                             { t: 'Wealth Simulator', d: 'Comprehensive retirement modeling and scenario analysis.', s: 'In Progress', dot: 'bg-slate-400' },
                           ]
                         }

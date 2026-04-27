@@ -24,6 +24,7 @@ import {
   Wallet,
   ShieldCheck,
   ShoppingCart,
+  ShoppingBag,
   Plus,
   Menu,
   Search,
@@ -78,6 +79,7 @@ import {
 } from 'firebase/firestore';
 
 import StatementImportModal from './StatementImportModal';
+import LifeArchitectModal from './LifeArchitectModal';
 
 // --- Error Boundary ---
 interface ErrorBoundaryProps {
@@ -136,6 +138,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 interface RecurringExpense {
   id: string;
   name: string;
+  merchant?: string; // e.g. "Google" (Parent Brand)
   amount: number;
   month: number; // Legacy single month (1-12)
   months?: number[]; // New multiple months (1-12)
@@ -236,9 +239,10 @@ const ReorderItem: React.FC<{
             {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
             {(exp.category.includes('maintenance') || exp.category.includes('utilities')) ? <Home size={18} className="text-[#C5A059]" /> : null}
             {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
+            {exp.category === 'retail' && <ShoppingBag size={18} className="text-[#C5A059]" />}
             {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
             {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
-            {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
+            {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'retail', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
         </div>
         <div>
           <div className="text-sm font-bold text-[#2C3338] flex items-center gap-2">
@@ -328,6 +332,7 @@ interface AutomatedInvestment {
 interface FixedExpense {
   id: string;
   label: string;
+  merchant?: string; // Parent brand
   amount: number;
   dueDate?: number; // legacy single
   dueDates?: number[]; // multiple days
@@ -348,7 +353,7 @@ interface FinanceProfile {
 
 // --- Components ---
 
-const ExpenseTrendGraph = ({ merchantName, userId }: { merchantName: string, userId: string }) => {
+const ExpenseTrendGraph = ({ merchantName, parentBrand, userId }: { merchantName: string, parentBrand?: string | null, userId: string }) => {
   const [data, setData] = useState<{ date: Date, amount: number }[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -360,13 +365,17 @@ const ExpenseTrendGraph = ({ merchantName, userId }: { merchantName: string, use
     const unsubscribe = onSnapshot(intelRef, (snapshot) => {
       const hits: { date: Date, amount: number }[] = [];
       const normalizedTarget = merchantName.trim().toLowerCase();
+      const normalizedParent = parentBrand?.trim().toLowerCase() || '';
       
       snapshot.forEach(doc => {
         const d = doc.data();
         const pName = d.merchantName?.trim().toLowerCase() || '';
+        const pParent = d.parentMerchant?.trim().toLowerCase() || '';
         
-        // Slightly smarter matching: check for substrings in either direction
-        if (pName && (pName.includes(normalizedTarget) || normalizedTarget.includes(pName))) {
+        const isMatch = (pName && (pName.includes(normalizedTarget) || normalizedTarget.includes(pName))) ||
+                        (normalizedParent && pParent && (pParent === normalizedParent || pParent.includes(normalizedParent) || normalizedParent.includes(pParent)));
+
+        if (isMatch) {
           let hitDate: Date;
           if (d.date?.toDate) {
             hitDate = d.date.toDate();
@@ -612,12 +621,16 @@ function Orbit() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingFromModal, setIsDeletingFromModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showArchitectModal, setShowArchitectModal] = useState(false);
   const [selectedOrbitCategory, setSelectedOrbitCategory] = useState<string | null>(null);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
+  const [viewMode, setViewMode] = useState<'annual' | 'monthly'>('annual');
+  const [observedSpending, setObservedSpending] = useState<Record<string, { total: number, subCategories: Record<string, number>, merchants: Record<string, number> }>>({});
   const [newExpense, setNewExpense] = useState<Partial<RecurringExpense>>({
     name: '',
+    merchant: '',
     amount: 0,
     months: [],
     frequency: 'annual',
@@ -630,6 +643,34 @@ function Orbit() {
     document.title = "Annual Orbit: Cash Flow Intelligence";
     logVisit('/orbit');
   }, []);
+
+  // Fetch and aggregate intelligence for "Observed Spend"
+  useEffect(() => {
+    if (!user || user.uid === 'guest-user') return;
+    
+    const intelRef = collection(db, 'users', user.uid, 'expenseIntelligence');
+    const unsubscribe = onSnapshot(intelRef, (snapshot) => {
+      const agg: Record<string, { total: number, subCategories: Record<string, number>, merchants: Record<string, number> }> = {};
+      
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const cat = d.category || 'other';
+        const sub = d.subCategory || 'general';
+        const brand = d.parentMerchant || d.merchantName || 'Unknown';
+        const amt = d.amount || 0;
+        
+        if (!agg[cat]) agg[cat] = { total: 0, subCategories: {}, merchants: {} };
+        agg[cat].total += amt;
+        agg[cat].subCategories[sub] = (agg[cat].subCategories[sub] || 0) + amt;
+        agg[cat].merchants[brand] = (agg[cat].merchants[brand] || 0) + amt;
+      });
+      
+      setObservedSpending(agg);
+    });
+    
+    return () => unsubscribe();
+  }, [user]);
+
   const [showAddExpense, setShowAddExpense] = useState(false);
 
   const monthNames = [
@@ -780,12 +821,21 @@ function Orbit() {
           data.automatedInvestments = [];
         }
 
+        if (!data.cardColors) {
+          data.cardColors = {
+            income: '#1E5C38',
+            spend: '#8B0000',
+            surplus: '#C5A059',
+            totalSpend: '#1E5C38'
+          };
+        }
+
         // One-time seeding check
         if (data.hasSeededDefaults === undefined || data.hasSeededDefaults === false) {
           DEFAULT_EXPENSES.forEach(exp => {
             setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp).catch(console.error);
           });
-          setDoc(docSnap.ref, { ...data, hasSeededDefaults: true }, { merge: true }).catch(console.error);
+          setDoc(profileRef, { ...data, hasSeededDefaults: true }, { merge: true }).catch(console.error);
           data.hasSeededDefaults = true;
         }
 
@@ -804,6 +854,12 @@ function Orbit() {
           payPeriodStartingBalance: 0,
           customReserveMonths: 6,
           emergencyFundGoal: 0,
+          cardColors: {
+            income: '#1E5C38',
+            spend: '#8B0000',
+            surplus: '#C5A059',
+            totalSpend: '#1E5C38'
+          },
           hasSeededDefaults: true
         };
         
@@ -811,7 +867,7 @@ function Orbit() {
           setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), exp).catch(console.error);
         });
         
-        setDoc(docSnap.ref, initialProfile).catch(console.error);
+        setDoc(profileRef, initialProfile).catch(console.error);
         // It will trigger another onSnapshot, but we can set it now just in case
         if (!isProfileLoaded.current) {
            setProfile(initialProfile);
@@ -1164,6 +1220,7 @@ function Orbit() {
 
       setNewExpense({ 
         name: '', 
+        merchant: '',
         amount: 0, 
         months: [], 
         frequency: 'annual', 
@@ -1178,7 +1235,7 @@ function Orbit() {
   };
 
   const editExpense = (exp: RecurringExpense) => {
-    const isStandard = ['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'health_and_fitness', 'vacation', 'food'].includes(exp.category);
+    const isStandard = ['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'health_and_fitness', 'vacation', 'food', 'retail'].includes(exp.category);
     setNewExpense({
       ...exp,
       category: isStandard ? exp.category : 'other',
@@ -1399,8 +1456,23 @@ function Orbit() {
         <div className="mb-12 w-full">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
-              <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">Annual Orbit: Cash Flow Intelligence</h2>
+              <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">{viewMode === 'annual' ? 'Annual Orbit' : 'Monthly Orbit'}: Cash Flow Intelligence</h2>
               <p className="text-[11px] font-mono uppercase tracking-widest text-[#C5A059] mt-2">Cash Flow Timeline: {monthsInRange} Months</p>
+            </div>
+            
+            <div className="flex bg-[#FAF9F6] border border-[#E8E4D0] p-1 rounded-xl shadow-sm">
+              <button 
+                onClick={() => setViewMode('annual')}
+                className={`px-6 py-2 rounded-lg text-[10px] font-mono uppercase tracking-[0.1em] font-bold transition-all ${viewMode === 'annual' ? 'bg-[#2C3338] text-white shadow-md' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
+              >
+                Annual View
+              </button>
+              <button 
+                onClick={() => setViewMode('monthly')}
+                className={`px-6 py-2 rounded-lg text-[10px] font-mono uppercase tracking-[0.1em] font-bold transition-all ${viewMode === 'monthly' ? 'bg-[#2C3338] text-white shadow-md' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
+              >
+                Monthly Predictor
+              </button>
             </div>
           </div>
           
@@ -1726,15 +1798,15 @@ function Orbit() {
                 <button 
                   onClick={() => setShowImportModal(true)}
                   disabled={!user || user.uid === 'guest-user'}
-                  title={!user || user.uid === 'guest-user' ? "Please sign in to import statements" : ""}
+                  title={!user || user.uid === 'guest-user' ? "Please sign in to run an estimation" : ""}
                   className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                     (!user || user.uid === 'guest-user') 
                       ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
                       : 'bg-[#1E5C38] text-[#FAF9F6] hover:bg-[#154629]'
                   }`}
                 >
-                  <Database size={14} />
-                  Import Statement
+                  <Zap size={14} />
+                  Orbit Estimator
                 </button>
               </div>
 
@@ -1794,17 +1866,29 @@ function Orbit() {
                 })}
 
                 {/* Orbiting Expense Categories */}
-                {Array.from(new Set(expenses.map(e => e.category))).map((cat, i) => {
+                {Array.from(new Set([...expenses.map(e => e.category), ...Object.keys(observedSpending)])).map((cat, i) => {
                   const categoryColors: Record<string, string> = {
                     'insurance': '#4A90E2',
                     'subscription': '#9013FE',
                     'tax': '#D0021B',
                     'maintenance_and_utilities': '#F5A623',
-                    'food': '#10B981',
+                    'groceries': '#10B981',
+                    'restaurants': '#F59E0B',
+                    'fast_food': '#EF4444',
+                    'retail': '#EC4899',
                     'health_and_fitness': '#F43F5E',
                     'vacation': '#06B6D4',
                     'other': '#8C8670'
                   };
+
+                  const displayNameMap: Record<string, string> = {
+                     'groceries': 'Groceries',
+                     'restaurants': 'Restaurants',
+                     'fast_food': 'Fast Food',
+                     'retail': 'Retail',
+                     'maintenance_and_utilities': 'Utilities'
+                  };
+
                   const color = profile.cardColors[`cat_${cat}`] || categoryColors[cat as string] || '#2C3338';
                   
                   const start = new Date(startDate);
@@ -1850,30 +1934,39 @@ function Orbit() {
                         }
                       }
                       
-                      return sum + (e.amount * occurrences);
+                      return sum + (e.amount * (occurrences || (monthsInRange === 1 ? 1 : 0)));
                     }, 0);
                   
+                  const observed = observedSpending[cat]?.total || 0;
+                  const ratio = catTotal > 0 ? (observed / catTotal) : (observed > 0 ? 1 : 0);
+                  
+                  // Adjust totals for viewMode
+                  const displayTotal = viewMode === 'annual' ? catTotal : (catTotal / (monthsInRange || 1));
+                  const displayObserved = viewMode === 'annual' ? (observed * (12 / (monthsInRange || 1))) : (observed / (monthsInRange || 1));
+
                   return (
                       <div 
                         key={cat} 
                         onClick={() => setSelectedOrbitCategory(cat as string)}
-                        className="bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:border-[#C5A059] cursor-pointer hover:z-50" 
+                        className={`bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:border-[#2C3338] cursor-pointer hover:z-50 ${ratio > 1.2 ? 'ring-1 ring-red-500/30' : ''}`} 
                         style={{ borderTopColor: color, borderTopWidth: '4px' }}
                       >
                       <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
-                      <div className={`absolute top-2 right-2 transition-opacity z-50 ${profile.cardColors[`cat_${cat}`] ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                        <ColorPicker 
-                          color={color} 
-                          onChange={(c) => setProfile({...profile, cardColors: {...profile.cardColors, [`cat_${cat}`]: c}})} 
-                        />
-                      </div>
                       <div className="flex-1">
-                        <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors font-bold relative z-10 leading-tight mb-1">
-                          {String(cat).replace(/_/g, ' ')}
-                        </h3>
-                        <div className="text-xl font-serif font-bold text-[#2C3338] relative z-10 pointer-events-none">${Math.round(catTotal).toLocaleString()}</div>
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors font-bold relative z-10 leading-tight">
+                            {displayNameMap[cat] || String(cat).replace(/_/g, ' ')}
+                          </h3>
+                        </div>
+                        <div className="flex items-baseline gap-2 relative z-10 pointer-events-none">
+                          <span className="text-xl font-serif font-bold text-[#2C3338]">
+                            ${Math.round(displayTotal).toLocaleString()}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-3 italic relative z-10 pointer-events-none group-hover:text-[#C5A059] transition-colors">View Expenses</div>
+                      <div className="text-[8px] font-mono text-[#8C8670]/60 mt-3 italic relative z-10 pointer-events-none group-hover:text-[#C5A059] transition-colors">
+                        View Orbit Details
+                      </div>
                     </div>
                   );
                 })}
@@ -1954,6 +2047,35 @@ function Orbit() {
             </section>
           </div>
         </div>
+
+        {/* Discovery CTA Banner */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16 p-10 bg-slate-900 rounded-[2.5rem] text-center space-y-6 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059]/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#1E5C38]/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
+          
+          <div className="relative z-10 max-w-xl mx-auto space-y-6">
+            <div className="w-16 h-16 bg-[#C5A059]/20 text-[#C5A059] rounded-2xl flex items-center justify-center mx-auto mb-2">
+              <Zap size={32} />
+            </div>
+            <h3 className="text-4xl font-serif font-bold text-[#FAF9F6] italic leading-tight">Uncover Your Financial Orbit</h3>
+            <p className="text-slate-400 text-lg">Use our Life Architect to map out your infrastructure. We'll help you find recurring costs you might be ignoring.</p>
+            
+            <div className="pt-4">
+              <button 
+                onClick={() => setShowArchitectModal(true)}
+                className="px-10 py-5 bg-[#C5A059] text-white rounded-2xl font-bold text-sm uppercase tracking-[0.2em] hover:bg-[#B38F48] transition-all shadow-xl shadow-[#C5A059]/20"
+              >
+                Help Find what's in my Orbit
+              </button>
+            </div>
+            <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-500">Fast Analysis • AI Powered • 2 Minute Setup</p>
+          </div>
+        </motion.div>
       </main>
 
       {/* Import Modal */}
@@ -1977,6 +2099,33 @@ function Orbit() {
         )}
       </AnimatePresence>
 
+      {/* Life Architect Modal */}
+      <AnimatePresence>
+        {showArchitectModal && (
+          <LifeArchitectModal 
+            onClose={() => setShowArchitectModal(false)}
+            onAddOrbits={(suggestedOrbits) => {
+              const newExpensesList = [...expenses];
+              suggestedOrbits.forEach(orbit => {
+                const newExp: RecurringExpense = {
+                  id: 'arch_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                  name: orbit.name,
+                  amount: orbit.amount,
+                  frequency: 'monthly',
+                  category: orbit.category || 'other',
+                  month: 1, // Default for backward compatibility
+                  months: [1,2,3,4,5,6,7,8,9,10,11,12],
+                  notes: orbit.description
+                };
+                newExpensesList.push(newExp);
+                saveExpense(newExp).catch(console.error);
+              });
+              setExpenses(newExpensesList);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Category Details Modal */}
       <AnimatePresence>
         {selectedOrbitCategory && (
@@ -1992,87 +2141,153 @@ function Orbit() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-2xl w-full rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="relative bg-[#FAF9F6] border border-[#E8E4D0] p-0 max-w-2xl w-full rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-[#2C3338] capitalize">
-                    {selectedOrbitCategory?.replace(/_/g, ' ')} Orbit
-                  </h3>
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mt-1">
-                    Expenses in this category
-                  </p>
+              <div className="p-8 border-b border-[#E8E4D0] bg-white">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-serif text-3xl font-bold text-[#2C3338] capitalize italic">
+                      {selectedOrbitCategory?.replace(/_/g, ' ')}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-2">
+                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: profile.cardColors[`cat_${selectedOrbitCategory}`] || '#C5A059' }}></div>
+                       <p className="text-[10px] font-mono uppercase tracking-[0.3em] font-bold text-[#8C8670]">Strategic Intelligence Analysis</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedOrbitCategory(null)}
+                    className="p-2 hover:bg-[#FAF9F6] rounded-xl transition-colors border border-transparent hover:border-[#E8E4D0]"
+                  >
+                    <X size={20} className="text-[#8C8670]" />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setSelectedOrbitCategory(null)}
-                  className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors"
-                >
-                  <X size={20} className="text-[#8C8670]" />
-                </button>
               </div>
 
-              <div className="space-y-3">
-                {expenses.filter(e => e.category === selectedOrbitCategory).length === 0 ? (
-                  <p className="text-sm font-mono text-[#8C8670]">No expenses in this category.</p>
-                ) : (
-                  expenses
-                    .filter(e => e.category === selectedOrbitCategory)
-                    .map(exp => (
-                    <div 
-                      key={exp.id} 
-                      onClick={() => {
-                        setSelectedOrbitCategory(null);
-                        editExpense(exp);
-                      }}
-                      className={`flex justify-between items-center p-4 bg-white border border-[#E8E4D0] rounded-xl cursor-pointer hover:border-[#C5A059] hover:shadow-sm transition-all ${monthsInRange === 1 && exp.frequency !== 'monthly' ? 'border-b-[#C5A059] border-b-2' : ''}`}
-                      title="Edit Expense"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#C5A059]/10 rounded-xl flex items-center justify-center shrink-0">
-                          {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
-                          {(exp.category.includes('maintenance') || exp.category.includes('utilities')) ? <Home size={18} className="text-[#C5A059]" /> : null}
-                          {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
-                          {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
-                          {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-sm font-bold text-[#2C3338] truncate">{exp.name}</div>
-                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mt-1 whitespace-nowrap">
-                            {exp.frequency.replace('-', ' ')}
-                            {exp.frequency !== 'monthly' && (
-                              <>
-                                {' • '}
-                                {exp.months && exp.months.length > 0
-                                  ? `${exp.months.map(m => new Date(2000, m - 1).toLocaleString('default', { month: 'short' })).join(', ')}`
-                                  : `Month ${exp.month}`
-                                }
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-right flex flex-col items-end min-w-[120px]">
-                          <div className={`font-serif font-bold text-lg ${monthsInRange === 1 && exp.frequency !== 'monthly' ? 'text-[#C5A059]' : 'text-[#2C3338]'}`}>
-                            ${(monthsInRange === 1 && exp.frequency !== 'monthly' ? getMonthlyReserveAmount(exp) : exp.amount).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                          </div>
-                          {monthsInRange === 1 && exp.frequency !== 'monthly' && (
-                            <div className="text-[10px] text-[#C5A059] font-bold tracking-tight flex flex-col gap-0.5 items-end">
-                              <span className="uppercase font-sans">Monthly Reserve</span>
-                              <span className="text-[9px] opacity-80 italic lowercase font-sans font-medium whitespace-nowrap">{getMonthlyReserveExplainer(exp)}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-2 text-[#8C8670] group-hover:text-[#C5A059] transition-colors shrink-0">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                        </div>
-                      </div>
+              <div className="flex-1 overflow-y-auto p-8 space-y-10">
+                {/* 1. Habit Analysis (Observed Data) */}
+                {observedSpending[selectedOrbitCategory as string] && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                       <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center">
+                          <Zap size={14} className="text-[#C5A059]" />
+                       </div>
+                       <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] font-bold text-[#2C3338]">Orbit Intelligence & Estimates</h4>
                     </div>
-                  ))
+
+                    {/* Sub-category breakdown (e.g. Food -> Groceries vs Restaurants) */}
+                    {Object.keys(observedSpending[selectedOrbitCategory as string].subCategories).length > 0 && (
+                      <div className="grid grid-cols-1 gap-6 bg-white border border-[#E8E4D0] p-6 rounded-2xl">
+                        {Object.entries(observedSpending[selectedOrbitCategory as string].subCategories)
+                          .sort((a: [string, any], b: [string, any]) => (b[1] as number) - (a[1] as number))
+                          .map(([sub, totalAmt]) => {
+                             const total = totalAmt as number;
+                             const categoryTotal = observedSpending[selectedOrbitCategory as string].total as number;
+                             const subPercent = (total / (categoryTotal || 1)) * 100;
+                             const monthlyAvg = total / (monthsInRange || 1);
+                             const displayAmt = viewMode === 'annual' ? monthlyAvg * 12 : monthlyAvg;
+                             
+                             return (
+                               <div key={sub} className="space-y-4">
+                                  <div className="flex justify-between items-baseline">
+                                     <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-[#1E5C38]" />
+                                        <span className="text-[11px] font-mono text-[#2C3338] uppercase tracking-wide font-bold">{sub.replace(/_/g, ' ')}</span>
+                                     </div>
+                                     <div className="text-right">
+                                        <span className="text-sm font-bold text-[#2C3338]">${Math.round(displayAmt).toLocaleString()}</span>
+                                        <span className="text-[10px] font-mono text-[#8C8670] ml-2">/{viewMode === 'annual' ? 'yr' : 'mo'}</span>
+                                     </div>
+                                  </div>
+                                  <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+                                     <motion.div 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${subPercent}%` }}
+                                        className="h-full bg-[#1E5C38]"
+                                     />
+                                  </div>
+
+                                  {/* Indented Merchants for this sub-category */}
+                                  <div className="pl-6 space-y-2 border-l border-slate-100 mt-2">
+                                     {Object.entries(observedSpending[selectedOrbitCategory as string].merchants)
+                                        .filter(([_, details]) => (details as any).subCategory === sub)
+                                        .sort((a, b) => ((b[1] as any).total as number) - ((a[1] as any).total as number))
+                                        .slice(0, 10) // Show more top merchants
+                                        .map(([brand, details]) => {
+                                           const amt = (details as any).total as number;
+                                           const monthlyAvg = amt / (monthsInRange || 1);
+                                           const displayAmt = viewMode === 'annual' ? monthlyAvg * 12 : monthlyAvg;
+                                           return (
+                                             <div key={brand} className="flex justify-between items-center text-[10px] text-[#8C8670] font-mono group">
+                                                <span className="group-hover:text-[#2C3338] transition-colors">• {brand}</span>
+                                                <span className="font-bold opacity-60">${Math.round(displayAmt).toLocaleString()}</span>
+                                             </div>
+                                           );
+                                        })}
+                                  </div>
+                               </div>
+                             );
+                          })}
+                      </div>
+                    )}
+                  </div>
                 )}
+
+                {/* 2. Tracked Recurrence (Orbit Bills) */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                     <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center">
+                        <Target size={14} className="text-[#C5A059]" />
+                     </div>
+                     <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] font-bold text-[#2C3338]">Fixed Recurring Orbits</h4>
+                  </div>
+
+                  <div className="space-y-3">
+                    {expenses.filter(e => e.category === selectedOrbitCategory).length === 0 ? (
+                      <div className="p-8 bg-white border border-dashed border-[#E8E4D0] rounded-2xl text-center">
+                         <p className="text-[11px] font-mono text-[#8C8670] italic">No fixed recurring bills defined in this orbit.</p>
+                      </div>
+                    ) : (
+                      expenses
+                        .filter(e => e.category === selectedOrbitCategory)
+                        .map(exp => (
+                        <div 
+                          key={exp.id} 
+                          onClick={() => {
+                            setSelectedOrbitCategory(null);
+                            editExpense(exp);
+                          }}
+                          className={`flex justify-between items-center p-4 bg-white border border-[#E8E4D0] rounded-2xl cursor-pointer hover:border-[#2C3338] hover:shadow-md transition-all group`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-[#C5A059] transition-colors">
+                               {exp.category === 'insurance' && <ShieldCheck size={18} className="text-[#C5A059]" />}
+                               {exp.category === 'tax' && <DollarSign size={18} className="text-[#C5A059]" />}
+                               {exp.category === 'subscription' && <RefreshCw size={18} className="text-[#C5A059]" />}
+                               {(exp.category.includes('maintenance') || exp.category.includes('utilities')) ? <Home size={18} className="text-[#C5A059]" /> : null}
+                               {exp.category === 'food' && <ShoppingCart size={18} className="text-[#C5A059]" />}
+                               {exp.category === 'retail' && <ShoppingBag size={18} className="text-[#C5A059]" />}
+                               {exp.category === 'health_and_fitness' && <Activity size={18} className="text-[#C5A059]" />}
+                               {exp.category === 'vacation' && <Plane size={18} className="text-[#C5A059]" />}
+                               {(exp.category === 'other' || !['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'food', 'retail', 'health_and_fitness', 'vacation', 'restaurants', 'groceries', 'fast_food'].includes(exp.category)) && <Zap size={18} className="text-[#C5A059]" />}
+                            </div>
+                            <div>
+                               <div className="text-sm font-bold text-[#2C3338]">{exp.name}</div>
+                               <div className="text-[9px] font-mono text-[#8C8670] uppercase tracking-widest mt-0.5">{exp.frequency}</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                             <div className="text-sm font-bold text-[#2C3338]">
+                                ${Math.round(viewMode === 'annual' ? (exp.frequency === 'monthly' ? exp.amount * 12 : exp.amount) : getMonthlyReserveAmount(exp)).toLocaleString()}
+                             </div>
+                             <div className="text-[9px] font-mono text-[#C5A059] font-bold uppercase tracking-tighter">
+                                {viewMode === 'annual' ? 'Annual' : 'Reserve'}
+                             </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -2109,7 +2324,7 @@ function Orbit() {
                   onClick={() => {
                     setShowAddExpense(false);
                     setEditingExpenseId(null);
-                    setNewExpense({ name: '', amount: 0, month: 1, frequency: 'annual', category: 'other' });
+                    setNewExpense({ name: '', merchant: '', amount: 0, month: 1, frequency: 'annual', category: 'other' });
                   }}
                   className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors"
                 >
@@ -2125,19 +2340,31 @@ function Orbit() {
                     
                     <div className="space-y-6">
                       <div>
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Expense Name</label>
+                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Service Name</label>
                         <input 
                           type="text" 
                           value={newExpense.name}
                           onChange={e => setNewExpense({...newExpense, name: e.target.value})}
                           className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-serif italic"
-                          placeholder="e.g. Car Insurance"
+                          placeholder="e.g. YouTube Premium"
                         />
+                      </div>
+
+                      <div>
+                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Parent Merchant / Brand (Optional)</label>
+                        <input 
+                          type="text" 
+                          value={newExpense.merchant || ''}
+                          onChange={e => setNewExpense({...newExpense, merchant: e.target.value})}
+                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono"
+                          placeholder="e.g. Google"
+                        />
+                        <p className="text-[10px] text-slate-400 mt-2 italic leading-relaxed">Bundles this expense under a single brand for smarter drill-down analysis.</p>
                       </div>
                       
                       {user && newExpense.name && newExpense.name.length > 2 && (
                         <div className="mt-2">
-                          <ExpenseTrendGraph merchantName={newExpense.name} userId={user.uid} />
+                          <ExpenseTrendGraph merchantName={newExpense.name} parentBrand={newExpense.merchant} userId={user.uid} />
                         </div>
                       )}
 
@@ -2235,7 +2462,7 @@ function Orbit() {
                       <div>
                         <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Category</label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          {['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'health_and_fitness', 'vacation', 'food', 'other'].map(cat => (
+                          {['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'health_and_fitness', 'vacation', 'food', 'retail', 'other'].map(cat => (
                             <button
                               key={cat}
                               onClick={() => setNewExpense({...newExpense, category: cat})}
@@ -2479,6 +2706,17 @@ function Orbit() {
                 </div>
 
                   <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Parent Merchant / Brand (Optional)</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Chase, Verizon, Landlord..."
+                      value={editingFixedExpense.merchant || ''}
+                      onChange={(e) => setEditingFixedExpense({ ...editingFixedExpense, merchant: e.target.value })}
+                      className="bg-white border border-[#E8E4D0] rounded-xl px-4 py-3 text-sm font-mono text-[#2C3338] focus:border-[#C5A059] outline-none w-full"
+                    />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Monthly Amount</label>
@@ -2594,7 +2832,11 @@ function Orbit() {
                   </div>
 
                   {user && editingFixedExpense.label && editingFixedExpense.label.length > 2 && (
-                    <ExpenseTrendGraph merchantName={editingFixedExpense.label} userId={user.uid} />
+                    <ExpenseTrendGraph 
+                      merchantName={editingFixedExpense.label} 
+                      parentBrand={editingFixedExpense.merchant} 
+                      userId={user.uid} 
+                    />
                   )}
 
                   <button 

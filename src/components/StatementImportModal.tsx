@@ -12,7 +12,10 @@ import {
   Info,
   Zap,
   Download,
-  RefreshCw
+  RefreshCw,
+  ChevronDown,
+  ChevronRight,
+  TrendingUp
 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import { collection, addDoc, setDoc, doc, query, orderBy, getDocs, serverTimestamp } from 'firebase/firestore';
@@ -28,9 +31,12 @@ interface StatementImportModalProps {
 
 interface ParsedExpense {
   name: string;
+  merchant?: string; // Normalized brand name
   amount: number;
   frequency: 'annual' | 'semi-annual' | 'quarterly' | 'monthly' | 'bi-weekly' | 'weekly' | 'one-time';
   category: string;
+  subCategory?: string; // e.g. 'groceries', 'restaurants', 'fast_food'
+  expenseType: 'orbit' | 'habit'; // 'orbit' for bills/subs, 'habit' for variable retail/food/etc
   date?: string; // YYYY-MM-DD
   confidence: number; // 0-100
   selected?: boolean;
@@ -61,6 +67,7 @@ export default function StatementImportModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [parsedExpenses, setParsedExpenses] = useState<ParsedExpense[]>([]);
   const [step, setStep] = useState<'upload' | 'review'>('upload');
+  const [showDetails, setShowDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const [history, setHistory] = useState<UploadLog[]>([]);
@@ -83,50 +90,16 @@ export default function StatementImportModal({
     if (userId === 'guest-user') return;
     setIsLoadingHistory(true);
     try {
-      // 1. Check primary and legacy collections without strict ordering (safer for mixed schemas)
+      // Consolidate into a single active collection for primary history
       const collRef = collection(db, 'users', userId, 'statementUploads');
-      const legacyCollRef = collection(db, 'users', userId, 'statementUploadHistory');
-      const alternateLegacyCollRef = collection(db, 'users', userId, 'uploads'); // Just in case
-      
-      const [snapshot, legacySnapshot, altSnapshot] = await Promise.all([
-        getDocs(collRef).catch(() => ({ docs: [], forEach: () => {} })),
-        getDocs(legacyCollRef).catch(() => ({ docs: [], forEach: () => {} })),
-        getDocs(alternateLegacyCollRef).catch(() => ({ docs: [], forEach: () => {} }))
-      ]);
+      const snapshot = await getDocs(collRef).catch(() => ({ docs: [] }));
 
-      const logs: UploadLog[] = [];
-      
-      snapshot.forEach(doc => {
-        logs.push({ id: doc.id, ...doc.data() } as UploadLog);
-      });
+      const logs: UploadLog[] = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      } as UploadLog));
 
-      legacySnapshot.forEach(doc => {
-        const data = doc.data();
-        if (!logs.find(l => l.id === doc.id)) {
-          logs.push({ 
-            id: doc.id, 
-            fileName: data.fileName || 'Legacy Statement', 
-            uploadDate: data.date || data.uploadDate || null, 
-            status: data.status || 'processed',
-            expensesFound: data.expenseCount || data.expensesFound || 0 
-          } as any);
-        }
-      });
-
-      altSnapshot.docs.forEach(doc => {
-        const data = doc.data() as any;
-        if (!logs.find(l => l.id === doc.id)) {
-          logs.push({
-            id: doc.id,
-            fileName: data.name || data.fileName || 'Old Upload',
-            uploadDate: data.date || data.uploadDate || data.timestamp || null,
-            status: data.status || 'processed',
-            expensesFound: data.count || data.expensesFound || 0
-          } as any);
-        }
-      });
-
-      // 2. Client-side sort to avoid silent query failures due to missing indexes or fields
+      // Client-side sort
       const sortedLogs = logs.sort((a, b) => {
         const dateA = a.uploadDate?.toDate ? a.uploadDate.toDate() : (a.uploadDate instanceof Date ? a.uploadDate : new Date(0));
         const dateB = b.uploadDate?.toDate ? b.uploadDate.toDate() : (b.uploadDate instanceof Date ? b.uploadDate : new Date(0));
@@ -186,38 +159,49 @@ export default function StatementImportModal({
       const promptText = `
         You are a financial AI assistant. Analyze the following credit card statement data.
         Identify ONLY recurring, fixed, or seasonal expenses.
-        IGNORE variable, day-to-day spending (coffee, groceries, restaurants, etc).
+        IGNORE variable, day-to-day spending (one-off coffee, sporadic restaurants, etc).
+        BUT, if you see a merchant that appears at least 2-3 times per month (like "Trader Joe's" or "Uber"), identify it as a recurring 'food' or 'transportation' habit.
 
         HISTORICAL TIMELINE RULE:
-        - If a merchant/expense appears multiple times (e.g. a monthly Netflix charge appearing 3 times in a long statement), return EACH individual occurrence as a separate object in the JSON array. This is critical for building a historical trend timeline. DO NOT consolidate them into a single entry.
+        - Return EACH individual occurrence as a separate object in the JSON array. This is critical for building a historical trend timeline. DO NOT consolidate them into a single entry.
 
+        MERCHANT EXTRACTION:
+        - "name": Clean Title Case name of the specific service (e.g. "YouTube Premium").
+        - "merchant": The parent BRAND name normalized. (e.g. "YouTube Premium" -> "Google", "Amazon Prime" -> "Amazon", "Trader Joes #123" -> "Trader Joe's").
+        
         DATA CLEANING RULES:
-        - For "name": Clean up vendor names. Convert ALL CAPS bank descriptions (e.g. "NETFLIX.COM* 800-456-7890") into clean, human-readable Title Case names (e.g. "Netflix"). 
+        - For "name": Clean up vendor names. Convert ALL CAPS bank descriptions (e.g. "TARGET T-1234 800-456-7890") into clean, human-readable names (e.g. "Target"). 
+        - BUNDLING: Ensure specific store numbers or transaction IDs are REMOVED from the name so recurring visits to the same brand are perfectly matched.
         - STRIP ALL NON-BRANDING TEXT: Remove suffixes like "Annual Membership", "Fee", "Member Fee", "Subscription", "Service", "Monthly", bank codes, phone numbers, and location info.
-        - Example: "CHASE SAPPHIRE ANNUAL MEMBERSHIP" -> "Chase Sapphire".
-        - Example: "AMEX PLATINUM FEE" -> "Amex Platinum".
-        - Example: "NETFLIX.COM INTERNET" -> "Netflix".
         
-        - Keep proper acronyms uppercase if they make sense (e.g., "PSEG", "NJ").
-        - Strip transaction codes, phone numbers, and web suffixes if they clutter the primary name.
-
         CATEGORIZATION RULES:
-        - Categories: 'insurance', 'subscription', 'tax', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'vacation', or 'other'.
-        - Membership fees -> 'subscription'.
-        - Utility bills -> 'maintenance_and_utilities'.
-        - Gyms/Health -> 'health_and_fitness'.
+        - Primary Categories: 'insurance', 'subscription', 'tax', 'maintenance_and_utilities', 'food', 'health_and_fitness', 'transportation', 'vacation', 'retail', or 'other'.
+        - "subCategory": 
+            - For 'food' category: specify 'groceries', 'restaurants', or 'fast_food'.
+            - For 'retail' category: specify 'general', 'amazon', 'home_improvement', etc.
+        - MANDATORY RULE [Retail]: Amazon, Walmart, Target, Home Depot MUST be primary category 'retail'.
+        - MANDATORY RULE [Food]: Costco, Stop & Shop, Trader Joe's, McDonald's MUST be primary category 'food'.
+            - Then use subCategory to distinguish 'groceries' vs 'fast_food'.
+        - BUNDLING: Consolidate recurring visits to the SAME merchant into a single result if they occur multiple times in the statement, but KEEP the historical individual dates if possible (or just return the most recent). Actually, for intelligence, return EVERY transaction as a separate row so we can accurately average.
         
-        Estimate frequency: 'annual', 'semi-annual', 'quarterly', 'monthly', 'bi-weekly', 'weekly', or 'one-time'.
+        EXPENSE TYPE CLASSIFICATION:
+        - "expenseType": 
+            - 'orbit' if it's a stable, predictable BILL or SUBSCRIPTION (Netlfix, Rent, Insurance, Gym).
+            - 'habit' if it's high-frequency spending that varies (Chipotle, Costco trips, Target runs).
+        
         Confidence score: 0 to 100.
 
         Respond explicitly in JSON array format.
         Structure:
         [
           {
-            "name": "Vendor Name",
+            "name": "Service Name",
+            "merchant": "Parent Brand",
             "amount": 15.99,
             "frequency": "monthly",
-            "category": "subscription",
+            "category": "food",
+            "subCategory": "fast_food",
+            "expenseType": "habit",
             "date": "YYYY-MM-DD",
             "confidence": 95
           }
@@ -260,7 +244,7 @@ export default function StatementImportModal({
       }
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash-latest',
         contents: allContents
       });
 
@@ -327,18 +311,19 @@ export default function StatementImportModal({
           // 3. Map with fuzzy matching in memory
           const enriched = configured.map(p => {
             const normalizedNew = p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const normalizedMerchant = (p.merchant || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            
             const allHits: number[] = [];
             let isAlreadyTracking = false;
 
             // Check current hits
             Object.entries(currentOrbitHits).forEach(([name, hits]) => {
-              // Substring check for near-duplicates
-              if (normalizedNew.length > 4 && name.length > 4) {
-                if (name.includes(normalizedNew) || normalizedNew.includes(name)) {
-                  allHits.push(...hits);
-                  isAlreadyTracking = true;
-                }
-              } else if (name === normalizedNew) {
+              const isMatch = name === normalizedNew || 
+                            (normalizedMerchant && name === normalizedMerchant) ||
+                            (normalizedNew.length > 4 && name.length > 4 && (name.includes(normalizedNew) || normalizedNew.includes(name))) ||
+                            (normalizedMerchant.length > 4 && name.length > 4 && (name.includes(normalizedMerchant) || normalizedMerchant.includes(name)));
+
+              if (isMatch) {
                 allHits.push(...hits);
                 isAlreadyTracking = true;
               }
@@ -346,11 +331,12 @@ export default function StatementImportModal({
 
             // Check history hits
             Object.entries(historyHits).forEach(([name, hits]) => {
-              if (normalizedNew.length > 4 && name.length > 4) {
-                if (name.includes(normalizedNew) || normalizedNew.includes(name)) {
-                  allHits.push(...hits);
-                }
-              } else if (name === normalizedNew) {
+              const isMatch = name === normalizedNew || 
+                            (normalizedMerchant && name === normalizedMerchant) ||
+                            (normalizedNew.length > 4 && name.length > 4 && (name.includes(normalizedNew) || normalizedNew.includes(name))) ||
+                            (normalizedMerchant.length > 4 && name.length > 4 && (name.includes(normalizedMerchant) || normalizedMerchant.includes(name)));
+
+              if (isMatch) {
                 allHits.push(...hits);
               }
             });
@@ -421,9 +407,12 @@ export default function StatementImportModal({
 
             return setDoc(doc(db, 'users', userId, 'expenseIntelligence', uniqueId), {
               merchantName: p.name,
+              parentMerchant: p.merchant || null,
               amount: p.amount,
               date: hitDate,
-              category: p.category
+              category: p.category,
+              subCategory: p.subCategory || null,
+              expenseType: p.expenseType
             });
           });
           await Promise.all(intelPromises);
@@ -469,6 +458,7 @@ export default function StatementImportModal({
        return {
          id: 'orbit_imp_' + Date.now() + Math.random().toString(36).substr(2, 5),
          name: p.name,
+         merchant: p.merchant || null,
          amount: finalAmount,
          frequency: p.frequency,
          category: p.category,
@@ -495,7 +485,7 @@ export default function StatementImportModal({
               <Database className="text-[#1E5C38]" size={20} />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-bold text-slate-900 leading-tight">Magic Statement Import</h2>
+              <h2 className="font-serif text-xl font-bold text-slate-900 leading-tight">Orbit Intelligence Estimator</h2>
               <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mt-0.5">Powered by Gemini AI</p>
             </div>
           </div>
@@ -612,7 +602,7 @@ export default function StatementImportModal({
                       {isProcessing ? (
                         <>
                           <Loader2 size={18} className="animate-spin" />
-                          Analyzing Statements...
+                          AI Extraction & Brand Normalization...
                         </>
                       ) : (
                         <>
@@ -626,148 +616,156 @@ export default function StatementImportModal({
               )}
 
               {step === 'review' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-slate-900 mb-1">Review Found Expenses</h3>
-                    <p className="text-sm text-slate-600">Gemini found {parsedExpenses.length} potential recurring expenses. Select the ones you'd like to track in Orbit.</p>
+                <div className="space-y-8 py-4">
+                  <div className="text-center space-y-2">
+                    <div className="w-16 h-16 bg-[#C5A059]/10 text-[#C5A059] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Zap size={32} />
+                    </div>
+                    <h3 className="font-serif text-2xl font-bold text-slate-900">Estimation Report Ready</h3>
+                    <p className="text-sm text-slate-500 max-w-xs mx-auto">Gemini has analyzed your history to estimate your future Orbit reserves.</p>
                   </div>
 
-                  {parsedExpenses.length === 0 ? (
-                    <div className="bg-slate-50 border border-slate-200 p-8 rounded-xl text-center">
-                      <p className="text-slate-600">No recurring expenses could be identified confidently in this file.</p>
-                    </div>
-                  ) : (
-                    <div className="border border-slate-200 rounded-xl overflow-hidden">
-                      <div className="bg-slate-50 p-3 grid grid-cols-12 gap-4 border-b border-slate-200 text-xs font-mono uppercase tracking-widest text-[#8C8670]">
-                        <div className="col-span-1 text-center">Add</div>
-                        <div className="col-span-4">Vendor</div>
-                        <div className="col-span-1">Freq</div>
-                        <div className="col-span-4 text-right">Amount Strategy</div>
-                        <div className="col-span-2 text-right">Confidence</div>
-                      </div>
-                      <div className="max-h-80 overflow-y-auto">
-                        {Array.from(new Set(parsedExpenses.map(p => p.category))).map((category: string) => (
-                          <div key={category} className="contents">
-                            <div className="col-span-12 bg-slate-50/50 px-4 py-2 text-[10px] font-mono uppercase tracking-widest text-[#C5A059] border-b border-slate-100 flex justify-between items-center">
-                              <span>{category.replace(/_/g, ' ')}</span>
+                  <div className="grid grid-cols-1 gap-4">
+                    {/* Fixed Orbit Expenses Found */}
+                    {parsedExpenses.filter(p => p.expenseType === 'orbit').length > 0 && (
+                      <div className="space-y-3">
+                        <button 
+                          onClick={() => setShowDetails(!showDetails)}
+                          className={`w-full bg-white border border-slate-200 p-5 rounded-2xl flex items-center justify-between hover:border-[#1E5C38]/50 transition-all ${showDetails ? 'rounded-b-none border-b-0' : ''}`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-[#1E5C38]/10 rounded-full flex items-center justify-center">
+                              <Database size={18} className="text-[#1E5C38]" />
                             </div>
-                            {parsedExpenses
-                              .map((p, i) => ({ ...p, originalIndex: i }))
-                              .filter(p => p.category === category)
-                              .map((expense) => (
-                                <div 
-                                  key={expense.originalIndex} 
-                                  className={`p-4 grid grid-cols-12 gap-4 items-center border-b border-slate-100 last:border-0 transition-colors ${expense.selected ? 'bg-[#1E5C38]/5' : 'hover:bg-slate-50 opacity-60'}`}
-                                >
-                                  <div className="col-span-1 flex justify-center">
-                                    <button 
-                                      onClick={() => {
-                                        const newList = [...parsedExpenses];
-                                        newList[expense.originalIndex].selected = !newList[expense.originalIndex].selected;
-                                        setParsedExpenses(newList);
-                                      }}
-                                      className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${expense.selected ? 'bg-[#1E5C38] border-[#1E5C38]' : 'border-slate-300'}`}
-                                    >
-                                      {expense.selected && <CheckCircle size={14} className="text-white" />}
-                                    </button>
-                                  </div>
-                                  <div className="col-span-4 font-medium text-slate-900 truncate">
-                                    {expense.name}
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      {expense.alreadyTracking && (
-                                        <span className="text-[8px] bg-[#1E5C38]/10 text-[#1E5C38] px-1.5 py-0.5 rounded font-mono font-bold uppercase">
-                                          Already Tracking
-                                        </span>
-                                      )}
-                                      {expense.hitCount && expense.hitCount > 0 && (
-                                        <div className="text-[8px] text-[#C5A059] font-mono font-bold flex items-center gap-1">
-                                          <History size={8} /> {expense.hitCount} Past Hits
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="col-span-1 text-[10px] text-slate-500 capitalize font-mono">
-                                    {expense.frequency.substring(0, 3)}
-                                  </div>
-                                  <div className="col-span-4 text-right">
-                                    <div className="flex flex-col items-end gap-1">
-                                      <div className="flex items-center gap-2 bg-slate-100/50 p-1 rounded-lg">
-                                        <button
-                                          onClick={() => {
-                                            const newList = [...parsedExpenses];
-                                            newList[expense.originalIndex].useAverage = false;
-                                            setParsedExpenses(newList);
-                                          }}
-                                          className={`px-2 py-1 rounded text-[9px] font-mono transition-all ${!expense.useAverage ? 'bg-white text-[#2C3338] shadow-sm font-bold' : 'text-[#8C8670]'}`}
-                                        >
-                                          Current: ${expense.amount.toFixed(0)}
-                                        </button>
-                                        {expense.historicalAverage && (
-                                          <button
-                                            onClick={() => {
-                                              const newList = [...parsedExpenses];
-                                              newList[expense.originalIndex].useAverage = true;
-                                              setParsedExpenses(newList);
-                                            }}
-                                            className={`px-2 py-1 rounded text-[9px] font-mono transition-all ${expense.useAverage ? 'bg-[#C5A059] text-white shadow-sm font-bold' : 'text-[#8C8670]'}`}
-                                          >
-                                            Avg: ${expense.historicalAverage.toFixed(0)}
-                                          </button>
-                                        )}
-                                      </div>
-                                      {expense.historicalAverage && !expense.useAverage && Math.abs(expense.amount - expense.historicalAverage) > (expense.historicalAverage * 0.15) && (
-                                        <div className="text-[8px] text-amber-600 font-mono italic animate-pulse">
-                                          {expense.amount < expense.historicalAverage ? 'Lower than average' : 'Higher than average'}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="col-span-2 flex justify-end">
-                                    <span className={`text-[9px] font-bold px-2 py-1 rounded-full ${expense.confidence > 80 ? 'bg-green-100 text-green-700' : expense.confidence > 50 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}>
-                                      {expense.confidence}%
-                                    </span>
+                            <div className="text-left">
+                              <p className="font-bold text-slate-800">Fixed Reserve Updates</p>
+                              <p className="text-xs text-slate-500">{parsedExpenses.filter(p => p.expenseType === 'orbit' && p.selected !== false).length} items selected to add</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                               <p className="text-sm font-bold text-[#1E5C38]">+${Math.round(parsedExpenses.filter(p => p.expenseType === 'orbit' && p.selected !== false).reduce((sum, p) => sum + p.amount, 0)).toLocaleString()}/mo</p>
+                            </div>
+                            <ChevronDown size={16} className={`text-slate-400 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+                          </div>
+                        </button>
+                        
+                        {showDetails && (
+                          <div className="bg-white border border-slate-200 border-t-0 p-4 rounded-b-2xl -mt-3 space-y-2 max-h-48 overflow-y-auto">
+                            {parsedExpenses.filter(p => p.expenseType === 'orbit').map((p, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg group">
+                                <div className="flex items-center gap-3">
+                                  <input 
+                                    type="checkbox" 
+                                    checked={p.selected !== false}
+                                    onChange={() => {
+                                      const newParsed = [...parsedExpenses];
+                                      const itemIdx = newParsed.findIndex(item => item === p);
+                                      newParsed[itemIdx].selected = !newParsed[itemIdx].selected;
+                                      setParsedExpenses(newParsed);
+                                    }}
+                                    className="accent-[#1E5C38] w-4 h-4"
+                                  />
+                                  <div>
+                                    <p className="text-sm font-bold text-slate-700">{p.merchant || p.name}</p>
+                                    <p className="text-[10px] text-slate-400 uppercase font-mono">{p.category}</p>
                                   </div>
                                 </div>
-                              ))}
+                                <span className="text-sm font-mono text-slate-900">${Math.round(p.amount)}</span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
+                      </div>
+                    )}
+
+                    {/* Impact Analysis */}
+                    <div className="bg-slate-900 text-white p-6 rounded-2xl space-y-4 shadow-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp size={14} className="text-[#C5A059]" />
+                        <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] font-bold">Planned vs. Estimated Impact</h4>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {Array.from(new Set(parsedExpenses.map(p => p.category))).slice(0, 3).map(cat => {
+                          const currentPlanned = existingOrbitExpenses?.filter(e => e.category === cat).reduce((sum, e) => sum + e.amount, 0) || 0;
+                          const suggestedAdd = parsedExpenses.filter(p => p.category === cat && p.selected !== false).reduce((sum, p) => sum + p.amount, 0);
+                          
+                          if (suggestedAdd === 0) return null;
+
+                          return (
+                            <div key={cat} className="flex justify-between items-end">
+                              <div>
+                                <p className="text-[10px] font-mono text-white/50 uppercase tracking-widest">{cat}</p>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-bold text-white/40 decoration-red-500/50 line-through">${Math.round(currentPlanned)}</span>
+                                  <ChevronRight size={12} className="text-white/20" />
+                                  <span className="text-sm font-bold text-[#C5A059]">${Math.round(currentPlanned + suggestedAdd)}</span>
+                                </div>
+                              </div>
+                              <div className="text-[10px] font-mono bg-[#C5A059]/20 text-[#C5A059] px-2 py-0.5 rounded">
+                                Calibration: +${Math.round(suggestedAdd)}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  )}
 
-                  <div className="flex justify-between items-center pt-4">
+                    {/* Habits Learned */}
+                    {parsedExpenses.filter(p => p.expenseType === 'habit').length > 0 && (
+                      <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-5 rounded-2xl flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-[#C5A059]/10 rounded-full flex items-center justify-center">
+                            <RefreshCw size={18} className="text-[#C5A059]" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800">Lifestyle Calibration</p>
+                            <p className="text-xs text-slate-500">Estimating variable costs across {new Set(parsedExpenses.filter(p => p.expenseType === 'habit').map(p => p.merchant)).size} habits</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] font-bold">Calibration Active</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-slate-50 p-4 rounded-xl">
+                    <p className="text-[10px] text-slate-400 font-mono text-center leading-relaxed">
+                      This estimation will update your conceptual Orbit planned spending. It does not track individual pennies, but recalibrates your overall financial architecture based on real spending patterns.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 pt-2">
+                    <button
+                      onClick={() => {
+                        const allSelected = parsedExpenses.map(p => ({ ...p, selected: true }));
+                        setParsedExpenses(allSelected);
+                        setTimeout(() => importSelected(), 10);
+                      }}
+                      className="w-full py-4 bg-[#C5A059] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#B38F48] transition-all shadow-lg shadow-[#C5A059]/20"
+                    >
+                      <Zap size={18} />
+                      Calibrate My Orbit
+                    </button>
                     <button
                       onClick={() => {
                         setStep('upload');
                         setFiles([]);
                         setParsedExpenses([]);
                       }}
-                      className="text-sm text-slate-500 hover:text-slate-800 transition-colors"
+                      className="text-xs text-slate-400 hover:text-slate-600 font-medium py-2 rounded-lg transition-colors"
                     >
-                      Start Over
+                      Wait, start over
                     </button>
-                    {parsedExpenses.filter(p => p.selected).length > 0 ? (
-                      <button
-                        onClick={importSelected}
-                        className="px-6 py-3 bg-[#1E5C38] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#154629] transition-colors"
-                      >
-                        Import {parsedExpenses.filter(p => p.selected).length} Items to Orbit
-                      </button>
-                    ) : (
-                      <button
-                        onClick={onClose}
-                        className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-200 transition-colors"
-                      >
-                        Log Data & Close
-                      </button>
-                    )}
                   </div>
                 </div>
               )}
             </>
           )}
 
-          {activeTab === 'history' && (
+        {activeTab === 'history' && (
             <div className="space-y-6">
               <div className="flex justify-between items-start">
                 <div>

@@ -33,7 +33,10 @@ A Gemini-powered advisor that analyzes your specific annual cash flow scenario a
 
 ## 5. Future Ideas
 - **Surplus Investments:** Actionable strategies for deploying the "Annual Surplus" into investments, high-yield savings, or other wealth-building vehicles.
-- **Statement Analyzer:** Upload financial statements to automatically detect and categorize orbiting expenses.
+- **Statement Analyzer:** Upload financial statements to automatically detect and categorize orbiting expenses. (Implemented)
+- **High-Fidelity Categorization:** Drill-down views for major categories (e.g., Food → Groceries vs. Restaurants/Fast Food).
+- **Merchant Intelligence:** Aggregation of merchant-specific data (Trader Joe’s, ShopRite) to show annualized monthly impact per vendor.
+- **Dynamic Orbit Adjustment:** Automatically update monthly orbit set-asides based on granular merchant-level spend trends.
 
 ## 6. Technical Constraints
 - **Security:** Firestore Security Rules must strictly enforce data ownership and validation.
