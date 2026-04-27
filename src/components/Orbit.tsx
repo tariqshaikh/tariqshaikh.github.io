@@ -78,9 +78,6 @@ import {
   orderBy
 } from 'firebase/firestore';
 
-import StatementImportModal from './StatementImportModal';
-import LifeArchitectModal from './LifeArchitectModal';
-
 // --- Error Boundary ---
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -572,12 +569,13 @@ const SliderInput = ({ label, value, min, max, step, onChange, unit = "", onSync
 );
 
 const DEFAULT_EXPENSES: RecurringExpense[] = [
+  { id: 'default_rent', name: 'Rent / Mortgage', amount: 2200, month: 1, months: [1,2,3,4,5,6,7,8,9,10,11,12], frequency: 'monthly', category: 'maintenance_and_utilities' },
+  { id: 'default_car_payment', name: 'Car Payment', amount: 450, month: 1, months: [1,2,3,4,5,6,7,8,9,10,11,12], frequency: 'monthly', category: 'maintenance_and_utilities' },
+  { id: 'default_student_loans', name: 'Student Loans', amount: 300, month: 1, months: [1,2,3,4,5,6,7,8,9,10,11,12], frequency: 'monthly', category: 'maintenance_and_utilities' },
   { id: 'default_car_ins', name: 'Car Insurance', amount: 1200, month: 3, months: [3, 9], frequency: 'semi-annual', category: 'insurance' },
-  { id: 'default_amex_plat', name: 'Amex Platinum Fee', amount: 695, month: 1, months: [1], frequency: 'annual', category: 'subscription' },
   { id: 'default_amazon', name: 'Amazon Prime', amount: 139, month: 7, months: [7], frequency: 'annual', category: 'subscription' },
   { id: 'default_car_maint', name: 'Car Maintenance', amount: 400, month: 5, months: [2, 5, 8, 11], frequency: 'quarterly', category: 'maintenance_and_utilities' },
   { id: 'default_groceries', name: 'Groceries', amount: 800, month: 1, months: [1], frequency: 'monthly', category: 'food' },
-  { id: 'default_restaurants', name: 'Restaurants & Fast Food', amount: 400, month: 1, months: [1], frequency: 'monthly', category: 'food' },
 ];
 
 function Orbit() {
@@ -620,14 +618,11 @@ function Orbit() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingFromModal, setIsDeletingFromModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showArchitectModal, setShowArchitectModal] = useState(false);
   const [selectedOrbitCategory, setSelectedOrbitCategory] = useState<string | null>(null);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
   const [showCustomCalendar, setShowCustomCalendar] = useState(false);
   const [viewMode, setViewMode] = useState<'annual' | 'monthly'>('annual');
-  const [observedSpending, setObservedSpending] = useState<Record<string, { total: number, subCategories: Record<string, number>, merchants: Record<string, number> }>>({});
   const [newExpense, setNewExpense] = useState<Partial<RecurringExpense>>({
     name: '',
     merchant: '',
@@ -643,33 +638,6 @@ function Orbit() {
     document.title = "Annual Orbit: Cash Flow Intelligence";
     logVisit('/orbit');
   }, []);
-
-  // Fetch and aggregate intelligence for "Observed Spend"
-  useEffect(() => {
-    if (!user || user.uid === 'guest-user') return;
-    
-    const intelRef = collection(db, 'users', user.uid, 'expenseIntelligence');
-    const unsubscribe = onSnapshot(intelRef, (snapshot) => {
-      const agg: Record<string, { total: number, subCategories: Record<string, number>, merchants: Record<string, number> }> = {};
-      
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const cat = d.category || 'other';
-        const sub = d.subCategory || 'general';
-        const brand = d.parentMerchant || d.merchantName || 'Unknown';
-        const amt = d.amount || 0;
-        
-        if (!agg[cat]) agg[cat] = { total: 0, subCategories: {}, merchants: {} };
-        agg[cat].total += amt;
-        agg[cat].subCategories[sub] = (agg[cat].subCategories[sub] || 0) + amt;
-        agg[cat].merchants[brand] = (agg[cat].merchants[brand] || 0) + amt;
-      });
-      
-      setObservedSpending(agg);
-    });
-    
-    return () => unsubscribe();
-  }, [user]);
 
   const [showAddExpense, setShowAddExpense] = useState(false);
 
@@ -821,6 +789,14 @@ function Orbit() {
           data.automatedInvestments = [];
         }
 
+        if (!data.fixedExpenses || data.fixedExpenses.length === 0) {
+          data.fixedExpenses = [
+            { id: '1', label: 'Rent / Mortgage', amount: 2200 },
+            { id: '2', label: 'Car Payment', amount: 450 },
+            { id: '3', label: 'Student Loans', amount: 300 }
+          ];
+        }
+
         if (!data.cardColors) {
           data.cardColors = {
             income: '#1E5C38',
@@ -847,7 +823,11 @@ function Orbit() {
         // Profile doesn't exist yet, create it and seed expenses
         const initialProfile = {
           incomes: [{ id: 'inc_1', label: 'Income Stream 1', paycheckAmount: 3500, frequencyPerMonth: 2 }],
-          fixedExpenses: [],
+          fixedExpenses: [
+            { id: '1', label: 'Rent / Mortgage', amount: 2200 },
+            { id: '2', label: 'Car Payment', amount: 450 },
+            { id: '3', label: 'Student Loans', amount: 300 }
+          ],
           automatedInvestments: [],
           savingsAmount: 0,
           wealthBuildingAmount: 0,
@@ -1698,18 +1678,7 @@ function Orbit() {
                 <div className="w-full">
                   <div className="flex items-center justify-between">
                     <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Finance Orbit</h2>
-                    <button 
-                      onClick={() => setShowImportModal(true)}
-                      disabled={!user || user.uid === 'guest-user'}
-                      className={`md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                        (!user || user.uid === 'guest-user') 
-                          ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                          : 'bg-[#1E5C38] text-[#FAF9F6] hover:bg-[#154629]'
-                      }`}
-                    >
-                      <Database size={12} />
-                      Import
-                    </button>
+
                   </div>
                   
                   <div className="flex flex-col gap-4 mt-4">
@@ -1795,19 +1764,7 @@ function Orbit() {
                     </AnimatePresence>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setShowImportModal(true)}
-                  disabled={!user || user.uid === 'guest-user'}
-                  title={!user || user.uid === 'guest-user' ? "Please sign in to run an estimation" : ""}
-                  className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    (!user || user.uid === 'guest-user') 
-                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
-                      : 'bg-[#1E5C38] text-[#FAF9F6] hover:bg-[#154629]'
-                  }`}
-                >
-                  <Zap size={14} />
-                  Orbit Estimator
-                </button>
+
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -1866,7 +1823,7 @@ function Orbit() {
                 })}
 
                 {/* Orbiting Expense Categories */}
-                {Array.from(new Set([...expenses.map(e => e.category), ...Object.keys(observedSpending)])).map((cat, i) => {
+                {Array.from(new Set(expenses.map(e => e.category))).map((cat, i) => {
                   const categoryColors: Record<string, string> = {
                     'insurance': '#4A90E2',
                     'subscription': '#9013FE',
@@ -1937,25 +1894,21 @@ function Orbit() {
                       return sum + (e.amount * (occurrences || (monthsInRange === 1 ? 1 : 0)));
                     }, 0);
                   
-                  const observed = observedSpending[cat]?.total || 0;
-                  const ratio = catTotal > 0 ? (observed / catTotal) : (observed > 0 ? 1 : 0);
-                  
                   // Adjust totals for viewMode
                   const displayTotal = viewMode === 'annual' ? catTotal : (catTotal / (monthsInRange || 1));
-                  const displayObserved = viewMode === 'annual' ? (observed * (12 / (monthsInRange || 1))) : (observed / (monthsInRange || 1));
 
                   return (
                       <div 
                         key={cat} 
                         onClick={() => setSelectedOrbitCategory(cat as string)}
-                        className={`bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:border-[#2C3338] cursor-pointer hover:z-50 ${ratio > 1.2 ? 'ring-1 ring-red-500/30' : ''}`} 
+                        className={`bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl flex flex-col justify-between transition-all group relative hover:shadow-md hover:border-[#2C3338] cursor-pointer hover:z-50`} 
                         style={{ borderTopColor: color, borderTopWidth: '4px' }}
                       >
                       <div className="absolute inset-0 opacity-[0.02] pointer-events-none rounded-xl" style={{ backgroundColor: color }} />
                       <div className="flex-1">
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] transition-colors font-bold relative z-10 leading-tight">
-                            {displayNameMap[cat] || String(cat).replace(/_/g, ' ')}
+                            {displayNameMap[cat as string] || String(cat).replace(/_/g, ' ')}
                           </h3>
                         </div>
                         <div className="flex items-baseline gap-2 relative z-10 pointer-events-none">
@@ -2047,84 +2000,7 @@ function Orbit() {
             </section>
           </div>
         </div>
-
-        {/* Discovery CTA Banner */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 p-10 bg-slate-900 rounded-[2.5rem] text-center space-y-6 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059]/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#1E5C38]/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
-          
-          <div className="relative z-10 max-w-xl mx-auto space-y-6">
-            <div className="w-16 h-16 bg-[#C5A059]/20 text-[#C5A059] rounded-2xl flex items-center justify-center mx-auto mb-2">
-              <Zap size={32} />
-            </div>
-            <h3 className="text-4xl font-serif font-bold text-[#FAF9F6] italic leading-tight">Uncover Your Financial Orbit</h3>
-            <p className="text-slate-400 text-lg">Use our Life Architect to map out your infrastructure. We'll help you find recurring costs you might be ignoring.</p>
-            
-            <div className="pt-4">
-              <button 
-                onClick={() => setShowArchitectModal(true)}
-                className="px-10 py-5 bg-[#C5A059] text-white rounded-2xl font-bold text-sm uppercase tracking-[0.2em] hover:bg-[#B38F48] transition-all shadow-xl shadow-[#C5A059]/20"
-              >
-                Help Find what's in my Orbit
-              </button>
-            </div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-500">Fast Analysis • AI Powered • 2 Minute Setup</p>
-          </div>
-        </motion.div>
       </main>
-
-      {/* Import Modal */}
-      <AnimatePresence>
-        {showImportModal && user && (
-          <StatementImportModal 
-            userId={user.uid}
-            onClose={() => setShowImportModal(false)}
-            existingFixedExpenses={profile.fixedExpenses}
-            existingOrbitExpenses={expenses}
-            onExpensesExtracted={(extractedExpenses) => {
-              // Iterate and save them
-              const newExpenses = [...expenses];
-              extractedExpenses.forEach((exp: any) => {
-                newExpenses.push(exp);
-                saveExpense(exp).catch(console.error);
-              });
-              setExpenses(newExpenses);
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Life Architect Modal */}
-      <AnimatePresence>
-        {showArchitectModal && (
-          <LifeArchitectModal 
-            onClose={() => setShowArchitectModal(false)}
-            onAddOrbits={(suggestedOrbits) => {
-              const newExpensesList = [...expenses];
-              suggestedOrbits.forEach(orbit => {
-                const newExp: RecurringExpense = {
-                  id: 'arch_' + Date.now() + Math.random().toString(36).substr(2, 5),
-                  name: orbit.name,
-                  amount: orbit.amount,
-                  frequency: 'monthly',
-                  category: orbit.category || 'other',
-                  month: 1, // Default for backward compatibility
-                  months: [1,2,3,4,5,6,7,8,9,10,11,12],
-                  notes: orbit.description
-                };
-                newExpensesList.push(newExp);
-                saveExpense(newExp).catch(console.error);
-              });
-              setExpenses(newExpensesList);
-            }}
-          />
-        )}
-      </AnimatePresence>
 
       {/* Category Details Modal */}
       <AnimatePresence>
@@ -2164,75 +2040,7 @@ function Orbit() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-8 space-y-10">
-                {/* 1. Habit Analysis (Observed Data) */}
-                {observedSpending[selectedOrbitCategory as string] && (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                       <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center">
-                          <Zap size={14} className="text-[#C5A059]" />
-                       </div>
-                       <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] font-bold text-[#2C3338]">Orbit Intelligence & Estimates</h4>
-                    </div>
-
-                    {/* Sub-category breakdown (e.g. Food -> Groceries vs Restaurants) */}
-                    {Object.keys(observedSpending[selectedOrbitCategory as string].subCategories).length > 0 && (
-                      <div className="grid grid-cols-1 gap-6 bg-white border border-[#E8E4D0] p-6 rounded-2xl">
-                        {Object.entries(observedSpending[selectedOrbitCategory as string].subCategories)
-                          .sort((a: [string, any], b: [string, any]) => (b[1] as number) - (a[1] as number))
-                          .map(([sub, totalAmt]) => {
-                             const total = totalAmt as number;
-                             const categoryTotal = observedSpending[selectedOrbitCategory as string].total as number;
-                             const subPercent = (total / (categoryTotal || 1)) * 100;
-                             const monthlyAvg = total / (monthsInRange || 1);
-                             const displayAmt = viewMode === 'annual' ? monthlyAvg * 12 : monthlyAvg;
-                             
-                             return (
-                               <div key={sub} className="space-y-4">
-                                  <div className="flex justify-between items-baseline">
-                                     <div className="flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-[#1E5C38]" />
-                                        <span className="text-[11px] font-mono text-[#2C3338] uppercase tracking-wide font-bold">{sub.replace(/_/g, ' ')}</span>
-                                     </div>
-                                     <div className="text-right">
-                                        <span className="text-sm font-bold text-[#2C3338]">${Math.round(displayAmt).toLocaleString()}</span>
-                                        <span className="text-[10px] font-mono text-[#8C8670] ml-2">/{viewMode === 'annual' ? 'yr' : 'mo'}</span>
-                                     </div>
-                                  </div>
-                                  <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                                     <motion.div 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${subPercent}%` }}
-                                        className="h-full bg-[#1E5C38]"
-                                     />
-                                  </div>
-
-                                  {/* Indented Merchants for this sub-category */}
-                                  <div className="pl-6 space-y-2 border-l border-slate-100 mt-2">
-                                     {Object.entries(observedSpending[selectedOrbitCategory as string].merchants)
-                                        .filter(([_, details]) => (details as any).subCategory === sub)
-                                        .sort((a, b) => ((b[1] as any).total as number) - ((a[1] as any).total as number))
-                                        .slice(0, 10) // Show more top merchants
-                                        .map(([brand, details]) => {
-                                           const amt = (details as any).total as number;
-                                           const monthlyAvg = amt / (monthsInRange || 1);
-                                           const displayAmt = viewMode === 'annual' ? monthlyAvg * 12 : monthlyAvg;
-                                           return (
-                                             <div key={brand} className="flex justify-between items-center text-[10px] text-[#8C8670] font-mono group">
-                                                <span className="group-hover:text-[#2C3338] transition-colors">• {brand}</span>
-                                                <span className="font-bold opacity-60">${Math.round(displayAmt).toLocaleString()}</span>
-                                             </div>
-                                           );
-                                        })}
-                                  </div>
-                               </div>
-                             );
-                          })}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* 2. Tracked Recurrence (Orbit Bills) */}
+                {/* Fixed Orbits (formerly Tracked Recurrence) */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-[#C5A059]/10 flex items-center justify-center">
