@@ -1436,23 +1436,8 @@ function Orbit() {
         <div className="mb-12 w-full">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
-              <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">{viewMode === 'annual' ? 'Annual Orbit' : 'Monthly Orbit'}: Cash Flow Intelligence</h2>
+              <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">Orbit: Cash Flow Intelligence</h2>
               <p className="text-[11px] font-mono uppercase tracking-widest text-[#C5A059] mt-2">Cash Flow Timeline: {monthsInRange} Months</p>
-            </div>
-            
-            <div className="flex bg-[#FAF9F6] border border-[#E8E4D0] p-1 rounded-xl shadow-sm">
-              <button 
-                onClick={() => setViewMode('annual')}
-                className={`px-6 py-2 rounded-lg text-[10px] font-mono uppercase tracking-[0.1em] font-bold transition-all ${viewMode === 'annual' ? 'bg-[#2C3338] text-white shadow-md' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
-              >
-                Annual View
-              </button>
-              <button 
-                onClick={() => setViewMode('monthly')}
-                className={`px-6 py-2 rounded-lg text-[10px] font-mono uppercase tracking-[0.1em] font-bold transition-all ${viewMode === 'monthly' ? 'bg-[#2C3338] text-white shadow-md' : 'text-[#8C8670] hover:text-[#2C3338]'}`}
-              >
-                Monthly Predictor
-              </button>
             </div>
           </div>
           
