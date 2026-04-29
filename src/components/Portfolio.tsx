@@ -102,10 +102,9 @@ export default function Portfolio() {
             <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
               <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-500 ml-1">NJ</span>
             </h3>
-            <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">A homebuyer's decision tool</p>
+            <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">Product Design & Data Strategy</p>
             <p className="text-base leading-[1.75] text-slate-300 mb-7 pl-4 border-l-2 border-blue-500/40">
-              Every home buyer in NJ has 6 browser tabs open — Zillow, GreatSchools, NJ Transit, WalkScore, crime maps. I collapsed them into one weighted comparison tool built for real decisions.
-            </p>
+              Every home buyer in NJ has 6 browser tabs open — Zillow, GreatSchools, NJ Transit, WalkScore, crime maps. I collapsed them into one weighted comparison tool built for real decisions.            </p>
             <div className="flex flex-wrap gap-1.5 mb-8">
               {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
                 <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 tracking-widest uppercase">{tag}</span>
@@ -130,7 +129,7 @@ export default function Portfolio() {
             <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
               <span className="font-serif font-bold italic">Orbit</span>
             </h3>
-            <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">Strategic wealth simulator</p>
+            <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">Financial Simulation & Strategy</p>
             <p className="text-base leading-[1.75] text-slate-300 mb-7 pl-4 border-l-2 border-[#C5A059]/40">
               Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus.
             </p>
@@ -210,7 +209,7 @@ export default function Portfolio() {
           </div>
           <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">I'm a <strong className="text-slate-900 font-semibold">Senior Data Strategist at Indeed</strong> with a background in frontend engineering and a Stanford product management certificate. I've spent 6+ years at the intersection of data, engineering, and product.</p>
           <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">I build things that solve real problems. The portfolio you're reading right now is one of them — I built every project here, wrote every PRD, and defined every roadmap myself.</p>
-          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">Based in <strong className="text-slate-900 font-semibold">New Jersey</strong>. Open to PM roles in B2B SaaS and consumer products.</p>
+          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">Based in <strong className="text-slate-900 font-semibold">New Jersey</strong>. I'm a technical PM who builds from scratch, with deep data intuition from Indeed, who understands how products are actually built from the inside.</p>
           <div className="grid grid-cols-2 gap-4 mt-10">
             <div>
               <div className="font-mono text-[12px] uppercase tracking-widest text-slate-900 font-bold mb-2">Product</div>
@@ -463,6 +462,8 @@ export default function Portfolio() {
                         </li>
                       </ul>
                     </div>
+
+
                   </div>
                 </>
               )}
@@ -553,6 +554,8 @@ export default function Portfolio() {
                         </div>
                       </div>
                     </div>
+
+
                   </div>
                 </>
               )}
@@ -792,6 +795,8 @@ export default function Portfolio() {
                           <p className="text-slate-600">A shared workspace where invited friends can view the same price trends, set their own alerts, and vote on preferred travel dates.</p>
                         </div>
                       </div>
+
+
                     </div>
                   </div>
                 </>
