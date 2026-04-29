@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Github, Linkedin, Mail, ExternalLink, ChevronRight, Menu, X, Terminal, Layers, Globe, Phone, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import FloatingNav from './FloatingNav';
 import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { logVisit } from '../lib/analytics';
@@ -43,19 +44,17 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="bg-white font-sans text-slate-900 min-h-screen selection:bg-blue-100 selection:text-slate-900">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-4.5 flex items-center justify-between border-b border-slate-200 transition-all duration-300 ${scrolled ? 'bg-white/94 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
-        <div className="font-mono text-sm tracking-widest uppercase text-slate-500">Tariq Shaikh</div>
-        <div className="hidden md:flex items-center gap-8">
-          <a href="#projects" className="text-sm text-slate-500 hover:text-slate-900 transition-colors tracking-wider">Work</a>
-          <a href="#process" className="text-sm text-slate-500 hover:text-slate-900 transition-colors tracking-wider">Process</a>
-          <a href="#about" className="text-sm text-slate-500 hover:text-slate-900 transition-colors tracking-wider">About</a>
-          <a href="mailto:tshaikh92@gmail.com" className="text-sm text-slate-500 hover:text-slate-900 transition-colors tracking-wider">Contact</a>
-          
-          <div className="w-px h-4 bg-slate-200"></div>
+    <div className="bg-white font-sans text-slate-900 min-h-screen selection:bg-blue-100 selection:text-slate-900 pb-24">
+      {/* Navigation - Simplified */}
+      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-6 flex items-center justify-between transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : 'bg-transparent'}`}>
+        <div className="font-mono text-sm tracking-widest uppercase text-slate-900 font-bold">Tariq Shaikh</div>
+        <div className="flex items-center gap-4">
+          <a href="mailto:tshaikh92@gmail.com" className="text-[10px] font-mono font-bold uppercase tracking-widest px-4 py-2 bg-slate-900 text-white rounded-full hover:bg-blue-600 transition-colors">Hire Me</a>
         </div>
       </nav>
+
+      {/* Floating Dock - 60fps Inspiration */}
+      <FloatingNav />
 
       {/* Hero */}
       <section className="relative min-h-[75vh] flex flex-col justify-center px-12 pt-32 pb-20 overflow-hidden bg-white border-b-3 border-slate-900">
