@@ -46,191 +46,253 @@ export default function Portfolio() {
   return (
     <div className="bg-white font-sans text-slate-900 min-h-screen selection:bg-blue-100 selection:text-slate-900 pb-24">
       {/* Navigation - Simplified */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-6 flex items-center justify-between transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : 'bg-transparent'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-6 flex items-center justify-between transition-all duration-500 ${scrolled ? 'translate-y-0 opacity-100 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : '-translate-y-full opacity-0 bg-transparent'}`}>
         <div className="font-mono text-sm tracking-widest uppercase text-slate-900 font-bold">Tariq Shaikh</div>
       </nav>
 
       {/* Floating Dock - 60fps Inspiration */}
       <FloatingNav />
 
-      {/* Hero */}
-      <section className="relative min-h-[75vh] flex flex-col justify-center px-12 pt-32 pb-20 overflow-hidden bg-white border-b-3 border-slate-900">
-        <div className="absolute top-0 right-0 w-[38%] h-[60%] bg-slate-100/50 clip-path-hero z-0 hidden md:block" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 font-mono text-[13px] tracking-[0.14em] uppercase text-slate-900 mb-5 animate-fade-up">
-            <div className="w-8 h-px bg-blue-600" />
-            Product Manager · New York Metro
+      {/* Hero - Inspired by 'OBSCURED' */}
+      <section className="relative min-h-[80vh] bg-[#F5F5F3] overflow-hidden flex flex-col pt-8 md:pt-12 pb-20 px-12">
+        {/* Minimal Header Bar */}
+        <div className="flex justify-between items-start font-mono text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-12 md:mb-16">
+          <div>
+            003+<br />Projects
           </div>
-          <h1 className="font-serif text-[clamp(64px,10vw,136px)] font-black leading-[0.9] tracking-tight mb-3.5 text-slate-900 animate-fade-up delay-100">
-            Tariq<br /><span className="italic text-blue-900">Shaikh</span>
-          </h1>
-          <p className="font-serif text-[clamp(18px,2.5vw,32px)] font-normal italic text-slate-500 animate-fade-up delay-200">
-            Product Manager
-          </p>
+          <div className="text-slate-900">
+            Portfolio
+          </div>
+          <div>
+            EN
+          </div>
         </div>
-        
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-slate-900/30 animate-fade-up delay-500 z-10">
-          <div className="w-px h-10 bg-gradient-to-b from-blue-600 to-transparent animate-scroll-line" />
-          <span>Scroll</span>
+
+        {/* Massive Bold Heading - Pushed Up */}
+        <div className="relative w-full flex-1 flex flex-col">
+          <motion.h1 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="text-[clamp(48px,12.8vw,224px)] font-black text-slate-900 tracking-[-0.05em] leading-[0.8] flex flex-col items-center select-none"
+          >
+            <span className="font-bakers normal-case inline-block transform scale-y-110 border-b-4 border-slate-900/5 pb-2">Tariq Shaikh</span>
+          </motion.h1>
+          <div className="flex justify-between items-end mt-12">
+            <div className="max-w-xs font-mono text-[10px] uppercase leading-relaxed text-slate-500">
+              <span className="text-[18px] text-slate-900 font-black block mb-2 tracking-tight">Product Manager</span>
+              Bridging data, strategy, and product.
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-slate-900 font-black">
+              Scroll <br />
+              to explore
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Projects */}
-      <section id="projects" className="px-12 py-24 bg-white border-t border-slate-200">
-        <div className="flex flex-col mb-13">
-          <div className="flex items-center gap-5">
-            <span className="font-mono text-[13px] text-blue-600 font-bold tracking-widest">01</span>
-            <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-slate-900">Selected Work</h2>
-            <div className="flex-1 h-px bg-slate-200" />
-          </div>
-          <p className="mt-4 text-slate-500 font-serif italic text-lg max-w-2xl">
-            A curated selection of purpose-built applications, designed to solve genuine personal needs and demonstrate a product-driven approach to engineering.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* Project 1 */}
-          <div className="bg-[#0F172A] border border-[#1E293B] p-10 transition-all duration-200 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/20 relative overflow-hidden rounded-xl group">
-            <div className="absolute top-0 left-0 w-[3px] h-full bg-blue-500 scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
-            <div className="flex items-center justify-between mb-6">
-              <span className="font-mono text-[13px] text-slate-400 tracking-widest">P — 001</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30">Live</span>
+      <section id="projects" className="px-6 md:px-12 py-32 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 px-4">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">01 — Selected Works</span>
+              </div>
+              <h2 className="font-display text-[clamp(48px,8vw,96px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter">
+                Logic <br />
+                <span className="text-slate-300">& Product</span>
+              </h2>
             </div>
-            <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
-              <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-500 ml-1">NJ</span>
-            </h3>
-            <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">Product Design & Data Strategy</p>
-            <p className="text-base leading-[1.75] text-slate-300 mb-7 pl-4 border-l-2 border-blue-500/40">
-              Every home buyer in NJ has 6 browser tabs open — Zillow, GreatSchools, NJ Transit, WalkScore, crime maps. I collapsed them into one weighted comparison tool built for real decisions.            </p>
-            <div className="flex flex-wrap gap-1.5 mb-8">
-              {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
-                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 tracking-widest uppercase">{tag}</span>
-              ))}
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Link to="/homebase" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-500 transition-all">
-                <ChevronRight size={13} /> Live Product
-              </Link>
-              <button onClick={() => openModal('prd-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-slate-700 rounded-[4px] text-sm font-semibold hover:border-blue-500 hover:text-blue-400 hover:bg-blue-500/10 cursor-pointer transition-all">PRD</button>
-              <button onClick={() => openModal('roadmap-1')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-slate-700 rounded-[4px] text-sm font-semibold hover:border-blue-500 hover:text-blue-400 hover:bg-blue-500/10 cursor-pointer transition-all">Roadmap</button>
-            </div>
-          </div>
-
-          {/* Project 2 - Orbit */}
-          <div className="bg-[#2C3338] border border-[#3D4347] p-10 transition-all duration-200 hover:border-[#C5A059] hover:shadow-xl hover:shadow-[#C5A059]/10 relative overflow-hidden rounded-xl group">
-            <div className="absolute top-0 left-0 w-[3px] h-full bg-[#C5A059] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
-            <div className="flex items-center justify-between mb-6">
-              <span className="font-mono text-[13px] text-[#8C8670] tracking-widest">P — 002</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/30">Live</span>
-            </div>
-            <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
-              <span className="font-serif font-bold italic">Orbit</span>
-            </h3>
-            <p className="text-[15px] text-slate-400 italic mb-4.5 font-serif">Financial Simulation & Strategy</p>
-            <p className="text-base leading-[1.75] text-slate-300 mb-7 pl-4 border-l-2 border-[#C5A059]/40">
-              Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus.
+            <p className="text-slate-500 font-sans text-lg max-w-sm leading-relaxed pb-2">
+              A curated selection of applications designed to solve genuine needs through a product-driven approach.
             </p>
-            <div className="flex flex-wrap gap-1.5 mb-8">
-              {['Fintech', 'Simulation', 'Strategy'].map(tag => (
-                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-slate-800 text-[#C5A059] border border-slate-700 tracking-widest uppercase">{tag}</span>
-              ))}
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Link to="/orbit" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#C5A059] text-slate-900 rounded-lg text-sm font-bold hover:bg-[#B38F48] transition-all">
-                <ChevronRight size={13} /> View App
-              </Link>
-              <button onClick={() => openModal('prd-2')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-slate-700 rounded-[4px] text-sm font-semibold hover:border-[#C5A059] hover:text-[#C5A059] hover:bg-[#C5A059]/5 cursor-pointer transition-all">PRD</button>
-              <button onClick={() => openModal('roadmap-2')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-white border-2 border-slate-700 rounded-[4px] text-sm font-semibold hover:border-[#C5A059] hover:text-[#C5A059] hover:bg-[#C5A059]/5 cursor-pointer transition-all">Roadmap</button>
-            </div>
           </div>
 
-          {/* Project 3 - Waves */}
-          <div className="bg-[#1A2E35] border border-[#257E8C]/30 p-10 transition-all duration-200 hover:border-[#137D97] hover:shadow-xl hover:shadow-[#137D97]/20 relative overflow-hidden rounded-xl group">
-            <div className="absolute top-0 left-0 w-[3px] h-full bg-[#137D97] scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100" />
-            <div className="flex items-center justify-between mb-6">
-              <span className="font-mono text-[13px] text-[#7EAAC7] tracking-widest">P — 003</span>
-              <span className="font-mono text-[12px] px-2.5 py-1 rounded-lg uppercase tracking-wider bg-[#137D97]/20 text-[#C9DCE6] border border-[#137D97]/30">Take a look! (In Development)</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Project 1 - Homebase NJ */}
+            <div className="bg-[#0F172A] border border-[#1E293B] p-10 transition-all duration-500 hover:border-blue-500 hover:shadow-2xl hover:shadow-blue-500/10 relative overflow-hidden rounded-2xl group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between mb-12">
+                <span className="font-mono text-[10px] px-3 py-1 uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-full">Live Product</span>
+                <span className="font-mono text-[10px] text-slate-500 font-bold tracking-tighter">P.001</span>
+              </div>
+              <h3 className="text-[44px] font-display leading-[0.9] mb-6 text-white tracking-tighter uppercase font-black">
+                Homebase <span className="text-blue-500">NJ</span>
+              </h3>
+              <p className="text-lg leading-[1.6] text-slate-400 mb-12 font-sans">
+                I collapsed 6 browser tabs into one weighted comparison tool built for real-world real estate decisions in NJ.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-12">
+                {['Consumer', 'Data Product', 'Strategy'].map(tag => (
+                  <span key={tag} className="font-mono text-[9px] px-2.5 py-1 bg-white/5 text-slate-400 border border-white/10 tracking-widest uppercase font-bold rounded">{tag}</span>
+                ))}
+              </div>
+              <div className="flex flex-col gap-3">
+                <Link to="/homebase" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-slate-900 transition-all rounded-lg">
+                  Launch App <ChevronRight size={14} />
+                </Link>
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => openModal('prd-1')} className="px-4 py-3 bg-white/5 text-white border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-white/10 transition-all cursor-pointer rounded-lg">PRD</button>
+                  <button onClick={() => openModal('roadmap-1')} className="px-4 py-3 bg-white/5 text-white border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-white/10 transition-all cursor-pointer rounded-lg">Roadmap</button>
+                </div>
+              </div>
             </div>
-            <h3 className="text-[32px] leading-[1.1] mb-1.5 text-white">
-              <span className="font-serif font-bold italic">Waves</span>
-            </h3>
-            <p className="text-[15px] text-[#7EAAC7] italic mb-4.5 font-serif">Dream trip planner & destination intelligence</p>
-            <p className="text-base leading-[1.75] text-[#C9DCE6] mb-7 pl-4 border-l-2 border-[#137D97]/50">
-              Your personal oracle for dream trip planning. Discover exactly when you should go, what's happening locally, and how to make that one specific bucket-list journey a reality.
-            </p>
-            <div className="flex flex-wrap gap-1.5 mb-8">
-              {['Travel', 'Data Viz', 'Collaboration'].map(tag => (
-                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-lg bg-[#0C868F]/20 text-[#C9DCE6] border border-[#0C868F]/40 tracking-widest uppercase">{tag}</span>
-              ))}
+
+            {/* Project 2 - Orbit */}
+            <div className="bg-[#1A1C1E] border border-[#2D2D2D] p-10 transition-all duration-500 hover:border-[#C5A059] hover:shadow-2xl hover:shadow-[#C5A059]/10 relative overflow-hidden rounded-2xl group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between mb-12">
+                <span className="font-mono text-[10px] px-3 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
+                <span className="font-mono text-[10px] text-slate-600 font-bold tracking-tighter">P.002</span>
+              </div>
+              <h3 className="text-[44px] font-display leading-[0.9] mb-6 text-white tracking-tighter uppercase font-black italic">
+                Orbit
+              </h3>
+              <p className="text-lg leading-[1.6] text-slate-400 mb-12 font-sans">
+                A financial trajectory simulator designed to map annual cash flow and sinking funds for big life decisions.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-12">
+                {['Fintech', 'Simulation', 'AI'].map(tag => (
+                  <span key={tag} className="font-mono text-[9px] px-2.5 py-1 bg-white/5 text-slate-500 border border-white/10 tracking-widest uppercase font-bold rounded">{tag}</span>
+                ))}
+              </div>
+              <div className="flex flex-col gap-3">
+                <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#C5A059] text-black text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white transition-all rounded-lg">
+                  Launch App <ChevronRight size={14} />
+                </Link>
+                <button onClick={() => openModal('prd-2')} className="px-4 py-3 bg-white/5 text-white border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-white/10 transition-all cursor-pointer rounded-lg">Strategy Guide</button>
+              </div>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <Link to="/waves" className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-[#137D97] text-white rounded-lg text-sm font-bold hover:bg-[#0C868F] transition-all">
-                <ChevronRight size={13} /> View App
-              </Link>
-              <button onClick={() => openModal('prd-3')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-[#C9DCE6] border-2 border-[#257E8C]/50 rounded-[4px] text-sm font-semibold hover:border-[#137D97] hover:text-[#137D97] hover:bg-[#137D97]/10 cursor-pointer transition-all">PRD</button>
-              <button onClick={() => openModal('roadmap-3')} className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-transparent text-[#C9DCE6] border-2 border-[#257E8C]/50 rounded-[4px] text-sm font-semibold hover:border-[#137D97] hover:text-[#137D97] hover:bg-[#137D97]/10 cursor-pointer transition-all">Roadmap</button>
+
+            {/* Project 3 - Waves */}
+            <div className="bg-[#0B1A1F] border border-[#162D34] p-10 transition-all duration-500 hover:border-cyan-500 hover:shadow-2xl hover:shadow-cyan-500/10 relative overflow-hidden rounded-2xl group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between mb-12">
+                <span className="font-mono text-[10px] px-3 py-1 uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold rounded-full">Prototype</span>
+                <span className="font-mono text-[10px] text-slate-600 font-bold tracking-tighter">P.003</span>
+              </div>
+              <h3 className="text-[44px] font-display leading-[0.9] mb-6 text-white tracking-tighter uppercase font-black">
+                Waves
+              </h3>
+              <p className="text-lg leading-[1.6] text-slate-400 mb-12 font-sans">
+                Destination intelligence for dream trips. Visualizing when to go, what to see, and how to get there.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-12">
+                {['Travel', 'Data Viz', 'Research'].map(tag => (
+                  <span key={tag} className="font-mono text-[9px] px-2.5 py-1 bg-white/5 text-slate-500 border border-white/10 tracking-widest uppercase font-bold rounded">{tag}</span>
+                ))}
+              </div>
+              <div className="flex flex-col gap-3">
+                <Link to="/waves" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-cyan-600 text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-slate-900 transition-all rounded-lg">
+                  View Demo <ChevronRight size={14} />
+                </Link>
+                <button onClick={() => openModal('prd-3')} className="px-4 py-3 bg-white/5 text-white border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-white/10 transition-all cursor-pointer rounded-lg">View PRD</button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="process" className="px-12 py-24 bg-slate-900">
-        <div className="flex items-center gap-5 mb-13">
-          <span className="font-mono text-[13px] text-blue-400 tracking-widest">02</span>
-          <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-white">How I Work</h2>
-          <div className="flex-1 h-px bg-white/15" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-white/15">
-          {[
-            { num: '01', title: 'Define the problem', desc: 'Every project starts with a user problem I can articulate in one sentence. If I can\'t, I don\'t build yet.' },
-            { num: '02', title: 'Write the PRD', desc: 'Before touching code, I write out the user, the problem, success metrics, tradeoffs, and what\'s explicitly out of scope.' },
-            { num: '03', title: 'Ship a V1', desc: 'Small, focused, completable. The goal is something real people can use — not something perfect.' },
-            { num: '04', title: 'Learn & iterate', desc: 'What did users actually do? What confused them? What did I get wrong? V2 is always better than V1.' },
-          ].map((step, i) => (
-            <div key={i} className={`p-10 border-white/12 ${i !== 3 ? 'lg:border-r' : ''} ${i % 2 === 0 ? 'sm:border-r lg:border-r' : ''}`}>
-              <div className="font-serif text-[52px] font-black text-blue-400/30 leading-none mb-4">{step.num}</div>
-              <div className="font-serif text-xl font-bold mb-2.5 text-white">{step.title}</div>
-              <p className="text-[15px] leading-[1.75] text-white/70">{step.desc}</p>
+      <section id="process" className="px-12 py-32 bg-slate-50 border-y border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">02 — Operating Model</span>
+              </div>
+              <h2 className="font-display text-[clamp(40px,7vw,96px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter">
+                The <br />
+                <span className="text-slate-300">Method</span>
+              </h2>
             </div>
-          ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200">
+            {[
+              { num: '01', title: 'Definition', desc: 'Identify a user problem that can be articulated in a single sentence. Logic over ego.' },
+              { num: '02', title: 'Specifications', desc: 'Write the PRD. Define metrics, constraints, and non-goals before opening the IDE.' },
+              { num: '03', title: 'Execution', desc: 'Build the functional core. Ship a V1 that solves the primary friction point immediately.' },
+              { num: '04', title: 'Refinement', desc: 'Synthesize feedback and performance data to inform the roadmap for V2 and beyond.' },
+            ].map((step, i) => (
+              <div key={i} className="p-12 bg-white group hover:bg-slate-50 transition-colors">
+                <div className="font-display text-[48px] font-black text-slate-100 leading-none mb-8 group-hover:text-blue-100 transition-colors">{step.num}</div>
+                <div className="font-display text-lg font-black mb-4 text-slate-900 uppercase tracking-tight">{step.title}</div>
+                <p className="text-base leading-relaxed text-slate-500">{step.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* About */}
-      <section id="about" className="px-12 py-24 bg-slate-50 border-t border-slate-200">
-        <div className="max-w-3xl">
-          <div className="flex items-center gap-5 mb-8">
-            <span className="font-mono text-[13px] text-blue-600 font-bold tracking-widest">03</span>
-            <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-slate-900">About</h2>
-            <div className="flex-1 h-px bg-slate-200" />
-          </div>
-          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">I'm a <strong className="text-slate-900 font-semibold">Senior Data Strategist at Indeed</strong> with a background in frontend engineering and a Stanford product management certificate. I've spent 8+ years at the intersection of data, engineering, and product.</p>
-          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">I build things that solve real problems. The portfolio you're reading right now is one of them — I built every project here, wrote every PRD, and defined every roadmap myself.</p>
-          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">Based in <strong className="text-slate-900 font-semibold">New Jersey</strong>. I'm a technical PM who builds from scratch, with deep data intuition from Indeed, a strong product sense, and an understanding of how products are actually built from the inside.</p>
-          <div className="grid grid-cols-2 gap-4 mt-10">
-            <div>
-              <div className="font-mono text-[12px] uppercase tracking-widest text-slate-900 font-bold mb-2">Product</div>
-              <div className="text-[15px] leading-[2] text-slate-700">Roadmap Ownership<br />A/B Experimentation<br />User Research<br />0→1 Launches<br />Agile / Scrum</div>
+      <section id="about" className="px-12 py-32 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+            <div className="lg:col-span-5">
+              <div className="flex items-center gap-3 mb-12">
+                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">03 — About</span>
+              </div>
+              <h2 className="font-display text-[clamp(40px,7vw,96px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter mb-12">
+                The<br />
+                <span className="text-slate-300">Builder</span>
+              </h2>
+              <div className="bg-slate-50 p-8 border-l-2 border-slate-900">
+                <p className="text-lg leading-relaxed text-slate-600 italic">
+                  "I specialize in bridging the gap between deep technical implementation and boardroom-level product decisions."
+                </p>
+              </div>
             </div>
-            <div>
-              <div className="font-mono text-[12px] uppercase tracking-widest text-slate-900 font-bold mb-2">Technical</div>
-              <div className="text-[15px] leading-[2] text-slate-700">JavaScript / React<br />SQL & Tableau<br />Data Automation<br />Front-End Arch.<br />Accessibility</div>
+            <div className="lg:col-span-7 flex flex-col justify-end gap-12">
+              <p className="text-[28px] leading-[1.2] text-slate-900 font-sans tracking-tight max-w-xl">
+                I am a <strong className="font-black">Senior Data Strategist at Indeed</strong> with a decade of experience operating at the convergence of high-scale data and product.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-12 border-t border-slate-100">
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-6">Expertise — Product</div>
+                  <ul className="text-sm font-black text-slate-900 uppercase tracking-tight flex flex-col gap-4">
+                    <li>Roadmap Ownership</li>
+                    <li>A/B Experimentation</li>
+                    <li>User Research</li>
+                    <li>0→1 Launches</li>
+                  </ul>
+                </div>
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-6">Expertise — Technical</div>
+                  <ul className="text-sm font-black text-slate-900 uppercase tracking-tight flex flex-col gap-4">
+                    <li>React / TypeScript</li>
+                    <li>SQL & Data Viz</li>
+                    <li>Data Automation</li>
+                    <li>Product Arch.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="px-12 py-9 border-t-3 border-red-700 bg-slate-900 flex items-center justify-between flex-wrap gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="font-mono text-[13px] text-slate-500 tracking-wider uppercase">© 2026 Tariq Shaikh · PM Portfolio</div>
-          {user?.email === 'TShaikh92@gmail.com' && (
-            <Link to="/admin/visitors" className="font-mono text-[10px] text-slate-700 hover:text-blue-600 transition-colors uppercase tracking-widest">Admin: Visitor Insights</Link>
-          )}
-        </div>
-        <div className="flex gap-6">
-          <a href="mailto:tshaikh92@gmail.com" className="font-mono text-[13px] text-slate-400 hover:text-red-700 transition-colors tracking-wider">tshaikh92@gmail.com</a>
-          <a href="tel:8483914393" className="font-mono text-[13px] text-slate-400 hover:text-red-700 transition-colors tracking-wider">848-391-4393</a>
-          <a href="https://linkedin.com" target="_blank" className="font-mono text-[13px] text-slate-400 hover:text-red-700 transition-colors tracking-wider">LinkedIn</a>
+      <footer className="px-12 py-24 border-t border-slate-100 bg-white">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-16">
+          <div className="flex flex-col gap-6">
+            <div className="font-mono text-[10px] text-slate-400 tracking-[0.4em] uppercase font-bold">Archive — © 2026</div>
+            <div className="font-display text-[clamp(24px,4vw,40px)] font-black text-slate-900 uppercase tracking-tighter">Tariq Shaikh</div>
+            <p className="text-slate-400 font-sans text-sm max-w-[240px] leading-relaxed">
+              Product Management & Data Strategy at the intersection of logic and product.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-16 md:gap-24 w-full md:w-auto">
+            <div className="flex flex-col gap-6">
+              <span className="font-mono text-[10px] text-slate-300 uppercase font-bold tracking-widest">Connect</span>
+              <div className="flex flex-col gap-3">
+                <a href="mailto:tshaikh92@gmail.com" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">Email</a>
+                <a href="https://linkedin.com" target="_blank" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">LinkedIn</a>
+              </div>
+            </div>
+            <div className="flex flex-col gap-6">
+              <span className="font-mono text-[10px] text-slate-300 uppercase font-bold tracking-widest">Reach</span>
+              <a href="tel:8483914393" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">848.391.4393</a>
+            </div>
+          </div>
         </div>
       </footer>
 
@@ -242,32 +304,30 @@ export default function Portfolio() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeModal}
-            className="fixed inset-0 z-[200] bg-[#1C355E]/20 backdrop-blur-md overflow-y-auto px-6 py-10 flex items-start justify-center"
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm overflow-y-auto px-6 py-10 flex items-start justify-center"
           >
             <motion.div 
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 16 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white text-slate-900 max-w-[1100px] w-full rounded-[3px] overflow-hidden shadow-2xl shadow-slate-900/20"
+              className="bg-white text-slate-900 max-w-[1100px] w-full overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-slate-100"
             >
               {activeModal === 'prd-1' && (
                 <>
-                  <div className="px-10 py-8 border-b border-slate-200 flex items-start justify-between gap-4 bg-white sticky top-0 z-10">
+                  <div className="px-10 py-10 border-b border-slate-200 flex items-start justify-between gap-4 bg-white sticky top-0 z-10">
                     <div>
-                      <div className="font-mono text-[12px] uppercase tracking-widest text-blue-600 mb-2">Product Requirements Document</div>
-                      <div className="text-4xl leading-none">
-                        <span className="font-serif font-bold text-slate-900">Homebase</span> <span className="font-sans font-black text-blue-600 ml-1">NJ</span>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-4">Product Requirements Document</div>
+                      <div className="text-5xl font-display leading-[0.8] tracking-tighter uppercase font-black">
+                        Homebase <span className="text-slate-300">NJ</span>
                       </div>
-                      <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-600"></span> Status: Shipped (v1.0)</span>
+                      <div className="flex gap-4 mt-8 text-[11px] font-mono font-bold uppercase tracking-widest text-slate-500">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-green-500"></span> Status: v1.0</span>
                         <span>|</span>
-                        <span>Author: TShaikh92</span>
-                        <span>|</span>
-                        <span>Target: Q2 2026</span>
+                        <span>Q2 2026</span>
                       </div>
                     </div>
-                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-slate-900 transition-colors">✕</button>
+                    <button onClick={closeModal} className="text-slate-900 text-3xl leading-none p-2 hover:bg-slate-100 transition-colors uppercase font-mono">✕</button>
                   </div>
                   
                   <div className="p-10 bg-white">
