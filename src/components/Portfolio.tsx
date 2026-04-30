@@ -68,6 +68,7 @@ export default function Portfolio() {
             Product Manager
           </p>
         </div>
+        
         <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-slate-900/30 animate-fade-up delay-500 z-10">
           <div className="w-px h-10 bg-gradient-to-b from-blue-600 to-transparent animate-scroll-line" />
           <span>Scroll</span>

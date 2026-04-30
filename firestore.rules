@@ -189,6 +189,33 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    // Collaborative Flights/Trips Rules (Waves)
+    match /trips/{tripId} {
+      // Helper to check if user is a member of this trip
+      function isTripMember() {
+        return isAuthenticated() && exists(/databases/$(database)/documents/trips/$(tripId)/members/$(request.auth.uid));
+      }
+
+      // Allow read if user is a member
+      allow read: if isTripMember();
+      
+      // Allow creation by any authenticated user
+      allow create: if isAuthenticated() && 
+                      request.resource.data.creatorId == request.auth.uid &&
+                      request.resource.data.destination is string;
+
+      // Allow update by members
+      allow update: if isTripMember();
+
+      match /members/{userId} {
+        // Members of the trip can see other members
+        allow read: if isTripMember();
+        
+        // Users can create/update their own member entry
+        allow write: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+
     // Visitor Log Rules
     match /visitorLogs/{logId} {
       // Allow anyone to log a visit

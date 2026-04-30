@@ -1,22 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { 
   Calendar, Users, Bell, TrendingDown, TrendingUp, 
-  Share2, MapPin, Search, ArrowRight, Sun, 
+  Share2, MapPin, Search, ArrowRight, Sun, Cloud, CloudRain, Snowflake, Globe,
   ThermometerSun, CheckCircle2, RefreshCw, Sparkles, Plane,
-  Bookmark, SlidersHorizontal, Clock, AlertCircle
+  Bookmark, SlidersHorizontal, Clock, AlertCircle,
+  Copy, Link2, Ghost, Crown, DollarSign
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from '@google/genai';
 import { logVisit } from '../lib/analytics';
+import { db, auth } from '../firebase';
+import { 
+  doc, setDoc, onSnapshot, collection, query, 
+  serverTimestamp, updateDoc, getDoc, getDocs
+} from 'firebase/firestore';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
 // --- Types ---
+interface TripMember {
+  userId: string;
+  displayName: string;
+  photoURL: string;
+  votedMonthIndex: number | null;
+  joinedAt: any;
+  lastActive: any;
+}
 interface TripIntelligence {
   title: string;
   subtitle: string;
   summary: string;
   whyVisit: string;
   whenToVisit: string;
+  averageDailySpend?: number;
   seasons: {
     high: string;
     low: string;
@@ -586,6 +602,9 @@ const WavesLogo = () => (
 );
 
 export default function Waves() {
+  const { tripId } = useParams();
+  const navigate = useNavigate();
+
   const [destination, setDestination] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -595,6 +614,78 @@ export default function Waves() {
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
   const [activeMonthIndex, setActiveMonthIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // Collaboration State
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [tripCrew, setTripCrew] = useState<TripMember[]>([]);
+  const [isCollaborating, setIsCollaborating] = useState(false);
+  const [isCreatingTrip, setIsCreatingTrip] = useState(false);
+  const [inviteLink, setInviteLink] = useState('');
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
+  // Auth Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Trip Listener
+  useEffect(() => {
+    if (!tripId) {
+      setIsCollaborating(false);
+      return;
+    }
+
+    setIsCollaborating(true);
+    
+    // Subscribe to Trip Doc
+    const tripRef = doc(db, 'trips', tripId);
+    const unsubTrip = onSnapshot(tripRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.intelligence) {
+          setIntelligence(data.intelligence);
+          setHasSearched(true);
+        }
+        setDestination(data.destination || '');
+      } else {
+        setError("This trip no longer exists or the link is invalid.");
+        navigate('/waves');
+      }
+    });
+
+    // Subscribe to Members
+    const membersRef = collection(db, 'trips', tripId, 'members');
+    const unsubMembers = onSnapshot(membersRef, (snap) => {
+      const members = snap.docs.map(d => d.data() as TripMember);
+      setTripCrew(members);
+    });
+
+    return () => {
+      unsubTrip();
+      unsubMembers();
+    };
+  }, [tripId, navigate]);
+
+  // Join Trip Effect
+  useEffect(() => {
+    if (tripId && user) {
+      const joinTrip = async () => {
+        const memberRef = doc(db, 'trips', tripId, 'members', user.uid);
+        await setDoc(memberRef, {
+          userId: user.uid,
+          displayName: user.displayName || user.email?.split('@')[0] || 'Explorer',
+          photoURL: user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`,
+          joinedAt: serverTimestamp(),
+          lastActive: serverTimestamp(),
+          votedMonthIndex: null
+        }, { merge: true });
+      };
+      joinTrip();
+    }
+  }, [tripId, user]);
 
   // Live Geocoding Search
   useEffect(() => {
@@ -623,86 +714,148 @@ export default function Waves() {
     logVisit('/waves');
   }, []);
 
-  const fetchDestinationIntelligence = async (dest: string) => {
+  const fetchDestinationIntelligence = async (dest: string, forTrip: boolean = false) => {
     // Check for Demo Data first to bypass API
     const demoMatch = Object.keys(DEMO_DATA).find(key => 
       key.toLowerCase().includes(dest.toLowerCase()) || dest.toLowerCase().includes(key.toLowerCase())
     );
 
+    let data: TripIntelligence;
+
     if (demoMatch) {
-      setIsSearching(true);
-      setTimeout(() => {
-        const demoData = DEMO_DATA[demoMatch];
-        setIntelligence(demoData);
-        // Set active month to current month or first ideal month
-        const currentMonthIdx = new Date().getMonth();
-        const idealIdx = demoData.monthlyData.findIndex(m => m.isIdeal);
-        setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
-        setHasSearched(true);
+      if (!forTrip) setIsSearching(true);
+      data = DEMO_DATA[demoMatch];
+      if (!forTrip) {
+        setTimeout(() => {
+          setIntelligence(data);
+          const currentMonthIdx = new Date().getMonth();
+          const idealIdx = data.monthlyData.findIndex(m => m.isIdeal);
+          setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
+          setHasSearched(true);
+          setIsSearching(false);
+        }, 800);
+      }
+    } else {
+      if (!forTrip) setIsSearching(true);
+      setError(null);
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const prompt = `
+          You are an expert travel planner. The user wants to travel to: ${dest}.
+          Provide a comprehensive, highly detailed destination guide. 
+          Focus heavily on local culture, food, and "in the weeds" details that only a local would know.
+          Format the response exactly as a JSON object with these keys:
+          - "title": Catchy title (e.g., "The Ultimate").
+          - "subtitle": Destination name (e.g., "Kyoto Experience").
+          - "summary": 2-3 sentences summarizing the vibe and overall appeal.
+          - "whyVisit": 2-3 sentences on why people visit this location.
+          - "whenToVisit": 2-3 sentences on the best times to visit and crowd levels.
+          - "averageDailySpend": Estimated average cost per day in USD (number).
+          - "seasons": { "high": "string", "low": "string", "shoulder": "string" }
+          - "weatherCard": { "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "tempHigh": number, "tempLow": number, "note": string, "month": string }
+          - "monthlyData": Array of exactly 12 objects (Jan-Dec). Each: "month" (e.g., "JAN"), "flightCost" (number), "temp" (number), "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "note": "string", "isIdeal" (boolean), and "crowdLevel" (number 1-10).
+          - "foodAndCulture": { 
+              "categories": [
+                { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
+                { "title": "Lunch & Street Food", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
+                { "title": "Dinner & Fine Dining", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
+                { "title": "Drinks & Nightlife", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] }
+              ], 
+              "mustTry": ["string"], 
+              "culturalEtiquette": [{ "title": "string", "description": "string" }] 
+            }
+          - "topActivities": Array of exactly 6 (title, description, imageKeyword)
+          - "nicheActivities": Array of exactly 4 (title, description, imageKeyword)
+          - "seasonalHighlights": Array of exactly 5 (title, description, timeOfYear)
+        `;
+        
+        const response = await ai.models.generateContent({
+          model: 'gemini-1.5-flash',
+          contents: prompt,
+          config: { responseMimeType: 'application/json' }
+        });
+        
+        const text = response.text || "{}";
+        data = JSON.parse(text);
+        if (!forTrip) {
+          setIntelligence(data);
+          const currentMonthIdx = new Date().getMonth();
+          const idealIdx = data.monthlyData.findIndex((m: any) => m.isIdeal);
+          setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
+          setHasSearched(true);
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch insights:", err);
+        const limitReached = err?.message?.includes('429') || err?.message?.toLowerCase().includes('quota');
+        const msg = limitReached ? "Search limit reached. Please wait a minute." : "Failed to analyze destination.";
+        if (forTrip) throw new Error(msg);
+        setError(msg);
         setIsSearching(false);
-      }, 800);
+        return null;
+      }
+    }
+    
+    if (!forTrip) setIsSearching(false);
+    return data;
+  };
+
+  const startCollaborativeSession = async () => {
+    if (!user) {
+      setError("Please sign in to start a Trip Crew.");
       return;
     }
+    
+    if (!destination.trim()) return;
 
-    setIsSearching(true);
+    setIsCreatingTrip(true);
     setError(null);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const prompt = `
-        You are an expert travel planner. The user wants to travel to: ${dest}.
-        Provide a comprehensive, highly detailed destination guide. 
-        Focus heavily on local culture, food, and "in the weeds" details that only a local would know.
-        Format the response exactly as a JSON object with these keys:
-        - "title": Catchy title (e.g., "The Ultimate").
-        - "subtitle": Destination name (e.g., "Kyoto Experience").
-        - "summary": 2-3 sentences summarizing the vibe and overall appeal.
-        - "whyVisit": 2-3 sentences on why people visit this location.
-        - "whenToVisit": 2-3 sentences on the best times to visit and crowd levels.
-        - "averageDailySpend": Estimated average cost per day in USD for food, lodging, and local transport (number).
-        - "seasons": { "high": "string", "low": "string", "shoulder": "string" } describing the months for each season.
-        - "weatherCard": { "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "tempHigh": number, "tempLow": number, "note": string (e.g., "Perfect beach weather"), "month": string (e.g., "October" or "Peak Summer") } representing the absolute BEST time to visit.
-        - "monthlyData": Array of exactly 12 objects (Jan-Dec). Each has: "month" (e.g., "JAN"), "flightCost" (estimated average round-trip flight cost in USD from a major global hub, number), "temp" (average high temperature in Fahrenheit, number), "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "note": "Short weather context for this month", "isIdeal" (boolean, true for the 2-3 best months to visit), and "crowdLevel" (number 1-10, where 10 is most crowded).
-        - "foodAndCulture": { 
-            "categories": [
-              { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
-              { "title": "Lunch & Street Food", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
-              { "title": "Dinner & Fine Dining", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
-              { "title": "Drinks & Nightlife", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] }
-            ], 
-            "mustTry": ["string"], 
-            "culturalEtiquette": [{ "title": "string", "description": "string" }] 
-          }
-        - "topActivities": Array of exactly 6 objects representing the best things to do year-round. Each has "title", "description", and "imageKeyword".
-        - "nicheActivities": Array of exactly 4 objects for unique, less-known experiences. Each has "title", "description", and "imageKeyword".
-        - "seasonalHighlights": Array of exactly 5 objects for specific times of year. Each has "title", "description", "timeOfYear" (e.g., "Late Autumn").
-      `;
+      // 1. Get intelligence first
+      const data = await fetchDestinationIntelligence(destination, true);
+      if (!data) return;
+
+      // 2. Create the Trip Doc
+      const tripId = Math.random().toString(36).substring(2, 10);
+      const tripRef = doc(db, 'trips', tripId);
       
-      const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-        }
+      await setDoc(tripRef, {
+        id: tripId,
+        creatorId: user.uid,
+        destination: destination,
+        intelligence: data,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        inviteCode: Math.random().toString(36).substring(2, 6).toUpperCase()
       });
-      
-      const text = response.text || "{}";
-      const data = JSON.parse(text);
-      setIntelligence(data);
-      // Set active month to current month or first ideal month
-      const currentMonthIdx = new Date().getMonth();
-      const idealIdx = data.monthlyData.findIndex((m: any) => m.isIdeal);
-      setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
-      setHasSearched(true);
+
+      // 3. Add the creator as the first member
+      await setDoc(doc(db, 'trips', tripId, 'members', user.uid), {
+        userId: user.uid,
+        displayName: user.displayName || user.email?.split('@')[0] || 'Captain',
+        photoURL: user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`,
+        joinedAt: serverTimestamp(),
+        lastActive: serverTimestamp(),
+        votedMonthIndex: null
+      });
+
+      // 4. Redirect
+      navigate(`/waves/${tripId}`);
+      setShowInviteModal(true);
     } catch (err: any) {
-      console.error("Failed to fetch insights:", err);
-      if (err?.message?.includes('429') || err?.message?.toLowerCase().includes('quota')) {
-        setError("Search limit reached. Please wait a minute or add your own Gemini API key in Settings.");
-      } else {
-        setError("Failed to analyze destination. Please try another location or try again.");
-      }
+      setError(err.message || "Failed to create trip.");
     } finally {
-      setIsSearching(false);
+      setIsCreatingTrip(false);
     }
+  };
+
+  const handleVote = async (monthIndex: number) => {
+    if (!tripId || !user) return;
+    
+    const memberRef = doc(db, 'trips', tripId, 'members', user.uid);
+    await updateDoc(memberRef, {
+      votedMonthIndex: monthIndex,
+      lastActive: serverTimestamp()
+    });
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -735,7 +888,7 @@ export default function Waves() {
               Where will the <span className="italic text-cyan-400">waves</span> take you?
             </h1>
             
-            <form onSubmit={handleSearch} className="relative group">
+            <form onSubmit={handleSearch} className="relative group mb-12">
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-purple-500/20 rounded-[2rem] blur-lg opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               <div className="relative bg-[#0B1221]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex flex-col md:flex-row items-center gap-4 shadow-2xl">
                 
@@ -754,7 +907,6 @@ export default function Waves() {
                       onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                       className="w-full bg-transparent border-none outline-none font-light text-lg md:text-xl text-white placeholder:text-slate-600 tracking-wide"
                       placeholder="e.g., Kyoto, Japan or The Amalfi Coast"
-                      autoFocus
                     />
                     
                     {/* Autocomplete Dropdown */}
@@ -794,23 +946,68 @@ export default function Waves() {
               )}
             </form>
 
-            <div className="mt-12 flex flex-wrap justify-center gap-4">
-              <p className="w-full text-center text-[10px] uppercase tracking-widest text-slate-500 mb-2">Featured Destinations (Instant Load)</p>
-              {Object.keys(DEMO_DATA).map(city => (
-                <button
-                  key={city}
-                  type="button"
-                  onClick={() => {
-                    setDestination(city);
-                    fetchDestinationIntelligence(city);
-                  }}
-                  className="px-6 py-3 bg-white/5 border border-white/10 rounded-full text-xs text-slate-300 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all flex items-center gap-2"
-                >
-                  <MapPin size={12} className="text-cyan-400" />
-                  {city.split(',')[0]}
-                </button>
-              ))}
-            </div>
+            {!hasSearched && !isSearching && (
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="w-full max-w-4xl"
+              >
+                <div className="flex items-center justify-between mb-8 px-4">
+                  <div className="flex items-center gap-3">
+                    <Globe size={18} className="text-cyan-400" />
+                    <h2 className="text-sm font-bold text-white uppercase tracking-[0.2em]">Explore Global Regions</h2>
+                  </div>
+                  <div className="text-[9px] text-slate-500 uppercase tracking-widest font-medium italic">
+                    AI-Powered Discovery
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+                  {[
+                    { name: 'Nordic Escapes', icon: Snowflake, color: 'text-blue-400', search: 'Scandinavia' },
+                    { name: 'Mediterranean Sun', icon: Sun, color: 'text-amber-400', search: 'Mediterranean Coast' },
+                    { name: 'Asian Metropolis', icon: MapPin, color: 'text-rose-400', search: 'Tokyo or Seoul' },
+                    { name: 'Tropical Islands', icon: Plane, color: 'text-emerald-400', search: 'Bali or Maldives' },
+                    { name: 'Alpine Peaks', icon: Cloud, color: 'text-indigo-400', search: 'Swiss Alps' },
+                    { name: 'Serengeti Plains', icon: SlidersHorizontal, color: 'text-orange-400', search: 'Serengeti, Tanzania' },
+                    { name: 'Hidden Gems', icon: Sparkles, color: 'text-purple-400', search: 'Hidden gems in Europe' },
+                    { name: 'Ancient Heritage', icon: Clock, color: 'text-yellow-400', search: 'Ancient ruins world' }
+                  ].map((cat) => (
+                    <button
+                      key={cat.name}
+                      onClick={() => {
+                        setDestination(cat.search);
+                        fetchDestinationIntelligence(cat.search);
+                      }}
+                      className="group flex flex-col items-center gap-4 p-6 bg-[#0B1221]/40 border border-white/5 rounded-3xl hover:bg-[#0B1221] hover:border-cyan-500/50 transition-all duration-500"
+                    >
+                      <div className={`p-4 rounded-2xl bg-white/5 group-hover:bg-cyan-500/10 ${cat.color} transition-all`}>
+                        <cat.icon size={20} />
+                      </div>
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center group-hover:text-white transition-colors">{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-12 flex flex-wrap justify-center gap-3">
+                  <p className="w-full text-center text-[10px] uppercase tracking-widest text-slate-500 mb-2">Popular Cities</p>
+                  {Object.keys(DEMO_DATA).map(city => (
+                    <button
+                      key={city}
+                      type="button"
+                      onClick={() => {
+                        setDestination(city);
+                        fetchDestinationIntelligence(city);
+                      }}
+                      className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase tracking-widest font-black text-slate-400 hover:bg-white/10 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"
+                    >
+                      {city.split(',')[0]}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </main>
       </div>
@@ -890,31 +1087,22 @@ export default function Waves() {
           </div>
         </header>
 
-        {/* Year-Round Flights & Climate - MOVED UP & ENHANCED */}
+        {/* Year-Round Flights & Climate - COLLABORATIVE WORKSPACE */}
         <section className="mb-24">
-          <div className="flex items-center justify-between mb-12">
-            <div className="flex items-center gap-3">
-              <Plane size={24} className="text-cyan-400" />
-              <h2 className="text-3xl md:text-5xl text-white font-serif">Flights & Climate</h2>
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                <Calendar size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl text-white font-serif tracking-tight">Trip Pulse</h2>
+                <p className="text-slate-500 text-xs">A 12-month seasonality and cost breakdown.</p>
+              </div>
             </div>
             <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></span>
                 <span className="text-slate-300">Ideal Window</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span className="text-slate-500">Quiet</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  <span className="text-slate-500">Moderate</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                  <span className="text-slate-500">Peak</span>
-                </div>
               </div>
             </div>
           </div>
@@ -922,46 +1110,38 @@ export default function Waves() {
           <div className="bg-[#0B1221]/50 border border-white/10 rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
             
-            {/* 12-Month Chart */}
             <div className="relative z-10">
-              <div className="flex items-end justify-between h-72 gap-2 md:gap-4">
+              <div className="flex items-end justify-between h-80 gap-1 md:gap-3">
                 {(() => {
                   const maxCost = Math.max(...data.monthlyData.map(d => d.flightCost), 500);
                   return data.monthlyData.map((item, i) => {
                     const heightPercent = Math.max(15, (item.flightCost / maxCost) * 100);
-                    const crowdColor = item.crowdLevel > 7 ? 'bg-rose-500' : item.crowdLevel > 4 ? 'bg-amber-500' : 'bg-emerald-500';
-                    const crowdShadow = item.crowdLevel > 7 ? 'shadow-[0_0_10px_rgba(244,63,94,0.4)]' : item.crowdLevel > 4 ? 'shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 'shadow-[0_0_10px_rgba(16,185,129,0.4)]';
+                    const isSelected = activeMonthIndex === i;
                     
                     return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-6 group h-full">
-                        <div className="w-full relative flex items-end justify-center h-full">
-                          {item.isIdeal && (
-                            <div className="absolute -top-8 flex flex-col items-center">
-                              <Sparkles size={14} className="text-cyan-400 animate-pulse" />
-                            </div>
-                          )}
-                          <motion.div 
-                            initial={{ height: 0 }}
-                            animate={{ height: `${heightPercent}%` }}
-                            transition={{ duration: 1, delay: i * 0.05, ease: "easeOut" }}
-                            className={`w-full max-w-[56px] rounded-t-xl transition-all duration-500 relative group-hover:opacity-100 ${
+                      <div key={i} className="flex-1 flex flex-col items-center gap-4 h-full">
+                        <div className="w-full relative flex flex-col items-center justify-end h-full">
+                          
+                          <button 
+                            onClick={() => {
+                              setActiveMonthIndex(i);
+                            }}
+                            className={`w-full max-w-[64px] rounded-t-2xl transition-all duration-500 relative group ${
                               item.isIdeal 
-                                ? 'bg-gradient-to-t from-cyan-900/50 to-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] opacity-100' 
-                                : 'bg-white/5 opacity-40 group-hover:bg-white/10'
-                            }`}
+                                ? 'bg-gradient-to-t from-cyan-900/40 to-cyan-400/80' 
+                                : 'bg-white/5 hover:bg-white/10'
+                            } ${isSelected ? 'ring-2 ring-cyan-400 ring-offset-4 ring-offset-[#0B1221]' : ''}`}
+                            style={{ height: `${heightPercent}%` }}
                           >
-                            {/* Tooltip */}
-                            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-[#050B14] border border-white/10 rounded-xl px-4 py-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 pointer-events-none z-30 whitespace-nowrap flex flex-col items-center shadow-2xl">
-                              <span className="text-white font-bold text-base">${item.flightCost}</span>
-                              <span className="text-slate-400 text-[9px] uppercase tracking-widest font-medium">{item.temp}°F Avg</span>
+                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#050B14] border border-white/10 rounded-xl px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-all z-30 shadow-2xl">
+                              <span className="text-white font-bold text-xs">${item.flightCost}</span>
                             </div>
-                          </motion.div>
+                          </button>
                         </div>
                         
-                        {/* Crowd Level Indicator - ENHANCED COLORS */}
-                        <div className="w-full flex flex-col items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${crowdColor} ${crowdShadow} transition-all duration-500 group-hover:scale-125`}></div>
-                          <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${item.isIdeal ? 'text-cyan-400' : 'text-slate-600 group-hover:text-slate-400'}`}>
+                        <div className="flex flex-col items-center gap-1.5">
+                          {item.isIdeal && <Sparkles size={10} className="text-cyan-400" />}
+                          <span className={`text-[10px] font-black tracking-widest uppercase ${isSelected ? 'text-cyan-400' : 'text-slate-600'}`}>
                             {item.month}
                           </span>
                         </div>
@@ -974,64 +1154,90 @@ export default function Waves() {
           </div>
         </section>
 
-        {/* The Draw: Why & When */}
+        {/* The Draw: Why & When - WITH BUDGET INSIGHTS */}
         <section className="mb-20 grid grid-cols-1 xl:grid-cols-3 gap-12">
           <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
-              <h3 className="text-2xl text-white font-serif mb-4">The Draw</h3>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                  <Sparkles size={20} />
+                </div>
+                <h3 className="text-2xl text-white font-serif">The Draw</h3>
+              </div>
               <p className="text-slate-400 font-light leading-relaxed">
                 {data.whyVisit}
               </p>
             </div>
             <div>
-              <h3 className="text-2xl text-white font-serif mb-4">When to Go</h3>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                  <Calendar size={20} />
+                </div>
+                <h3 className="text-2xl text-white font-serif">When to Go</h3>
+              </div>
               <p className="text-slate-400 font-light leading-relaxed">
                 {data.whenToVisit}
               </p>
             </div>
+            
+            {/* Budget Insight */}
+            {data.averageDailySpend && (
+              <div className="md:col-span-2 p-8 bg-[#0B1221] border border-white/5 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 border-l-cyan-500/50 border-l-4">
+                <div className="flex items-center gap-6">
+                  <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                    <DollarSign size={28} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-medium mb-1">Estimated Daily Spend</h4>
+                    <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">Mid-range comfort level</p>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl text-white font-light tracking-tight">${data.averageDailySpend}</span>
+                  <span className="text-slate-500 text-sm">/ day</span>
+                </div>
+              </div>
+            )}
           </div>
           
-          {/* Weather Card - Integrated & Interactive */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col">
-            <div className="flex items-center justify-between mb-8">
-              <span className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold">Climate Snapshot</span>
+          {/* Weather Card - REFINED */}
+          <div className="bg-[#0B1221] border border-white/10 rounded-3xl p-8 flex flex-col shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-cyan-500/10 transition-colors"></div>
+            
+            <div className="flex items-center justify-between mb-8 relative z-10">
+              <span className="text-[10px] uppercase tracking-widest text-cyan-400 font-black px-3 py-1 bg-cyan-400/10 rounded-full">Climate Pulse</span>
               {(() => {
                 const monthData = data.monthlyData[activeMonthIndex];
                 const cond = monthData?.condition || "Sunny";
                 if (cond.includes('Sun')) return <Sun size={24} className="text-amber-400" />;
-                if (cond.includes('Rain')) return <RefreshCw size={24} className="text-cyan-400 animate-pulse" />;
-                return <ThermometerSun size={24} className="text-cyan-400" />;
+                if (cond.includes('Rain')) return <CloudRain size={24} className="text-cyan-400" />;
+                if (cond.includes('Snow')) return <Snowflake size={24} className="text-indigo-400" />;
+                return <Cloud size={24} className="text-slate-400" />;
               })()}
             </div>
 
-            {/* 12 Months Navigation - MOVED TO TOP & EQUAL SPACING */}
-            <div className="flex items-center justify-between gap-1 mb-10 border-b border-white/5 pb-6">
-              {data.monthlyData.map((m, idx) => {
-                const isCurrentMonth = idx === new Date().getMonth();
-                return (
-                  <button
-                    key={m.month}
-                    onClick={() => setActiveMonthIndex(idx)}
-                    className={`flex-1 text-[8px] py-2 rounded-lg transition-all border font-bold ${
-                      activeMonthIndex === idx 
-                        ? 'bg-cyan-500 border-cyan-400 text-white shadow-[0_0_10px_rgba(34,211,238,0.4)]' 
-                        : isCurrentMonth
-                          ? 'bg-white/10 border-white/20 text-white'
-                          : 'bg-transparent border-transparent text-slate-600 hover:text-slate-300'
-                    }`}
-                  >
-                    {m.month.substring(0, 1)}
-                  </button>
-                );
-              })}
+            <div className="flex items-center justify-between gap-1 mb-10 bg-white/5 p-1 rounded-2xl relative z-10">
+              {data.monthlyData.map((m, idx) => (
+                <button
+                  key={m.month}
+                  onClick={() => setActiveMonthIndex(idx)}
+                  className={`flex-1 text-[9px] py-2 rounded-xl transition-all font-black uppercase ${
+                    activeMonthIndex === idx 
+                      ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' 
+                      : 'text-slate-600 hover:text-slate-400'
+                  }`}
+                >
+                  {m.month.substring(0, 1)}
+                </button>
+              ))}
             </div>
             
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-6xl text-white font-light tracking-tighter">{data.monthlyData[activeMonthIndex]?.temp || 0}°</span>
-              <span className="text-xl text-slate-500">F</span>
+            <div className="flex items-baseline gap-2 mb-4 relative z-10">
+              <span className="text-7xl text-white font-light tracking-tighter">{data.monthlyData[activeMonthIndex]?.temp || 0}°</span>
+              <span className="text-2xl text-slate-500 font-serif">F</span>
             </div>
             
-            <p className="text-sm text-slate-300 font-light leading-relaxed mb-4 min-h-[60px]">
+            <p className="text-sm text-slate-300 font-light leading-relaxed relative z-10">
               {data.monthlyData[activeMonthIndex]?.note || "Select a month to see local weather context."}
             </p>
           </div>
@@ -1212,6 +1418,59 @@ export default function Waves() {
           </div>
         </section>
       </main>
+      <InviteModal 
+        show={showInviteModal} 
+        onClose={() => setShowInviteModal(false)} 
+        tripId={tripId || ''} 
+      />
+    </div>
+  );
+}
+
+function InviteModal({ show, onClose, tripId }: { show: boolean, onClose: () => void, tripId: string }) {
+  const [copied, setCopied] = useState(false);
+  const link = `${window.location.origin}/waves/${tripId}`;
+
+  const copy = () => {
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 pb-32">
+      <div className="absolute inset-0 bg-[#050B14]/80 backdrop-blur-md" onClick={onClose} />
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="relative bg-[#0B1221] border border-white/10 rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl"
+      >
+        <div className="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center text-cyan-400 mb-6 mx-auto">
+          <Users size={32} />
+        </div>
+        <h3 className="text-3xl font-serif font-black text-white text-center mb-2 tracking-tight">The Crew is Ready</h3>
+        <p className="text-slate-400 text-center mb-8">Share this link with your trip partners to start voting and planning in sync.</p>
+        
+        <div className="space-y-4">
+          <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
+            <span className="text-xs text-slate-500 font-mono truncate mr-4">{link}</span>
+            <button 
+              onClick={copy}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-cyan-400"
+            >
+              {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
+            </button>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-full py-5 bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-2xl text-white text-[11px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-cyan-500/20"
+          >
+            Enter Workspace
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 }
