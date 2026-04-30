@@ -219,10 +219,10 @@ export default function Portfolio() {
             </div>
 
             {/* Project 4 - Jobverse */}
-            <div className="bg-[#1E1B2E] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-indigo-400/50 hover:shadow-[0_32px_64px_-16px_rgba(139,92,246,0.15)] relative overflow-hidden rounded-2xl group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="bg-[#140E22] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#D8B4FE]/50 hover:shadow-[0_32px_64px_-16px_rgba(216,180,254,0.15)] relative overflow-hidden rounded-2xl group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold rounded-full">New Concept</span>
+                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-[#D8B4FE]/10 text-[#D8B4FE] border border-[#D8B4FE]/20 font-bold rounded-full">New Concept</span>
                 <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.004</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
@@ -231,7 +231,7 @@ export default function Portfolio() {
               <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">AI-Powered Job Search Intelligence</p>
 
               <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-indigo-500/30" />
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#D8B4FE]/30" />
                 <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
                   Navigating 1.5 billion+ records at Indeed gave me a unique perspective on the job market. Jobverse is a tool designed to cut through the noise.
                 </p>
@@ -239,14 +239,14 @@ export default function Portfolio() {
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {['AI / LLM', 'Product Strategy', 'Big Data'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-indigo-500/5 text-indigo-400/50 border border-indigo-500/10 tracking-widest uppercase font-bold">{tag}</span>
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#D8B4FE]/5 text-[#D8B4FE]/60 border border-[#D8B4FE]/10 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
               
               <div className="flex flex-col gap-3">
-                <button disabled className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] opacity-50 cursor-not-allowed rounded-none ring-1 ring-indigo-400/20">
-                  Coming Soon <ChevronRight size={14} />
-                </button>
+                <Link to="/jobverse" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-purple-500 to-[#D8B4FE] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:opacity-90 transition-opacity">
+                  View Concept <ChevronRight size={14} />
+                </Link>
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => openModal('prd-4')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
                   <button onClick={() => openModal('roadmap-4')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
@@ -1004,15 +1004,15 @@ export default function Portfolio() {
                 </>
               )}
               {(activeModal === 'prd-4' || activeModal === 'roadmap-4') && (
-                <div className="bg-[#1E1B2E] p-20 text-center min-h-[400px] flex flex-col items-center justify-center">
-                  <div className="font-mono text-[11px] uppercase tracking-widest text-indigo-400 mb-6 bg-indigo-500/10 px-4 py-1.5 rounded-full border border-indigo-500/20">Documentation in Progress</div>
+                <div className="bg-[#140E22] p-20 text-center min-h-[400px] flex flex-col items-center justify-center">
+                  <div className="font-mono text-[11px] uppercase tracking-widest text-[#D8B4FE] mb-6 bg-[#D8B4FE]/10 px-4 py-1.5 rounded-full border border-[#D8B4FE]/20">Documentation in Progress</div>
                   <h2 className="text-5xl font-serif font-bold text-white mb-6 italic">Jobverse</h2>
                   <p className="text-slate-400 max-w-md mx-auto leading-[1.8] text-lg">
                     The Product Requirements and Strategic Roadmap for Jobverse are currently being visualized.
                   </p>
                   <div className="mt-12 flex gap-4">
-                    <div className="w-12 h-1 bg-indigo-500/20 rounded-full overflow-hidden">
-                      <div className="w-2/3 h-full bg-indigo-500 animate-pulse"></div>
+                    <div className="w-12 h-1 bg-[#D8B4FE]/20 rounded-full overflow-hidden">
+                      <div className="w-2/3 h-full bg-[#D8B4FE] animate-pulse"></div>
                     </div>
                   </div>
                 </div>
