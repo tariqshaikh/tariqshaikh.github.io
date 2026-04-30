@@ -62,7 +62,7 @@ const rankToWeight = (r: number, total: number) => {
 
 const barColor = (v: number) => v >= 70 ? '#1E5C38' : v >= 45 ? '#7A5200' : '#A83220';
 const tagClass = (v: number) => v >= 70 ? 'bg-[#D4EDDE] text-[#1E5C38]' : v >= 45 ? 'bg-[#FDEFC6] text-[#7A5200]' : 'bg-[#FAD9D3] text-[#A83220]';
-const tagLabel = (v: number, hi: string, lo: string) => v >= 70 ? hi : v >= 45 ? 'Average' : lo;
+const tagLabel = (v: number, hi: string, lo: string) => v >= 70 ? hi : v >= 45 ? 'Typical' : lo;
 const fmtNum = (n: number | null) => { if (!n || n < 0) return 'N/A'; if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M'; if (n >= 1000) return (n / 1000).toFixed(0) + 'K'; return String(n); };
 const fmtDollar = (n: number | null) => (n && n > 0) ? '$' + fmtNum(n) : 'N/A';
 
@@ -72,12 +72,16 @@ export default function Homebase() {
   const [countySearch, setCountySearch] = useState('');
   const [townSearch, setTownSearch] = useState('');
   const [ghostText, setGhostText] = useState('');
+  const heroVariant = 'V2' as const;
   const [priorityOrder, setPriorityOrder] = useState(['schools', 'safety', 'walk', 'home', 'highway', 'income', 'edu', 'market', 'commute', 'taxes', 'localScene']);
+  const [enabledDims, setEnabledDims] = useState<Set<string>>(new Set(['schools', 'safety', 'walk', 'home', 'highway', 'income', 'edu', 'market', 'commute', 'taxes', 'localScene']));
   const [sortKey, setSortKey] = useState('fit');
   const [showResults, setShowResults] = useState(false);
-  const [showPrioritySettings, setShowPrioritySettings] = useState(false);
+  const [showPrioritySettings, setShowPrioritySettings] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [tooltip, setTooltip] = useState<{ name: string, x: number, y: number } | null>(null);
+  const [tickerPaused, setTickerPaused] = useState(false);
+  const [hoveredTickerIdx, setHoveredTickerIdx] = useState<number | null>(null);
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showTownDropdown, setShowTownDropdown] = useState(false);
   const [expandedTown, setExpandedTown] = useState<string | null>(null);
@@ -189,13 +193,14 @@ export default function Homebase() {
 
   const calcFitScore = (d: any) => {
     let sum = 0, total = 0;
-    for (let i = 0; i < priorityOrder.length; i++) {
-      const dimKey = priorityOrder[i];
+    const enabledOrder = priorityOrder.filter(key => enabledDims.has(key));
+    for (let i = 0; i < enabledOrder.length; i++) {
+      const dimKey = enabledOrder[i];
       const dim = DIMS.find(d => d.key === dimKey);
       if (!dim) continue;
       const score = d[dim.scoreKey];
       if (score == null) continue;
-      const w = rankToWeight(i, priorityOrder.length);
+      const w = rankToWeight(i, enabledOrder.length);
       sum += score * w;
       total += w;
     }
@@ -307,21 +312,45 @@ export default function Homebase() {
   });
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-slate-900 flex flex-col">
-      <nav className="px-10 py-4 flex items-center justify-between border-b border-slate-200 bg-white shrink-0">
+    <div className="bg-gradient-to-br from-[#EBF5FB] via-[#F4F9FC] to-slate-50 min-h-screen font-sans text-slate-900 flex flex-col relative">
+
+      {/* Hero background — fades out smoothly when entering results */}
+      <AnimatePresence>
+        {!showResults && (
+          <motion.div
+            className="absolute inset-0 z-0 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.45, ease: 'easeInOut' }}
+            style={{ background: '#090f1a' }}
+          >
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 55% 65% at 80% 15%, rgba(4,113,164,0.55) 0%, transparent 65%)' }} />
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 55% at 15% 80%, rgba(91,168,204,0.22) 0%, transparent 60%)' }} />
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 40% 40% at 55% 48%, rgba(4,113,164,0.18) 0%, transparent 50%)' }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <nav className={`px-10 py-4 flex items-center justify-between border-b shrink-0 shadow-sm relative z-10 backdrop-blur-sm ${
+        !showResults && heroVariant.startsWith('V')
+          ? 'bg-black/30 border-white/10'
+          : 'bg-white/95 border-[#0471A4]/10'
+      }`}>
         <div className="flex items-center gap-6">
           <button onClick={handleClearAll} className="text-2xl leading-none hover:opacity-80 transition-opacity cursor-pointer text-left">
-            <span className="font-serif font-bold text-slate-900">Homebase</span> <span className="font-sans font-black text-[#0471A4] ml-1">NJ</span>
+            <span className={`font-serif font-bold ${!showResults && heroVariant.startsWith('V') ? 'text-white' : 'text-slate-900'}`}>Homebase</span>
+            <span className={`font-sans font-black ml-1 ${!showResults && heroVariant.startsWith('V') ? 'text-[#8ECAE6]' : 'text-[#0471A4]'}`}>NJ</span>
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <div className="font-mono text-[13px] text-slate-500 px-2.5 py-0.5 border border-slate-200 rounded-xl hidden sm:block">21 counties · live verified data</div>
+          <div className={`font-mono text-[12px] px-3 py-1 border rounded-full hidden sm:block tracking-wide ${!showResults && heroVariant.startsWith('V') ? 'text-white/60 border-white/20 bg-white/10' : 'text-[#0471A4] border-[#0471A4]/20 bg-[#0471A4]/5'}`}>21 counties · live verified data</div>
           
           {user ? (
             <div className="flex items-center gap-4">
               <div className="flex flex-col items-end hidden md:flex">
                 <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest leading-none mb-1">Logged In</span>
-                <span className="text-[10px] font-bold text-slate-900 leading-none">{user.displayName || user.email}</span>
+                <span className={`text-[10px] font-bold leading-none ${!showResults && heroVariant.startsWith('V') ? 'text-white' : 'text-slate-900'}`}>{user.displayName || user.email}</span>
               </div>
               <button 
                 onClick={() => auth.signOut()}
@@ -343,23 +372,73 @@ export default function Homebase() {
         </div>
       </nav>
 
-      <motion.div 
-        className={`transition-all duration-500 ease-in-out ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center justify-center px-6 py-20 max-w-4xl mx-auto w-full'}`}
+      <motion.div
+        layout
+        transition={{ layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
+        className={`relative z-10 ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center justify-center px-6 py-20 max-w-4xl mx-auto w-full'}`}
       >
         <AnimatePresence mode="wait">
           {!showResults && (
-              <motion.button 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                onClick={handleClearAll}
-                className="text-center mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
-              >
-                <h1 className="text-[clamp(48px,8vw,84px)] mb-2 leading-none">
-                  <span className="font-serif font-bold text-[#0471A4]">Homebase</span> <span className="font-sans font-black text-[#0471A4]/20 ml-1">NJ</span>
-                </h1>
-                <p className="font-mono text-base text-slate-500 tracking-[0.2em] uppercase">Find your perfect New Jersey town</p>
-              </motion.button>
+            <motion.button
+              key={heroVariant}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              onClick={handleClearAll}
+              className="text-center mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
+            >
+              {heroVariant.startsWith('V') && (
+                <>
+                  <h1 className="text-[clamp(56px,9vw,100px)] mb-4 leading-[0.9] tracking-tight">
+                    <span className="font-serif font-bold text-white drop-shadow-sm">Homebase</span>
+                    <span className="font-display font-black ml-3" style={{ color: '#8ECAE6' }}>NJ</span>
+                  </h1>
+                  <p className="font-display text-base font-medium tracking-[0.25em] uppercase mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>Find your perfect New Jersey town</p>
+                  <div className="relative overflow-hidden w-full py-2.5 border-y" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
+                    <div
+                      className="flex gap-10 animate-marquee whitespace-nowrap"
+                      style={{ animationPlayState: tickerPaused ? 'paused' : 'running' }}
+                    >
+                      {[
+                        'Princeton', 'Summit', 'Westfield', 'Montclair', 'Short Hills',
+                        'Ridgewood', 'Glen Ridge', 'Chatham', 'Madison', 'Maplewood',
+                        'Hoboken', 'Morristown', 'Millburn', 'Livingston',
+                        'Princeton', 'Summit', 'Westfield', 'Montclair', 'Short Hills',
+                        'Ridgewood', 'Glen Ridge', 'Chatham', 'Madison', 'Maplewood',
+                        'Hoboken', 'Morristown', 'Millburn', 'Livingston',
+                      ].map((t, i) => (
+                        <button
+                          key={i}
+                          onMouseEnter={() => { setTickerPaused(true); setHoveredTickerIdx(i); }}
+                          onMouseLeave={() => { setTickerPaused(false); setHoveredTickerIdx(null); }}
+                          onClick={e => {
+                            e.stopPropagation();
+                            const town = allTowns.find(a => a.name === t);
+                            if (town) {
+                              handleTownSelect(town);
+                              runComparison();
+                            }
+                          }}
+                          className="font-mono text-[13px] tracking-widest bg-transparent border-none cursor-pointer transition-all duration-150 px-1"
+                          style={{
+                            color: hoveredTickerIdx === i
+                              ? 'rgba(255,255,255,0.95)'
+                              : hoveredTickerIdx !== null
+                              ? 'rgba(255,255,255,0.15)'
+                              : 'rgba(255,255,255,0.35)',
+                            textDecoration: hoveredTickerIdx === i ? 'underline' : 'none',
+                            textUnderlineOffset: '3px',
+                            textShadow: hoveredTickerIdx === i ? '0 0 14px rgba(255,255,255,0.55)' : 'none',
+                          }}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </motion.button>
           )}
         </AnimatePresence>
 
@@ -374,7 +453,7 @@ export default function Homebase() {
               ref={countyDropdownRef}
             >
               <div className="flex items-center justify-between mb-0 px-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">County Selection</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${!showResults && heroVariant.startsWith('V') ? 'text-white/40' : 'text-slate-400'}`}>County Selection</span>
               </div>
               <div className={`relative flex flex-wrap items-center w-full min-h-[44px] pl-12 pr-6 py-1 border border-slate-200 rounded-[24px] bg-white shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-[#0471A4] transition-all gap-2`}>
                 <div className="absolute top-1/2 -translate-y-1/2 left-5 flex items-center pointer-events-none z-20">
@@ -532,8 +611,8 @@ export default function Homebase() {
                   ref={townDropdownRef}
                 >
                   <div className="flex items-center justify-between mb-0 px-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Town Selection</span>
-                    <span className={`text-[10px] font-mono ${selectedTowns.length >= 8 ? 'text-red-600 font-bold' : 'text-slate-400'}`}>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${!showResults && heroVariant.startsWith('V') ? 'text-white/40' : 'text-slate-400'}`}>Town Selection</span>
+                    <span className={`text-[10px] font-mono ${selectedTowns.length >= 8 ? 'text-red-400 font-bold' : (!showResults && heroVariant.startsWith('V') ? 'text-white/40' : 'text-slate-400')}`}>
                       {selectedTowns.length}/8 Towns Max
                     </span>
                   </div>
@@ -569,7 +648,7 @@ export default function Homebase() {
                             <span className="text-[11px] text-slate-400 italic">Sorted by sale-to-list %</span>
                           </div>
                         )}
-                        {activeCounties.flatMap(c => (NJ_COUNTIES as any)[c].towns.map((t: string) => ({ name: t, county: c })))
+                        {(showResults && townSearch ? allTowns : activeCounties.flatMap(c => (NJ_COUNTIES as any)[c].towns.map((t: string) => ({ name: t, county: c }))))
                           .filter(t => !selectedTowns.some(s => s.name === t.name) && (townSearch ? t.name.toLowerCase().includes(townSearch.toLowerCase()) : true))
                           .sort((a, b) => {
                             const heatA = NJ_ENRICHED[a.name]?.saleToList || 0;
@@ -657,21 +736,15 @@ export default function Homebase() {
               exit={{ opacity: 0, y: -20 }}
               className="w-full max-w-2xl space-y-6 mt-6"
             >
-              <div className="bg-white/50 border border-slate-200 rounded-xl p-4 text-center max-w-lg mx-auto">
-                <p className="text-[13px] text-slate-500 font-mono leading-relaxed">
-                  <span className="font-bold text-slate-900">Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
-                </p>
-              </div>
-
               {selectedTowns.length > 0 && (
-                <div className="flex justify-center items-center gap-3 pt-4">
-                  <button 
+                <div className="flex justify-center items-center gap-3 py-2">
+                  <button
                     onClick={runComparison}
                     className="px-6 py-2.5 bg-[#0471A4] text-white rounded-xl text-sm font-bold hover:bg-[#035480] transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                   >
                     {selectedTowns.length === 1 ? 'View Town Data' : `Compare ${selectedTowns.length} Towns`}
                   </button>
-                  <button 
+                  <button
                     onClick={handleClearAll}
                     className="px-5 py-2.5 bg-white text-slate-500 border border-slate-200 rounded-xl text-sm font-bold hover:bg-slate-50 hover:text-[#0471A4] transition-all shadow-sm hover:shadow-md"
                   >
@@ -679,10 +752,91 @@ export default function Homebase() {
                   </button>
                 </div>
               )}
+
+              <div className={`rounded-2xl p-4 text-center max-w-lg mx-auto border ${heroVariant.startsWith('V') ? 'bg-white/10 border-white/15' : 'bg-gradient-to-r from-[#0471A4]/5 to-[#5BA8CC]/5 border-[#0471A4]/15'}`}>
+                    <p className={`text-[13px] leading-relaxed ${heroVariant.startsWith('V') ? 'text-white/70' : 'text-slate-600'}`}>
+                      <span className={`font-bold ${heroVariant.startsWith('V') ? 'text-white' : 'text-[#0471A4]'}`}>Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto">
+                    {[
+                      { icon: '🏘️', stat: '300+', label: 'Towns Covered' },
+                      { icon: '📊', stat: '11', label: 'Data Dimensions' },
+                      { icon: '⚡', stat: 'Live', label: 'Verified Data' },
+                    ].map(f => (
+                      <div key={f.stat} className="bg-white border border-[#0471A4]/10 rounded-2xl p-4 text-center shadow-sm hover:shadow-md hover:border-[#0471A4]/30 transition-all">
+                        <div className="text-2xl mb-2">{f.icon}</div>
+                        <div className="font-display font-black text-xl text-[#0471A4]">{f.stat}</div>
+                        <div className="text-[11px] text-slate-400 font-mono mt-0.5 uppercase tracking-wider">{f.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="max-w-lg mx-auto">
+                    <p className={`text-[11px] font-mono uppercase tracking-widest text-center mb-3 ${heroVariant.startsWith('V') ? 'text-white/40' : 'text-slate-400'}`}>Or start by region</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {REGIONS.map(r => (
+                        <button
+                          key={r.id}
+                          onClick={() => handleCountySelect(r.counties[0])}
+                          className="flex flex-col items-start p-4 bg-white border border-[#0471A4]/10 rounded-2xl hover:border-[#0471A4]/40 hover:bg-[#0471A4]/5 transition-all text-left shadow-sm hover:shadow-md group"
+                          style={{ borderLeftColor: r.color, borderLeftWidth: '3px' }}
+                        >
+                          <div className="font-display font-bold text-sm text-slate-900 group-hover:text-[#0471A4] transition-colors">{r.name}</div>
+                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">{r.sub}</div>
+                          <div className="text-[10px] text-slate-300 font-mono mt-1.5">{r.counties.length} counties →</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* NJ SVG Map — decorative + interactive on landing */}
+      {!showResults && heroVariant.startsWith('V') && (
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-[5] hidden xl:block pointer-events-auto select-none pr-6"
+          style={{ paddingTop: '60px' }}
+        >
+          <svg
+            viewBox="-8 -8 280 520"
+            width="210"
+            height="390"
+            style={{ filter: 'drop-shadow(0 0 24px rgba(4,113,164,0.35)) drop-shadow(0 0 8px rgba(91,168,204,0.2))' }}
+          >
+            {NJ_COUNTY_PATHS.map(county => (
+              <path
+                key={county.id}
+                d={county.d}
+                fill={activeCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)'}
+                stroke={activeCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)'}
+                strokeWidth="1.2"
+                style={{ cursor: 'pointer', transition: 'fill 0.12s ease, stroke 0.12s ease, stroke-width 0.12s ease' }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.fill = 'rgba(4,113,164,0.45)';
+                  e.currentTarget.style.stroke = 'rgba(91,168,204,0.9)';
+                  e.currentTarget.style.strokeWidth = '2';
+                  setTooltip({ name: county.name, x: e.clientX, y: e.clientY });
+                }}
+                onMouseMove={e => setTooltip({ name: county.name, x: e.clientX, y: e.clientY })}
+                onMouseLeave={e => {
+                  e.currentTarget.style.fill = activeCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)';
+                  e.currentTarget.style.stroke = activeCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)';
+                  e.currentTarget.style.strokeWidth = '1.2';
+                  setTooltip(null);
+                }}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleCountySelect(county.name);
+                }}
+              />
+            ))}
+          </svg>
+          <p className="text-center font-mono text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>click a county</p>
+        </div>
+      )}
 
         {tooltip && (
           <div className="fixed bg-slate-900 text-white px-3 py-1 rounded text-sm font-mono pointer-events-none z-[100]" style={{ left: tooltip.x + 12, top: tooltip.y - 28 }}>
@@ -700,7 +854,7 @@ export default function Homebase() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
               <div>
-                <h2 className="font-serif text-3xl italic"><span className="not-italic">{selectedTowns.length === 1 ? selectedTowns[0].name : 'Town Comparison'}</span></h2>
+                <h2 className="font-display font-black text-3xl tracking-tight text-slate-900">{selectedTowns.length === 1 ? selectedTowns[0].name : 'Town Comparison'}</h2>
                 <div className="font-mono text-[13px] text-slate-400 mt-1">{selectedTowns.length} towns · New Jersey · Enriched local data + Census ACS 2023</div>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -740,7 +894,7 @@ export default function Homebase() {
                 className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-blue-50 transition-colors"
               >
                 <div className="flex items-baseline gap-3">
-                  <h3 className="font-serif text-xl text-slate-900">What matters most to you?</h3>
+                  <h3 className="font-display font-bold text-xl text-slate-900">What matters most to you?</h3>
                   <p className="text-sm text-slate-400 font-mono hidden sm:block">Drag to rank · top = highest priority</p>
                 </div>
                 <div className={`transition-transform duration-300 ${showPrioritySettings ? 'rotate-180' : ''}`}>
@@ -769,29 +923,58 @@ export default function Homebase() {
                           onReorder={setPriorityOrder}
                           className="space-y-2"
                         >
-                          {priorityOrder.map((key, i) => {
+                          {priorityOrder.map((key) => {
                             const dim = DIMS.find(d => d.key === key)!;
+                            const isEnabled = enabledDims.has(key);
+                            const enabledOrder = priorityOrder.filter(k => enabledDims.has(k));
+                            const enabledRank = isEnabled ? enabledOrder.indexOf(key) : -1;
                             return (
-                              <Reorder.Item 
-                                key={key} 
+                              <Reorder.Item
+                                key={key}
                                 value={key}
                                 className="group/prio cursor-grab active:cursor-grabbing"
                               >
-                                <div className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg hover:border-[#0471A4] hover:bg-slate-50 transition-all shadow-sm hover:shadow-md">
+                                <div className={`flex items-center gap-3 p-3 bg-white border rounded-lg transition-all shadow-sm ${isEnabled ? 'border-slate-200 hover:border-[#0471A4] hover:bg-slate-50 hover:shadow-md' : 'border-slate-100 opacity-50'}`}>
+                                  <button
+                                    onPointerDown={e => e.stopPropagation()}
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      setEnabledDims(prev => {
+                                        const next = new Set(prev);
+                                        if (next.has(key)) next.delete(key);
+                                        else next.add(key);
+                                        return next;
+                                      });
+                                    }}
+                                    className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${isEnabled ? 'bg-[#0471A4] border-[#0471A4]' : 'bg-white border-slate-300'}`}
+                                  >
+                                    {isEnabled && (
+                                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                      </svg>
+                                    )}
+                                  </button>
+
                                   <div className="flex items-center gap-3 flex-1">
-                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center font-mono text-xs font-bold text-[#0471A4]">
-                                      {i + 1}
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold ${isEnabled ? 'bg-blue-50 text-[#0471A4]' : 'bg-slate-100 text-slate-400'}`}>
+                                      {isEnabled ? enabledRank + 1 : '—'}
                                     </div>
                                     <div>
-                                      <div className="font-bold text-sm text-slate-900">{dim.label}</div>
+                                      <div className={`font-display font-bold text-sm ${isEnabled ? 'text-slate-900' : 'text-slate-400'}`}>{dim.label}</div>
                                       <div className="text-[11px] text-slate-400 font-mono">{dim.sub}</div>
                                     </div>
                                   </div>
-                                  
-                                  <div className="flex items-center gap-4">
-                                    <div className="px-2.5 py-1 bg-[#0471A4]/10 rounded-md border border-[#0471A4]/20">
-                                      <span className="font-mono text-[10px] text-[#0471A4] font-bold uppercase">Weight x{rankToWeight(i, priorityOrder.length)}</span>
-                                    </div>
+
+                                  <div className="flex items-center gap-3">
+                                    {isEnabled ? (
+                                      <div className="px-2.5 py-1 bg-[#0471A4]/10 rounded-md border border-[#0471A4]/20">
+                                        <span className="font-mono text-[10px] text-[#0471A4] font-bold uppercase">x{rankToWeight(enabledRank, enabledOrder.length)}</span>
+                                      </div>
+                                    ) : (
+                                      <div className="px-2.5 py-1 bg-slate-100 rounded-md">
+                                        <span className="font-mono text-[10px] text-slate-400 font-bold uppercase">Excluded</span>
+                                      </div>
+                                    )}
                                     <GripVertical size={16} className="text-slate-300 group-hover/prio:text-[#0471A4] transition-colors" />
                                   </div>
                                 </div>
@@ -816,8 +999,8 @@ export default function Homebase() {
                 return (
                 <div 
                   key={d.name} 
-                  className={`p-4 text-white cursor-pointer hover:brightness-110 transition-all relative group/town ${isPerfectMatch ? 'border-t-4 border-amber-400' : ''} ${expandedTown === d.name ? 'z-50' : 'z-30'}`} 
-                  style={{ backgroundColor: d.color }}
+                  className={`p-5 text-white cursor-pointer hover:brightness-110 transition-all relative group/town ${isPerfectMatch ? 'border-t-4 border-amber-400' : 'border-t-[3px] border-white/10'} ${expandedTown === d.name ? 'z-50' : 'z-30'}`}
+                  style={{ background: `linear-gradient(160deg, #022d44 0%, ${d.color} 100%)` }}
                   onClick={() => setExpandedTown(expandedTown === d.name ? null : d.name)}
                 >
                   {isPerfectMatch && (
@@ -828,18 +1011,18 @@ export default function Homebase() {
                   <div className={`flex justify-between items-start ${isPerfectMatch ? 'mt-2' : ''}`}>
                     <div>
                       <div className="flex items-center gap-2">
-                        <div className="font-serif text-lg font-bold leading-tight">{d.name}</div>
+                        <div className="font-display font-bold text-xl leading-tight tracking-tight">{d.name}</div>
                         {d.isLive && (
                           <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" title="Live Data Active"></div>
                         )}
                       </div>
-                      <div className="font-mono text-[11px] opacity-60 uppercase tracking-wider">{d.county}</div>
+                      <div className="font-mono text-[11px] opacity-50 uppercase tracking-wider mt-0.5">{d.county}</div>
                     </div>
                     <div className={`transition-transform duration-300 ${expandedTown === d.name ? 'rotate-180' : ''}`}>
-                      <ChevronRight size={14} className="opacity-60 group-hover/town:opacity-100" />
+                      <ChevronRight size={14} className="opacity-40 group-hover/town:opacity-100" />
                     </div>
                   </div>
-                  <div className="font-mono text-[11px] opacity-60 mt-0.5">
+                  <div className="font-mono text-[10px] opacity-50 mt-1">
                     {d.isLoadingLive ? (
                       <span className="flex items-center gap-1.5 italic animate-pulse">
                         <Zap size={10} className="text-yellow-400 fill-yellow-400" />
@@ -853,8 +1036,12 @@ export default function Homebase() {
                       ''
                     )}
                   </div>
-                  <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-white/20 rounded-full font-mono text-[13px] group/fit relative">
-                    <span>Fit</span><span className="text-base font-bold">{calcFitScore(d)}</span><span className="text-[12px] opacity-60">/100</span>
+                  <div className="mt-3 pt-3 border-t border-white/10">
+                    <div className="flex items-baseline gap-1">
+                      <span className="font-display font-black text-4xl leading-none">{calcFitScore(d)}</span>
+                      <span className="font-mono text-sm opacity-40">/100</span>
+                    </div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.15em] opacity-50 mt-0.5">Fit Score</div>
                   </div>
 
                   {/* Town Detail Dropdown */}
@@ -903,7 +1090,7 @@ export default function Homebase() {
                   <React.Fragment key={key}>
                     <div className="p-3 border-t border-r border-slate-100 bg-slate-50 flex flex-col justify-center sticky left-0 z-20 group/dim relative">
                       <div className="flex items-center gap-1.5">
-                        <div className="text-[12px] font-bold uppercase tracking-wider text-slate-900">{dim.label}</div>
+                        <div className="text-[12px] font-display font-bold uppercase tracking-wider text-slate-900">{dim.label}</div>
                         {(dim as any).hoverSub && (
                           <Info size={12} className="text-slate-400 opacity-40 group-hover/dim:opacity-100 transition-opacity cursor-help" />
                         )}
@@ -1015,8 +1202,8 @@ export default function Homebase() {
                             )}
                           </div>
 
-                          <div className="h-1 bg-slate-100 rounded-full overflow-hidden mt-0.5">
-                            <div className="h-full transition-all duration-500" style={{ width: `${dynamicScore}%`, backgroundColor: barColor(dynamicScore) }}></div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${dynamicScore}%`, backgroundColor: barColor(dynamicScore) }}></div>
                           </div>
                           
                           <div className="flex items-center justify-between gap-2">
@@ -1395,6 +1582,7 @@ export default function Homebase() {
           </div>
         )}
       </div>
+
     </div>
   );
 }
