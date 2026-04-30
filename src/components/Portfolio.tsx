@@ -54,7 +54,7 @@ export default function Portfolio() {
       <FloatingNav />
 
       {/* Hero - Inspired by 'OBSCURED' */}
-      <section className="relative min-h-[80vh] bg-[#F5F5F3] overflow-hidden flex flex-col pt-8 md:pt-12 pb-20 px-12">
+      <section className="relative min-h-[80vh] bg-[#F5F5F3] overflow-hidden flex flex-col pt-20 md:pt-24 pb-20 px-12">
         {/* Minimal Header Bar */}
         <div className="flex justify-between items-start font-mono text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-12 md:mb-16">
           <div>
@@ -97,11 +97,11 @@ export default function Portfolio() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 px-4">
             <div className="max-w-2xl">
               <div className="flex items-center gap-3 mb-6">
-                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">01 — Selected Works</span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">01</span>
               </div>
-              <h2 className="font-display text-[clamp(48px,8vw,96px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter">
-                Logic <br />
-                <span className="text-slate-300">& Product</span>
+              <h2 className="font-display text-[clamp(40px,6.5vw,72px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter">
+                What I am <br />
+                <span className="text-slate-300">Building...</span>
               </h2>
             </div>
             <p className="text-slate-500 font-sans text-lg max-w-sm leading-relaxed pb-2">
@@ -118,30 +118,30 @@ export default function Portfolio() {
                 <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.001</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-500 ml-1">NJ</span>
+                <span className="font-serif font-bold text-white">Homebase</span> <span className="font-sans font-black text-blue-500 ml-1">NJ</span>
               </h3>
-              <p className="font-serif italic text-slate-500 text-sm mb-6">Product Design & Data Strategy</p>
+              <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">Product Design & Data Strategy</p>
               
               <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-500/20" />
-                <p className="text-[15px] leading-[1.7] text-slate-400 pl-6 font-sans">
-                  Every home buyer in NJ has 6 browser tabs open — Zillow, GreatSchools, NJ Transit, WalkScore, crime maps. I collapsed them into one weighted comparison tool built for real decisions.
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-500/30" />
+                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
+                  I collapsed 6 browser tabs into one weighted comparison tool built for real-world real estate decisions.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2.5 py-1 bg-blue-500/5 text-blue-400/60 border border-blue-500/10 tracking-widest uppercase font-bold rounded">{tag}</span>
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-blue-500/5 text-blue-400/50 border border-blue-500/10 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
               
               <div className="flex flex-col gap-3">
-                <Link to="/homebase" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-slate-900 transition-all rounded-lg">
+                <Link to="/homebase" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all rounded-none ring-1 ring-blue-400/20">
                   Launch Application <ChevronRight size={14} />
                 </Link>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => openModal('prd-1')} className="px-4 py-3 bg-white/5 text-slate-400 border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-lg">PRD</button>
-                  <button onClick={() => openModal('roadmap-1')} className="px-4 py-3 bg-white/5 text-slate-400 border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-lg">Roadmap</button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => openModal('prd-1')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
+                  <button onClick={() => openModal('roadmap-1')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
                 </div>
               </div>
             </div>
@@ -154,30 +154,30 @@ export default function Portfolio() {
                 <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.002</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold italic">Orbit</span>
+                <span className="font-serif font-bold italic text-white">Orbit</span>
               </h3>
-              <p className="font-serif italic text-slate-500 text-sm mb-6">Financial Simulation & Strategy</p>
+              <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">Financial Simulation & Strategy</p>
 
               <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/20" />
-                <p className="text-[15px] leading-[1.7] text-slate-400 pl-6 font-sans">
-                  Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus.
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
+                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
+                  A financial trajectory simulator designed to map annual cash flow and sinking funds.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {['Fintech', 'Simulation', 'Strategy'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2.5 py-1 bg-[#C5A059]/5 text-[#C5A059]/60 border border-[#C5A059]/10 tracking-widest uppercase font-bold rounded">{tag}</span>
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#C5A059]/5 text-[#C5A059]/50 border border-[#C5A059]/10 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
               
               <div className="flex flex-col gap-3">
-                <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#C5A059] text-black text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white transition-all rounded-lg">
+                <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#C5A059] text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#D5B069] hover:shadow-[0_0_20px_rgba(197,160,89,0.3)] transition-all rounded-none ring-1 ring-[#C5A059]/20">
                   Launch Application <ChevronRight size={14} />
                 </Link>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => openModal('prd-2')} className="px-4 py-3 bg-white/5 text-slate-400 border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-lg">PRD</button>
-                  <button onClick={() => openModal('roadmap-2')} className="px-4 py-3 bg-white/5 text-slate-400 border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-lg">Roadmap</button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => openModal('prd-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
+                  <button onClick={() => openModal('roadmap-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
                 </div>
               </div>
             </div>
@@ -190,30 +190,30 @@ export default function Portfolio() {
                 <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.003</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold italic">Waves</span>
+                <span className="font-serif font-bold italic text-white">Waves</span>
               </h3>
-              <p className="font-serif italic text-slate-500 text-sm mb-6">Dream trip planner & destination intelligence</p>
+              <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">Dream trip planner & destination intelligence</p>
 
               <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-cyan-500/20" />
-                <p className="text-[15px] leading-[1.7] text-slate-400 pl-6 font-sans">
-                  Your personal oracle for dream trip planning. Discover exactly when you should go, what's happening locally, and how to make that one specific bucket-list journey a reality.
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-cyan-500/30" />
+                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
+                  Destination intelligence for dream trips. Visualizing when to go and what to see.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {['Travel', 'Data Viz', 'Collaboration'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2.5 py-1 bg-cyan-500/5 text-cyan-400/60 border border-cyan-500/10 tracking-widest uppercase font-bold rounded">{tag}</span>
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-cyan-500/5 text-cyan-400/50 border border-cyan-500/10 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
               
               <div className="flex flex-col gap-3">
-                <Link to="/waves" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-cyan-600 text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-slate-900 transition-all rounded-lg">
+                <Link to="/waves" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-cyan-600 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all rounded-none ring-1 ring-cyan-400/20">
                   View Prototype <ChevronRight size={14} />
                 </Link>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => openModal('prd-3')} className="px-4 py-3 bg-white/5 text-slate-400 border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-lg">PRD</button>
-                  <button onClick={() => openModal('roadmap-3')} className="px-4 py-3 bg-white/5 text-slate-400 border border-white/10 text-[10px] font-black uppercase tracking-[0.15em] hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-lg">Roadmap</button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => openModal('prd-3')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
+                  <button onClick={() => openModal('roadmap-3')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
                 </div>
               </div>
             </div>
