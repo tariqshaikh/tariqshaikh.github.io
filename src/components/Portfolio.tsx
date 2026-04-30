@@ -48,9 +48,6 @@ export default function Portfolio() {
       {/* Navigation - Simplified */}
       <nav className={`fixed top-0 left-0 right-0 z-[100] px-12 py-6 flex items-center justify-between transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm' : 'bg-transparent'}`}>
         <div className="font-mono text-sm tracking-widest uppercase text-slate-900 font-bold">Tariq Shaikh</div>
-        <div className="flex items-center gap-4">
-          <a href="mailto:tshaikh92@gmail.com" className="text-[10px] font-mono font-bold uppercase tracking-widest px-4 py-2 bg-slate-900 text-white rounded-full hover:bg-blue-600 transition-colors">Hire Me</a>
-        </div>
       </nav>
 
       {/* Floating Dock - 60fps Inspiration */}
@@ -206,9 +203,9 @@ export default function Portfolio() {
             <h2 className="font-serif text-[clamp(28px,4vw,48px)] font-bold leading-none text-slate-900">About</h2>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
-          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">I'm a <strong className="text-slate-900 font-semibold">Senior Data Strategist at Indeed</strong> with a background in frontend engineering and a Stanford product management certificate. I've spent 6+ years at the intersection of data, engineering, and product.</p>
+          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">I'm a <strong className="text-slate-900 font-semibold">Senior Data Strategist at Indeed</strong> with a background in frontend engineering and a Stanford product management certificate. I've spent 8+ years at the intersection of data, engineering, and product.</p>
           <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">I build things that solve real problems. The portfolio you're reading right now is one of them — I built every project here, wrote every PRD, and defined every roadmap myself.</p>
-          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">Based in <strong className="text-slate-900 font-semibold">New Jersey</strong>. I'm a technical PM who builds from scratch, with deep data intuition from Indeed, who understands how products are actually built from the inside.</p>
+          <p className="text-[17px] leading-[1.85] text-slate-700 mb-4.5">Based in <strong className="text-slate-900 font-semibold">New Jersey</strong>. I'm a technical PM who builds from scratch, with deep data intuition from Indeed, a strong product sense, and an understanding of how products are actually built from the inside.</p>
           <div className="grid grid-cols-2 gap-4 mt-10">
             <div>
               <div className="font-mono text-[12px] uppercase tracking-widest text-slate-900 font-bold mb-2">Product</div>
