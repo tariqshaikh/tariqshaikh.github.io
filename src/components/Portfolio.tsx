@@ -233,7 +233,7 @@ export default function Portfolio() {
               <div className="relative mb-10">
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-[#D8B4FE]/30" />
                 <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  Navigating 1.5 billion+ records at Indeed gave me a unique perspective on the job market. Jobverse is a tool designed to cut through the noise.
+                  Finding your dream job shouldn't feel like a second job. Jobverse cuts through the noise and surfaces what actually matters — the right role, at the right company, at the right time.
                 </p>
               </div>
 
