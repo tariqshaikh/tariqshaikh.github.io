@@ -2,11 +2,9 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* Local font — must come after @import rules */
 @font-face {
   font-family: 'BakersLocal';
-  src: url('/Bakers.otf') format('truetype'),
-       url('/Bakers.otf') format('opentype');
+  src: url('./assets/Bakers.otf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -35,6 +33,15 @@
 
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
+}
+
+.btn-gradient-animated {
+  background-size: 300% 300%;
+  background-position: 100% 100%;
+  transition: background-position 0.5s ease, box-shadow 0.25s ease;
+}
+.btn-gradient-animated:hover {
+  background-position: 0% 0%;
 }
 
 @keyframes marquee {

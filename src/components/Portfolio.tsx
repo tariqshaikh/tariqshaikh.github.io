@@ -136,7 +136,7 @@ export default function Portfolio() {
               </div>
               
               <div className="flex flex-col gap-3">
-                <Link to="/homebase" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all rounded-none ring-1 ring-blue-400/20">
+                <Link to="/homebase" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(59,130,246,0.5)]">
                   Launch Application <ChevronRight size={14} />
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
@@ -172,7 +172,7 @@ export default function Portfolio() {
               </div>
               
               <div className="flex flex-col gap-3">
-                <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#C5A059] text-black text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#D5B069] hover:shadow-[0_0_20px_rgba(197,160,89,0.3)] transition-all rounded-none ring-1 ring-[#C5A059]/20">
+                <Link to="/orbit" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(197,160,89,0.45)]">
                   Launch Application <ChevronRight size={14} />
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
@@ -208,7 +208,7 @@ export default function Portfolio() {
               </div>
               
               <div className="flex flex-col gap-3">
-                <Link to="/waves" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-cyan-600 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-cyan-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all rounded-none ring-1 ring-cyan-400/20">
+                <Link to="/waves" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-cyan-600 to-teal-300 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(6,182,212,0.5)]">
                   View Prototype <ChevronRight size={14} />
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
@@ -244,7 +244,7 @@ export default function Portfolio() {
               </div>
               
               <div className="flex flex-col gap-3">
-                <Link to="/jobverse" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-purple-500 to-[#D8B4FE] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:opacity-90 transition-opacity">
+                <Link to="/jobverse" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-purple-600 to-[#D8B4FE] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(168,85,247,0.45)]">
                   View Concept <ChevronRight size={14} />
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
