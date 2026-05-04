@@ -75,9 +75,9 @@ export default function Portfolio() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 1.2, ease: "easeOut" }}
-              className="text-[clamp(48px,12.8vw,224px)] font-black text-slate-900 tracking-[-0.05em] leading-[0.8] flex flex-col items-center select-none"
+              className="text-[clamp(36px,9.5vw,168px)] font-black text-slate-900 tracking-[-0.05em] leading-[0.8] flex flex-col items-center select-none"
             >
-              <span className="font-bakers normal-case inline-block transform scale-y-110 border-b-4 border-slate-900/5 pb-2">Tariq Shaikh</span>
+              <span style={{ fontFamily: "'BakersLocal', serif" }} className="normal-case inline-block whitespace-nowrap transform scale-y-110 border-b-4 border-slate-900/5 pb-2">Tariq Shaikh</span>
             </motion.h1>
           </div>
           <div className="flex justify-between items-end">
