@@ -68,17 +68,19 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* Massive Bold Heading - Pushed Up */}
+        {/* Massive Bold Heading - Centered */}
         <div className="relative w-full flex-1 flex flex-col">
-          <motion.h1 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="text-[clamp(48px,12.8vw,224px)] font-black text-slate-900 tracking-[-0.05em] leading-[0.8] flex flex-col items-center select-none"
-          >
-            <span className="font-bakers normal-case inline-block transform scale-y-110 border-b-4 border-slate-900/5 pb-2">Tariq Shaikh</span>
-          </motion.h1>
-          <div className="flex justify-between items-end mt-12">
+          <div className="flex-1 flex items-center justify-center">
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              className="text-[clamp(48px,12.8vw,224px)] font-black text-slate-900 tracking-[-0.05em] leading-[0.8] flex flex-col items-center select-none"
+            >
+              <span className="font-bakers normal-case inline-block transform scale-y-110 border-b-4 border-slate-900/5 pb-2">Tariq Shaikh</span>
+            </motion.h1>
+          </div>
+          <div className="flex justify-between items-end">
             <div className="max-w-xs font-mono text-[10px] uppercase leading-relaxed text-slate-500">
               <span className="text-[18px] text-slate-900 font-black block mb-2 tracking-tight">Product Manager</span>
               Bridging data, strategy, and product.
