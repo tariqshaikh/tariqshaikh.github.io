@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Info, ChevronRight, GripVertical, Zap, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { NJ_COUNTIES, NJ_ENRICHED, DIMS, COLORS } from '../constants';
+import { getCachedTownData, setCachedTownData } from '../services/townCache';
 import { fetchLiveTownData } from '../services/geminiService';
 import { NJ_COUNTY_PATHS, NJ_STATE_OUTLINE, COUNTY_CENTERS } from '../mapData';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
@@ -17,28 +18,31 @@ import { Link } from 'react-router-dom';
 // Regional Data
 const REGIONS = [
   {
-    id: 'north',
-    name: 'North Jersey',
-    sub: 'NYC Hubs & Skylines',
-    counties: ['Bergen', 'Essex', 'Hudson', 'Morris', 'Passaic', 'Sussex', 'Union', 'Warren'],
+    id: 'nyc',
+    name: 'NYC Commute',
+    sub: 'Train towns under 60 min',
+    icon: '🚆',
+    counties: ['Bergen', 'Essex', 'Hudson', 'Union', 'Passaic', 'Morris', 'Somerset'],
     color: '#0471A4',
     bg: 'bg-blue-50'
   },
   {
-    id: 'central',
-    name: 'Central Jersey',
-    sub: 'Suburban Bliss & Tech',
-    counties: ['Hunterdon', 'Mercer', 'Middlesex', 'Monmouth', 'Somerset', 'Ocean'],
-    color: '#035480',
-    bg: 'bg-slate-50'
+    id: 'shore',
+    name: 'Shore Towns',
+    sub: 'Beach life & coastal charm',
+    icon: '🏖️',
+    counties: ['Monmouth', 'Ocean', 'Atlantic', 'Cape May'],
+    color: '#5BA8CC',
+    bg: 'bg-sky-50'
   },
   {
-    id: 'south',
-    name: 'South Jersey',
-    sub: 'Philly Metro & Shore',
-    counties: ['Atlantic', 'Burlington', 'Camden', 'Cape May', 'Cumberland', 'Gloucester', 'Salem'],
-    color: '#5BA8CC',
-    bg: 'bg-indigo-50'
+    id: 'philly',
+    name: 'Philly Centric',
+    sub: 'South Jersey value plays',
+    icon: '🏙️',
+    counties: ['Burlington', 'Camden', 'Gloucester', 'Salem', 'Cumberland', 'Mercer'],
+    color: '#035480',
+    bg: 'bg-slate-50'
   }
 ];
 
@@ -100,12 +104,19 @@ export default function Homebase() {
   const townDropdownRef = useRef<HTMLDivElement>(null);
   const townInputRef = useRef<HTMLInputElement>(null);
 
-  const allTowns = React.useMemo(() => 
-
-    Object.entries(NJ_COUNTIES).flatMap(([county, data]) => 
+  const allTowns = React.useMemo(() =>
+    Object.entries(NJ_COUNTIES).flatMap(([county, data]) =>
       data.towns.map(town => ({ name: town, county }))
     ), []
   );
+
+  const highlightedCounties = React.useMemo(() => {
+    if (!countySearch || countySearch.length < 2) return activeCounties;
+    const searchMatch = Object.keys(NJ_COUNTIES).filter(c =>
+      c.toLowerCase().includes(countySearch.toLowerCase())
+    );
+    return [...new Set([...activeCounties, ...searchMatch])];
+  }, [activeCounties, countySearch]);
 
   useEffect(() => {
     const fetchTownData = async () => {
@@ -121,7 +132,9 @@ export default function Homebase() {
   }, []);
 
   const handleCountySelect = (c: string) => {
-    if (!activeCounties.includes(c)) {
+    if (activeCounties.includes(c)) {
+      setActiveCounties(activeCounties.filter((x: string) => x !== c));
+    } else {
       setActiveCounties([...activeCounties, c]);
     }
     setCountySearch('');
@@ -147,9 +160,17 @@ export default function Homebase() {
   };
 
   const fetchTownLive = async (name: string, county: string) => {
+    // Cache hit — serve instantly, no loading state needed
+    const cached = getCachedTownData(name);
+    if (cached) {
+      setLiveTownData(prev => ({ ...prev, [name]: cached }));
+      return;
+    }
+
     setLiveLoading(prev => ({ ...prev, [name]: true }));
     const data = await fetchLiveTownData(name, county);
     if (data) {
+      setCachedTownData(name, data);
       setLiveTownData(prev => ({ ...prev, [name]: data }));
     }
     setLiveLoading(prev => ({ ...prev, [name]: false }));
@@ -214,6 +235,43 @@ export default function Homebase() {
     setTimeout(() => {
       setIsLoading(false);
     }, 600);
+  };
+
+  const VIBE_TOWNS: Record<string, {name: string, county: string}[]> = {
+    nyc: [
+      { name: 'South Orange', county: 'Essex' },
+      { name: 'Maplewood', county: 'Essex' },
+      { name: 'Montclair', county: 'Essex' },
+      { name: 'Summit', county: 'Union' },
+      { name: 'Millburn', county: 'Essex' },
+      { name: 'Chatham', county: 'Morris' },
+    ],
+    shore: [
+      { name: 'Spring Lake', county: 'Monmouth' },
+      { name: 'Sea Girt', county: 'Monmouth' },
+      { name: 'Manasquan', county: 'Monmouth' },
+      { name: 'Asbury Park', county: 'Monmouth' },
+      { name: 'Red Bank', county: 'Monmouth' },
+      { name: 'Point Pleasant Beach', county: 'Ocean' },
+    ],
+    philly: [
+      { name: 'Moorestown', county: 'Burlington' },
+      { name: 'Haddon Township', county: 'Camden' },
+      { name: 'Cherry Hill', county: 'Camden' },
+      { name: 'Collingswood', county: 'Camden' },
+      { name: 'Medford', county: 'Burlington' },
+      { name: 'Mount Laurel', county: 'Burlington' },
+    ],
+  };
+
+  const handleVibeSelect = (vibeId: string) => {
+    const towns = VIBE_TOWNS[vibeId] || [];
+    setSelectedTowns(towns);
+    setActiveCounties([...new Set(towns.map((t: {name: string, county: string}) => t.county))]);
+    setIsLoading(true);
+    setShowResults(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => setIsLoading(false), 600);
   };
 
   const handleClearAll = () => {
@@ -773,23 +831,7 @@ export default function Homebase() {
                     ))}
                   </div>
 
-                  <div className="max-w-lg mx-auto">
-                    <p className={`text-[11px] font-mono uppercase tracking-widest text-center mb-3 ${heroVariant.startsWith('V') ? 'text-white/40' : 'text-slate-400'}`}>Or start by region</p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {REGIONS.map(r => (
-                        <button
-                          key={r.id}
-                          onClick={() => handleCountySelect(r.counties[0])}
-                          className="flex flex-col items-start p-4 bg-white border border-[#0471A4]/10 rounded-2xl hover:border-[#0471A4]/40 hover:bg-[#0471A4]/5 transition-all text-left shadow-sm hover:shadow-md group"
-                          style={{ borderLeftColor: r.color, borderLeftWidth: '3px' }}
-                        >
-                          <div className="font-display font-bold text-sm text-slate-900 group-hover:text-[#0471A4] transition-colors">{r.name}</div>
-                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">{r.sub}</div>
-                          <div className="text-[10px] text-slate-300 font-mono mt-1.5">{r.counties.length} counties →</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Vibe region buttons — hidden, revisit later */}
             </motion.div>
           )}
         </AnimatePresence>
@@ -797,21 +839,21 @@ export default function Homebase() {
 
       {/* NJ SVG Map — decorative + interactive on landing */}
       {!showResults && heroVariant.startsWith('V') && (
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-[5] hidden xl:block pointer-events-auto select-none pr-6"
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 z-[5] hidden lg:block pointer-events-auto select-none"
           style={{ paddingTop: '60px' }}
         >
           <svg
             viewBox="-8 -8 280 520"
-            width="210"
-            height="390"
+            width="300"
+            height="557"
             style={{ filter: 'drop-shadow(0 0 24px rgba(4,113,164,0.35)) drop-shadow(0 0 8px rgba(91,168,204,0.2))' }}
           >
             {NJ_COUNTY_PATHS.map(county => (
               <path
                 key={county.id}
                 d={county.d}
-                fill={activeCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)'}
-                stroke={activeCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)'}
+                fill={highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)'}
+                stroke={highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)'}
                 strokeWidth="1.2"
                 style={{ cursor: 'pointer', transition: 'fill 0.12s ease, stroke 0.12s ease, stroke-width 0.12s ease' }}
                 onMouseEnter={e => {
@@ -822,8 +864,8 @@ export default function Homebase() {
                 }}
                 onMouseMove={e => setTooltip({ name: county.name, x: e.clientX, y: e.clientY })}
                 onMouseLeave={e => {
-                  e.currentTarget.style.fill = activeCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)';
-                  e.currentTarget.style.stroke = activeCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)';
+                  e.currentTarget.style.fill = highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)';
+                  e.currentTarget.style.stroke = highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)';
                   e.currentTarget.style.strokeWidth = '1.2';
                   setTooltip(null);
                 }}

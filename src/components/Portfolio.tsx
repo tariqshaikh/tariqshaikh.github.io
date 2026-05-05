@@ -117,13 +117,13 @@ export default function Portfolio() {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
                 <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.001</span>
+                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.001</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold text-white">Homebase</span> <span className="font-sans font-black text-blue-500 ml-1">NJ</span>
+                <span className="font-serif font-bold text-white">Homebase</span> <span className="font-sans font-black text-blue-400 ml-1">NJ</span>
               </h3>
-              <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">Product Design & Data Strategy</p>
-              
+              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Product Design & Data Strategy</p>
+
               <div className="relative mb-10">
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-500/30" />
                 <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
@@ -133,7 +133,7 @@ export default function Portfolio() {
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-blue-500/5 text-blue-400/50 border border-blue-500/10 tracking-widest uppercase font-bold">{tag}</span>
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-300/80 border border-blue-500/20 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
               
@@ -153,12 +153,12 @@ export default function Portfolio() {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
                 <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.002</span>
+                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.002</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
                 <span className="font-serif font-bold italic text-white">Orbit</span>
               </h3>
-              <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">Financial Simulation & Strategy</p>
+              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Financial Simulation & Strategy</p>
 
               <div className="relative mb-10">
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
@@ -169,7 +169,7 @@ export default function Portfolio() {
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {['Fintech', 'Simulation', 'Strategy'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#C5A059]/5 text-[#C5A059]/50 border border-[#C5A059]/10 tracking-widest uppercase font-bold">{tag}</span>
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
               
@@ -189,12 +189,12 @@ export default function Portfolio() {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
                 <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-cyan-700/20 text-cyan-400 border border-cyan-500/20 font-bold rounded-full">Coming Soon</span>
-                <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.003</span>
+                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.003</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
                 <span className="font-serif font-bold italic text-white">Waves</span>
               </h3>
-              <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">Dream trip planner & destination intelligence</p>
+              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Dream trip planner & destination intelligence</p>
 
               <div className="relative mb-10">
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-cyan-500/30" />
@@ -205,7 +205,7 @@ export default function Portfolio() {
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {['Travel', 'Data Viz', 'Collaboration'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-cyan-500/5 text-cyan-400/50 border border-cyan-500/10 tracking-widest uppercase font-bold">{tag}</span>
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-cyan-500/10 text-cyan-300/80 border border-cyan-500/20 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
               
@@ -220,41 +220,7 @@ export default function Portfolio() {
               </div>
             </div>
 
-            {/* Project 4 - Jobverse */}
-            <div className="bg-[#140E22] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#D8B4FE]/50 hover:shadow-[0_32px_64px_-16px_rgba(216,180,254,0.15)] relative overflow-hidden rounded-2xl group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-[#D8B4FE]/10 text-[#D8B4FE] border border-[#D8B4FE]/20 font-bold rounded-full">New Concept</span>
-                <span className="font-mono text-[10px] text-slate-700 font-bold tracking-tighter">P.004</span>
-              </div>
-              <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold italic text-white">Jobverse</span>
-              </h3>
-              <p className="font-serif italic text-slate-500 text-xs mb-6 uppercase tracking-wider">AI-Powered Job Search Intelligence</p>
-
-              <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#D8B4FE]/30" />
-                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  Finding your dream job shouldn't feel like a second job. Jobverse cuts through the noise and surfaces what actually matters — the right role, at the right company, at the right time.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-10">
-                {['AI / LLM', 'Product Strategy', 'Big Data'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#D8B4FE]/5 text-[#D8B4FE]/60 border border-[#D8B4FE]/10 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-              
-              <div className="flex flex-col gap-3">
-                <Link to="/jobverse" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-purple-600 to-[#D8B4FE] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(168,85,247,0.45)]">
-                  View Concept <ChevronRight size={14} />
-                </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => openModal('prd-4')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
-                  <button onClick={() => openModal('roadmap-4')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
-                </div>
-              </div>
-            </div>
+            {/* Project 4 - Jobverse (hidden) */}
           </div>
         </div>
       </section>
@@ -347,14 +313,14 @@ export default function Portfolio() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-16 md:gap-24 w-full md:w-auto">
             <div className="flex flex-col gap-6">
-              <span className="font-mono text-[10px] text-slate-300 uppercase font-bold tracking-widest">Connect</span>
+              <span className="font-mono text-[10px] text-slate-500 uppercase font-bold tracking-widest">Connect</span>
               <div className="flex flex-col gap-3">
                 <a href="mailto:tshaikh92@gmail.com" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">Email</a>
                 <a href="https://linkedin.com" target="_blank" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">LinkedIn</a>
               </div>
             </div>
             <div className="flex flex-col gap-6">
-              <span className="font-mono text-[10px] text-slate-300 uppercase font-bold tracking-widest">Reach</span>
+              <span className="font-mono text-[10px] text-slate-500 uppercase font-bold tracking-widest">Reach</span>
               <a href="tel:8483914393" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">848.391.4393</a>
             </div>
           </div>
