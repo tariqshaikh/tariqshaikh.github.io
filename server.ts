@@ -152,13 +152,31 @@ async function startServer() {
     }));
   }
 
+  async function fetchJobSalary(job: AshbyJob): Promise<string | undefined> {
+    try {
+      const res = await fetch(job.applyUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; portfolio-jobverse/1.0)' },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!res.ok) return undefined;
+      const html = await res.text();
+      const data = extractAppData(html);
+      if (!data) return undefined;
+      const posting = data?.posting ?? {};
+      // Prefer the clean scrapeable summary; fall back to the full tier summary
+      return posting.scrapeableCompensationSalarySummary || posting.compensationTierSummary || undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   app.get('/api/jobs', async (req, res) => {
     if (jobsCache && Date.now() - jobsCache.timestamp < JOBS_CACHE_TTL) {
       res.json(jobsCache.jobs);
       return;
     }
     try {
-      // Fetch in batches of 30 to avoid hammering Ashby
+      // Step 1: collect all PM jobs from board pages (batches of 30)
       const allJobs: AshbyJob[] = [];
       for (let i = 0; i < ASHBY_COMPANIES.length; i += 30) {
         const batch = ASHBY_COMPANIES.slice(i, i + 30);
@@ -178,8 +196,16 @@ async function startServer() {
         const db = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
         return db - da;
       });
-      jobsCache = { jobs: filtered, timestamp: Date.now() };
-      res.json(filtered);
+
+      // Step 2: enrich with salary from individual job detail pages (all in parallel)
+      const salaryResults = await Promise.allSettled(filtered.map(fetchJobSalary));
+      const enriched = filtered.map((job, i) => {
+        const salary = salaryResults[i].status === 'fulfilled' ? salaryResults[i].value : undefined;
+        return salary ? { ...job, salary } : job;
+      });
+
+      jobsCache = { jobs: enriched, timestamp: Date.now() };
+      res.json(enriched);
     } catch (err) {
       console.error('Error fetching jobs:', err);
       res.status(500).json({ error: 'Failed to fetch jobs' });
