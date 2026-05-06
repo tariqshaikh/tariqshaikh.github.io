@@ -64,12 +64,35 @@ function cutoffDate(filter: DateFilter): Date | null {
   return d;
 }
 
+type SalaryFilter = 'all' | 'disclosed' | '100k' | '125k' | '150k' | '175k' | '200k';
+
+const SALARY_FILTER_OPTIONS: { value: SalaryFilter; label: string; min: number | null; disclosedOnly: boolean }[] = [
+  { value: 'all',      label: 'Any salary',      min: null,   disclosedOnly: false },
+  { value: 'disclosed',label: 'Disclosed only',  min: null,   disclosedOnly: true  },
+  { value: '100k',     label: '$100K+',           min: 100000, disclosedOnly: true  },
+  { value: '125k',     label: '$125K+',           min: 125000, disclosedOnly: true  },
+  { value: '150k',     label: '$150K+',           min: 150000, disclosedOnly: true  },
+  { value: '175k',     label: '$175K+',           min: 175000, disclosedOnly: true  },
+  { value: '200k',     label: '$200K+',           min: 200000, disclosedOnly: true  },
+];
+
+function parseSalaryMin(salary: string | undefined): number | null {
+  if (!salary) return null;
+  const match = salary.match(/([\d,]+)\s*[Kk]/);
+  if (match) return parseFloat(match[1].replace(/,/g, '')) * 1000;
+  const m2 = salary.match(/([\d,]+)/);
+  return m2 ? parseFloat(m2[1].replace(/,/g, '')) : null;
+}
+
 export default function JobverseApp() {
   const [activeTab, setActiveTab] = useState('board');
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
+  const [salaryFilter, setSalaryFilter] = useState<SalaryFilter>('all');
+  const [salaryDropdownOpen, setSalaryDropdownOpen] = useState(false);
+  const salaryDropdownRef = useRef<HTMLDivElement>(null);
   const [jobs, setJobs] = useState<AshbyJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -97,6 +120,9 @@ export default function JobverseApp() {
       if (dateDropdownRef.current && !dateDropdownRef.current.contains(e.target as Node)) {
         setDateDropdownOpen(false);
       }
+      if (salaryDropdownRef.current && !salaryDropdownRef.current.contains(e.target as Node)) {
+        setSalaryDropdownOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -116,6 +142,7 @@ export default function JobverseApp() {
   };
 
   const cutoff = cutoffDate(dateFilter);
+  const salaryOption = SALARY_FILTER_OPTIONS.find(o => o.value === salaryFilter)!;
 
   const filteredJobs = jobs.filter(job => {
     const q = searchQuery.toLowerCase();
@@ -125,7 +152,15 @@ export default function JobverseApp() {
       (job.department ?? '').toLowerCase().includes(q)
     );
     const matchesDate = !cutoff || !job.publishedDate || new Date(job.publishedDate) >= cutoff;
-    return matchesSearch && matchesDate;
+    const matchesSalary = (() => {
+      if (salaryOption.disclosedOnly && !job.salary) return false;
+      if (salaryOption.min !== null) {
+        const min = parseSalaryMin(job.salary);
+        if (min === null || min < salaryOption.min) return false;
+      }
+      return true;
+    })();
+    return matchesSearch && matchesDate && matchesSalary;
   });
 
   const displayedJobs = activeTab === 'saved'
@@ -278,6 +313,41 @@ export default function JobverseApp() {
                 )}
               </div>
 
+              {/* Salary filter dropdown */}
+              <div className="relative" ref={salaryDropdownRef}>
+                <button
+                  onClick={() => setSalaryDropdownOpen(o => !o)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm border ${
+                    salaryFilter !== 'all'
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                      : 'bg-white border-[#E2E8F0] text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                  }`}
+                >
+                  <DollarSign size={14} />
+                  {SALARY_FILTER_OPTIONS.find(o => o.value === salaryFilter)?.label ?? 'Salary'}
+                  <ChevronDown size={14} className={`transition-transform ${salaryDropdownOpen ? 'rotate-180' : ''} ${salaryFilter !== 'all' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                </button>
+                {salaryDropdownOpen && (
+                  <div className="absolute top-full mt-2 left-0 z-30 w-44 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 overflow-hidden">
+                    {SALARY_FILTER_OPTIONS.map((opt, i) => (
+                      <React.Fragment key={opt.value}>
+                        {i === 2 && <div className="my-1 border-t border-slate-100" />}
+                        <button
+                          onClick={() => { setSalaryFilter(opt.value); setSalaryDropdownOpen(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
+                            salaryFilter === opt.value
+                              ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                              : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="w-px h-6 bg-slate-200 mx-2"></div>
               <button className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-bold hover:bg-indigo-100 transition-colors">
                 <Filter size={14} />
@@ -306,6 +376,14 @@ export default function JobverseApp() {
                       className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors"
                     >
                       Clear date ×
+                    </button>
+                  )}
+                  {salaryFilter !== 'all' && (
+                    <button
+                      onClick={() => setSalaryFilter('all')}
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors"
+                    >
+                      Clear salary ×
                     </button>
                   )}
                   <p className="text-sm font-medium text-slate-400">Showing {displayedJobs.length} job{displayedJobs.length === 1 ? '' : 's'}</p>
