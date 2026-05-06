@@ -14,6 +14,7 @@ export interface AshbyJob {
   isRemote: boolean;
   employmentType: string;
   publishedDate: string;
+  salary?: string; // present only when company opts in to display compensation
   applyUrl: string; // https://jobs.ashbyhq.com/{handle}/{id}
 }
 

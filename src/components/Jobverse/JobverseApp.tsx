@@ -403,6 +403,13 @@ export default function JobverseApp() {
                           {job.employmentType ?? 'Full-time'}
                           {job.department ? ` • ${job.department}` : ''}
                         </div>
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <DollarSign size={14} className="text-slate-400" />
+                          {job.salary
+                            ? <span className="text-emerald-700">{job.salary}</span>
+                            : <span className="text-slate-400">Not disclosed</span>
+                          }
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between pt-4 border-t border-slate-100">

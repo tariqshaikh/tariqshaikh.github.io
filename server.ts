@@ -145,6 +145,9 @@ async function startServer() {
       isRemote: p.workplaceType === 'Remote' || p.workplaceType === 'Distributed',
       employmentType: p.employmentType ?? '',
       publishedDate: p.publishedDate ?? '',
+      ...(p.shouldDisplayCompensationOnJobBoard && p.compensationTierSummary
+        ? { salary: p.compensationTierSummary }
+        : {}),
       applyUrl: `https://jobs.ashbyhq.com/${handle}/${p.id}`,
     }));
   }
