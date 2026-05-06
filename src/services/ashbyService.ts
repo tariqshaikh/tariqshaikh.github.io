@@ -1,7 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Ashby Public Job Board Service
-// Fetches live PM job listings from the Ashby public API (no API key required).
-// Endpoint: https://api.ashbyhq.com/posting-public/job-board/{handle}
+// Job Board Service — Ashby + Greenhouse
+// Server proxy at /api/jobs handles all fetching (bypasses browser CORS).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface AshbyJob {
@@ -13,10 +12,11 @@ export interface AshbyJob {
   location: string;
   isRemote: boolean;
   employmentType: string;
-  publishedDate: string;
-  salary?: string; // present only when company opts in to display compensation
-  logoUrl?: string; // square logo from Ashby org theme
-  applyUrl: string; // https://jobs.ashbyhq.com/{handle}/{id}
+  publishedDate: string; // YYYY-MM-DD or ISO timestamp
+  source: 'ashby' | 'greenhouse'; // which board this came from
+  salary?: string;
+  logoUrl?: string;
+  applyUrl: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -375,6 +375,29 @@ export const ASHBY_COMPANIES: string[] = [
   'zefr',
   'zencastr',
   'zyphra',
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Greenhouse company handles (boards.greenhouse.io/v1/boards/{handle}/jobs)
+// Confirmed to have PM roles as of May 2026.
+// ─────────────────────────────────────────────────────────────────────────────
+export const GREENHOUSE_COMPANIES: string[] = [
+  // Confirmed PM roles
+  'airbnb', 'benchling', 'brex', 'carta', 'chime', 'coinbase', 'databricks',
+  'discord', 'doordash', 'dropbox', 'duolingo', 'faire', 'fastly', 'figma',
+  'flexport', 'gofundme', 'gusto', 'headspace', 'hubspot', 'instacart',
+  'klaviyo', 'lyft', 'masterclass', 'mercury', 'modernhealth', 'mongodb',
+  'navan', 'okta', 'pagerduty', 'patreon', 'peloton', 'pinterest', 'podium',
+  'postman', 'quora', 'reddit', 'retool', 'robinhood', 'rubrik', 'sentry',
+  'servicetitan', 'snyk', 'squarespace', 'stripe', 'thoughtspot', 'tipalti',
+  'toast', 'twilio', 'twitch', 'udemy', 'vimeo', 'webflow', 'whoop',
+  'wiz', 'workato', 'wrike',
+  // Additional likely candidates
+  'canva', 'coda', 'confluent', 'coursera', 'descript', 'etsy', 'gem',
+  'gusto', 'heap', 'hex', 'hopin', 'ironclad', 'lob', 'looker', 'mixpanel',
+  'nerdwallet', 'notion', 'opendoor', 'outreach', 'pilot', 'plaid', 'ramp',
+  'segment', 'shopify', 'sourcegraph', 'superhuman', 'talkdesk', 'teachable',
+  'unqork', 'wealthsimple', 'zendesk',
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

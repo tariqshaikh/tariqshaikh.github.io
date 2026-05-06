@@ -3,7 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { NJ_COUNTIES, NJ_ENRICHED } from "./src/constants";
-import { ASHBY_COMPANIES, PM_KEYWORDS, LOCATION_KEYWORDS, type AshbyJob } from "./src/services/ashbyService";
+import { ASHBY_COMPANIES, GREENHOUSE_COMPANIES, PM_KEYWORDS, LOCATION_KEYWORDS, type AshbyJob } from "./src/services/ashbyService";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -146,12 +146,45 @@ async function startServer() {
       isRemote: p.workplaceType === 'Remote' || p.workplaceType === 'Distributed',
       employmentType: p.employmentType ?? '',
       publishedDate: p.publishedDate ?? '',
+      source: 'ashby' as const,
       ...(logoUrl ? { logoUrl } : {}),
       ...(p.shouldDisplayCompensationOnJobBoard && p.compensationTierSummary
         ? { salary: p.compensationTierSummary }
         : {}),
       applyUrl: `https://jobs.ashbyhq.com/${handle}/${p.id}`,
     }));
+  }
+
+  function domainFromUrl(url: string): string {
+    try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
+  }
+
+  async function fetchGreenhouseJobs(handle: string): Promise<AshbyJob[]> {
+    const res = await fetch(`https://boards.greenhouse.io/v1/boards/${handle}/jobs`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; portfolio-jobverse/1.0)' },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) return [];
+    const data: any = await res.json();
+    const postings: any[] = data?.jobs ?? [];
+    return postings.map((p: any): AshbyJob => {
+      const domain = domainFromUrl(p.absolute_url ?? '');
+      const location: string = p.location?.name ?? '';
+      return {
+        id: `gh_${p.id}`,
+        title: p.title ?? '',
+        company: p.company_name ?? handle,
+        companyHandle: handle,
+        department: '',
+        location,
+        isRemote: /remote/i.test(location),
+        employmentType: 'FullTime',
+        publishedDate: p.first_published ? p.first_published.slice(0, 10) : '',
+        source: 'greenhouse',
+        ...(domain ? { logoUrl: `https://logo.clearbit.com/${domain}` } : {}),
+        applyUrl: p.absolute_url ?? `https://boards.greenhouse.io/${handle}`,
+      };
+    });
   }
 
   async function fetchJobSalary(job: AshbyJob): Promise<string | undefined> {
@@ -178,15 +211,30 @@ async function startServer() {
       return;
     }
     try {
-      // Step 1: collect all PM jobs from board pages (batches of 30)
-      const allJobs: AshbyJob[] = [];
-      for (let i = 0; i < ASHBY_COMPANIES.length; i += 30) {
-        const batch = ASHBY_COMPANIES.slice(i, i + 30);
-        const results = await Promise.allSettled(batch.map(fetchHandleJobs));
-        for (const r of results) {
-          if (r.status === 'fulfilled') allJobs.push(...r.value);
+      // Step 1: fetch Ashby + Greenhouse boards in parallel
+      const ashbyPromise = (async () => {
+        const jobs: AshbyJob[] = [];
+        for (let i = 0; i < ASHBY_COMPANIES.length; i += 30) {
+          const batch = ASHBY_COMPANIES.slice(i, i + 30);
+          const results = await Promise.allSettled(batch.map(fetchHandleJobs));
+          for (const r of results) { if (r.status === 'fulfilled') jobs.push(...r.value); }
         }
-      }
+        return jobs;
+      })();
+
+      const greenhousePromise = (async () => {
+        const jobs: AshbyJob[] = [];
+        for (let i = 0; i < GREENHOUSE_COMPANIES.length; i += 30) {
+          const batch = GREENHOUSE_COMPANIES.slice(i, i + 30);
+          const results = await Promise.allSettled(batch.map(fetchGreenhouseJobs));
+          for (const r of results) { if (r.status === 'fulfilled') jobs.push(...r.value); }
+        }
+        return jobs;
+      })();
+
+      const [ashbyJobs, greenhouseJobs] = await Promise.all([ashbyPromise, greenhousePromise]);
+      const allJobs = [...ashbyJobs, ...greenhouseJobs];
+
       const filtered = allJobs.filter(job => {
         const t = job.title.toLowerCase();
         const l = (job.location ?? '').toLowerCase();
@@ -199,12 +247,17 @@ async function startServer() {
         return db - da;
       });
 
-      // Step 2: enrich with salary from individual job detail pages (all in parallel)
-      const salaryResults = await Promise.allSettled(filtered.map(fetchJobSalary));
-      const enriched = filtered.map((job, i) => {
+      // Step 2: enrich Ashby jobs with salary from detail pages (Greenhouse has no detail page)
+      const ashbyFiltered = filtered.filter(j => j.source === 'ashby');
+      const salaryResults = await Promise.allSettled(ashbyFiltered.map(fetchJobSalary));
+      const salaryMap = new Map<string, string>();
+      ashbyFiltered.forEach((job, i) => {
         const salary = salaryResults[i].status === 'fulfilled' ? salaryResults[i].value : undefined;
-        return salary ? { ...job, salary } : job;
+        if (salary) salaryMap.set(job.id, salary);
       });
+      const enriched = filtered.map(job =>
+        salaryMap.has(job.id) ? { ...job, salary: salaryMap.get(job.id) } : job
+      );
 
       jobsCache = { jobs: enriched, timestamp: Date.now() };
       res.json(enriched);

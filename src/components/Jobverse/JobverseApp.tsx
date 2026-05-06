@@ -451,9 +451,24 @@ export default function JobverseApp() {
                         <div className="flex gap-4 items-center">
                           <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 shadow-sm shrink-0 overflow-hidden flex items-center justify-center">
                             {job.logoUrl
-                              ? <img src={job.logoUrl} alt={job.company} className="w-full h-full object-contain p-1.5" />
-                              : <span className="font-bold text-lg text-slate-700">{logoInitials(job.company)}</span>
-                            }
+                              ? <img
+                                  src={job.logoUrl}
+                                  alt={job.company}
+                                  className="w-full h-full object-contain p-1.5"
+                                  onError={(e) => {
+                                    const target = e.currentTarget;
+                                    target.style.display = 'none';
+                                    const fallback = target.nextElementSibling as HTMLElement | null;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }}
+                                />
+                              : null}
+                            <span
+                              className="font-bold text-lg text-slate-700 w-full h-full items-center justify-center"
+                              style={{ display: job.logoUrl ? 'none' : 'flex' }}
+                            >
+                              {logoInitials(job.company)}
+                            </span>
                           </div>
                           <div>
                             <h3 className="font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">{job.title}</h3>
