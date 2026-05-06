@@ -3,6 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { NJ_COUNTIES, NJ_ENRICHED } from "./src/constants";
+import { ASHBY_COMPANIES, PM_KEYWORDS, LOCATION_KEYWORDS, type AshbyJob } from "./src/services/ashbyService";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,6 +94,93 @@ async function startServer() {
     });
     
     res.json(enrichedData);
+  });
+
+  // ── Ashby Jobs Proxy ──────────────────────────────────────────────────────
+  // Fetches job board pages server-side (bypasses browser CORS restrictions).
+  // Results are cached in memory for 30 minutes.
+
+  interface JobsCache { jobs: AshbyJob[]; timestamp: number; }
+  let jobsCache: JobsCache | null = null;
+  const JOBS_CACHE_TTL = 30 * 60 * 1000;
+
+  function extractAppData(html: string): any {
+    const marker = 'window.__appData = ';
+    const markerIdx = html.indexOf(marker);
+    if (markerIdx === -1) return null;
+    let start = html.indexOf('{', markerIdx);
+    if (start === -1) return null;
+    let depth = 0, inString = false, escape = false;
+    for (let i = start; i < html.length; i++) {
+      const ch = html[i];
+      if (escape) { escape = false; continue; }
+      if (ch === '\\' && inString) { escape = true; continue; }
+      if (ch === '"') { inString = !inString; continue; }
+      if (!inString) {
+        if (ch === '{') depth++;
+        else if (ch === '}') { depth--; if (depth === 0) { try { return JSON.parse(html.slice(start, i + 1)); } catch { return null; } } }
+      }
+    }
+    return null;
+  }
+
+  async function fetchHandleJobs(handle: string): Promise<AshbyJob[]> {
+    const res = await fetch(`https://jobs.ashbyhq.com/${handle}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; portfolio-jobverse/1.0)' },
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    const data = extractAppData(html);
+    if (!data) return [];
+    const orgName: string = data?.organization?.name ?? handle;
+    const postings: any[] = data?.jobBoard?.jobPostings ?? [];
+    return postings.map((p: any): AshbyJob => ({
+      id: p.id,
+      title: p.title ?? '',
+      company: orgName,
+      companyHandle: handle,
+      department: p.departmentName ?? '',
+      location: p.locationName ?? '',
+      isRemote: p.workplaceType === 'Remote' || p.workplaceType === 'Distributed',
+      employmentType: p.employmentType ?? '',
+      publishedDate: p.publishedDate ?? '',
+      applyUrl: `https://jobs.ashbyhq.com/${handle}/${p.id}`,
+    }));
+  }
+
+  app.get('/api/jobs', async (req, res) => {
+    if (jobsCache && Date.now() - jobsCache.timestamp < JOBS_CACHE_TTL) {
+      res.json(jobsCache.jobs);
+      return;
+    }
+    try {
+      // Fetch in batches of 30 to avoid hammering Ashby
+      const allJobs: AshbyJob[] = [];
+      for (let i = 0; i < ASHBY_COMPANIES.length; i += 30) {
+        const batch = ASHBY_COMPANIES.slice(i, i + 30);
+        const results = await Promise.allSettled(batch.map(fetchHandleJobs));
+        for (const r of results) {
+          if (r.status === 'fulfilled') allJobs.push(...r.value);
+        }
+      }
+      const filtered = allJobs.filter(job => {
+        const t = job.title.toLowerCase();
+        const l = (job.location ?? '').toLowerCase();
+        return PM_KEYWORDS.some(kw => t.includes(kw)) &&
+               (job.isRemote || LOCATION_KEYWORDS.some(kw => l.includes(kw)));
+      });
+      filtered.sort((a, b) => {
+        const da = a.publishedDate ? new Date(a.publishedDate).getTime() : 0;
+        const db = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
+        return db - da;
+      });
+      jobsCache = { jobs: filtered, timestamp: Date.now() };
+      res.json(filtered);
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      res.status(500).json({ error: 'Failed to fetch jobs' });
+    }
   });
 
   // API Route for Hottest Things (specific town)
