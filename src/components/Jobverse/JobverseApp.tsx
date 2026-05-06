@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, Briefcase, DollarSign, Clock, Heart, ArrowRight, Filter, ChevronDown, Bell, Bookmark, Settings, Home, Building2, User, RefreshCw, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Search, MapPin, Briefcase, DollarSign, Clock, Heart, ArrowRight, Filter, ChevronDown, Bell, Bookmark, Settings, Home, Building2, User, RefreshCw, Loader2, Calendar } from 'lucide-react';
 import { fetchAshbyJobs, AshbyJob } from '../../services/ashbyService';
 
 const SAVED_JOBS_KEY = 'jobverse_saved';
@@ -45,9 +45,31 @@ function persistSavedJobs(saved: Set<string>): void {
   }
 }
 
+type DateFilter = 'all' | '1d' | '3d' | '7d' | '30d';
+
+const DATE_FILTER_OPTIONS: { value: DateFilter; label: string }[] = [
+  { value: 'all', label: 'All time' },
+  { value: '1d', label: 'Today' },
+  { value: '3d', label: 'Last 3 days' },
+  { value: '7d', label: 'Last 7 days' },
+  { value: '30d', label: 'Last 30 days' },
+];
+
+function cutoffDate(filter: DateFilter): Date | null {
+  if (filter === 'all') return null;
+  const days = filter === '1d' ? 1 : filter === '3d' ? 3 : filter === '7d' ? 7 : 30;
+  const d = new Date();
+  d.setDate(d.getDate() - (days - 1));
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 export default function JobverseApp() {
   const [activeTab, setActiveTab] = useState('board');
   const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+  const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
+  const dateDropdownRef = useRef<HTMLDivElement>(null);
   const [jobs, setJobs] = useState<AshbyJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -70,6 +92,16 @@ export default function JobverseApp() {
     loadJobs();
   }, [loadJobs]);
 
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dateDropdownRef.current && !dateDropdownRef.current.contains(e.target as Node)) {
+        setDateDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
   const toggleSave = (jobId: string) => {
     setSavedJobs(prev => {
       const next = new Set<string>(prev);
@@ -83,14 +115,17 @@ export default function JobverseApp() {
     });
   };
 
+  const cutoff = cutoffDate(dateFilter);
+
   const filteredJobs = jobs.filter(job => {
     const q = searchQuery.toLowerCase();
-    if (!q) return true;
-    return (
+    const matchesSearch = !q || (
       job.title.toLowerCase().includes(q) ||
       job.company.toLowerCase().includes(q) ||
       (job.department ?? '').toLowerCase().includes(q)
     );
+    const matchesDate = !cutoff || !job.publishedDate || new Date(job.publishedDate) >= cutoff;
+    return matchesSearch && matchesDate;
   });
 
   const displayedJobs = activeTab === 'saved'
@@ -209,15 +244,40 @@ export default function JobverseApp() {
                 Location
                 <ChevronDown size={14} className="text-slate-400" />
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E2E8F0] rounded-full text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
-                Level
-                <ChevronDown size={14} className="text-slate-400" />
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E2E8F0] rounded-full text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
-                <DollarSign size={14} />
-                Salary
-                <ChevronDown size={14} className="text-slate-400" />
-              </button>
+
+              {/* Date Posted dropdown */}
+              <div className="relative" ref={dateDropdownRef}>
+                <button
+                  onClick={() => setDateDropdownOpen(o => !o)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm border ${
+                    dateFilter !== 'all'
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                      : 'bg-white border-[#E2E8F0] text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                  }`}
+                >
+                  <Calendar size={14} />
+                  {DATE_FILTER_OPTIONS.find(o => o.value === dateFilter)?.label ?? 'Date Posted'}
+                  <ChevronDown size={14} className={`transition-transform ${dateDropdownOpen ? 'rotate-180' : ''} ${dateFilter !== 'all' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                </button>
+                {dateDropdownOpen && (
+                  <div className="absolute top-full mt-2 left-0 z-30 w-44 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 overflow-hidden">
+                    {DATE_FILTER_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => { setDateFilter(opt.value); setDateDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
+                          dateFilter === opt.value
+                            ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="w-px h-6 bg-slate-200 mx-2"></div>
               <button className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-bold hover:bg-indigo-100 transition-colors">
                 <Filter size={14} />
@@ -239,7 +299,17 @@ export default function JobverseApp() {
                 )}
               </div>
               {!loading && !error && (
-                <p className="text-sm font-medium text-slate-400">Showing {displayedJobs.length} job{displayedJobs.length === 1 ? '' : 's'}</p>
+                <div className="flex items-center gap-3">
+                  {dateFilter !== 'all' && (
+                    <button
+                      onClick={() => setDateFilter('all')}
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors"
+                    >
+                      Clear date ×
+                    </button>
+                  )}
+                  <p className="text-sm font-medium text-slate-400">Showing {displayedJobs.length} job{displayedJobs.length === 1 ? '' : 's'}</p>
+                </div>
               )}
             </div>
 
