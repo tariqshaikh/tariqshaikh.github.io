@@ -117,14 +117,29 @@ async function startServer() {
     const plain = stripHtml(text);
     // Match patterns like "$180,000 - $225,000", "$150K - $200K", "€58K – €73K"
     const patterns = [
+      // Ranges first (most specific)
       /[\$€£]\s*[\d,]+[Kk]?\s*[-–—]\s*[\$€£]?\s*[\d,]+[Kk]?\s*(?:USD|EUR|GBP)?/,
       /[\d,]+[Kk]\s*[-–—]\s*[\d,]+[Kk]\s*(?:USD|EUR|GBP)?/i,
+      // "to" separator: "$196,000 to $245,000"
+      /[\$€£]\s*[\d,]+[Kk]?\s+to\s+[\$€£]?\s*[\d,]+[Kk]?\s*(?:USD|EUR|GBP)?/i,
       // Two adjacent currency amounts with a small gap (e.g. from stripped HTML spans)
       /[\$€£]\s*([\d,]+)\s+[\$€£]?\s*([\d,]+)\s*(?:USD|EUR|GBP)/,
+      // Single value near salary context: "salary of $180,000", "up to $180,000"
+      /(?:salary|compensation)\s+(?:of\s+)?(?:up\s+to\s+)?[\$€£]\s*\d[\d,]*\d[Kk]?/i,
+      /up\s+to\s+(?:a\s+)?(?:base\s+)?(?:salary\s+of\s+)?[\$€£]\s*\d[\d,]*\d[Kk]?/i,
+      /[\$€£]\s*\d[\d,]*\d[Kk]?\s*(?:annually|per\s+year|\/\s*year|base\s+salary)/i,
     ];
-    for (const re of patterns) {
-      const m = plain.match(re);
-      if (m) return m[0].replace(/\s+/g, ' ').trim();
+    for (let i = 0; i < patterns.length; i++) {
+      const m = plain.match(patterns[i]);
+      if (m) {
+        const result = m[0].replace(/\s+/g, ' ').trim();
+        // For single-value context patterns (index >= 4), extract just the currency portion
+        if (i >= 4) {
+          const currencyMatch = result.match(/[\$€£]\s*\d[\d,]*\d[Kk]?(?:\s*(?:annually|per\s+year|\/\s*year|base\s+salary))?/i);
+          if (currencyMatch) return currencyMatch[0].trim();
+        }
+        return result;
+      }
     }
     return undefined;
   }
