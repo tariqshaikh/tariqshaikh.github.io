@@ -104,6 +104,31 @@ async function startServer() {
   let jobsCache: JobsCache | null = null;
   const JOBS_CACHE_TTL = 30 * 60 * 1000;
 
+  function stripHtml(html: string): string {
+    return html
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
+      .replace(/&mdash;/g, '—').replace(/&ndash;/g, '–').replace(/&bull;/g, '•')
+      .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function extractSalaryFromText(text: string): string | undefined {
+    if (!text) return undefined;
+    const plain = stripHtml(text);
+    // Match patterns like "$180,000 - $225,000", "$150K - $200K", "€58K – €73K"
+    const patterns = [
+      /[\$€£]\s*[\d,]+[Kk]?\s*[-–—]\s*[\$€£]?\s*[\d,]+[Kk]?\s*(?:USD|EUR|GBP)?/,
+      /[\d,]+[Kk]\s*[-–—]\s*[\d,]+[Kk]\s*(?:USD|EUR|GBP)?/i,
+      // Two adjacent currency amounts with a small gap (e.g. from stripped HTML spans)
+      /[\$€£]\s*([\d,]+)\s+[\$€£]?\s*([\d,]+)\s*(?:USD|EUR|GBP)/,
+    ];
+    for (const re of patterns) {
+      const m = plain.match(re);
+      if (m) return m[0].replace(/\s+/g, ' ').trim();
+    }
+    return undefined;
+  }
+
   function extractAppData(html: string): any {
     const marker = 'window.__appData = ';
     const markerIdx = html.indexOf(marker);
@@ -155,9 +180,38 @@ async function startServer() {
     }));
   }
 
-  function domainFromUrl(url: string): string {
-    try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
-  }
+  const GREENHOUSE_DOMAINS: Record<string, string> = {
+    airbnb: 'airbnb.com', benchling: 'benchling.com', brex: 'brex.com',
+    canva: 'canva.com', carta: 'carta.com', chime: 'chime.com',
+    coda: 'coda.io', coinbase: 'coinbase.com', confluent: 'confluent.io',
+    coursera: 'coursera.org', databricks: 'databricks.com', descript: 'descript.com',
+    discord: 'discord.com', doordash: 'doordash.com', dropbox: 'dropbox.com',
+    duolingo: 'duolingo.com', etsy: 'etsy.com', faire: 'faire.com',
+    fastly: 'fastly.com', figma: 'figma.com', flexport: 'flexport.com',
+    gem: 'gem.com', gofundme: 'gofundme.com', gusto: 'gusto.com',
+    headspace: 'headspace.com', heap: 'heap.io', hex: 'hex.tech',
+    hopin: 'hopin.com', hubspot: 'hubspot.com', instacart: 'instacart.com',
+    ironclad: 'ironcladapp.com', klaviyo: 'klaviyo.com', lob: 'lob.com',
+    looker: 'looker.com', lyft: 'lyft.com', masterclass: 'masterclass.com',
+    mercury: 'mercury.com', mixpanel: 'mixpanel.com', modernhealth: 'modernhealth.com',
+    mongodb: 'mongodb.com', mux: 'mux.com', navan: 'navan.com',
+    nerdwallet: 'nerdwallet.com', notion: 'notion.so', okta: 'okta.com',
+    opendoor: 'opendoor.com', outreach: 'outreach.io', pagerduty: 'pagerduty.com',
+    patreon: 'patreon.com', peloton: 'onepeloton.com', pilot: 'pilot.com',
+    pinterest: 'pinterest.com', plaid: 'plaid.com', podium: 'podium.com',
+    postman: 'postman.com', productboard: 'productboard.com', quora: 'quora.com',
+    ramp: 'ramp.com', reddit: 'reddit.com', retool: 'retool.com',
+    robinhood: 'robinhood.com', rubrik: 'rubrik.com', segment: 'segment.com',
+    sentry: 'sentry.io', servicetitan: 'servicetitan.com', shopify: 'shopify.com',
+    snyk: 'snyk.io', sourcegraph: 'sourcegraph.com', squarespace: 'squarespace.com',
+    stripe: 'stripe.com', superhuman: 'superhuman.com', talkdesk: 'talkdesk.com',
+    teachable: 'teachable.com', thoughtspot: 'thoughtspot.com', tipalti: 'tipalti.com',
+    toast: 'toasttab.com', twilio: 'twilio.com', twitch: 'twitch.tv',
+    udemy: 'udemy.com', unqork: 'unqork.com', vimeo: 'vimeo.com',
+    wealthsimple: 'wealthsimple.com', webflow: 'webflow.com', whoop: 'whoop.com',
+    wiz: 'wiz.io', workato: 'workato.com', wrike: 'wrike.com',
+    zendesk: 'zendesk.com',
+  };
 
   async function fetchGreenhouseJobs(handle: string): Promise<AshbyJob[]> {
     const res = await fetch(`https://boards.greenhouse.io/v1/boards/${handle}/jobs`, {
@@ -167,8 +221,8 @@ async function startServer() {
     if (!res.ok) return [];
     const data: any = await res.json();
     const postings: any[] = data?.jobs ?? [];
+    const domain = GREENHOUSE_DOMAINS[handle];
     return postings.map((p: any): AshbyJob => {
-      const domain = domainFromUrl(p.absolute_url ?? '');
       const location: string = p.location?.name ?? '';
       return {
         id: `gh_${p.id}`,
@@ -181,7 +235,7 @@ async function startServer() {
         employmentType: 'FullTime',
         publishedDate: p.first_published ? p.first_published.slice(0, 10) : '',
         source: 'greenhouse',
-        ...(domain ? { logoUrl: `https://logo.clearbit.com/${domain}` } : {}),
+        ...(domain ? { logoUrl: `https://icon.horse/icon/${domain}` } : {}),
         applyUrl: p.absolute_url ?? `https://boards.greenhouse.io/${handle}`,
       };
     });
@@ -198,8 +252,11 @@ async function startServer() {
       const data = extractAppData(html);
       if (!data) return undefined;
       const posting = data?.posting ?? {};
-      // Prefer the clean scrapeable summary; fall back to the full tier summary
-      return posting.scrapeableCompensationSalarySummary || posting.compensationTierSummary || undefined;
+      // 1. Structured fields (most reliable)
+      const structured = posting.scrapeableCompensationSalarySummary || posting.compensationTierSummary;
+      if (structured) return structured;
+      // 2. Fall back to parsing salary range from the description text
+      return extractSalaryFromText(posting.descriptionPlainText ?? '');
     } catch {
       return undefined;
     }
@@ -247,11 +304,27 @@ async function startServer() {
         return db - da;
       });
 
-      // Step 2: enrich Ashby jobs with salary from detail pages (Greenhouse has no detail page)
-      const ashbyFiltered = filtered.filter(j => j.source === 'ashby');
-      const salaryResults = await Promise.allSettled(ashbyFiltered.map(fetchJobSalary));
+      // Step 2: enrich ALL filtered jobs with salary from detail pages
+      async function fetchGreenhouseSalary(job: AshbyJob): Promise<string | undefined> {
+        try {
+          // Greenhouse individual job API includes description content
+          const id = job.id.replace('gh_', '');
+          const res = await fetch(
+            `https://boards.greenhouse.io/v1/boards/${job.companyHandle}/jobs/${id}`,
+            { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; portfolio-jobverse/1.0)' },
+              signal: AbortSignal.timeout(10000) }
+          );
+          if (!res.ok) return undefined;
+          const data: any = await res.json();
+          return extractSalaryFromText(data?.content ?? '');
+        } catch { return undefined; }
+      }
+
+      const salaryResults = await Promise.allSettled(
+        filtered.map(j => j.source === 'ashby' ? fetchJobSalary(j) : fetchGreenhouseSalary(j))
+      );
       const salaryMap = new Map<string, string>();
-      ashbyFiltered.forEach((job, i) => {
+      filtered.forEach((job, i) => {
         const salary = salaryResults[i].status === 'fulfilled' ? salaryResults[i].value : undefined;
         if (salary) salaryMap.set(job.id, salary);
       });
