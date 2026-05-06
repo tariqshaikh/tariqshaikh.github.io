@@ -15,6 +15,7 @@ export interface AshbyJob {
   employmentType: string;
   publishedDate: string;
   salary?: string; // present only when company opts in to display compensation
+  logoUrl?: string; // square logo from Ashby org theme
   applyUrl: string; // https://jobs.ashbyhq.com/{handle}/{id}
 }
 

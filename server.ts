@@ -134,6 +134,7 @@ async function startServer() {
     const data = extractAppData(html);
     if (!data) return [];
     const orgName: string = data?.organization?.name ?? handle;
+    const logoUrl: string | undefined = data?.organization?.theme?.logoSquareImageUrl || undefined;
     const postings: any[] = data?.jobBoard?.jobPostings ?? [];
     return postings.map((p: any): AshbyJob => ({
       id: p.id,
@@ -145,6 +146,7 @@ async function startServer() {
       isRemote: p.workplaceType === 'Remote' || p.workplaceType === 'Distributed',
       employmentType: p.employmentType ?? '',
       publishedDate: p.publishedDate ?? '',
+      ...(logoUrl ? { logoUrl } : {}),
       ...(p.shouldDisplayCompensationOnJobBoard && p.compensationTierSummary
         ? { salary: p.compensationTierSummary }
         : {}),
