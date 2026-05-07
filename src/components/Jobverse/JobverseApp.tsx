@@ -5,6 +5,15 @@ import { fetchAshbyJobs, AshbyJob } from '../../services/ashbyService';
 const SAVED_JOBS_KEY = 'jobverse_saved';
 const DREAM_COMPANIES_KEY = 'jobverse_dream_companies';
 
+const LOGO_OVERRIDES: Record<string, string> = {
+  ramp: 'https://logo.clearbit.com/ramp.com',
+};
+
+function resolveLogoUrl(job: AshbyJob): string | undefined {
+  if (job.companyHandle && LOGO_OVERRIDES[job.companyHandle]) return LOGO_OVERRIDES[job.companyHandle];
+  return job.logoUrl;
+}
+
 function loadDreamCompanies(): Set<string> {
   try {
     const raw = localStorage.getItem(DREAM_COMPANIES_KEY);
@@ -564,11 +573,8 @@ export default function JobverseApp() {
                           }`}
                         >
                           <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
-                            {job.logoUrl
-                              ? <img src={job.logoUrl} alt={job.company} className="w-full h-full object-contain p-1"
-                                  onError={e => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }} />
-                              : null}
-                            <span className="text-xs font-bold text-slate-600 w-full h-full items-center justify-center" style={{ display: job.logoUrl ? 'none' : 'flex' }}>
+                            {(() => { const src = resolveLogoUrl(job); return src ? <img src={src} alt={job.company} className="w-full h-full object-contain p-1" onError={e => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }} /> : null; })()}
+                            <span className="text-xs font-bold text-slate-600 w-full h-full items-center justify-center" style={{ display: resolveLogoUrl(job) ? 'none' : 'flex' }}>
                               {logoInitials(job.company)}
                             </span>
                           </div>
@@ -663,11 +669,8 @@ export default function JobverseApp() {
                           }`}
                         >
                           <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
-                            {job.logoUrl
-                              ? <img src={job.logoUrl} alt={job.company} className="w-full h-full object-contain p-1"
-                                  onError={e => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }} />
-                              : null}
-                            <span className="text-xs font-bold text-slate-600 w-full h-full items-center justify-center" style={{ display: job.logoUrl ? 'none' : 'flex' }}>
+                            {(() => { const src = resolveLogoUrl(job); return src ? <img src={src} alt={job.company} className="w-full h-full object-contain p-1" onError={e => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }} /> : null; })()}
+                            <span className="text-xs font-bold text-slate-600 w-full h-full items-center justify-center" style={{ display: resolveLogoUrl(job) ? 'none' : 'flex' }}>
                               {logoInitials(job.company)}
                             </span>
                           </div>
@@ -975,22 +978,10 @@ export default function JobverseApp() {
                       <div className="flex justify-between items-start mb-6">
                         <div className="flex gap-4 items-center">
                           <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 shadow-sm shrink-0 overflow-hidden flex items-center justify-center">
-                            {job.logoUrl
-                              ? <img
-                                  src={job.logoUrl}
-                                  alt={job.company}
-                                  className="w-full h-full object-contain p-1.5"
-                                  onError={(e) => {
-                                    const target = e.currentTarget;
-                                    target.style.display = 'none';
-                                    const fallback = target.nextElementSibling as HTMLElement | null;
-                                    if (fallback) fallback.style.display = 'flex';
-                                  }}
-                                />
-                              : null}
+                            {(() => { const src = resolveLogoUrl(job); return src ? <img src={src} alt={job.company} className="w-full h-full object-contain p-1.5" onError={(e) => { const t = e.currentTarget; t.style.display = 'none'; const f = t.nextElementSibling as HTMLElement | null; if (f) f.style.display = 'flex'; }} /> : null; })()}
                             <span
                               className="font-bold text-lg text-slate-700 w-full h-full items-center justify-center"
-                              style={{ display: job.logoUrl ? 'none' : 'flex' }}
+                              style={{ display: resolveLogoUrl(job) ? 'none' : 'flex' }}
                             >
                               {logoInitials(job.company)}
                             </span>
