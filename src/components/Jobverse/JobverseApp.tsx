@@ -305,6 +305,184 @@ export default function JobverseApp() {
           {(() => {
             const logos = [
               {
+                name: 'Classic',
+                svg: (
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <filter id="cs1"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs1sm"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    {/* background dust */}
+                    <circle cx="10" cy="12" r="0.8" fill="white" opacity="0.2"/>
+                    <circle cx="44" cy="9" r="0.6" fill="white" opacity="0.15"/>
+                    <circle cx="48" cy="38" r="0.7" fill="white" opacity="0.2"/>
+                    <circle cx="6" cy="42" r="0.5" fill="white" opacity="0.15"/>
+                    <circle cx="22" cy="48" r="0.6" fill="white" opacity="0.1"/>
+                    <line x1="28" y1="8" x2="45" y2="21" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="45" y1="21" x2="38" y2="41" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="38" y1="41" x2="18" y2="41" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="18" y1="41" x2="11" y2="21" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="11" y1="21" x2="28" y2="8" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="28" y1="8" x2="38" y2="41" stroke="#6366f1" strokeWidth="0.5" opacity="0.18"/>
+                    <line x1="45" y1="21" x2="18" y2="41" stroke="#6366f1" strokeWidth="0.5" opacity="0.18"/>
+                    <circle cx="28" cy="8" r="4" fill="white" filter="url(#cs1)"/>
+                    <circle cx="45" cy="21" r="2.5" fill="#c4b5fd" filter="url(#cs1sm)"/>
+                    <circle cx="38" cy="41" r="2" fill="#a78bfa"/>
+                    <circle cx="18" cy="41" r="2.5" fill="#c4b5fd" filter="url(#cs1sm)"/>
+                    <circle cx="11" cy="21" r="2" fill="#a78bfa"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Dipper',
+                svg: (
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <filter id="cs2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs2sm"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <circle cx="8" cy="14" r="0.7" fill="white" opacity="0.2"/>
+                    <circle cx="50" cy="44" r="0.6" fill="white" opacity="0.15"/>
+                    <circle cx="14" cy="48" r="0.5" fill="white" opacity="0.12"/>
+                    {/* handle */}
+                    <line x1="10" y1="18" x2="17" y2="25" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="17" y1="25" x2="25" y2="29" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="25" y1="29" x2="34" y2="28" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    {/* bowl */}
+                    <line x1="34" y1="28" x2="46" y2="22" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="46" y1="22" x2="46" y2="36" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="46" y1="36" x2="34" y2="38" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="34" y1="38" x2="34" y2="28" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <circle cx="10" cy="18" r="2" fill="#a78bfa" filter="url(#cs2sm)"/>
+                    <circle cx="17" cy="25" r="2" fill="#a78bfa"/>
+                    <circle cx="25" cy="29" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
+                    <circle cx="34" cy="28" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
+                    <circle cx="46" cy="22" r="4" fill="white" filter="url(#cs2)"/>
+                    <circle cx="46" cy="36" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
+                    <circle cx="34" cy="38" r="2" fill="#a78bfa"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Arrow',
+                svg: (
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <filter id="cs3"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs3sm"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <circle cx="9" cy="10" r="0.7" fill="white" opacity="0.18"/>
+                    <circle cx="47" cy="48" r="0.6" fill="white" opacity="0.12"/>
+                    <circle cx="50" cy="12" r="0.8" fill="white" opacity="0.15"/>
+                    {/* arrowhead */}
+                    <line x1="28" y1="7" x2="14" y2="24" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="28" y1="7" x2="42" y2="24" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    {/* shaft */}
+                    <line x1="28" y1="7" x2="28" y2="49" stroke="#818cf8" strokeWidth="0.8" opacity="0.35"/>
+                    {/* crossbar */}
+                    <line x1="14" y1="24" x2="42" y2="24" stroke="#6366f1" strokeWidth="0.6" opacity="0.25"/>
+                    <line x1="20" y1="36" x2="36" y2="36" stroke="#6366f1" strokeWidth="0.5" opacity="0.18"/>
+                    <circle cx="28" cy="7" r="4.5" fill="white" filter="url(#cs3)"/>
+                    <circle cx="14" cy="24" r="2.5" fill="#c4b5fd" filter="url(#cs3sm)"/>
+                    <circle cx="42" cy="24" r="2.5" fill="#c4b5fd" filter="url(#cs3sm)"/>
+                    <circle cx="20" cy="36" r="2" fill="#a78bfa"/>
+                    <circle cx="36" cy="36" r="2" fill="#a78bfa"/>
+                    <circle cx="28" cy="49" r="2.5" fill="#c4b5fd" filter="url(#cs3sm)"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Crown',
+                svg: (
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <filter id="cs4"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs4sm"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <circle cx="12" cy="46" r="0.7" fill="white" opacity="0.15"/>
+                    <circle cx="46" cy="50" r="0.6" fill="white" opacity="0.12"/>
+                    {/* crown base line */}
+                    <line x1="10" y1="38" x2="46" y2="38" stroke="#818cf8" strokeWidth="0.7" opacity="0.3"/>
+                    {/* spires */}
+                    <line x1="10" y1="38" x2="18" y2="20" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="18" y1="20" x2="28" y2="10" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="28" y1="10" x2="38" y2="20" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="38" y1="20" x2="46" y2="38" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    {/* inner cross */}
+                    <line x1="18" y1="20" x2="38" y2="20" stroke="#6366f1" strokeWidth="0.5" opacity="0.2"/>
+                    <circle cx="28" cy="10" r="5" fill="white" filter="url(#cs4)"/>
+                    <circle cx="18" cy="20" r="2.8" fill="#c4b5fd" filter="url(#cs4sm)"/>
+                    <circle cx="38" cy="20" r="2.8" fill="#c4b5fd" filter="url(#cs4sm)"/>
+                    <circle cx="10" cy="38" r="2" fill="#a78bfa"/>
+                    <circle cx="46" cy="38" r="2" fill="#a78bfa"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Cluster',
+                svg: (
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <filter id="cs5"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs5sm"><feGaussianBlur stdDeviation="1.3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <circle cx="8" cy="20" r="0.6" fill="white" opacity="0.15"/>
+                    <circle cx="50" cy="14" r="0.7" fill="white" opacity="0.12"/>
+                    <circle cx="48" cy="44" r="0.5" fill="white" opacity="0.1"/>
+                    <line x1="28" y1="10" x2="40" y2="18" stroke="#818cf8" strokeWidth="0.7" opacity="0.4"/>
+                    <line x1="28" y1="10" x2="18" y2="20" stroke="#818cf8" strokeWidth="0.7" opacity="0.4"/>
+                    <line x1="40" y1="18" x2="44" y2="32" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="40" y1="18" x2="32" y2="30" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="18" y1="20" x2="12" y2="34" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="18" y1="20" x2="32" y2="30" stroke="#6366f1" strokeWidth="0.5" opacity="0.2"/>
+                    <line x1="32" y1="30" x2="38" y2="44" stroke="#818cf8" strokeWidth="0.7" opacity="0.3"/>
+                    <line x1="32" y1="30" x2="22" y2="44" stroke="#818cf8" strokeWidth="0.7" opacity="0.3"/>
+                    <circle cx="28" cy="10" r="4.5" fill="white" filter="url(#cs5)"/>
+                    <circle cx="40" cy="18" r="2.5" fill="#c4b5fd" filter="url(#cs5sm)"/>
+                    <circle cx="18" cy="20" r="2.5" fill="#c4b5fd" filter="url(#cs5sm)"/>
+                    <circle cx="44" cy="32" r="1.8" fill="#a78bfa"/>
+                    <circle cx="12" cy="34" r="1.8" fill="#a78bfa"/>
+                    <circle cx="32" cy="30" r="3" fill="#c4b5fd" filter="url(#cs5sm)"/>
+                    <circle cx="38" cy="44" r="1.5" fill="#818cf8" opacity="0.8"/>
+                    <circle cx="22" cy="44" r="1.5" fill="#818cf8" opacity="0.8"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Orion',
+                svg: (
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <filter id="cs6"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs6sm"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <circle cx="9" cy="9" r="0.7" fill="white" opacity="0.18"/>
+                    <circle cx="48" cy="50" r="0.6" fill="white" opacity="0.12"/>
+                    {/* shoulders */}
+                    <line x1="15" y1="16" x2="41" y2="12" stroke="#818cf8" strokeWidth="0.7" opacity="0.4"/>
+                    {/* left arm to belt */}
+                    <line x1="15" y1="16" x2="19" y2="28" stroke="#818cf8" strokeWidth="0.7" opacity="0.4"/>
+                    {/* right arm to belt */}
+                    <line x1="41" y1="12" x2="37" y2="28" stroke="#818cf8" strokeWidth="0.7" opacity="0.4"/>
+                    {/* belt */}
+                    <line x1="19" y1="28" x2="28" y2="29" stroke="#818cf8" strokeWidth="0.8" opacity="0.5"/>
+                    <line x1="28" y1="29" x2="37" y2="28" stroke="#818cf8" strokeWidth="0.8" opacity="0.5"/>
+                    {/* legs */}
+                    <line x1="19" y1="28" x2="14" y2="44" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <line x1="37" y1="28" x2="42" y2="44" stroke="#818cf8" strokeWidth="0.7" opacity="0.35"/>
+                    <circle cx="15" cy="16" r="4.5" fill="white" filter="url(#cs6)"/>
+                    <circle cx="41" cy="12" r="3" fill="#e0d9ff" filter="url(#cs6sm)"/>
+                    <circle cx="19" cy="28" r="2" fill="#a78bfa"/>
+                    <circle cx="28" cy="29" r="2.2" fill="#c4b5fd" filter="url(#cs6sm)"/>
+                    <circle cx="37" cy="28" r="2" fill="#a78bfa"/>
+                    <circle cx="14" cy="44" r="2.5" fill="#c4b5fd" filter="url(#cs6sm)"/>
+                    <circle cx="42" cy="44" r="3" fill="#e0d9ff" filter="url(#cs6sm)"/>
+                  </svg>
+                ),
+              },
+            ];
+            const _unused = [
+              {
                 name: 'Portal',
                 svg: (
                   <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
@@ -459,7 +637,7 @@ export default function JobverseApp() {
             ];
 
             return (
-              <div className="grid grid-cols-7 gap-4 mb-14 w-full max-w-3xl">
+              <div className="grid grid-cols-6 gap-4 mb-14 w-full max-w-3xl">
                 {logos.map((logo, i) => (
                   <div key={i} className="flex flex-col items-center gap-2.5 group cursor-pointer">
                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 flex items-center justify-center group-hover:border-indigo-500/40 group-hover:from-indigo-500/10 group-hover:to-violet-500/5 transition-all duration-200 shadow-lg">
