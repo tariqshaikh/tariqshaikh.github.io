@@ -119,13 +119,17 @@ function matchesJobType(job: AshbyJob, filter: JobTypeFilter): boolean {
   return true;
 }
 
-type LocationFilter = 'all' | 'remote' | 'nyc' | 'nj';
+type LocationFilter = 'all' | 'remote' | 'nyc' | 'sf' | 'seattle' | 'austin' | 'boston' | 'nj';
 
 const LOCATION_FILTER_OPTIONS: { value: LocationFilter; label: string }[] = [
-  { value: 'all',    label: 'All locations' },
-  { value: 'remote', label: 'Remote' },
-  { value: 'nyc',    label: 'New York' },
-  { value: 'nj',     label: 'New Jersey' },
+  { value: 'all',     label: 'All locations' },
+  { value: 'remote',  label: 'Remote' },
+  { value: 'nyc',     label: 'New York' },
+  { value: 'sf',      label: 'San Francisco' },
+  { value: 'seattle', label: 'Seattle' },
+  { value: 'austin',  label: 'Austin' },
+  { value: 'boston',  label: 'Boston' },
+  { value: 'nj',      label: 'New Jersey' },
 ];
 
 function matchesLocation(job: AshbyJob, filter: LocationFilter): boolean {
@@ -133,6 +137,10 @@ function matchesLocation(job: AshbyJob, filter: LocationFilter): boolean {
   const loc = (job.location ?? '').toLowerCase();
   if (filter === 'remote') return job.isRemote;
   if (filter === 'nyc') return /new york|, ny\b/.test(loc);
+  if (filter === 'sf') return /san francisco|bay area|, ca\b|south bay|menlo park|palo alto|mountain view|sunnyvale|san jose/.test(loc);
+  if (filter === 'seattle') return /seattle|, wa\b|bellevue|redmond/.test(loc);
+  if (filter === 'austin') return /austin|, tx\b/.test(loc);
+  if (filter === 'boston') return /boston|cambridge|, ma\b/.test(loc);
   if (filter === 'nj') return /new jersey|, nj\b/.test(loc);
   return true;
 }

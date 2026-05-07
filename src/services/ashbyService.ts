@@ -13,7 +13,7 @@ export interface AshbyJob {
   isRemote: boolean;
   employmentType: string;
   publishedDate: string; // YYYY-MM-DD or ISO timestamp
-  source: 'ashby' | 'greenhouse'; // which board this came from
+  source: 'ashby' | 'greenhouse' | 'lever';
   salary?: string;
   logoUrl?: string;
   applyUrl: string;
@@ -392,12 +392,59 @@ export const GREENHOUSE_COMPANIES: string[] = [
   'servicetitan', 'snyk', 'squarespace', 'stripe', 'thoughtspot', 'tipalti',
   'toast', 'twilio', 'twitch', 'udemy', 'vimeo', 'webflow', 'whoop',
   'wiz', 'workato', 'wrike',
-  // Additional likely candidates
-  'canva', 'coda', 'confluent', 'coursera', 'descript', 'etsy', 'gem',
-  'gusto', 'heap', 'hex', 'hopin', 'ironclad', 'lob', 'looker', 'mixpanel',
+  // Additional
+  'amplitude', 'canva', 'coda', 'confluent', 'coursera', 'descript', 'etsy',
+  'gem', 'heap', 'hex', 'hopin', 'ironclad', 'lob', 'looker', 'mixpanel',
   'nerdwallet', 'notion', 'opendoor', 'outreach', 'pilot', 'plaid', 'ramp',
   'segment', 'shopify', 'sourcegraph', 'superhuman', 'talkdesk', 'teachable',
   'unqork', 'wealthsimple', 'zendesk',
+  // Expanded
+  'cloudflare', 'elastic', 'box', 'unity', 'roblox', 'snap', 'justworks',
+  'checkr', 'gitlab', 'netlify', 'rippling', 'datadog', 'asana', 'miro',
+  'airtable', 'loom', 'intercom', 'braze', 'drift', 'gong', 'highspot',
+  'lattice', 'pendo', 'contentful', 'algolia', 'sprinklr', 'medallia',
+  'zuora', 'seismic', 'fivetran', 'hashicorp', 'cockroachdb', 'airbyte',
+  'temporal', 'vercel', 'linear', 'dbtlabs', 'grafana',
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lever company handles (api.lever.co/v0/postings/{handle}?mode=json)
+// ─────────────────────────────────────────────────────────────────────────────
+export const LEVER_COMPANIES: { handle: string; name: string; domain: string }[] = [
+  { handle: 'anthropic',    name: 'Anthropic',    domain: 'anthropic.com' },
+  { handle: 'attentive',    name: 'Attentive',    domain: 'attentivemobile.com' },
+  { handle: 'highspot',     name: 'Highspot',     domain: 'highspot.com' },
+  { handle: 'clari',        name: 'Clari',        domain: 'clari.com' },
+  { handle: 'intercom',     name: 'Intercom',     domain: 'intercom.com' },
+  { handle: 'miro',         name: 'Miro',         domain: 'miro.com' },
+  { handle: 'airtable',     name: 'Airtable',     domain: 'airtable.com' },
+  { handle: 'loom',         name: 'Loom',         domain: 'loom.com' },
+  { handle: 'lattice',      name: 'Lattice',      domain: 'lattice.com' },
+  { handle: 'pendo',        name: 'Pendo',        domain: 'pendo.io' },
+  { handle: 'gong-io',      name: 'Gong',         domain: 'gong.io' },
+  { handle: 'dbtlabs',      name: 'dbt Labs',     domain: 'getdbt.com' },
+  { handle: 'cockroachdb',  name: 'CockroachDB',  domain: 'cockroachlabs.com' },
+  { handle: 'fivetran',     name: 'Fivetran',     domain: 'fivetran.com' },
+  { handle: 'rippling',     name: 'Rippling',     domain: 'rippling.com' },
+  { handle: 'airbyte',      name: 'Airbyte',      domain: 'airbyte.com' },
+  { handle: 'linear',       name: 'Linear',       domain: 'linear.app' },
+  { handle: 'vercel',       name: 'Vercel',       domain: 'vercel.com' },
+  { handle: 'temporal',     name: 'Temporal',     domain: 'temporal.io' },
+  { handle: 'grafana',      name: 'Grafana Labs', domain: 'grafana.com' },
+  { handle: 'hashicorp',    name: 'HashiCorp',    domain: 'hashicorp.com' },
+  { handle: 'contentful',   name: 'Contentful',   domain: 'contentful.com' },
+  { handle: 'algolia',      name: 'Algolia',      domain: 'algolia.com' },
+  { handle: 'seismic',      name: 'Seismic',      domain: 'seismic.com' },
+  { handle: 'zuora',        name: 'Zuora',        domain: 'zuora.com' },
+  { handle: 'sprinklr',     name: 'Sprinklr',     domain: 'sprinklr.com' },
+  { handle: 'netlify',      name: 'Netlify',      domain: 'netlify.com' },
+  { handle: 'asana',        name: 'Asana',        domain: 'asana.com' },
+  { handle: 'brex',         name: 'Brex',         domain: 'brex.com' },
+  { handle: 'snap',         name: 'Snap',         domain: 'snap.com' },
+  { handle: 'box',          name: 'Box',          domain: 'box.com' },
+  { handle: 'elastic',      name: 'Elastic',      domain: 'elastic.co' },
+  { handle: 'gitlab',       name: 'GitLab',       domain: 'about.gitlab.com' },
+  { handle: 'cloudflare',   name: 'Cloudflare',   domain: 'cloudflare.com' },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -4,8 +4,8 @@ import { fileURLToPath } from 'url';
 import {
   ASHBY_COMPANIES,
   GREENHOUSE_COMPANIES,
+  LEVER_COMPANIES,
   PM_KEYWORDS,
-  LOCATION_KEYWORDS,
   type AshbyJob,
 } from '../src/services/ashbyService.js';
 
@@ -128,8 +128,8 @@ async function fetchJobSalary(job: AshbyJob): Promise<string | undefined> {
 // ── Greenhouse ─────────────────────────────────────────────────────────────
 
 const GREENHOUSE_DOMAINS: Record<string, string> = {
-  airbnb: 'airbnb.com', benchling: 'benchling.com', brex: 'brex.com',
-  canva: 'canva.com', carta: 'carta.com', chime: 'chime.com',
+  airbnb: 'airbnb.com', amplitude: 'amplitude.com', benchling: 'benchling.com',
+  brex: 'brex.com', canva: 'canva.com', carta: 'carta.com', chime: 'chime.com',
   coda: 'coda.io', coinbase: 'coinbase.com', confluent: 'confluent.io',
   coursera: 'coursera.org', databricks: 'databricks.com', descript: 'descript.com',
   discord: 'discord.com', doordash: 'doordash.com', dropbox: 'dropbox.com',
@@ -156,8 +156,20 @@ const GREENHOUSE_DOMAINS: Record<string, string> = {
   toast: 'toasttab.com', twilio: 'twilio.com', twitch: 'twitch.tv',
   udemy: 'udemy.com', unqork: 'unqork.com', vimeo: 'vimeo.com',
   wealthsimple: 'wealthsimple.com', webflow: 'webflow.com', whoop: 'whoop.com',
-  wiz: 'wiz.io', workato: 'workato.com', wrike: 'wrike.com',
-  zendesk: 'zendesk.com',
+  wiz: 'wiz.io', workato: 'workato.com', wrike: 'wrike.com', zendesk: 'zendesk.com',
+  // Expanded
+  cloudflare: 'cloudflare.com', elastic: 'elastic.co', box: 'box.com',
+  unity: 'unity.com', roblox: 'roblox.com', snap: 'snap.com',
+  justworks: 'justworks.com', checkr: 'checkr.com', gitlab: 'about.gitlab.com',
+  netlify: 'netlify.com', rippling: 'rippling.com', datadog: 'datadoghq.com',
+  asana: 'asana.com', miro: 'miro.com', airtable: 'airtable.com', loom: 'loom.com',
+  intercom: 'intercom.com', braze: 'braze.com', drift: 'drift.com', gong: 'gong.io',
+  highspot: 'highspot.com', lattice: 'lattice.com', pendo: 'pendo.io',
+  contentful: 'contentful.com', algolia: 'algolia.com', sprinklr: 'sprinklr.com',
+  medallia: 'medallia.com', zuora: 'zuora.com', seismic: 'seismic.com',
+  fivetran: 'fivetran.com', hashicorp: 'hashicorp.com', cockroachdb: 'cockroachlabs.com',
+  airbyte: 'airbyte.com', temporal: 'temporal.io', vercel: 'vercel.com',
+  linear: 'linear.app', dbtlabs: 'getdbt.com', grafana: 'grafana.com',
 };
 
 async function fetchGreenhouseJobs(handle: string): Promise<AshbyJob[]> {
@@ -202,6 +214,43 @@ async function fetchGreenhouseSalary(job: AshbyJob): Promise<string | undefined>
   } catch { return undefined; }
 }
 
+// ── Lever ──────────────────────────────────────────────────────────────────
+
+async function fetchLeverJobs(handle: string, name: string, domain: string): Promise<AshbyJob[]> {
+  try {
+    const res = await fetch(`https://api.lever.co/v0/postings/${handle}?mode=json`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; portfolio-jobverse/1.0)' },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) return [];
+    const data: any[] = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data.map((p: any): AshbyJob => {
+      const location: string = p.categories?.location ?? (p.categories?.allLocations?.[0] ?? '');
+      const descriptionText: string = p.content?.descriptionPlain ?? p.content?.description ?? '';
+      const salary = extractSalaryFromText(descriptionText) ??
+        (p.salaryRange?.min && p.salaryRange?.max
+          ? `$${Math.round(p.salaryRange.min / 1000)}K – $${Math.round(p.salaryRange.max / 1000)}K`
+          : undefined);
+      return {
+        id: `lv_${p.id}`,
+        title: p.text ?? '',
+        company: name,
+        companyHandle: handle.toLowerCase(),
+        department: p.categories?.team ?? p.categories?.department ?? '',
+        location,
+        isRemote: p.workplaceType === 'remote' || /remote/i.test(location),
+        employmentType: p.categories?.commitment ?? 'FullTime',
+        publishedDate: p.createdAt ? new Date(p.createdAt).toISOString().slice(0, 10) : '',
+        source: 'lever' as const,
+        logoUrl: `https://logo.clearbit.com/${domain}`,
+        applyUrl: p.hostedUrl ?? `https://jobs.lever.co/${handle}/${p.id}`,
+        ...(salary ? { salary } : {}),
+      };
+    });
+  } catch { return []; }
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -223,30 +272,44 @@ async function main() {
     process.stdout.write(`  Greenhouse: ${i + batch.length}/${GREENHOUSE_COMPANIES.length}\r`);
   }
 
-  const allJobs = [...ashbyJobs, ...greenhouseJobs];
-  const filtered = allJobs.filter(job => {
-    const t = job.title.toLowerCase();
-    const l = (job.location ?? '').toLowerCase();
-    return PM_KEYWORDS.some(kw => t.includes(kw)) &&
-           (job.isRemote || LOCATION_KEYWORDS.some(kw => l.includes(kw)));
-  });
+  console.log('\nFetching Lever jobs...');
+  const leverJobs: AshbyJob[] = [];
+  for (let i = 0; i < LEVER_COMPANIES.length; i += 20) {
+    const batch = LEVER_COMPANIES.slice(i, i + 20);
+    const results = await Promise.allSettled(
+      batch.map(c => fetchLeverJobs(c.handle, c.name, c.domain))
+    );
+    for (const r of results) { if (r.status === 'fulfilled') leverJobs.push(...r.value); }
+    process.stdout.write(`  Lever: ${i + batch.length}/${LEVER_COMPANIES.length}\r`);
+  }
+
+  const allJobs = [...ashbyJobs, ...greenhouseJobs, ...leverJobs];
+  const filtered = allJobs.filter(job =>
+    PM_KEYWORDS.some(kw => job.title.toLowerCase().includes(kw))
+  );
   filtered.sort((a, b) => {
     const da = a.publishedDate ? new Date(a.publishedDate).getTime() : 0;
     const db = b.publishedDate ? new Date(b.publishedDate).getTime() : 0;
     return db - da;
   });
 
-  console.log(`\nEnriching ${filtered.length} jobs with salary...`);
+  console.log(`\nEnriching ${filtered.length} jobs with salary (Ashby + Greenhouse)...`);
+  const needsSalaryFetch = filtered.filter(j => !j.salary && j.source !== 'lever');
   const salaryResults = await Promise.allSettled(
-    filtered.map(j => j.source === 'ashby' ? fetchJobSalary(j) : fetchGreenhouseSalary(j))
+    needsSalaryFetch.map(j => j.source === 'ashby' ? fetchJobSalary(j) : fetchGreenhouseSalary(j))
   );
-  const enriched = filtered.map((job, i) => {
-    const salary = salaryResults[i].status === 'fulfilled' ? salaryResults[i].value : undefined;
-    return salary ? { ...job, salary } : job;
+  const salaryMap = new Map<string, string>();
+  needsSalaryFetch.forEach((job, i) => {
+    const val = salaryResults[i].status === 'fulfilled' ? salaryResults[i].value : undefined;
+    if (val) salaryMap.set(job.id, val);
   });
+  const enriched = filtered.map(job =>
+    salaryMap.has(job.id) ? { ...job, salary: salaryMap.get(job.id) } : job
+  );
 
   const withSalary = enriched.filter(j => j.salary).length;
   console.log(`Done: ${enriched.length} jobs (${withSalary} with salary)`);
+  console.log(`  Ashby: ${ashbyJobs.length} raw  Greenhouse: ${greenhouseJobs.length} raw  Lever: ${leverJobs.length} raw`);
 
   const outPath = resolve(PROJECT_ROOT, 'public', 'jobs.json');
   mkdirSync(resolve(PROJECT_ROOT, 'public'), { recursive: true });
