@@ -191,7 +191,7 @@ export default function JobverseApp() {
 
           {/* Tagline */}
           <p className="text-lg text-zinc-500 font-medium mb-14 tracking-wide">
-            Every PM role, in one place.
+            Top tech. Rising startups. One feed.
           </p>
 
           {/* Live stats */}
