@@ -435,7 +435,9 @@ export const LOCATION_KEYWORDS: string[] = [
  * The proxy handles CORS by fetching Ashby job board pages server-side.
  */
 export async function fetchAshbyJobs(): Promise<AshbyJob[]> {
-  const response = await fetch('/api/jobs');
+  // In production (GitHub Pages) use pre-built static JSON; in dev use live proxy.
+  const url = import.meta.env.PROD ? '/jobs.json' : '/api/jobs';
+  const response = await fetch(url);
   if (!response.ok) throw new Error(`Job API returned ${response.status}`);
   return response.json() as Promise<AshbyJob[]>;
 }
