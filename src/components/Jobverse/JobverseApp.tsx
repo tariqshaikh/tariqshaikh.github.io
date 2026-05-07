@@ -307,99 +307,165 @@ export default function JobverseApp() {
               {
                 name: 'Portal',
                 svg: (
-                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                    <circle cx="24" cy="24" r="20" stroke="white" strokeWidth="1.2" opacity="0.2"/>
-                    <circle cx="24" cy="24" r="14" stroke="white" strokeWidth="1.5" opacity="0.4"/>
-                    <circle cx="24" cy="24" r="8" stroke="white" strokeWidth="1.8" opacity="0.7"/>
-                    <circle cx="24" cy="24" r="3" fill="white"/>
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <radialGradient id="pg" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#a78bfa"/>
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0"/>
+                      </radialGradient>
+                    </defs>
+                    <circle cx="28" cy="28" r="26" fill="url(#pg)" opacity="0.15"/>
+                    <circle cx="28" cy="28" r="22" stroke="#818cf8" strokeWidth="0.8" opacity="0.25"/>
+                    <circle cx="28" cy="28" r="16" stroke="#a78bfa" strokeWidth="1.2" opacity="0.45"/>
+                    <circle cx="28" cy="28" r="10" stroke="#c4b5fd" strokeWidth="1.8" opacity="0.7"/>
+                    <circle cx="28" cy="28" r="5" stroke="white" strokeWidth="2" opacity="0.9"/>
+                    <circle cx="28" cy="28" r="2" fill="white"/>
                   </svg>
                 ),
               },
               {
                 name: 'Signal',
                 svg: (
-                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                    <path d="M16 35 Q24 20 32 35" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.9"/>
-                    <path d="M11 40 Q24 13 37 40" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-                    <path d="M7 44 Q24 7 41 44" stroke="white" strokeWidth="1" strokeLinecap="round" opacity="0.25"/>
-                    <circle cx="24" cy="36" r="2.5" fill="white"/>
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <radialGradient id="sg" cx="50%" cy="85%" r="60%">
+                        <stop offset="0%" stopColor="#818cf8"/>
+                        <stop offset="100%" stopColor="#818cf8" stopOpacity="0"/>
+                      </radialGradient>
+                    </defs>
+                    <ellipse cx="28" cy="44" rx="24" ry="10" fill="url(#sg)" opacity="0.3"/>
+                    <path d="M19 42 Q28 24 37 42" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                    <path d="M13 48 Q28 16 43 48" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round" opacity="0.6"/>
+                    <path d="M8 54 Q28 8 48 54" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round" opacity="0.3"/>
+                    <circle cx="28" cy="43" r="3" fill="white"/>
+                    <circle cx="28" cy="43" r="6" fill="white" opacity="0.12"/>
                   </svg>
                 ),
               },
               {
                 name: 'Orbit',
                 svg: (
-                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                    <circle cx="24" cy="24" r="5" fill="white" opacity="0.9"/>
-                    <ellipse cx="24" cy="24" rx="19" ry="8" stroke="white" strokeWidth="1.2" opacity="0.4" transform="rotate(-25 24 24)"/>
-                    <circle cx="39" cy="17" r="3" fill="white"/>
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <radialGradient id="og" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="white"/>
+                        <stop offset="100%" stopColor="#818cf8"/>
+                      </radialGradient>
+                      <linearGradient id="orbitg" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0"/>
+                        <stop offset="50%" stopColor="#a78bfa"/>
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <ellipse cx="28" cy="28" rx="22" ry="9" stroke="url(#orbitg)" strokeWidth="1.5" transform="rotate(-20 28 28)"/>
+                    <circle cx="28" cy="28" r="7" fill="url(#og)" opacity="0.9"/>
+                    <circle cx="28" cy="28" r="7" fill="white" opacity="0.1"/>
+                    <circle cx="46" cy="19" r="3.5" fill="white"/>
+                    <circle cx="46" cy="19" r="6" fill="white" opacity="0.1"/>
                   </svg>
                 ),
               },
               {
                 name: 'Constellation',
                 svg: (
-                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                    <line x1="24" y1="7" x2="39" y2="18" stroke="white" strokeWidth="0.8" opacity="0.3"/>
-                    <line x1="39" y1="18" x2="33" y2="35" stroke="white" strokeWidth="0.8" opacity="0.3"/>
-                    <line x1="33" y1="35" x2="15" y2="35" stroke="white" strokeWidth="0.8" opacity="0.3"/>
-                    <line x1="15" y1="35" x2="9" y2="18" stroke="white" strokeWidth="0.8" opacity="0.3"/>
-                    <line x1="9" y1="18" x2="24" y2="7" stroke="white" strokeWidth="0.8" opacity="0.3"/>
-                    <line x1="24" y1="7" x2="33" y2="35" stroke="white" strokeWidth="0.8" opacity="0.15"/>
-                    <line x1="39" y1="18" x2="15" y2="35" stroke="white" strokeWidth="0.8" opacity="0.15"/>
-                    <circle cx="24" cy="7" r="2.5" fill="white"/>
-                    <circle cx="39" cy="18" r="2" fill="white" opacity="0.8"/>
-                    <circle cx="33" cy="35" r="1.5" fill="white" opacity="0.7"/>
-                    <circle cx="15" cy="35" r="2" fill="white" opacity="0.8"/>
-                    <circle cx="9" cy="18" r="1.5" fill="white" opacity="0.6"/>
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <filter id="glow">
+                        <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                      </filter>
+                    </defs>
+                    <line x1="28" y1="7" x2="45" y2="20" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="45" y1="20" x2="39" y2="40" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="39" y1="40" x2="17" y2="40" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="17" y1="40" x2="11" y2="20" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="11" y1="20" x2="28" y2="7" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
+                    <line x1="28" y1="7" x2="39" y2="40" stroke="#6366f1" strokeWidth="0.6" opacity="0.2"/>
+                    <line x1="45" y1="20" x2="17" y2="40" stroke="#6366f1" strokeWidth="0.6" opacity="0.2"/>
+                    <circle cx="28" cy="7" r="3.5" fill="white" filter="url(#glow)"/>
+                    <circle cx="45" cy="20" r="2.5" fill="#c4b5fd"/>
+                    <circle cx="39" cy="40" r="2" fill="#a78bfa"/>
+                    <circle cx="17" cy="40" r="2.5" fill="#c4b5fd"/>
+                    <circle cx="11" cy="20" r="2" fill="#a78bfa"/>
                   </svg>
                 ),
               },
               {
                 name: 'Vortex',
                 svg: (
-                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                    <path d="M24 6 C36 6 42 14 42 24 C42 31 37 36 30 36 C24 36 20 32 20 26 C20 21 23 18 28 18 C32 18 34 21 34 24" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.9"/>
-                    <path d="M34 24 C34 27 32 29 29 29" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-                    <circle cx="24" cy="6" r="2.5" fill="white"/>
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <linearGradient id="vg1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="white"/>
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0.3"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M28 5 C43 5 51 14 51 28 C51 38 44 45 34 45 C26 45 20 39 20 31 C20 24 25 19 32 19 C37 19 41 23 41 28 C41 32 38 35 34 35 C31 35 29 33 29 30" stroke="url(#vg1)" strokeWidth="2.5" strokeLinecap="round"/>
+                    <circle cx="28" cy="5" r="3" fill="white"/>
+                    <circle cx="28" cy="5" r="6" fill="white" opacity="0.1"/>
+                    <circle cx="29" cy="30" r="2" fill="#a78bfa"/>
                   </svg>
                 ),
               },
               {
                 name: 'Compass',
                 svg: (
-                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                    <circle cx="24" cy="24" r="19" stroke="white" strokeWidth="1" opacity="0.2"/>
-                    <line x1="24" y1="7" x2="24" y2="41" stroke="white" strokeWidth="0.6" opacity="0.15"/>
-                    <line x1="7" y1="24" x2="41" y2="24" stroke="white" strokeWidth="0.6" opacity="0.15"/>
-                    <polygon points="24,6 26.5,22 24,26 21.5,22" fill="white"/>
-                    <polygon points="24,42 26.5,26 24,22 21.5,26" fill="white" opacity="0.2"/>
-                    <circle cx="24" cy="24" r="2.5" fill="#09090B" stroke="white" strokeWidth="1"/>
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <linearGradient id="ng" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="white"/>
+                        <stop offset="100%" stopColor="#818cf8"/>
+                      </linearGradient>
+                    </defs>
+                    <circle cx="28" cy="28" r="23" stroke="#818cf8" strokeWidth="1" opacity="0.25"/>
+                    <circle cx="28" cy="28" r="23" stroke="white" strokeWidth="1" opacity="0.08"/>
+                    {[0,45,90,135,180,225,270,315].map((a,i) => {
+                      const r = 23; const len = i % 2 === 0 ? 4 : 2.5;
+                      const rad = (a * Math.PI) / 180;
+                      const x1 = 28 + (r-len) * Math.sin(rad); const y1 = 28 - (r-len) * Math.cos(rad);
+                      const x2 = 28 + r * Math.sin(rad); const y2 = 28 - r * Math.cos(rad);
+                      return <line key={a} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth={i%2===0?1:0.6} opacity={i%2===0?0.5:0.25}/>;
+                    })}
+                    <polygon points="28,7 30.5,26 28,30 25.5,26" fill="url(#ng)"/>
+                    <polygon points="28,49 30.5,30 28,26 25.5,30" fill="white" opacity="0.18"/>
+                    <circle cx="28" cy="28" r="3" fill="#09090B"/>
+                    <circle cx="28" cy="28" r="3" stroke="white" strokeWidth="1.2" opacity="0.8"/>
                   </svg>
                 ),
               },
               {
                 name: 'Trajectory',
                 svg: (
-                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                    <path d="M34 7 C40 14 40 26 34 34 C29 40 20 43 13 40" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.9"/>
-                    <circle cx="34" cy="7" r="4" fill="white"/>
-                    <circle cx="31" cy="13" r="1.8" fill="white" opacity="0.55"/>
-                    <circle cx="28" cy="19" r="1.2" fill="white" opacity="0.3"/>
-                    <circle cx="13" cy="40" r="2" fill="white" opacity="0.5"/>
+                  <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
+                    <defs>
+                      <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="white"/>
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0"/>
+                      </linearGradient>
+                      <radialGradient id="headg" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="white"/>
+                        <stop offset="100%" stopColor="#a78bfa"/>
+                      </radialGradient>
+                    </defs>
+                    <path d="M40 8 C48 18 48 32 40 42 C33 50 20 52 11 47" stroke="url(#tg)" strokeWidth="2.8" strokeLinecap="round"/>
+                    <circle cx="40" cy="8" r="5.5" fill="url(#headg)"/>
+                    <circle cx="40" cy="8" r="9" fill="white" opacity="0.08"/>
+                    <circle cx="36" cy="15" r="2.2" fill="white" opacity="0.5"/>
+                    <circle cx="32" cy="22" r="1.5" fill="white" opacity="0.3"/>
+                    <circle cx="28" cy="29" r="1" fill="white" opacity="0.15"/>
                   </svg>
                 ),
               },
             ];
 
             return (
-              <div className="grid grid-cols-7 gap-3 mb-12 w-full">
+              <div className="grid grid-cols-7 gap-4 mb-14 w-full max-w-3xl">
                 {logos.map((logo, i) => (
-                  <div key={i} className="flex flex-col items-center gap-2 group cursor-pointer">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+                  <div key={i} className="flex flex-col items-center gap-2.5 group cursor-pointer">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 flex items-center justify-center group-hover:border-indigo-500/40 group-hover:from-indigo-500/10 group-hover:to-violet-500/5 transition-all duration-200 shadow-lg">
                       {logo.svg}
                     </div>
-                    <span className="text-[10px] font-semibold text-zinc-600 group-hover:text-zinc-400 transition-colors tracking-wide">{logo.name}</span>
+                    <span className="text-[11px] font-semibold text-zinc-500 group-hover:text-zinc-300 transition-colors tracking-wide">{logo.name}</span>
                   </div>
                 ))}
               </div>
