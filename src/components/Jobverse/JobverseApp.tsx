@@ -76,6 +76,43 @@ const SALARY_FILTER_OPTIONS: { value: SalaryFilter; label: string; min: number |
   { value: '200k',     label: '$200K+',           min: 200000, disclosedOnly: true  },
 ];
 
+type JobTypeFilter = 'all' | 'remote' | 'hybrid' | 'onsite';
+
+const JOB_TYPE_OPTIONS: { value: JobTypeFilter; label: string }[] = [
+  { value: 'all',    label: 'All types' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'onsite', label: 'On-site' },
+];
+
+function matchesJobType(job: AshbyJob, filter: JobTypeFilter): boolean {
+  if (filter === 'all') return true;
+  const loc = (job.location ?? '').toLowerCase();
+  const isHybrid = /hybrid/.test(loc);
+  if (filter === 'remote') return job.isRemote && !isHybrid;
+  if (filter === 'hybrid') return isHybrid;
+  if (filter === 'onsite') return !job.isRemote && !isHybrid;
+  return true;
+}
+
+type LocationFilter = 'all' | 'remote' | 'nyc' | 'nj';
+
+const LOCATION_FILTER_OPTIONS: { value: LocationFilter; label: string }[] = [
+  { value: 'all',    label: 'All locations' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'nyc',    label: 'New York' },
+  { value: 'nj',     label: 'New Jersey' },
+];
+
+function matchesLocation(job: AshbyJob, filter: LocationFilter): boolean {
+  if (filter === 'all') return true;
+  const loc = (job.location ?? '').toLowerCase();
+  if (filter === 'remote') return job.isRemote;
+  if (filter === 'nyc') return /new york|, ny\b/.test(loc);
+  if (filter === 'nj') return /new jersey|, nj\b/.test(loc);
+  return true;
+}
+
 type ExperienceFilter = 'all' | 'mid' | 'senior' | 'staff' | 'leadership';
 
 const EXPERIENCE_FILTER_OPTIONS: { value: ExperienceFilter; label: string; description: string }[] = [
@@ -120,6 +157,12 @@ export default function JobverseApp() {
   const [experienceFilter, setExperienceFilter] = useState<ExperienceFilter>('all');
   const [experienceDropdownOpen, setExperienceDropdownOpen] = useState(false);
   const experienceDropdownRef = useRef<HTMLDivElement>(null);
+  const [jobTypeFilter, setJobTypeFilter] = useState<JobTypeFilter>('all');
+  const [jobTypeDropdownOpen, setJobTypeDropdownOpen] = useState(false);
+  const jobTypeDropdownRef = useRef<HTMLDivElement>(null);
+  const [locationFilter, setLocationFilter] = useState<LocationFilter>('all');
+  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+  const locationDropdownRef = useRef<HTMLDivElement>(null);
   const [jobs, setJobs] = useState<AshbyJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -152,6 +195,12 @@ export default function JobverseApp() {
       }
       if (experienceDropdownRef.current && !experienceDropdownRef.current.contains(e.target as Node)) {
         setExperienceDropdownOpen(false);
+      }
+      if (jobTypeDropdownRef.current && !jobTypeDropdownRef.current.contains(e.target as Node)) {
+        setJobTypeDropdownOpen(false);
+      }
+      if (locationDropdownRef.current && !locationDropdownRef.current.contains(e.target as Node)) {
+        setLocationDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
@@ -191,7 +240,9 @@ export default function JobverseApp() {
       return true;
     })();
     const matchesExperienceLevel = matchesExperience(job.title, experienceFilter);
-    return matchesSearch && matchesDate && matchesSalary && matchesExperienceLevel;
+    const matchesType = matchesJobType(job, jobTypeFilter);
+    const matchesLoc = matchesLocation(job, locationFilter);
+    return matchesSearch && matchesDate && matchesSalary && matchesExperienceLevel && matchesType && matchesLoc;
   });
 
   const displayedJobs = activeTab === 'saved'
@@ -384,16 +435,67 @@ export default function JobverseApp() {
           <div className="max-w-6xl mx-auto">
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-3 mb-8">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E2E8F0] rounded-full text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
-                <Briefcase size={14} />
-                Job Type
-                <ChevronDown size={14} className="text-slate-400" />
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E2E8F0] rounded-full text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
-                <MapPin size={14} />
-                Location
-                <ChevronDown size={14} className="text-slate-400" />
-              </button>
+              {/* Job Type dropdown */}
+              <div className="relative" ref={jobTypeDropdownRef}>
+                <button
+                  onClick={() => setJobTypeDropdownOpen(o => !o)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm border ${
+                    jobTypeFilter !== 'all'
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                      : 'bg-white border-[#E2E8F0] text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                  }`}
+                >
+                  <Briefcase size={14} />
+                  {JOB_TYPE_OPTIONS.find(o => o.value === jobTypeFilter)?.label ?? 'Job Type'}
+                  <ChevronDown size={14} className={`transition-transform ${jobTypeDropdownOpen ? 'rotate-180' : ''} ${jobTypeFilter !== 'all' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                </button>
+                {jobTypeDropdownOpen && (
+                  <div className="absolute top-full mt-2 left-0 z-30 w-40 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 overflow-hidden">
+                    {JOB_TYPE_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => { setJobTypeFilter(opt.value); setJobTypeDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
+                          jobTypeFilter === opt.value ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Location dropdown */}
+              <div className="relative" ref={locationDropdownRef}>
+                <button
+                  onClick={() => setLocationDropdownOpen(o => !o)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm border ${
+                    locationFilter !== 'all'
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                      : 'bg-white border-[#E2E8F0] text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                  }`}
+                >
+                  <MapPin size={14} />
+                  {LOCATION_FILTER_OPTIONS.find(o => o.value === locationFilter)?.label ?? 'Location'}
+                  <ChevronDown size={14} className={`transition-transform ${locationDropdownOpen ? 'rotate-180' : ''} ${locationFilter !== 'all' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                </button>
+                {locationDropdownOpen && (
+                  <div className="absolute top-full mt-2 left-0 z-30 w-44 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 overflow-hidden">
+                    {LOCATION_FILTER_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => { setLocationFilter(opt.value); setLocationDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
+                          locationFilter === opt.value ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Date Posted dropdown */}
               <div className="relative" ref={dateDropdownRef}>
@@ -519,6 +621,16 @@ export default function JobverseApp() {
               </div>
               {!loading && !error && (
                 <div className="flex items-center gap-3">
+                  {jobTypeFilter !== 'all' && (
+                    <button onClick={() => setJobTypeFilter('all')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors">
+                      Clear type ×
+                    </button>
+                  )}
+                  {locationFilter !== 'all' && (
+                    <button onClick={() => setLocationFilter('all')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors">
+                      Clear location ×
+                    </button>
+                  )}
                   {dateFilter !== 'all' && (
                     <button
                       onClick={() => setDateFilter('all')}
