@@ -85,6 +85,7 @@ function parseSalaryMin(salary: string | undefined): number | null {
 }
 
 export default function JobverseApp() {
+  const [showLanding, setShowLanding] = useState(true);
   const [activeTab, setActiveTab] = useState('board');
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
@@ -168,6 +169,90 @@ export default function JobverseApp() {
     : filteredJobs;
 
   const uniqueCompanies = new Set(jobs.map(j => j.company)).size;
+  const withSalary = jobs.filter(j => j.salary).length;
+
+  if (showLanding) {
+    return (
+      <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center relative overflow-hidden" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        {/* Background glow orbs */}
+        <div className="absolute top-1/3 left-1/3 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-xl w-full">
+          {/* Logo mark */}
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white font-black text-4xl mb-10 shadow-2xl shadow-indigo-500/40">
+            J
+          </div>
+
+          {/* Wordmark */}
+          <h1 className="text-7xl font-black text-white tracking-tight leading-none mb-4">
+            Jobverse
+          </h1>
+
+          {/* Tagline */}
+          <p className="text-lg text-zinc-500 font-medium mb-14 tracking-wide">
+            Every PM role, in one place.
+          </p>
+
+          {/* Live stats */}
+          <div className="flex items-center gap-8 mb-14">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-4xl font-black text-white tabular-nums">
+                {loading ? '—' : jobs.length}
+              </span>
+              <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">Open roles</span>
+            </div>
+            <div className="w-px h-10 bg-zinc-800" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-4xl font-black text-white tabular-nums">
+                {loading ? '—' : uniqueCompanies}
+              </span>
+              <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">Companies</span>
+            </div>
+            <div className="w-px h-10 bg-zinc-800" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-4xl font-black text-white tabular-nums">
+                {loading ? '—' : withSalary}
+              </span>
+              <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">With salary</span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => setShowLanding(false)}
+            disabled={loading}
+            className="group flex items-center gap-3 bg-white text-zinc-900 px-10 py-4 rounded-full text-base font-bold hover:bg-indigo-50 transition-all shadow-2xl shadow-black/40 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin text-zinc-400" />
+                Loading roles...
+              </>
+            ) : (
+              <>
+                Find your next role
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
+
+          {/* Footer note */}
+          {!loading && !error && (
+            <p className="mt-8 text-xs text-zinc-700 font-medium tracking-wide">
+              Updated daily &nbsp;·&nbsp; Ashby & Greenhouse &nbsp;·&nbsp; Remote, NYC & NJ
+            </p>
+          )}
+          {error && (
+            <p className="mt-8 text-xs text-red-500 font-medium">
+              Could not load jobs.{' '}
+              <button onClick={loadJobs} className="underline hover:text-red-400">Retry</button>
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-slate-900 flex">
