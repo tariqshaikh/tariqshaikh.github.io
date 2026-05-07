@@ -174,7 +174,11 @@ async function startServer() {
     const data = extractAppData(html);
     if (!data) return [];
     const orgName: string = data?.organization?.name ?? handle;
-    const logoUrl: string | undefined = data?.organization?.theme?.logoSquareImageUrl || undefined;
+    const publicWebsite: string | undefined = data?.organization?.publicWebsite;
+    const domain = publicWebsite ? publicWebsite.replace(/^https?:\/\//, '').replace(/\/.*$/, '') : undefined;
+    const logoUrl: string | undefined = domain
+      ? `https://icon.horse/icon/${domain}`
+      : (data?.organization?.theme?.logoSquareImageUrl || undefined);
     const postings: any[] = data?.jobBoard?.jobPostings ?? [];
     return postings.map((p: any): AshbyJob => ({
       id: p.id,

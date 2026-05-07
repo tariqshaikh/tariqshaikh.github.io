@@ -1,5 +1,35 @@
 [
   {
+    "id": "e1cbef4b-0435-490d-a289-9f79b67f792a",
+    "title": "Product Manager, Core App",
+    "company": "OnePay",
+    "companyHandle": "oneapp",
+    "department": "Product",
+    "location": "United States (Remote)",
+    "isRemote": true,
+    "employmentType": "FullTime",
+    "publishedDate": "2026-05-07",
+    "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/www.onepay.com",
+    "applyUrl": "https://jobs.ashbyhq.com/oneapp/e1cbef4b-0435-490d-a289-9f79b67f792a",
+    "salary": "$160K - $180K"
+  },
+  {
+    "id": "a5da0fa3-8e3b-45bb-ba5c-a4b164632aa7",
+    "title": "Staff Product Manager",
+    "company": "Onebrief",
+    "companyHandle": "onebrief",
+    "department": "Product & Design",
+    "location": "United States | Remote",
+    "isRemote": true,
+    "employmentType": "FullTime",
+    "publishedDate": "2026-05-07",
+    "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/onebrief.com",
+    "salary": "$205K - $255K",
+    "applyUrl": "https://jobs.ashbyhq.com/onebrief/a5da0fa3-8e3b-45bb-ba5c-a4b164632aa7"
+  },
+  {
     "id": "gh_7904851",
     "title": "Senior Product Manager, Shopping Experience",
     "company": "Instacart",
@@ -83,7 +113,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-05-05",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/6784899b-4919-4733-8b43-99c0b60d6ea7/8a972e09-fa54-4735-a113-19d628dcfaff/58a0cf57-031f-4a36-93f8-e4487314ca72.png",
+    "logoUrl": "https://icon.horse/icon/join9am.com",
     "applyUrl": "https://jobs.ashbyhq.com/join9am/ecdd6c39-503e-4cd9-9070-98ef14802df4",
     "salary": "$180,000"
   },
@@ -98,23 +128,8 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-05-05",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/e73d91c4-810d-423b-bc95-3c9c9ae9263e"
-  },
-  {
-    "id": "3dc5e545-211b-44a5-b764-bcd74d53e343",
-    "title": "Senior Product Manager, NetBox Cloud",
-    "company": "NetBox Labs",
-    "companyHandle": "netboxlabs",
-    "department": "Product",
-    "location": "US Remote",
-    "isRemote": true,
-    "employmentType": "FullTime",
-    "publishedDate": "2026-05-05",
-    "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/37ef05fa-7e24-4a10-a130-e1b1680f2700/980aba70-ff39-4a7a-bf9a-306c7354c651/31d37927-6f33-4519-998d-d0e208ec03ae.png",
-    "salary": "$180K - $195K",
-    "applyUrl": "https://jobs.ashbyhq.com/netboxlabs/3dc5e545-211b-44a5-b764-bcd74d53e343"
   },
   {
     "id": "20cefd9c-5c60-40a8-b00d-ac3404ab1af5",
@@ -127,7 +142,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-05-05",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/d7e68137-5dac-406c-9924-6e9d9df07856/1f2409f6-5294-4c37-8fbf-c60ac5761513/d43d0eb1-0f8b-41d3-a65d-3ce4fca1838b.png",
+    "logoUrl": "https://icon.horse/icon/vanta.com",
     "applyUrl": "https://jobs.ashbyhq.com/vanta/20cefd9c-5c60-40a8-b00d-ac3404ab1af5",
     "salary": "$207K - $244K"
   },
@@ -142,7 +157,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-05-04",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/cf4502ef-3a67-4484-86f3-b89e4f7be84b/11dc6329-77a1-499e-bc39-8ea2a7a4c69b/6bbd0254-c269-4399-ba11-d2c2a5a147f6.png",
+    "logoUrl": "https://icon.horse/icon/www.hellobrigit.com",
     "applyUrl": "https://jobs.ashbyhq.com/brigit/86d4788a-d67c-45db-998b-95b93b21fb58",
     "salary": "$190,000 - $225,000"
   },
@@ -157,6 +172,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-05-01",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/www.getbenepass.com",
     "applyUrl": "https://jobs.ashbyhq.com/benepass/8d52b724-c0c2-4592-b5a4-0555e66714b9",
     "salary": "$195,000 to $240,000"
   },
@@ -186,6 +202,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-30",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/bankjoy.com",
     "applyUrl": "https://jobs.ashbyhq.com/bankjoy/18aa5960-d804-4699-a61d-68c2f75646a9"
   },
   {
@@ -199,6 +216,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-30",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/bankjoy.com",
     "applyUrl": "https://jobs.ashbyhq.com/bankjoy/9b2db57b-2e88-4abb-ac6a-cc59d59a9f58"
   },
   {
@@ -212,7 +230,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-30",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/78a82b8e-fbde-4627-88d4-e108b5d724a2/3c74d957-06db-4463-9de0-f2d1e63fcf28/df9e3338-5227-40cf-b086-cfe60a3cf59b.png",
+    "logoUrl": "https://icon.horse/icon/junipersquare.com",
     "applyUrl": "https://jobs.ashbyhq.com/junipersquare/18241f69-83ce-4ac4-980a-9b8e2391f1ca",
     "salary": "$180,000 - $225,000"
   },
@@ -227,7 +245,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-30",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/d7e68137-5dac-406c-9924-6e9d9df07856/1f2409f6-5294-4c37-8fbf-c60ac5761513/d43d0eb1-0f8b-41d3-a65d-3ce4fca1838b.png",
+    "logoUrl": "https://icon.horse/icon/vanta.com",
     "applyUrl": "https://jobs.ashbyhq.com/vanta/36cdb55a-a5a0-41c3-8e41-806182d43886",
     "salary": "$207K - $244K"
   },
@@ -257,7 +275,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-29",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/7e5b88a8-0d79-4402-9ab8-3b8efa158966/524a0a49-dcc6-42e9-88a4-07178ef53946/0f376189-8354-41c1-83e5-05c6ab93a9c0.png",
+    "logoUrl": "https://icon.horse/icon/supabase.com",
     "applyUrl": "https://jobs.ashbyhq.com/supabase/b8010a28-109c-46a9-b8b7-c7f9b24077fa"
   },
   {
@@ -271,7 +289,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-28",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/d49fbb66-50c0-4f1c-ac88-f63880f79469",
     "salary": "€58K - €73K"
   },
@@ -286,7 +304,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-28",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/fd99ce78-46b6-4e3d-a1bb-870684b3e6fb",
     "salary": "€58K - €73K"
   },
@@ -346,7 +364,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-27",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/f06719a9-b849-4107-8938-b4b546a3ff37",
     "salary": "€58K - €73K"
   },
@@ -361,7 +379,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-27",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/4bd24203-a6ef-4e4b-8729-fb8568598cdc",
     "salary": "€58K - €73K"
   },
@@ -376,7 +394,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-27",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/ef04ce11-38f4-42d8-8950-d9fe75ea1526/142d3320-f551-489e-b962-9a73d9354444/4fc71df0-3d09-4812-8ab3-52a0bcf4f4f2.png",
+    "logoUrl": "https://icon.horse/icon/www.hims.com",
     "applyUrl": "https://jobs.ashbyhq.com/hims-and-hers/8bbe8d75-07ab-40fa-bbec-52d480aff3df",
     "salary": "$150K - $175K"
   },
@@ -421,7 +439,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-24",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/7aafb8ae-4407-4af8-9671-3c768f732a0a"
   },
   {
@@ -435,7 +453,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-24",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$110.4K - $220.8K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/63c58820-71f6-4afc-9352-c21c95c07752"
   },
@@ -450,7 +468,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-24",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/ff2129b4-2fc9-4e8e-9c92-777279b377fe"
   },
   {
@@ -464,7 +482,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-24",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$110.4K - $220.8K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/1f12b2eb-5d14-4aab-995e-eae7a126b90a"
   },
@@ -479,7 +497,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-24",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/7cdab2ce-0065-4cdb-9b9c-c3a9152ae93b/8cf44060-3eb2-433f-a624-4a2c690b190a/5e7fd25d-9833-4939-83b7-f15e05234f22.png",
+    "logoUrl": "https://icon.horse/icon/www.getweave.com",
     "applyUrl": "https://jobs.ashbyhq.com/weave/922ea9ab-8e9a-42c6-86ba-8db60bf696ea"
   },
   {
@@ -553,7 +571,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-23",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/78a82b8e-fbde-4627-88d4-e108b5d724a2/3c74d957-06db-4463-9de0-f2d1e63fcf28/df9e3338-5227-40cf-b086-cfe60a3cf59b.png",
+    "logoUrl": "https://icon.horse/icon/junipersquare.com",
     "applyUrl": "https://jobs.ashbyhq.com/junipersquare/5e7b133d-6642-4d5b-96fd-a31dca2ee058",
     "salary": "$160,000 to $190,000"
   },
@@ -598,7 +616,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-22",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/4a303efc-25e4-40c9-b2f0-54aecb5638e1/f7d57ca4-7515-4f02-95d4-e2d7074fa5ad/f1a626ca-bb9e-4d59-9b84-b95d169034cf.png",
+    "logoUrl": "https://icon.horse/icon/www.horizon3.ai",
     "applyUrl": "https://jobs.ashbyhq.com/horizon3ai/8a277c3b-c44e-4cbd-b72e-8d6017c85fc8",
     "salary": "$175,000 - $260,000"
   },
@@ -613,7 +631,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-22",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/78a82b8e-fbde-4627-88d4-e108b5d724a2/3c74d957-06db-4463-9de0-f2d1e63fcf28/df9e3338-5227-40cf-b086-cfe60a3cf59b.png",
+    "logoUrl": "https://icon.horse/icon/junipersquare.com",
     "applyUrl": "https://jobs.ashbyhq.com/junipersquare/93fa4fd9-ef6c-42f3-83d3-a345f64f1e3f",
     "salary": "$200,000 - $230,000"
   },
@@ -658,7 +676,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-21",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/303cfeb5-1b65-4cc4-9551-ee0d911e0fc9/caffb83c-b05d-485d-819a-6d3cb64d679d/0e416084-ce49-4450-94bc-ad817d86f929.png",
+    "logoUrl": "https://icon.horse/icon/www.onepay.com",
     "applyUrl": "https://jobs.ashbyhq.com/oneapp/3dfd8d97-4d98-49bf-b2c3-ebb3cd0a6e8d",
     "salary": "$160K - $180K"
   },
@@ -702,7 +720,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-19",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8fa135c2-9d32-4983-8bb6-8e573cfb13f0/85d16e95-e5d3-4746-9cc5-410d17ebd9d0/95b621eb-e7c1-46b1-9b42-578f9f669e39.png",
+    "logoUrl": "https://icon.horse/icon/www.deel.com",
     "applyUrl": "https://jobs.ashbyhq.com/deel/269e6266-838b-4cb5-85f9-290549e885e0"
   },
   {
@@ -746,7 +764,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/836c83c7-b20a-486e-885d-a1725f550a3e",
     "salary": "€58K - €73K"
   },
@@ -761,7 +779,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/a703a505-03c1-45da-a003-7eab99db5d65",
     "salary": "€58K - €73K"
   },
@@ -776,7 +794,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/80c74e1d-013e-4ee2-8ca5-088b313671e7",
     "salary": "€58K - €73K"
   },
@@ -791,7 +809,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/760d440c-3812-475a-b4e6-17e5b78579e3",
     "salary": "€58K - €73K"
   },
@@ -806,7 +824,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/957fd84b-8867-4a14-8456-e0e2ccf8b429/f82c5754-1086-4853-ab09-48d7bc289bda/fb7c00af-4137-4c6d-a38e-17c3eab18feb.png",
+    "logoUrl": "https://icon.horse/icon/www.airapps.com",
     "applyUrl": "https://jobs.ashbyhq.com/airapps/415d07b6-1d90-4bad-ac24-3ef7eb9cd2cc",
     "salary": "€58K - €73K"
   },
@@ -821,7 +839,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/6c18046c-a29b-44c7-90d9-d7238ae7821f/eb172c88-8163-42a6-91fc-8f069f2dbbf1/5dd8c785-02a6-4900-9add-8dcc51839a07.png",
+    "logoUrl": "https://icon.horse/icon/www.assembled.com",
     "applyUrl": "https://jobs.ashbyhq.com/assembledhq/99536c83-7e0f-482b-af5d-55e8df9c01bf",
     "salary": "$190K - $260K"
   },
@@ -836,7 +854,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/3af3a50e-3460-48c9-b3e2-181e498b4679/dc207ad6-f2aa-49fb-a3b2-eb7a50d2cfd8/eeaa7729-2e3a-4172-8eb3-7b19f6e50e45.png",
+    "logoUrl": "https://icon.horse/icon/tech.bestow.com",
     "applyUrl": "https://jobs.ashbyhq.com/bestow/80d43dc2-1ac3-4d43-9c70-c9a4a2789fb7",
     "salary": "$140K - $190K"
   },
@@ -911,6 +929,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-15",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/bankjoy.com",
     "applyUrl": "https://jobs.ashbyhq.com/bankjoy/4e3f4098-e1d7-4683-b8f3-919685e0b04d"
   },
   {
@@ -924,6 +943,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-15",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/bankjoy.com",
     "applyUrl": "https://jobs.ashbyhq.com/bankjoy/30b387af-135e-46c2-8f6b-818ccb683aa6"
   },
   {
@@ -937,7 +957,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-15",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/24fc7a0d-00ff-4774-bed3-335f0fd2f6e1/61fda992-eb04-4983-9f1f-ada3baa884d8/af0882f7-1fe8-4a0b-94fc-0562a9f4d7f3.png",
+    "logoUrl": "https://icon.horse/icon/www.g2i.co",
     "applyUrl": "https://jobs.ashbyhq.com/g2i/01972181-f5c7-458a-9044-d7ae02e7ed4b"
   },
   {
@@ -951,7 +971,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-15",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/37ef05fa-7e24-4a10-a130-e1b1680f2700/980aba70-ff39-4a7a-bf9a-306c7354c651/31d37927-6f33-4519-998d-d0e208ec03ae.png",
+    "logoUrl": "https://icon.horse/icon/www.netboxlabs.com",
     "salary": "$205K - $223K",
     "applyUrl": "https://jobs.ashbyhq.com/netboxlabs/da28c76a-5953-4f8b-be3a-bb16fee6cf57"
   },
@@ -1009,6 +1029,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-14",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/skydropx.com",
     "applyUrl": "https://jobs.ashbyhq.com/skydropx/ceaf3a26-6cb7-40eb-8cd2-6af63efd2e9f"
   },
   {
@@ -1080,7 +1101,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-13",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/6c18046c-a29b-44c7-90d9-d7238ae7821f/eb172c88-8163-42a6-91fc-8f069f2dbbf1/5dd8c785-02a6-4900-9add-8dcc51839a07.png",
+    "logoUrl": "https://icon.horse/icon/www.assembled.com",
     "applyUrl": "https://jobs.ashbyhq.com/assembledhq/683422c1-1f65-4a99-8115-4ef43c5e4ac6",
     "salary": "$190K - $260K"
   },
@@ -1153,7 +1174,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-09",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/6989cb97-e2e6-4cd4-8364-e2090cb62f4f/e9435169-a0de-4a90-b3c0-afb3d4f7b1ab/fa36ebc8-b4b6-4fd0-ac5d-3c4b35eb3e10.png",
+    "logoUrl": "https://icon.horse/icon/www.freshpaint.io",
     "salary": "$200K - $240K",
     "applyUrl": "https://jobs.ashbyhq.com/freshpaint/15798080-a8c7-408e-9a7b-a0483f49fad9"
   },
@@ -1168,7 +1189,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-09",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/2dbf754d-ebb1-429e-a429-2ccb0a02bc85/ef19ad46-fe10-477a-b203-483caa7f16bb/c68bbd61-0884-4004-8da3-01d8577ab392.png",
+    "logoUrl": "https://icon.horse/icon/www.patreon.com",
     "salary": "$232K - $348K",
     "applyUrl": "https://jobs.ashbyhq.com/patreon/09394a78-d733-4ffc-97a8-dad353d01865"
   },
@@ -1243,7 +1264,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-07",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8fa135c2-9d32-4983-8bb6-8e573cfb13f0/85d16e95-e5d3-4746-9cc5-410d17ebd9d0/95b621eb-e7c1-46b1-9b42-578f9f669e39.png",
+    "logoUrl": "https://icon.horse/icon/www.deel.com",
     "applyUrl": "https://jobs.ashbyhq.com/deel/7af3a8dd-f0b0-49dc-9c59-73318a653200"
   },
   {
@@ -1257,7 +1278,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-06",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/b8833a99-53c9-4b1c-9e2d-dd2b7952c640/bd5cff34-571d-4e8b-bf53-7f9bcef57d29/3119f472-35f1-4a3f-9d31-f4c9f5e8f91b.png",
+    "logoUrl": "https://icon.horse/icon/1password.com",
     "applyUrl": "https://jobs.ashbyhq.com/1password/26af8030-5e7b-4bd3-9535-7ec7df3f3e87"
   },
   {
@@ -1271,7 +1292,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-06",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/f44b056b-9c75-4ff3-b0f9-2419b20e1c91/71154305-35d3-440c-9f65-4c6fb6e39afc/e25d8c5a-5a7c-436e-9e3b-b71eea3b45fd.png",
+    "logoUrl": "https://icon.horse/icon/www.evertune.ai",
     "salary": "$130K - $180K",
     "applyUrl": "https://jobs.ashbyhq.com/evertune/4a5ccacb-ca34-4a34-9b85-2f553529f022"
   },
@@ -1286,7 +1307,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-06",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/a700ddf9-d0c2-4869-920b-247652c53c9b/66108603-0e0e-4d02-a49a-1bd3293be7ff/903db0b9-fd8d-4622-b984-51f0e6b61260.png",
+    "logoUrl": "https://icon.horse/icon/finalis.com",
     "applyUrl": "https://jobs.ashbyhq.com/finalis/a870680d-5e48-4679-b665-36b0a5d16247"
   },
   {
@@ -1343,7 +1364,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-04",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/24b3623d-b96c-40a6-8c65-2c3a28b933dd/18ac19d1-b8d1-4741-a873-2468819b7ee3/8b7f325b-d92f-4f75-be00-4f1747491bf5.png",
+    "logoUrl": "https://icon.horse/icon/replit.com",
     "applyUrl": "https://jobs.ashbyhq.com/replit/7ff74387-ff7f-4bd7-9e23-a09177f8e2a6"
   },
   {
@@ -1357,7 +1378,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-03",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/78a82b8e-fbde-4627-88d4-e108b5d724a2/3c74d957-06db-4463-9de0-f2d1e63fcf28/df9e3338-5227-40cf-b086-cfe60a3cf59b.png",
+    "logoUrl": "https://icon.horse/icon/junipersquare.com",
     "applyUrl": "https://jobs.ashbyhq.com/junipersquare/bb3dda11-b03a-4e43-a952-ce5695f288ce",
     "salary": "$160,000 – $190,000 USD"
   },
@@ -1372,7 +1393,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-02",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/f44a0f9c-f27e-4e87-83ab-330a455a992b"
   },
   {
@@ -1386,7 +1407,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-02",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$127.2K - $254.4K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/f9158d39-58ec-4aea-b502-3dde61e142e2"
   },
@@ -1401,7 +1422,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-02",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/36fd4cba-7425-46b5-8273-df92d7f8e6cc/5703e757-4958-47f5-bdf3-4e2ef9e197bf/d651b2fa-cefe-403a-9e15-88a8f9d0b3ae.png",
+    "logoUrl": "https://icon.horse/icon/www.withprotege.ai",
     "applyUrl": "https://jobs.ashbyhq.com/protege/05473e98-8946-494e-baf4-badafefe625d"
   },
   {
@@ -1420,20 +1441,6 @@
     "salary": "$208,000 - $260,000,"
   },
   {
-    "id": "86bf8cd4-183f-4a27-b943-cb77ceb7f6e9",
-    "title": "Sr. Product Manager, Onboarding",
-    "company": "Kraken",
-    "companyHandle": "kraken.com",
-    "department": "Product",
-    "location": "Europe",
-    "isRemote": true,
-    "employmentType": "FullTime",
-    "publishedDate": "2026-04-01",
-    "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
-    "applyUrl": "https://jobs.ashbyhq.com/kraken.com/86bf8cd4-183f-4a27-b943-cb77ceb7f6e9"
-  },
-  {
     "id": "4458d786-dca2-4831-b286-432444e12379",
     "title": "Sr. Product Manager, Onboarding",
     "company": "Kraken",
@@ -1444,9 +1451,23 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-04-01",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$127K - $203K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/4458d786-dca2-4831-b286-432444e12379"
+  },
+  {
+    "id": "86bf8cd4-183f-4a27-b943-cb77ceb7f6e9",
+    "title": "Sr. Product Manager, Onboarding",
+    "company": "Kraken",
+    "companyHandle": "kraken.com",
+    "department": "Product",
+    "location": "Europe",
+    "isRemote": true,
+    "employmentType": "FullTime",
+    "publishedDate": "2026-04-01",
+    "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
+    "applyUrl": "https://jobs.ashbyhq.com/kraken.com/86bf8cd4-183f-4a27-b943-cb77ceb7f6e9"
   },
   {
     "id": "gh_7699712",
@@ -1489,7 +1510,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-31",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/36fd4cba-7425-46b5-8273-df92d7f8e6cc/5703e757-4958-47f5-bdf3-4e2ef9e197bf/d651b2fa-cefe-403a-9e15-88a8f9d0b3ae.png",
+    "logoUrl": "https://icon.horse/icon/www.withprotege.ai",
     "applyUrl": "https://jobs.ashbyhq.com/protege/d5dce126-e908-4ef9-a019-f0c9e3c40626"
   },
   {
@@ -1563,7 +1584,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-30",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/5d9815e5-a124-48da-a3e9-bba7fc406eac/d96cd0f2-b8e9-4f3c-b782-bd0680d2f88f/f36e2dc5-78d8-40c3-ab09-cee22e19b468.png",
+    "logoUrl": "https://icon.horse/icon/www.farmraise.com",
     "applyUrl": "https://jobs.ashbyhq.com/farmraise/cbbf430c-9f1f-4362-ab78-f8e288ddb7c2",
     "salary": "$200,000 - $230,000"
   },
@@ -1578,7 +1599,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-30",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/ae58dafa-5e30-40f0-9fe4-ce7c559569c4/a9d0fbd1-6c7e-458e-8c32-87f4dbf9f96b/d3c1a96f-4936-4c5c-8f73-fcc4b2217b57.png",
+    "logoUrl": "https://icon.horse/icon/www.immersivelabs.com",
     "applyUrl": "https://jobs.ashbyhq.com/immersivelabs/f478d152-d30b-4a98-abfc-e396be3477ab"
   },
   {
@@ -1622,7 +1643,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-25",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8dc3f14f-0fa2-42d3-923e-e2c090653b80/b49574f9-5d23-4b6a-a6c8-14c9b8d7da6d/17c032dc-198c-4620-8cf1-9f68d9829937.png",
+    "logoUrl": "https://icon.horse/icon/jobs.ashbyhq.com",
     "applyUrl": "https://jobs.ashbyhq.com/joko/dcae93e5-3aaf-4b8a-908b-2ae9c4b5d9d2"
   },
   {
@@ -1726,7 +1747,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-23",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/24b3623d-b96c-40a6-8c65-2c3a28b933dd/18ac19d1-b8d1-4741-a873-2468819b7ee3/8b7f325b-d92f-4f75-be00-4f1747491bf5.png",
+    "logoUrl": "https://icon.horse/icon/replit.com",
     "applyUrl": "https://jobs.ashbyhq.com/replit/55b3fb32-e920-471d-8980-6afb3f506d4e",
     "salary": "$220K - $370K"
   },
@@ -1741,7 +1762,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-23",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/7e5b88a8-0d79-4402-9ab8-3b8efa158966/524a0a49-dcc6-42e9-88a4-07178ef53946/0f376189-8354-41c1-83e5-05c6ab93a9c0.png",
+    "logoUrl": "https://icon.horse/icon/supabase.com",
     "applyUrl": "https://jobs.ashbyhq.com/supabase/47282e37-34dc-401d-a1cd-dbe85fdd1c22"
   },
   {
@@ -1800,7 +1821,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-20",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$96K - $192K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/8062dccc-d328-4310-ad2a-db1ea1225dc7"
   },
@@ -1815,7 +1836,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-20",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$127.2K - $254.4K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/4b55f45d-5b98-4992-9f10-369beafbeff2"
   },
@@ -1830,7 +1851,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-20",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/e7cd9609-b2f6-4658-afa8-15be89f27580/089d154f-c228-44a8-8416-f49497e1a76b/91d20288-b395-4e4f-b324-f9b6c10c397c.png",
+    "logoUrl": "https://icon.horse/icon/traba.work",
     "applyUrl": "https://jobs.ashbyhq.com/traba/45bd1679-dbf2-43b6-8d2d-0e4e2fb63c00",
     "salary": "$170K - $200K"
   },
@@ -1845,7 +1866,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-20",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/e7cd9609-b2f6-4658-afa8-15be89f27580/089d154f-c228-44a8-8416-f49497e1a76b/91d20288-b395-4e4f-b324-f9b6c10c397c.png",
+    "logoUrl": "https://icon.horse/icon/traba.work",
     "applyUrl": "https://jobs.ashbyhq.com/traba/40280b3e-03d6-47fb-aa4d-d26c2b93dd21",
     "salary": "$200K - $225K"
   },
@@ -1860,7 +1881,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-20",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/d7e68137-5dac-406c-9924-6e9d9df07856/1f2409f6-5294-4c37-8fbf-c60ac5761513/d43d0eb1-0f8b-41d3-a65d-3ce4fca1838b.png",
+    "logoUrl": "https://icon.horse/icon/vanta.com",
     "applyUrl": "https://jobs.ashbyhq.com/vanta/9667cb46-ea5b-4cca-a61e-5f5f2f6648c5",
     "salary": "$221K - $260K"
   },
@@ -1918,7 +1939,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-18",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/951a1fca-ef74-47dd-9932-d2e6ae54beb2/c275a67b-c32a-426c-bc5a-e64c488df273/f9bad60a-761a-4d26-9d99-39bda6bbaed4.png",
+    "logoUrl": "https://icon.horse/icon/cohere.com",
     "applyUrl": "https://jobs.ashbyhq.com/cohere/1d1b300d-254b-48c4-958f-99c6b907f295"
   },
   {
@@ -1932,7 +1953,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-18",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/9a987cc7-aab7-4be2-95df-aee898cb44db/6f0d1aca-0806-4e30-b4ca-5ace14558909/10701f88-e03a-46bb-b6c7-438387346bdc.png",
+    "logoUrl": "https://icon.horse/icon/www.keyrock.com",
     "applyUrl": "https://jobs.ashbyhq.com/keyrock/24f56758-f59a-4259-9ffc-179f4d60eda8"
   },
   {
@@ -1961,6 +1982,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-17",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/january.com",
     "salary": "$185K - $244K",
     "applyUrl": "https://jobs.ashbyhq.com/january/837101a2-6bc5-44e8-8f93-110638dcaca3"
   },
@@ -1975,7 +1997,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-17",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/8d6a759e-0e70-4f72-bc85-37e82ddf6e52"
   },
   {
@@ -1989,7 +2011,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-17",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$110.4K - $220.8K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/92ed73c9-4fe8-4f09-a202-057448cac760"
   },
@@ -2004,7 +2026,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8fa135c2-9d32-4983-8bb6-8e573cfb13f0/85d16e95-e5d3-4746-9cc5-410d17ebd9d0/95b621eb-e7c1-46b1-9b42-578f9f669e39.png",
+    "logoUrl": "https://icon.horse/icon/www.deel.com",
     "applyUrl": "https://jobs.ashbyhq.com/deel/73502d24-d905-4e8f-b5ee-19167db3a0d9"
   },
   {
@@ -2018,7 +2040,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/301d8507-9966-4e6b-86b4-6b055790958a"
   },
   {
@@ -2032,7 +2054,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/bb32c246-acc2-4463-a384-a507d9328eb4/1f8e0e55-1ba1-464c-96f5-8dbabddad270/67ddd38b-2b98-41ac-a64c-0e4341fa7f46.png",
+    "logoUrl": "https://icon.horse/icon/www.kraken.com",
     "salary": "$110.4K - $220.8K",
     "applyUrl": "https://jobs.ashbyhq.com/kraken.com/3b83ea02-c847-43e9-b842-c7122bf217ae"
   },
@@ -2077,7 +2099,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-12",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/951a1fca-ef74-47dd-9932-d2e6ae54beb2/c275a67b-c32a-426c-bc5a-e64c488df273/f9bad60a-761a-4d26-9d99-39bda6bbaed4.png",
+    "logoUrl": "https://icon.horse/icon/cohere.com",
     "applyUrl": "https://jobs.ashbyhq.com/cohere/fe2e2971-e2c0-43fd-9ab1-187571776a5d"
   },
   {
@@ -2091,7 +2113,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-12",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8fa135c2-9d32-4983-8bb6-8e573cfb13f0/85d16e95-e5d3-4746-9cc5-410d17ebd9d0/95b621eb-e7c1-46b1-9b42-578f9f669e39.png",
+    "logoUrl": "https://icon.horse/icon/www.deel.com",
     "applyUrl": "https://jobs.ashbyhq.com/deel/07e80be5-d69c-4299-8d8d-f4d574159ced"
   },
   {
@@ -2120,7 +2142,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-11",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/951a1fca-ef74-47dd-9932-d2e6ae54beb2/c275a67b-c32a-426c-bc5a-e64c488df273/f9bad60a-761a-4d26-9d99-39bda6bbaed4.png",
+    "logoUrl": "https://icon.horse/icon/cohere.com",
     "applyUrl": "https://jobs.ashbyhq.com/cohere/d9d2740b-8869-462d-85df-21c1941bc13d"
   },
   {
@@ -2134,7 +2156,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-11",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/951a1fca-ef74-47dd-9932-d2e6ae54beb2/c275a67b-c32a-426c-bc5a-e64c488df273/f9bad60a-761a-4d26-9d99-39bda6bbaed4.png",
+    "logoUrl": "https://icon.horse/icon/cohere.com",
     "applyUrl": "https://jobs.ashbyhq.com/cohere/a8122632-cc3b-4a1a-bd78-4b4b9466cb38"
   },
   {
@@ -2148,7 +2170,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-11",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/d7e68137-5dac-406c-9924-6e9d9df07856/1f2409f6-5294-4c37-8fbf-c60ac5761513/d43d0eb1-0f8b-41d3-a65d-3ce4fca1838b.png",
+    "logoUrl": "https://icon.horse/icon/vanta.com",
     "applyUrl": "https://jobs.ashbyhq.com/vanta/91ea4caf-3fc4-49a8-841b-76a3c8d157a7",
     "salary": "$123K - $145K"
   },
@@ -2178,7 +2200,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-09",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/4a303efc-25e4-40c9-b2f0-54aecb5638e1/f7d57ca4-7515-4f02-95d4-e2d7074fa5ad/f1a626ca-bb9e-4d59-9b84-b95d169034cf.png",
+    "logoUrl": "https://icon.horse/icon/www.horizon3.ai",
     "applyUrl": "https://jobs.ashbyhq.com/horizon3ai/429fea95-08c8-458e-aa8d-28beed90f1d5",
     "salary": "$185,000 - $260,000"
   },
@@ -2193,7 +2215,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-09",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/7920595a-38dc-4568-a601-7458374df293/b54e5b7c-5c39-45e0-a140-eea9b4ba059e/5083542e-54f6-4e34-9db0-af4b93a08bb5.png",
+    "logoUrl": "https://icon.horse/icon/www.livekindred.com",
     "applyUrl": "https://jobs.ashbyhq.com/kindred/8868c144-1909-47f2-9c1c-e59a9e4ddce0",
     "salary": "$200K - $245K"
   },
@@ -2208,7 +2230,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-06",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/473526dd-62d5-41b2-b8df-b0ddd3ffa013/87c64042-cd83-4833-a2d5-94beaa05fa80/426361b3-e125-48d5-9a51-b79ec8f998aa.png",
+    "logoUrl": "https://icon.horse/icon/www.cinder.ai",
     "applyUrl": "https://jobs.ashbyhq.com/cinder/2c483a08-7d94-4901-babb-5cbd880ce949",
     "salary": "$130K - $200K"
   },
@@ -2279,7 +2301,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-03",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/7a158cac-9866-4881-95a8-bc946d3dca79/c68257b4-5a2d-4ecc-93a6-fe3c6766ce8b/55852d64-3584-498c-8afb-0679e5c9dede.png",
+    "logoUrl": "https://icon.horse/icon/ramp.com",
     "salary": "$230K - $325K",
     "applyUrl": "https://jobs.ashbyhq.com/ramp/8baec095-2235-41ab-ab64-9abc57823b4b"
   },
@@ -2294,7 +2316,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-03-03",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/d7e68137-5dac-406c-9924-6e9d9df07856/1f2409f6-5294-4c37-8fbf-c60ac5761513/d43d0eb1-0f8b-41d3-a65d-3ce4fca1838b.png",
+    "logoUrl": "https://icon.horse/icon/vanta.com",
     "applyUrl": "https://jobs.ashbyhq.com/vanta/f0d6efc2-8b55-4655-a27e-c8359d3b925f",
     "salary": "$207K - $244K"
   },
@@ -2324,7 +2346,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-27",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/a5e422b3-ae8e-4d5e-a06f-f3fcf99ca0a8/3c5ebd71-ba3a-4f9c-971d-fecefd7ef64e/2762575e-091f-4c14-95e5-f3fb0452fc4b.png",
+    "logoUrl": "https://icon.horse/icon/propelus.com",
     "applyUrl": "https://jobs.ashbyhq.com/propelus/20c9fb9b-b64a-4650-bea1-19da78bce899",
     "salary": "$150K - $180K"
   },
@@ -2339,6 +2361,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-27",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/skydropx.com",
     "applyUrl": "https://jobs.ashbyhq.com/skydropx/09a82573-6484-4a12-9eb9-3812c26a79a7"
   },
   {
@@ -2352,7 +2375,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-27",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/324b1834-7bc8-47a8-ae0a-bbb1e15643ba/924d437b-21c2-4fbe-a995-3d95095dd0b8/93c88931-f1ea-4762-bbdb-8abe89e92e49.png",
+    "logoUrl": "https://icon.horse/icon/www.zefir.fr",
     "salary": "€54.5K - €77K",
     "applyUrl": "https://jobs.ashbyhq.com/zefir/63e9215e-5288-4ea0-a0d1-c0bd445e7ce9"
   },
@@ -2382,7 +2405,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-25",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/d7e68137-5dac-406c-9924-6e9d9df07856/1f2409f6-5294-4c37-8fbf-c60ac5761513/d43d0eb1-0f8b-41d3-a65d-3ce4fca1838b.png",
+    "logoUrl": "https://icon.horse/icon/vanta.com",
     "applyUrl": "https://jobs.ashbyhq.com/vanta/6f1a9062-4e8f-4cae-8fe4-ba84e7f092e1",
     "salary": "$243K - $286K"
   },
@@ -2446,21 +2469,6 @@
     "applyUrl": "https://stripe.com/jobs/search?gh_jid=7655023"
   },
   {
-    "id": "gh_8436530002",
-    "title": "Staff Product Manager, Growth",
-    "company": "Brex",
-    "companyHandle": "brex",
-    "department": "",
-    "location": "Seattle, Washington, United States",
-    "isRemote": false,
-    "employmentType": "FullTime",
-    "publishedDate": "2026-02-24",
-    "source": "greenhouse",
-    "logoUrl": "https://icon.horse/icon/brex.com",
-    "applyUrl": "https://www.brex.com/careers/8436530002?gh_jid=8436530002",
-    "salary": "$240,000 - $300,000"
-  },
-  {
     "id": "gh_8436527002",
     "title": "Staff Product Manager, Growth",
     "company": "Brex",
@@ -2491,6 +2499,21 @@
     "salary": "$240,000 - $300,000"
   },
   {
+    "id": "gh_8436530002",
+    "title": "Staff Product Manager, Growth",
+    "company": "Brex",
+    "companyHandle": "brex",
+    "department": "",
+    "location": "Seattle, Washington, United States",
+    "isRemote": false,
+    "employmentType": "FullTime",
+    "publishedDate": "2026-02-24",
+    "source": "greenhouse",
+    "logoUrl": "https://icon.horse/icon/brex.com",
+    "applyUrl": "https://www.brex.com/careers/8436530002?gh_jid=8436530002",
+    "salary": "$240,000 - $300,000"
+  },
+  {
     "id": "6d95b635-f52a-4119-8278-048bac78166a",
     "title": "Product Manager, Eligibility & Insurance Discovery",
     "company": "Stedi",
@@ -2501,7 +2524,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-23",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/f7b884cd-e6fd-4982-b183-18e9c2d093d0/e97b131b-5c71-4fd0-bef1-36ee01bd5845/144a2f6a-3b00-4b37-a866-8931c0b1cbb5.png",
+    "logoUrl": "https://icon.horse/icon/stedi.com",
     "applyUrl": "https://jobs.ashbyhq.com/stedi/6d95b635-f52a-4119-8278-048bac78166a"
   },
   {
@@ -2550,6 +2573,21 @@
     "salary": "$340,000 - $425,000"
   },
   {
+    "id": "gh_8432702002",
+    "title": "Staff Product Manager",
+    "company": "Brex",
+    "companyHandle": "brex",
+    "department": "",
+    "location": "New York, New York, United States",
+    "isRemote": false,
+    "employmentType": "FullTime",
+    "publishedDate": "2026-02-22",
+    "source": "greenhouse",
+    "logoUrl": "https://icon.horse/icon/brex.com",
+    "applyUrl": "https://www.brex.com/careers/8432702002?gh_jid=8432702002",
+    "salary": "$240,000 - $300,000"
+  },
+  {
     "id": "gh_8432698002",
     "title": "Staff Product Manager",
     "company": "Brex",
@@ -2577,21 +2615,6 @@
     "source": "greenhouse",
     "logoUrl": "https://icon.horse/icon/brex.com",
     "applyUrl": "https://www.brex.com/careers/8432703002?gh_jid=8432703002",
-    "salary": "$240,000 - $300,000"
-  },
-  {
-    "id": "gh_8432702002",
-    "title": "Staff Product Manager",
-    "company": "Brex",
-    "companyHandle": "brex",
-    "department": "",
-    "location": "New York, New York, United States",
-    "isRemote": false,
-    "employmentType": "FullTime",
-    "publishedDate": "2026-02-22",
-    "source": "greenhouse",
-    "logoUrl": "https://icon.horse/icon/brex.com",
-    "applyUrl": "https://www.brex.com/careers/8432702002?gh_jid=8432702002",
     "salary": "$240,000 - $300,000"
   },
   {
@@ -2665,7 +2688,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-17",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/78a82b8e-fbde-4627-88d4-e108b5d724a2/3c74d957-06db-4463-9de0-f2d1e63fcf28/df9e3338-5227-40cf-b086-cfe60a3cf59b.png",
+    "logoUrl": "https://icon.horse/icon/junipersquare.com",
     "applyUrl": "https://jobs.ashbyhq.com/junipersquare/29b396c5-d85c-4124-aeef-8c11c05a6b52",
     "salary": "$180,000 - $225,000"
   },
@@ -2695,7 +2718,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/b78b8199-30e5-4c3c-bfdc-0a911a5e13f4/949e5000-046c-4c41-ba33-f65d170836e1/cd0cc1e1-6d66-4b9c-9382-4ba3cdbfc151.png",
+    "logoUrl": "https://icon.horse/icon/www.rula.com",
     "salary": "$180,965 - $212,900",
     "applyUrl": "https://jobs.ashbyhq.com/rula/40915141-68c6-4a00-9581-95b158da6d91"
   },
@@ -2740,7 +2763,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-10",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/b3bc4a8f-e1d4-4155-a49d-3e419d59328c/f1e23199-0119-44d8-8711-8576bdc8324e/d65c1be1-6686-4da0-bc7b-f67595836afd.png",
+    "logoUrl": "https://icon.horse/icon/www.clay.com",
     "salary": "$240K - $300K",
     "applyUrl": "https://jobs.ashbyhq.com/claylabs/749a6373-0979-424a-abc9-9cfc511a5e44"
   },
@@ -2755,6 +2778,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-10",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/www.sentilink.com",
     "applyUrl": "https://jobs.ashbyhq.com/sentilink/a63dcae1-7f42-498b-8845-e2bf5820bbe6",
     "salary": "$180,000/year"
   },
@@ -2784,7 +2808,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-09",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8fa135c2-9d32-4983-8bb6-8e573cfb13f0/85d16e95-e5d3-4746-9cc5-410d17ebd9d0/95b621eb-e7c1-46b1-9b42-578f9f669e39.png",
+    "logoUrl": "https://icon.horse/icon/www.deel.com",
     "applyUrl": "https://jobs.ashbyhq.com/deel/90cb4b15-5930-40b6-ab71-eb77690a2315"
   },
   {
@@ -2828,7 +2852,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-06",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8dc3f14f-0fa2-42d3-923e-e2c090653b80/b49574f9-5d23-4b6a-a6c8-14c9b8d7da6d/17c032dc-198c-4620-8cf1-9f68d9829937.png",
+    "logoUrl": "https://icon.horse/icon/jobs.ashbyhq.com",
     "applyUrl": "https://jobs.ashbyhq.com/joko/662f233b-b8d5-4d7f-a4a1-0c710785f785"
   },
   {
@@ -2871,7 +2895,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-05",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8fa135c2-9d32-4983-8bb6-8e573cfb13f0/85d16e95-e5d3-4746-9cc5-410d17ebd9d0/95b621eb-e7c1-46b1-9b42-578f9f669e39.png",
+    "logoUrl": "https://icon.horse/icon/www.deel.com",
     "applyUrl": "https://jobs.ashbyhq.com/deel/c5c4fed9-dd50-4477-9148-59ce9cebc0fc"
   },
   {
@@ -2885,6 +2909,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-02-04",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/www.getbenepass.com",
     "applyUrl": "https://jobs.ashbyhq.com/benepass/1bd7ded0-5144-46c0-ac90-805ed459b3c7",
     "salary": "$150,000 to $180,000"
   },
@@ -3016,7 +3041,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-28",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/6e23f7f7-cd7d-4ce0-9c98-a110a190ef11/189f2f03-7a70-4685-8fa1-542ff3f2df0e/cecd53dd-d00e-44c1-9674-b2d04fa3edc4.png",
+    "logoUrl": "https://icon.horse/icon/www.airwallex.com",
     "applyUrl": "https://jobs.ashbyhq.com/airwallex/9760e4be-fc26-42df-81ae-ef23f29c78d7",
     "salary": "SGD 189K - SGD 250K"
   },
@@ -3045,7 +3070,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-27",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/868dcb5b-0628-48f1-b4f7-fed828a37e35/8ee59e75-fb38-4eb7-80b7-3b902c5da994/ba4329fb-4c07-4f68-9a2a-ea85386fb430.png",
+    "logoUrl": "https://icon.horse/icon/www.harvey.ai",
     "salary": "$178.5K - $241.5K",
     "applyUrl": "https://jobs.ashbyhq.com/harvey/2cbe13b9-a44b-47d3-abb8-45d9a98b05f6"
   },
@@ -3075,7 +3100,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-26",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/29e0deb2-597a-4b55-844a-3a22fbce7cdb/29e96b7d-6a81-4bd1-a58e-eb9bf626d3c8/73b14f79-126b-4a48-85cc-04c600199014.png",
+    "logoUrl": "https://icon.horse/icon/doppel.com",
     "salary": "$150K - $300K",
     "applyUrl": "https://jobs.ashbyhq.com/doppel/de977d6f-43f4-4b20-9296-0ce052baac3c"
   },
@@ -3090,7 +3115,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-26",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/24b3623d-b96c-40a6-8c65-2c3a28b933dd/18ac19d1-b8d1-4741-a873-2468819b7ee3/8b7f325b-d92f-4f75-be00-4f1747491bf5.png",
+    "logoUrl": "https://icon.horse/icon/replit.com",
     "applyUrl": "https://jobs.ashbyhq.com/replit/cf236c47-218b-4a31-b0b6-d6ed12a8e077",
     "salary": "$176K - $242K"
   },
@@ -3150,6 +3175,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-22",
     "source": "ashby",
+    "logoUrl": "https://icon.horse/icon/www.getbenepass.com",
     "applyUrl": "https://jobs.ashbyhq.com/benepass/716b41c7-f3df-470a-bd7c-7f38d67d951a",
     "salary": "$180,000 to $200,000"
   },
@@ -3164,23 +3190,9 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-22",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/cf4502ef-3a67-4484-86f3-b89e4f7be84b/11dc6329-77a1-499e-bc39-8ea2a7a4c69b/6bbd0254-c269-4399-ba11-d2c2a5a147f6.png",
+    "logoUrl": "https://icon.horse/icon/www.hellobrigit.com",
     "applyUrl": "https://jobs.ashbyhq.com/brigit/dfc8ebb1-cf3e-4408-8a4c-5f74742ec86a",
     "salary": "$190,000 - $225,000"
-  },
-  {
-    "id": "gh_7550590",
-    "title": "Staff Product Manager, Stripe Apps and Extensibility Platform",
-    "company": "Stripe",
-    "companyHandle": "stripe",
-    "department": "",
-    "location": "San Francisco, Seattle, NYC, Chicago, Toronto, US- Remote, Canada-Remote",
-    "isRemote": true,
-    "employmentType": "FullTime",
-    "publishedDate": "2026-01-20",
-    "source": "greenhouse",
-    "logoUrl": "https://icon.horse/icon/stripe.com",
-    "applyUrl": "https://stripe.com/jobs/search?gh_jid=7550590"
   },
   {
     "id": "4934e3e3-406c-40bb-b0a4-b5e79ffbb512",
@@ -3193,7 +3205,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-17",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/79a81a50-3045-47b6-84ae-8cd2d981845e/a7b4a98d-e921-4c80-8205-cfca0484e5f6/32f8449e-f9b2-4a0b-911f-b306f82a9a13.png",
+    "logoUrl": "https://icon.horse/icon/www.sardine.ai",
     "salary": "$190K - $240K",
     "applyUrl": "https://jobs.ashbyhq.com/sardine/4934e3e3-406c-40bb-b0a4-b5e79ffbb512"
   },
@@ -3208,7 +3220,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-15",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/2dbfc236-5c7c-4a85-95e0-942e757542ee/a38d9aca-da31-401a-859a-f9c30f625d06/efd0ce09-5b24-4286-a04c-6d7dab9bd19d.png",
+    "logoUrl": "https://icon.horse/icon/www.siena.cx",
     "applyUrl": "https://jobs.ashbyhq.com/siena/89fe7b6e-3740-4eb0-bc42-95d7f3df4c96"
   },
   {
@@ -3237,7 +3249,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-14",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/10c3253d-76cf-441a-a08e-5146ade6a3b2/e35046b8-c6f2-466d-9ed2-2065b280f05d/74b4bfe3-79ef-4ff4-a827-20e1d6e804f2.png",
+    "logoUrl": "https://icon.horse/icon/equip.health",
     "salary": "$120K - $150K",
     "applyUrl": "https://jobs.ashbyhq.com/equip/428e5581-7515-469c-a84b-8240941ac1fd"
   },
@@ -3296,7 +3308,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-06",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8dc3f14f-0fa2-42d3-923e-e2c090653b80/b49574f9-5d23-4b6a-a6c8-14c9b8d7da6d/17c032dc-198c-4620-8cf1-9f68d9829937.png",
+    "logoUrl": "https://icon.horse/icon/jobs.ashbyhq.com",
     "applyUrl": "https://jobs.ashbyhq.com/joko/4a3ef361-14a8-4df9-b7cb-884a56f1e53a"
   },
   {
@@ -3325,7 +3337,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2026-01-02",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/9d0be221-c309-48b0-920d-a87128a39189/661a4825-fa11-4ebc-bb24-d7130d79a620/68124ce7-97c0-4160-b7a4-1c5f715bddf5.png",
+    "logoUrl": "https://icon.horse/icon/www.counselhealth.com",
     "applyUrl": "https://jobs.ashbyhq.com/counsel/b6edfdc2-539c-4e6d-9b07-054618ef5f70",
     "salary": "$165K - $205K"
   },
@@ -3340,7 +3352,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-12-22",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/6a5e6c29-7b36-44ca-8b64-f1ff30478098/ec2a0176-74d9-43b5-b486-a018968067bf/fe01d44f-8547-420c-8028-c08b1679007f.png",
+    "logoUrl": "https://icon.horse/icon/www.tabs.com",
     "salary": "$180K - $220K",
     "applyUrl": "https://jobs.ashbyhq.com/Tabs/3af8639b-41b1-4abf-a3ad-b1fbac042703"
   },
@@ -3355,7 +3367,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-12-18",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/7a158cac-9866-4881-95a8-bc946d3dca79/c68257b4-5a2d-4ecc-93a6-fe3c6766ce8b/55852d64-3584-498c-8afb-0679e5c9dede.png",
+    "logoUrl": "https://icon.horse/icon/ramp.com",
     "salary": "$230K - $325K",
     "applyUrl": "https://jobs.ashbyhq.com/ramp/9972df9e-4133-4e2c-9305-49c285b76506"
   },
@@ -3370,7 +3382,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-12-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/79a81a50-3045-47b6-84ae-8cd2d981845e/a7b4a98d-e921-4c80-8205-cfca0484e5f6/32f8449e-f9b2-4a0b-911f-b306f82a9a13.png",
+    "logoUrl": "https://icon.horse/icon/www.sardine.ai",
     "salary": "$190K - $240K",
     "applyUrl": "https://jobs.ashbyhq.com/sardine/adc5f3ee-2ace-4675-8551-d8748162a299"
   },
@@ -3385,7 +3397,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-12-11",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/868dcb5b-0628-48f1-b4f7-fed828a37e35/8ee59e75-fb38-4eb7-80b7-3b902c5da994/ba4329fb-4c07-4f68-9a2a-ea85386fb430.png",
+    "logoUrl": "https://icon.horse/icon/www.harvey.ai",
     "salary": "$178.5K - $241.5K",
     "applyUrl": "https://jobs.ashbyhq.com/harvey/e5272fbe-4431-4841-bf00-b9f59812b82a"
   },
@@ -3415,7 +3427,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-11-18",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/f7b884cd-e6fd-4982-b183-18e9c2d093d0/e97b131b-5c71-4fd0-bef1-36ee01bd5845/144a2f6a-3b00-4b37-a866-8931c0b1cbb5.png",
+    "logoUrl": "https://icon.horse/icon/stedi.com",
     "applyUrl": "https://jobs.ashbyhq.com/stedi/3ca357f6-f121-4f2a-9ac4-a03e6270523f"
   },
   {
@@ -3501,7 +3513,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-10-23",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/e7cd9609-b2f6-4658-afa8-15be89f27580/089d154f-c228-44a8-8416-f49497e1a76b/91d20288-b395-4e4f-b324-f9b6c10c397c.png",
+    "logoUrl": "https://icon.horse/icon/traba.work",
     "applyUrl": "https://jobs.ashbyhq.com/traba/b00513c3-56b8-4828-929c-2fe9f227b094",
     "salary": "$180K - $210K"
   },
@@ -3559,7 +3571,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-09-17",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/2dbfc236-5c7c-4a85-95e0-942e757542ee/a38d9aca-da31-401a-859a-f9c30f625d06/efd0ce09-5b24-4286-a04c-6d7dab9bd19d.png",
+    "logoUrl": "https://icon.horse/icon/www.siena.cx",
     "applyUrl": "https://jobs.ashbyhq.com/siena/886bddc1-1fc7-4869-aa4a-563229ffa12c"
   },
   {
@@ -3573,7 +3585,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-09-06",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8fa135c2-9d32-4983-8bb6-8e573cfb13f0/85d16e95-e5d3-4746-9cc5-410d17ebd9d0/95b621eb-e7c1-46b1-9b42-578f9f669e39.png",
+    "logoUrl": "https://icon.horse/icon/www.deel.com",
     "applyUrl": "https://jobs.ashbyhq.com/deel/f6132ae0-20ec-4c5c-9177-842ed34571cd"
   },
   {
@@ -3587,7 +3599,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-08-26",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/c9d1b6ec-be84-4801-bf17-4fe1422349e6/185d14f2-d29e-4562-98ef-d44a32883376/ed11392e-a580-48f2-9720-bbca7a9df696.png",
+    "logoUrl": "https://icon.horse/icon/decagon.ai",
     "salary": "$200K - $285K",
     "applyUrl": "https://jobs.ashbyhq.com/decagon/e31c0645-7325-43b9-9d58-0acc40904240"
   },
@@ -3660,7 +3672,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-07-22",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8b6cdf3e-e113-4b9c-94d6-5e18b550dffd/1bb1e88e-5724-4c12-a67d-c8590aeaffcc/e660d136-0678-495c-b057-66c828727f96.png",
+    "logoUrl": "https://icon.horse/icon/stainless.com",
     "applyUrl": "https://jobs.ashbyhq.com/stainlessapi/ce139a3d-fc08-4c00-8eb4-f9d22a033d19"
   },
   {
@@ -3674,7 +3686,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-07-08",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/08d1effe-dbc7-46cb-adea-384faf82eed8/dd30419d-779b-4b69-854c-e15f27376530/d23583ea-85a9-44d4-b414-f48cee6a6abd.png",
+    "logoUrl": "https://icon.horse/icon/rogodata.com",
     "applyUrl": "https://jobs.ashbyhq.com/rogo/ccecba20-cd08-4ab6-82bf-1c7df8b2719e"
   },
   {
@@ -3703,7 +3715,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-07-02",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/08d1effe-dbc7-46cb-adea-384faf82eed8/dd30419d-779b-4b69-854c-e15f27376530/d23583ea-85a9-44d4-b414-f48cee6a6abd.png",
+    "logoUrl": "https://icon.horse/icon/rogodata.com",
     "applyUrl": "https://jobs.ashbyhq.com/rogo/88402be7-95b6-48cc-bd70-4e181eaf8bba"
   },
   {
@@ -3746,7 +3758,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2025-03-27",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/e7cd9609-b2f6-4658-afa8-15be89f27580/089d154f-c228-44a8-8416-f49497e1a76b/91d20288-b395-4e4f-b324-f9b6c10c397c.png",
+    "logoUrl": "https://icon.horse/icon/traba.work",
     "applyUrl": "https://jobs.ashbyhq.com/traba/b01ff7d0-5234-4c0c-b71c-8610db4ead0e",
     "salary": "$210K - $250K"
   },
@@ -3761,7 +3773,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2024-05-14",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/8dc3f14f-0fa2-42d3-923e-e2c090653b80/b49574f9-5d23-4b6a-a6c8-14c9b8d7da6d/17c032dc-198c-4620-8cf1-9f68d9829937.png",
+    "logoUrl": "https://icon.horse/icon/jobs.ashbyhq.com",
     "applyUrl": "https://jobs.ashbyhq.com/joko/7e20ccdc-cb54-4d15-96f9-541874f13c23"
   },
   {
@@ -3775,7 +3787,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2022-02-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/64ebf830-5209-48bf-9e92-0feca182c363/70639349-e51e-4944-928e-8f987853d310/82701fda-be98-4ed9-b4d7-e8e2344ac614.png",
+    "logoUrl": "https://icon.horse/icon/partisiablockchain.com",
     "applyUrl": "https://jobs.ashbyhq.com/partisiablockchain/e6606071-a12d-44f0-983f-87d59edb2eec"
   },
   {
@@ -3789,7 +3801,7 @@
     "employmentType": "FullTime",
     "publishedDate": "2021-12-16",
     "source": "ashby",
-    "logoUrl": "https://app.ashbyhq.com/api/images/org-theme-logo/6a35fa35-c515-442a-9efe-6b56ff3c8c34/83f11079-4736-4eac-97d5-da69b75e5650/34823ad6-ad91-45f8-a3af-ad021a39dd72.png",
+    "logoUrl": "https://icon.horse/icon/lightning.engineering",
     "applyUrl": "https://jobs.ashbyhq.com/lightning/2d77b496-ab0d-4e54-bcf8-33260d1bab6b"
   }
 ]
