@@ -1021,9 +1021,13 @@ export default function JobverseApp() {
                       </div>
 
                       <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-                          <Clock size={12} />
-                          {job.publishedDate ? timeAgo(job.publishedDate) : 'Recently posted'}
+                        <div className="flex items-center gap-2.5 text-xs font-medium text-slate-400">
+                          <span className="flex items-center gap-1.5">
+                            <Clock size={12} />
+                            {job.publishedDate ? timeAgo(job.publishedDate) : 'Recently posted'}
+                          </span>
+                          <span className="text-slate-300">·</span>
+                          <span className="capitalize">{job.source}</span>
                         </div>
                         <a
                           href={job.applyUrl}
