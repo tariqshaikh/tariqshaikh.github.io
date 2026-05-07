@@ -224,23 +224,23 @@ export default function Portfolio() {
             <div className="bg-[#140E22] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#D8B4FE]/50 hover:shadow-[0_32px_64px_-16px_rgba(216,180,254,0.15)] relative overflow-hidden rounded-2xl group">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-[#D8B4FE]/10 text-[#D8B4FE] border border-[#D8B4FE]/20 font-bold rounded-full">New Concept</span>
+                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold rounded-full">Live</span>
                 <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.004</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
                 <span className="font-serif font-bold italic text-white">Jobverse</span>
               </h3>
-              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">AI-Powered Job Search Intelligence</p>
+              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">PM Job Board — Aggregated Daily</p>
 
               <div className="relative mb-10">
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-[#D8B4FE]/30" />
                 <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  Finding your dream job shouldn't feel like a second job. Jobverse cuts through the noise and surfaces what actually matters — the right role, at the right company, at the right time.
+                  635+ PM roles pulled daily from Ashby, Greenhouse, and Lever across 125+ companies. Filter by experience level, salary, job type, and location. Star dream companies to surface their roles first.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-10">
-                {['AI / LLM', 'Product Strategy', 'Big Data'].map(tag => (
+                {['React / TypeScript', 'Ashby · Greenhouse · Lever', 'Refreshed Daily'].map(tag => (
                   <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#D8B4FE]/10 text-[#D8B4FE]/80 border border-[#D8B4FE]/20 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
