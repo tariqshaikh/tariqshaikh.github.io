@@ -293,16 +293,118 @@ export default function JobverseApp() {
         <div className="absolute top-1/3 left-1/3 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-xl w-full">
-          {/* Logo mark */}
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white font-black text-4xl mb-10 shadow-2xl shadow-indigo-500/40">
-            J
-          </div>
+        <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-4xl w-full">
 
           {/* Wordmark */}
-          <h1 className="text-7xl font-black text-white tracking-tight leading-none mb-4">
+          <h1 className="text-6xl font-black text-white tracking-tight leading-none mb-3">
             Jobverse
           </h1>
+          <p className="text-zinc-500 text-sm font-medium mb-12">Pick a logo — click to select</p>
+
+          {/* Logo picker grid */}
+          {(() => {
+            const logos = [
+              {
+                name: 'Portal',
+                svg: (
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
+                    <circle cx="24" cy="24" r="20" stroke="white" strokeWidth="1.2" opacity="0.2"/>
+                    <circle cx="24" cy="24" r="14" stroke="white" strokeWidth="1.5" opacity="0.4"/>
+                    <circle cx="24" cy="24" r="8" stroke="white" strokeWidth="1.8" opacity="0.7"/>
+                    <circle cx="24" cy="24" r="3" fill="white"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Signal',
+                svg: (
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
+                    <path d="M16 35 Q24 20 32 35" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.9"/>
+                    <path d="M11 40 Q24 13 37 40" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+                    <path d="M7 44 Q24 7 41 44" stroke="white" strokeWidth="1" strokeLinecap="round" opacity="0.25"/>
+                    <circle cx="24" cy="36" r="2.5" fill="white"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Orbit',
+                svg: (
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
+                    <circle cx="24" cy="24" r="5" fill="white" opacity="0.9"/>
+                    <ellipse cx="24" cy="24" rx="19" ry="8" stroke="white" strokeWidth="1.2" opacity="0.4" transform="rotate(-25 24 24)"/>
+                    <circle cx="39" cy="17" r="3" fill="white"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Constellation',
+                svg: (
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
+                    <line x1="24" y1="7" x2="39" y2="18" stroke="white" strokeWidth="0.8" opacity="0.3"/>
+                    <line x1="39" y1="18" x2="33" y2="35" stroke="white" strokeWidth="0.8" opacity="0.3"/>
+                    <line x1="33" y1="35" x2="15" y2="35" stroke="white" strokeWidth="0.8" opacity="0.3"/>
+                    <line x1="15" y1="35" x2="9" y2="18" stroke="white" strokeWidth="0.8" opacity="0.3"/>
+                    <line x1="9" y1="18" x2="24" y2="7" stroke="white" strokeWidth="0.8" opacity="0.3"/>
+                    <line x1="24" y1="7" x2="33" y2="35" stroke="white" strokeWidth="0.8" opacity="0.15"/>
+                    <line x1="39" y1="18" x2="15" y2="35" stroke="white" strokeWidth="0.8" opacity="0.15"/>
+                    <circle cx="24" cy="7" r="2.5" fill="white"/>
+                    <circle cx="39" cy="18" r="2" fill="white" opacity="0.8"/>
+                    <circle cx="33" cy="35" r="1.5" fill="white" opacity="0.7"/>
+                    <circle cx="15" cy="35" r="2" fill="white" opacity="0.8"/>
+                    <circle cx="9" cy="18" r="1.5" fill="white" opacity="0.6"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Vortex',
+                svg: (
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
+                    <path d="M24 6 C36 6 42 14 42 24 C42 31 37 36 30 36 C24 36 20 32 20 26 C20 21 23 18 28 18 C32 18 34 21 34 24" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.9"/>
+                    <path d="M34 24 C34 27 32 29 29 29" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+                    <circle cx="24" cy="6" r="2.5" fill="white"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Compass',
+                svg: (
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
+                    <circle cx="24" cy="24" r="19" stroke="white" strokeWidth="1" opacity="0.2"/>
+                    <line x1="24" y1="7" x2="24" y2="41" stroke="white" strokeWidth="0.6" opacity="0.15"/>
+                    <line x1="7" y1="24" x2="41" y2="24" stroke="white" strokeWidth="0.6" opacity="0.15"/>
+                    <polygon points="24,6 26.5,22 24,26 21.5,22" fill="white"/>
+                    <polygon points="24,42 26.5,26 24,22 21.5,26" fill="white" opacity="0.2"/>
+                    <circle cx="24" cy="24" r="2.5" fill="#09090B" stroke="white" strokeWidth="1"/>
+                  </svg>
+                ),
+              },
+              {
+                name: 'Trajectory',
+                svg: (
+                  <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
+                    <path d="M34 7 C40 14 40 26 34 34 C29 40 20 43 13 40" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.9"/>
+                    <circle cx="34" cy="7" r="4" fill="white"/>
+                    <circle cx="31" cy="13" r="1.8" fill="white" opacity="0.55"/>
+                    <circle cx="28" cy="19" r="1.2" fill="white" opacity="0.3"/>
+                    <circle cx="13" cy="40" r="2" fill="white" opacity="0.5"/>
+                  </svg>
+                ),
+              },
+            ];
+
+            return (
+              <div className="grid grid-cols-7 gap-3 mb-12 w-full">
+                {logos.map((logo, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2 group cursor-pointer">
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+                      {logo.svg}
+                    </div>
+                    <span className="text-[10px] font-semibold text-zinc-600 group-hover:text-zinc-400 transition-colors tracking-wide">{logo.name}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Tagline */}
           <p className="text-lg text-zinc-400 font-medium mb-14 tracking-wide">
