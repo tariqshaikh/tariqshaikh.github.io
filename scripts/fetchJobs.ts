@@ -86,7 +86,7 @@ async function fetchHandleJobs(handle: string): Promise<AshbyJob[]> {
   const publicWebsite: string | undefined = data?.organization?.publicWebsite;
   const domain = publicWebsite ? publicWebsite.replace(/^https?:\/\//, '').replace(/\/.*$/, '') : undefined;
   const logoUrl: string | undefined = domain
-    ? `https://icon.horse/icon/${domain}`
+    ? `https://logo.clearbit.com/${domain}`
     : (data?.organization?.theme?.logoSquareImageUrl || undefined);
   const postings: any[] = data?.jobBoard?.jobPostings ?? [];
   return postings.map((p: any): AshbyJob => ({
@@ -194,7 +194,7 @@ async function fetchGreenhouseJobs(handle: string): Promise<AshbyJob[]> {
       employmentType: 'FullTime',
       publishedDate: p.first_published ? p.first_published.slice(0, 10) : '',
       source: 'greenhouse',
-      ...(domain ? { logoUrl: `https://icon.horse/icon/${domain}` } : {}),
+      ...(domain ? { logoUrl: `https://logo.clearbit.com/${domain}` } : {}),
       applyUrl: p.absolute_url ?? `https://boards.greenhouse.io/${handle}`,
     };
   });

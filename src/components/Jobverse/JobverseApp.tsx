@@ -5,12 +5,7 @@ import { fetchAshbyJobs, AshbyJob } from '../../services/ashbyService';
 const SAVED_JOBS_KEY = 'jobverse_saved';
 const DREAM_COMPANIES_KEY = 'jobverse_dream_companies';
 
-const LOGO_OVERRIDES: Record<string, string> = {
-  ramp: 'https://logo.clearbit.com/ramp.com',
-};
-
 function resolveLogoUrl(job: AshbyJob): string | undefined {
-  if (job.companyHandle && LOGO_OVERRIDES[job.companyHandle]) return LOGO_OVERRIDES[job.companyHandle];
   return job.logoUrl;
 }
 
