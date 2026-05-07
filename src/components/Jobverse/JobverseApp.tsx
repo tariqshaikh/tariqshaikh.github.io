@@ -390,7 +390,10 @@ export default function JobverseApp() {
             <Home size={18} />
             Job Board
           </button>
-          <button className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:bg-slate-50 hover:text-slate-900`}>
+          <button
+            onClick={() => setActiveTab('companies')}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'companies' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+          >
             <Building2 size={18} />
             Companies
           </button>
@@ -477,6 +480,81 @@ export default function JobverseApp() {
           </div>
         </header>
 
+        {/* Companies Page */}
+        {activeTab === 'companies' && (() => {
+          const companyMap = new Map<string, { job: AshbyJob; count: number }>();
+          jobs.forEach(j => {
+            const existing = companyMap.get(j.company);
+            if (existing) { existing.count++; }
+            else { companyMap.set(j.company, { job: j, count: 1 }); }
+          });
+          const companies = Array.from(companyMap.values()).sort((a, b) => {
+            const aDream = dreamCompanies.has(a.job.company) ? 1 : 0;
+            const bDream = dreamCompanies.has(b.job.company) ? 1 : 0;
+            if (bDream !== aDream) return bDream - aDream;
+            return b.count - a.count;
+          });
+          return (
+            <div className="flex-1 overflow-y-auto p-6 md:p-8">
+              <div className="max-w-5xl mx-auto">
+                <div className="mb-8">
+                  <h1 className="text-2xl font-black tracking-tight text-slate-900 mb-1">Companies</h1>
+                  <p className="text-slate-500 text-sm">{companies.length} companies hiring PMs right now. Star any to add them to your Dream Role list.</p>
+                </div>
+                {loading ? (
+                  <div className="flex items-center justify-center py-24">
+                    <Loader2 size={32} className="text-indigo-400 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {companies.map(({ job, count }) => {
+                      const isDream = dreamCompanies.has(job.company);
+                      return (
+                        <div
+                          key={job.company}
+                          className={`flex items-center gap-4 p-4 rounded-xl border bg-white transition-all ${
+                            isDream ? 'border-violet-300 shadow-[0_2px_12px_rgb(139,92,246,0.12)]' : 'border-[#E2E8F0] hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
+                            {job.logoUrl
+                              ? <img src={job.logoUrl} alt={job.company} className="w-full h-full object-contain p-1"
+                                  onError={e => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }} />
+                              : null}
+                            <span className="text-xs font-bold text-slate-600 w-full h-full items-center justify-center" style={{ display: job.logoUrl ? 'none' : 'flex' }}>
+                              {logoInitials(job.company)}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-slate-900 text-sm truncate">{job.company}</p>
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">
+                              {count} open role{count !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              onClick={() => { setSearchQuery(job.company); setActiveTab('board'); }}
+                              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-2.5 py-1 rounded-full transition-colors"
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={() => toggleDream(job.company)}
+                              className={`p-1.5 rounded-full transition-colors ${isDream ? 'text-violet-500 bg-violet-50' : 'text-slate-300 hover:text-violet-400 hover:bg-violet-50'}`}
+                            >
+                              <Star size={15} fill={isDream ? 'currentColor' : 'none'} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Dream Role Page */}
         {activeTab === 'dream' && (
           <div className="flex-1 overflow-y-auto p-6 md:p-8">
@@ -560,7 +638,7 @@ export default function JobverseApp() {
         )}
 
         {/* Scrollable Content */}
-        {activeTab !== 'dream' && (
+        {activeTab !== 'dream' && activeTab !== 'companies' && (
         <div className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
             {/* Filters */}
