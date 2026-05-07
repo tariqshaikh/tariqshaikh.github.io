@@ -255,7 +255,7 @@ export default function JobverseApp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-slate-900 flex">
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 flex" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-[#E2E8F0] flex flex-col fixed h-full inset-y-0 z-20 hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-[#E2E8F0] mb-6">
@@ -519,7 +519,7 @@ export default function JobverseApp() {
 
             {/* Job Grid */}
             {!loading && !error && displayedJobs.length > 0 && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {displayedJobs.map((job, idx) => {
                   const isSaved = savedJobs.has(job.id);
                   const locationLabel = job.isRemote ? 'Remote' : (job.location ?? 'Flexible');
