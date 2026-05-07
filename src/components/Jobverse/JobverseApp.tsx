@@ -76,6 +76,29 @@ const SALARY_FILTER_OPTIONS: { value: SalaryFilter; label: string; min: number |
   { value: '200k',     label: '$200K+',           min: 200000, disclosedOnly: true  },
 ];
 
+type ExperienceFilter = 'all' | 'mid' | 'senior' | 'staff' | 'leadership';
+
+const EXPERIENCE_FILTER_OPTIONS: { value: ExperienceFilter; label: string; description: string }[] = [
+  { value: 'all',        label: 'All levels',    description: '' },
+  { value: 'mid',        label: 'Product Manager', description: 'PM, Product Lead' },
+  { value: 'senior',     label: 'Senior',        description: 'Senior PM, Sr. PM' },
+  { value: 'staff',      label: 'Staff / Principal', description: 'Staff, Principal, Group PM' },
+  { value: 'leadership', label: 'Leadership',    description: 'Head of, Director, VP, CPO' },
+];
+
+function matchesExperience(title: string, filter: ExperienceFilter): boolean {
+  if (filter === 'all') return true;
+  const t = title.toLowerCase();
+  const isLeadership = /\b(head of|director|vp |vice president|chief product|cpo)\b/.test(t);
+  const isStaff = /\b(staff|principal|group product|group pm)\b/.test(t);
+  const isSenior = /\b(senior|sr\.?)\b/.test(t);
+  if (filter === 'leadership') return isLeadership;
+  if (filter === 'staff') return !isLeadership && isStaff;
+  if (filter === 'senior') return !isLeadership && !isStaff && isSenior;
+  if (filter === 'mid') return !isLeadership && !isStaff && !isSenior;
+  return true;
+}
+
 function parseSalaryMin(salary: string | undefined): number | null {
   if (!salary) return null;
   const match = salary.match(/([\d,]+)\s*[Kk]/);
@@ -94,6 +117,9 @@ export default function JobverseApp() {
   const [salaryFilter, setSalaryFilter] = useState<SalaryFilter>('all');
   const [salaryDropdownOpen, setSalaryDropdownOpen] = useState(false);
   const salaryDropdownRef = useRef<HTMLDivElement>(null);
+  const [experienceFilter, setExperienceFilter] = useState<ExperienceFilter>('all');
+  const [experienceDropdownOpen, setExperienceDropdownOpen] = useState(false);
+  const experienceDropdownRef = useRef<HTMLDivElement>(null);
   const [jobs, setJobs] = useState<AshbyJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -123,6 +149,9 @@ export default function JobverseApp() {
       }
       if (salaryDropdownRef.current && !salaryDropdownRef.current.contains(e.target as Node)) {
         setSalaryDropdownOpen(false);
+      }
+      if (experienceDropdownRef.current && !experienceDropdownRef.current.contains(e.target as Node)) {
+        setExperienceDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
@@ -161,7 +190,8 @@ export default function JobverseApp() {
       }
       return true;
     })();
-    return matchesSearch && matchesDate && matchesSalary;
+    const matchesExperienceLevel = matchesExperience(job.title, experienceFilter);
+    return matchesSearch && matchesDate && matchesSalary && matchesExperienceLevel;
   });
 
   const displayedJobs = activeTab === 'saved'
@@ -398,6 +428,40 @@ export default function JobverseApp() {
                 )}
               </div>
 
+              {/* Experience filter dropdown */}
+              <div className="relative" ref={experienceDropdownRef}>
+                <button
+                  onClick={() => setExperienceDropdownOpen(o => !o)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm border ${
+                    experienceFilter !== 'all'
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                      : 'bg-white border-[#E2E8F0] text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                  }`}
+                >
+                  <Briefcase size={14} />
+                  {EXPERIENCE_FILTER_OPTIONS.find(o => o.value === experienceFilter)?.label ?? 'Level'}
+                  <ChevronDown size={14} className={`transition-transform ${experienceDropdownOpen ? 'rotate-180' : ''} ${experienceFilter !== 'all' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                </button>
+                {experienceDropdownOpen && (
+                  <div className="absolute top-full mt-2 left-0 z-30 w-52 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 overflow-hidden">
+                    {EXPERIENCE_FILTER_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => { setExperienceFilter(opt.value); setExperienceDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-2.5 transition-colors ${
+                          experienceFilter === opt.value
+                            ? 'bg-indigo-50 text-indigo-700'
+                            : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <span className="text-sm font-semibold block">{opt.label}</span>
+                        {opt.description && <span className="text-xs text-slate-400">{opt.description}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Salary filter dropdown */}
               <div className="relative" ref={salaryDropdownRef}>
                 <button
@@ -469,6 +533,14 @@ export default function JobverseApp() {
                       className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors"
                     >
                       Clear salary ×
+                    </button>
+                  )}
+                  {experienceFilter !== 'all' && (
+                    <button
+                      onClick={() => setExperienceFilter('all')}
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors"
+                    >
+                      Clear level ×
                     </button>
                   )}
                   <p className="text-sm font-medium text-slate-400">Showing {displayedJobs.length} job{displayedJobs.length === 1 ? '' : 's'}</p>
