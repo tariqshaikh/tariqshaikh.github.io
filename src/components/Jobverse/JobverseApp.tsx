@@ -484,13 +484,6 @@ export default function JobverseApp() {
               </span>
             )}
           </button>
-          <button className="w-full flex flex-row items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-            <div className="flex items-center gap-3">
-              <Bell size={18} />
-              Alerts
-            </div>
-            <span className="bg-indigo-100 text-indigo-700 py-0.5 px-2 rounded-full text-[10px] font-bold">3</span>
-          </button>
           <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:bg-slate-50 hover:text-slate-900">
             <Briefcase size={18} />
             Applications
