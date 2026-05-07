@@ -190,7 +190,7 @@ export default function JobverseApp() {
           </h1>
 
           {/* Tagline */}
-          <p className="text-lg text-zinc-500 font-medium mb-14 tracking-wide">
+          <p className="text-lg text-zinc-400 font-medium mb-14 tracking-wide">
             Top tech. Rising startups. One feed.
           </p>
 
@@ -200,21 +200,21 @@ export default function JobverseApp() {
               <span className="text-4xl font-black text-white tabular-nums">
                 {loading ? '—' : jobs.length}
               </span>
-              <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">Open roles</span>
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Open roles</span>
             </div>
             <div className="w-px h-10 bg-zinc-800" />
             <div className="flex flex-col items-center gap-1">
               <span className="text-4xl font-black text-white tabular-nums">
                 {loading ? '—' : uniqueCompanies}
               </span>
-              <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">Companies</span>
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Companies</span>
             </div>
             <div className="w-px h-10 bg-zinc-800" />
             <div className="flex flex-col items-center gap-1">
               <span className="text-4xl font-black text-white tabular-nums">
                 {loading ? '—' : withSalary}
               </span>
-              <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">With salary</span>
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">With salary</span>
             </div>
           </div>
 
@@ -239,7 +239,7 @@ export default function JobverseApp() {
 
           {/* Footer note */}
           {!loading && !error && (
-            <p className="mt-8 text-xs text-zinc-700 font-medium tracking-wide">
+            <p className="mt-8 text-xs text-zinc-500 font-medium tracking-wide">
               Updated daily &nbsp;·&nbsp; Ashby & Greenhouse &nbsp;·&nbsp; Remote, NYC & NJ
             </p>
           )}
