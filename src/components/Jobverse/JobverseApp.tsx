@@ -1,8 +1,23 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Search, MapPin, Briefcase, DollarSign, Clock, Heart, ArrowRight, Filter, ChevronDown, Bell, Bookmark, Settings, Home, Building2, User, RefreshCw, Loader2, Calendar } from 'lucide-react';
+import { Search, MapPin, Briefcase, DollarSign, Clock, Heart, ArrowRight, Filter, ChevronDown, Bell, Bookmark, Settings, Home, Building2, User, RefreshCw, Loader2, Calendar, Star, X } from 'lucide-react';
 import { fetchAshbyJobs, AshbyJob } from '../../services/ashbyService';
 
 const SAVED_JOBS_KEY = 'jobverse_saved';
+const DREAM_COMPANIES_KEY = 'jobverse_dream_companies';
+
+function loadDreamCompanies(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DREAM_COMPANIES_KEY);
+    if (raw) return new Set(JSON.parse(raw) as string[]);
+  } catch { /* ignore */ }
+  return new Set();
+}
+
+function persistDreamCompanies(set: Set<string>): void {
+  try {
+    localStorage.setItem(DREAM_COMPANIES_KEY, JSON.stringify(Array.from(set)));
+  } catch { /* ignore */ }
+}
 
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr);
@@ -167,6 +182,8 @@ export default function JobverseApp() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(() => loadSavedJobs());
+  const [dreamCompanies, setDreamCompanies] = useState<Set<string>>(() => loadDreamCompanies());
+  const [dreamSearch, setDreamSearch] = useState('');
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
@@ -207,6 +224,15 @@ export default function JobverseApp() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  const toggleDream = (company: string) => {
+    setDreamCompanies(prev => {
+      const next = new Set<string>(prev);
+      if (next.has(company)) next.delete(company); else next.add(company);
+      persistDreamCompanies(next);
+      return next;
+    });
+  };
+
   const toggleSave = (jobId: string) => {
     setSavedJobs(prev => {
       const next = new Set<string>(prev);
@@ -245,9 +271,17 @@ export default function JobverseApp() {
     return matchesSearch && matchesDate && matchesSalary && matchesExperienceLevel && matchesType && matchesLoc;
   });
 
-  const displayedJobs = activeTab === 'saved'
-    ? filteredJobs.filter(job => savedJobs.has(job.id))
-    : filteredJobs;
+  const displayedJobs = (() => {
+    const base = activeTab === 'saved'
+      ? filteredJobs.filter(job => savedJobs.has(job.id))
+      : filteredJobs;
+    if (dreamCompanies.size === 0) return base;
+    return [...base].sort((a, b) => {
+      const aDream = dreamCompanies.has(a.company) ? 1 : 0;
+      const bDream = dreamCompanies.has(b.company) ? 1 : 0;
+      return bDream - aDream;
+    });
+  })();
 
   const uniqueCompanies = new Set(jobs.map(j => j.company)).size;
   const withSalary = jobs.filter(j => j.salary).length;
@@ -361,6 +395,19 @@ export default function JobverseApp() {
             Companies
           </button>
 
+          <button
+            onClick={() => setActiveTab('dream')}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === 'dream' ? 'bg-violet-50 text-violet-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+          >
+            <Star size={18} />
+            Dream Role
+            {dreamCompanies.size > 0 && (
+              <span className="ml-auto bg-violet-100 text-violet-700 py-0.5 px-2 rounded-full text-[10px] font-bold">
+                {dreamCompanies.size}
+              </span>
+            )}
+          </button>
+
           <div className="pt-6 pb-2 px-3">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Your Workspace</p>
           </div>
@@ -430,7 +477,90 @@ export default function JobverseApp() {
           </div>
         </header>
 
+        {/* Dream Role Page */}
+        {activeTab === 'dream' && (
+          <div className="flex-1 overflow-y-auto p-6 md:p-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-8">
+                <h1 className="text-2xl font-black tracking-tight text-slate-900 mb-1">Dream Role</h1>
+                <p className="text-slate-500 text-sm">Select companies you'd love to work at. Their jobs will be pinned to the top of your feed with a purple highlight.</p>
+              </div>
+
+              {/* Search */}
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search companies..."
+                  value={dreamSearch}
+                  onChange={e => setDreamSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-full text-sm focus:border-violet-300 focus:ring-2 focus:ring-violet-100 transition-all outline-none"
+                />
+                {dreamSearch && (
+                  <button onClick={() => setDreamSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Selected count */}
+              {dreamCompanies.size > 0 && (
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-semibold text-violet-700 bg-violet-50 px-3 py-1 rounded-full border border-violet-100">
+                    {dreamCompanies.size} dream compan{dreamCompanies.size === 1 ? 'y' : 'ies'} selected
+                  </span>
+                  <button onClick={() => { setDreamCompanies(new Set()); persistDreamCompanies(new Set()); }} className="text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors">
+                    Clear all
+                  </button>
+                </div>
+              )}
+
+              {/* Company grid */}
+              {loading ? (
+                <div className="flex items-center justify-center py-24">
+                  <Loader2 size={32} className="text-violet-400 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {Array.from(new Map<string, AshbyJob>(jobs.map(j => [j.company, j])).values())
+                    .sort((a, b) => a.company.localeCompare(b.company))
+                    .filter(j => !dreamSearch || j.company.toLowerCase().includes(dreamSearch.toLowerCase()))
+                    .map(job => {
+                      const selected = dreamCompanies.has(job.company);
+                      return (
+                        <button
+                          key={job.company}
+                          onClick={() => toggleDream(job.company)}
+                          className={`flex items-center gap-3 px-3 py-3 rounded-xl border text-left transition-all ${
+                            selected
+                              ? 'border-violet-400 bg-violet-50 shadow-[0_2px_12px_rgb(139,92,246,0.15)]'
+                              : 'border-[#E2E8F0] bg-white hover:border-violet-200 hover:bg-violet-50/30'
+                          }`}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center">
+                            {job.logoUrl
+                              ? <img src={job.logoUrl} alt={job.company} className="w-full h-full object-contain p-1"
+                                  onError={e => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }} />
+                              : null}
+                            <span className="text-xs font-bold text-slate-600 w-full h-full items-center justify-center" style={{ display: job.logoUrl ? 'none' : 'flex' }}>
+                              {logoInitials(job.company)}
+                            </span>
+                          </div>
+                          <span className={`text-xs font-semibold truncate flex-1 ${selected ? 'text-violet-800' : 'text-slate-700'}`}>
+                            {job.company}
+                          </span>
+                          {selected && <Star size={12} className="text-violet-500 shrink-0" fill="currentColor" />}
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Scrollable Content */}
+        {activeTab !== 'dream' && (
         <div className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
             {/* Filters */}
@@ -704,16 +834,17 @@ export default function JobverseApp() {
             {/* Job Grid */}
             {!loading && !error && displayedJobs.length > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {displayedJobs.map((job, idx) => {
+                {displayedJobs.map((job) => {
                   const isSaved = savedJobs.has(job.id);
+                  const isDream = dreamCompanies.has(job.company);
                   const locationLabel = job.isRemote ? 'Remote' : (job.location ?? 'Flexible');
                   return (
                     <div
                       key={job.id}
                       className={`bg-white rounded-2xl p-6 border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl ${
-                        idx === 0
-                          ? 'border-indigo-400 shadow-[0_8px_30px_rgb(99,102,241,0.12)]'
-                          : 'border-[#E2E8F0] hover:border-indigo-200'
+                        isDream
+                          ? 'border-violet-400 shadow-[0_8px_30px_rgb(139,92,246,0.15)]'
+                          : 'border-[#E2E8F0] hover:border-slate-300'
                       }`}
                     >
                       <div className="flex justify-between items-start mb-6">
@@ -799,6 +930,7 @@ export default function JobverseApp() {
             )}
           </div>
         </div>
+        )}
       </main>
     </div>
   );
