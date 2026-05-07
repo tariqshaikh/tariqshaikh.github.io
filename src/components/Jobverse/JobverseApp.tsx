@@ -334,32 +334,42 @@ export default function JobverseApp() {
                 ),
               },
               {
-                name: 'Dipper',
+                name: 'Dipper J',
                 svg: (
                   <svg viewBox="0 0 56 56" fill="none" className="w-12 h-12">
                     <defs>
-                      <filter id="cs2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                      <filter id="cs2sm"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs2"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <filter id="cs2sm"><feGaussianBlur stdDeviation="1.3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      <linearGradient id="jline" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="white" stopOpacity="0.6"/>
+                        <stop offset="100%" stopColor="#818cf8" stopOpacity="0.25"/>
+                      </linearGradient>
                     </defs>
-                    <circle cx="8" cy="14" r="0.7" fill="white" opacity="0.2"/>
-                    <circle cx="50" cy="44" r="0.6" fill="white" opacity="0.15"/>
-                    <circle cx="14" cy="48" r="0.5" fill="white" opacity="0.12"/>
-                    {/* handle */}
-                    <line x1="10" y1="18" x2="17" y2="25" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
-                    <line x1="17" y1="25" x2="25" y2="29" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
-                    <line x1="25" y1="29" x2="34" y2="28" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
-                    {/* bowl */}
-                    <line x1="34" y1="28" x2="46" y2="22" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
-                    <line x1="46" y1="22" x2="46" y2="36" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
-                    <line x1="46" y1="36" x2="34" y2="38" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
-                    <line x1="34" y1="38" x2="34" y2="28" stroke="#818cf8" strokeWidth="0.8" opacity="0.4"/>
-                    <circle cx="10" cy="18" r="2" fill="#a78bfa" filter="url(#cs2sm)"/>
-                    <circle cx="17" cy="25" r="2" fill="#a78bfa"/>
-                    <circle cx="25" cy="29" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
-                    <circle cx="34" cy="28" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
-                    <circle cx="46" cy="22" r="4" fill="white" filter="url(#cs2)"/>
-                    <circle cx="46" cy="36" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
-                    <circle cx="34" cy="38" r="2" fill="#a78bfa"/>
+                    {/* dust */}
+                    <circle cx="8" cy="10" r="0.6" fill="white" opacity="0.18"/>
+                    <circle cx="48" cy="8" r="0.7" fill="white" opacity="0.12"/>
+                    <circle cx="50" cy="34" r="0.5" fill="white" opacity="0.12"/>
+                    {/* J stroke — handle going down */}
+                    <line x1="36" y1="8" x2="34" y2="18" stroke="url(#jline)" strokeWidth="0.9"/>
+                    <line x1="34" y1="18" x2="32" y2="28" stroke="url(#jline)" strokeWidth="0.9"/>
+                    {/* J curve — bowl curling left */}
+                    <line x1="32" y1="28" x2="27" y2="36" stroke="#818cf8" strokeWidth="0.9" opacity="0.45"/>
+                    <line x1="27" y1="36" x2="19" y2="42" stroke="#818cf8" strokeWidth="0.9" opacity="0.4"/>
+                    <line x1="19" y1="42" x2="13" y2="38" stroke="#818cf8" strokeWidth="0.9" opacity="0.35"/>
+                    <line x1="13" y1="38" x2="14" y2="29" stroke="#818cf8" strokeWidth="0.9" opacity="0.3"/>
+                    {/* bowl cross — subtle dipper detail */}
+                    <line x1="32" y1="28" x2="14" y2="29" stroke="#6366f1" strokeWidth="0.5" opacity="0.18"/>
+                    {/* anchor star — top of J, brightest */}
+                    <circle cx="36" cy="8" r="4.5" fill="white" filter="url(#cs2)"/>
+                    <circle cx="36" cy="8" r="2" fill="white"/>
+                    {/* handle stars */}
+                    <circle cx="34" cy="18" r="2.2" fill="#e0d9ff" filter="url(#cs2sm)"/>
+                    <circle cx="32" cy="28" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
+                    {/* bowl stars */}
+                    <circle cx="27" cy="36" r="2" fill="#a78bfa"/>
+                    <circle cx="19" cy="42" r="2.5" fill="#c4b5fd" filter="url(#cs2sm)"/>
+                    <circle cx="13" cy="38" r="2" fill="#a78bfa"/>
+                    <circle cx="14" cy="29" r="1.8" fill="#818cf8" opacity="0.9"/>
                   </svg>
                 ),
               },
