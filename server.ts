@@ -177,7 +177,7 @@ async function startServer() {
     const publicWebsite: string | undefined = data?.organization?.publicWebsite;
     const domain = publicWebsite ? publicWebsite.replace(/^https?:\/\//, '').replace(/\/.*$/, '') : undefined;
     const logoUrl: string | undefined = domain
-      ? `https://logo.clearbit.com/${domain}`
+      ? `https://icon.horse/icon/${domain}`
       : (data?.organization?.theme?.logoSquareImageUrl || undefined);
     const postings: any[] = data?.jobBoard?.jobPostings ?? [];
     return postings.map((p: any): AshbyJob => ({
@@ -265,7 +265,7 @@ async function startServer() {
         employmentType: 'FullTime',
         publishedDate: p.first_published ? p.first_published.slice(0, 10) : '',
         source: 'greenhouse',
-        ...(domain ? { logoUrl: `https://logo.clearbit.com/${domain}` } : {}),
+        ...(domain ? { logoUrl: `https://icon.horse/icon/${domain}` } : {}),
         applyUrl: p.absolute_url ?? `https://boards.greenhouse.io/${handle}`,
       };
     });
@@ -319,7 +319,7 @@ async function startServer() {
           employmentType: p.categories?.commitment ?? 'FullTime',
           publishedDate: p.createdAt ? new Date(p.createdAt).toISOString().slice(0, 10) : '',
           source: 'lever' as const,
-          logoUrl: `https://logo.clearbit.com/${domain}`,
+          logoUrl: `https://icon.horse/icon/${domain}`,
           applyUrl: p.hostedUrl ?? `https://jobs.lever.co/${handle}/${p.id}`,
           ...(salary ? { salary } : {}),
         };
