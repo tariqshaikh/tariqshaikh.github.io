@@ -224,7 +224,7 @@ export default function Portfolio() {
             <div className="bg-[#140E22] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#D8B4FE]/50 hover:shadow-[0_32px_64px_-16px_rgba(216,180,254,0.15)] relative overflow-hidden rounded-2xl group">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold rounded-full">Live</span>
+                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold rounded-full">In Progress</span>
                 <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.004</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
