@@ -114,10 +114,9 @@ function matchesJobType(job: AshbyJob, filter: JobTypeFilter): boolean {
   return true;
 }
 
-type LocationFilter = 'all' | 'remote' | 'nyc' | 'sf' | 'seattle' | 'austin' | 'boston' | 'nj';
+type LocationFilter = 'remote' | 'nyc' | 'sf' | 'seattle' | 'austin' | 'boston' | 'nj';
 
 const LOCATION_FILTER_OPTIONS: { value: LocationFilter; label: string }[] = [
-  { value: 'all',     label: 'All locations' },
   { value: 'remote',  label: 'Remote' },
   { value: 'nyc',     label: 'New York' },
   { value: 'sf',      label: 'San Francisco' },
@@ -127,27 +126,30 @@ const LOCATION_FILTER_OPTIONS: { value: LocationFilter; label: string }[] = [
   { value: 'nj',      label: 'New Jersey' },
 ];
 
-function matchesLocation(job: AshbyJob, filter: LocationFilter): boolean {
-  if (filter === 'all') return true;
+function matchesLocation(job: AshbyJob, filters: Set<LocationFilter>): boolean {
+  if (filters.size === 0) return true;
   const loc = (job.location ?? '').toLowerCase();
-  if (filter === 'remote') return job.isRemote;
-  if (filter === 'nyc') return /new york|, ny\b/.test(loc);
-  if (filter === 'sf') return /san francisco|bay area|, ca\b|south bay|menlo park|palo alto|mountain view|sunnyvale|san jose/.test(loc);
-  if (filter === 'seattle') return /seattle|, wa\b|bellevue|redmond/.test(loc);
-  if (filter === 'austin') return /austin|, tx\b/.test(loc);
-  if (filter === 'boston') return /boston|cambridge|, ma\b/.test(loc);
-  if (filter === 'nj') return /new jersey|, nj\b/.test(loc);
-  return true;
+  return Array.from(filters).some(f => {
+    if (f === 'remote') return job.isRemote;
+    if (f === 'nyc') return /new york|, ny\b/.test(loc);
+    if (f === 'sf') return /san francisco|bay area|, ca\b|south bay|menlo park|palo alto|mountain view|sunnyvale|san jose/.test(loc);
+    if (f === 'seattle') return /seattle|, wa\b|bellevue|redmond/.test(loc);
+    if (f === 'austin') return /austin|, tx\b/.test(loc);
+    if (f === 'boston') return /boston|cambridge|, ma\b/.test(loc);
+    if (f === 'nj') return /new jersey|, nj\b/.test(loc);
+    return false;
+  });
 }
 
-type ExperienceFilter = 'all' | 'mid' | 'senior' | 'staff' | 'leadership';
+type ExperienceFilter = 'all' | 'apm' | 'mid' | 'senior' | 'staff' | 'leadership';
 
 const EXPERIENCE_FILTER_OPTIONS: { value: ExperienceFilter; label: string; description: string }[] = [
-  { value: 'all',        label: 'All levels',    description: '' },
-  { value: 'mid',        label: 'Product Manager', description: 'PM, Product Lead' },
-  { value: 'senior',     label: 'Senior',        description: 'Senior PM, Sr. PM' },
+  { value: 'all',        label: 'All levels',       description: '' },
+  { value: 'apm',        label: 'APM',              description: 'Associate PM, New Grad' },
+  { value: 'mid',        label: 'Product Manager',  description: 'PM, Product Lead' },
+  { value: 'senior',     label: 'Senior',           description: 'Senior PM, Sr. PM' },
   { value: 'staff',      label: 'Staff / Principal', description: 'Staff, Principal, Group PM' },
-  { value: 'leadership', label: 'Leadership',    description: 'Head of, Director, VP, CPO' },
+  { value: 'leadership', label: 'Leadership',       description: 'Head of, Director, VP, CPO' },
 ];
 
 function matchesExperience(title: string, filter: ExperienceFilter): boolean {
@@ -156,10 +158,12 @@ function matchesExperience(title: string, filter: ExperienceFilter): boolean {
   const isLeadership = /\b(head of|director|vp |vice president|chief product|cpo)\b/.test(t);
   const isStaff = /\b(staff|principal|group product|group pm)\b/.test(t);
   const isSenior = /\b(senior|sr\.?)\b/.test(t);
+  const isAPM = /\b(associate|apm|new.?grad|entry.?level)\b/.test(t);
   if (filter === 'leadership') return isLeadership;
   if (filter === 'staff') return !isLeadership && isStaff;
   if (filter === 'senior') return !isLeadership && !isStaff && isSenior;
-  if (filter === 'mid') return !isLeadership && !isStaff && !isSenior;
+  if (filter === 'apm') return !isLeadership && !isStaff && !isSenior && isAPM;
+  if (filter === 'mid') return !isLeadership && !isStaff && !isSenior && !isAPM;
   return true;
 }
 
@@ -233,7 +237,7 @@ export default function JobverseApp() {
   const [jobTypeFilter, setJobTypeFilter] = useState<JobTypeFilter>('all');
   const [jobTypeDropdownOpen, setJobTypeDropdownOpen] = useState(false);
   const jobTypeDropdownRef = useRef<HTMLDivElement>(null);
-  const [locationFilter, setLocationFilter] = useState<LocationFilter>('all');
+  const [locationFilters, setLocationFilters] = useState<Set<LocationFilter>>(new Set());
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
   const locationDropdownRef = useRef<HTMLDivElement>(null);
   const [jobs, setJobs] = useState<AshbyJob[]>([]);
@@ -325,7 +329,7 @@ export default function JobverseApp() {
     })();
     const matchesExperienceLevel = matchesExperience(job.title, experienceFilter);
     const matchesType = matchesJobType(job, jobTypeFilter);
-    const matchesLoc = matchesLocation(job, locationFilter);
+    const matchesLoc = matchesLocation(job, locationFilters);
     return matchesSearch && matchesDate && matchesSalary && matchesExperienceLevel && matchesType && matchesLoc;
   });
 
@@ -720,33 +724,55 @@ export default function JobverseApp() {
                 )}
               </div>
 
-              {/* Location dropdown */}
+              {/* Location dropdown — multi-select */}
               <div className="relative" ref={locationDropdownRef}>
                 <button
                   onClick={() => setLocationDropdownOpen(o => !o)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-sm border ${
-                    locationFilter !== 'all'
+                    locationFilters.size > 0
                       ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
                       : 'bg-white border-[#E2E8F0] text-slate-700 hover:bg-slate-50 hover:border-slate-300'
                   }`}
                 >
                   <MapPin size={14} />
-                  {LOCATION_FILTER_OPTIONS.find(o => o.value === locationFilter)?.label ?? 'Location'}
-                  <ChevronDown size={14} className={`transition-transform ${locationDropdownOpen ? 'rotate-180' : ''} ${locationFilter !== 'all' ? 'text-indigo-400' : 'text-slate-400'}`} />
+                  {locationFilters.size === 0
+                    ? 'Location'
+                    : locationFilters.size === 1
+                      ? LOCATION_FILTER_OPTIONS.find(o => locationFilters.has(o.value))?.label
+                      : `${locationFilters.size} locations`}
+                  <ChevronDown size={14} className={`transition-transform ${locationDropdownOpen ? 'rotate-180' : ''} ${locationFilters.size > 0 ? 'text-indigo-400' : 'text-slate-400'}`} />
                 </button>
                 {locationDropdownOpen && (
-                  <div className="absolute top-full mt-2 left-0 z-30 w-44 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1 overflow-hidden">
-                    {LOCATION_FILTER_OPTIONS.map(opt => (
-                      <button
-                        key={opt.value}
-                        onClick={() => { setLocationFilter(opt.value); setLocationDropdownOpen(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
-                          locationFilter === opt.value ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
+                  <div className="absolute top-full mt-2 left-0 z-30 w-48 bg-white border border-[#E2E8F0] rounded-xl shadow-lg py-1.5 overflow-hidden">
+                    {LOCATION_FILTER_OPTIONS.map(opt => {
+                      const active = locationFilters.has(opt.value);
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => setLocationFilters(prev => {
+                            const next = new Set(prev);
+                            active ? next.delete(opt.value) : next.add(opt.value);
+                            return next;
+                          })}
+                          className={`w-full text-left px-4 py-2.5 text-sm font-medium flex items-center justify-between transition-colors ${
+                            active ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {opt.label}
+                          {active && <span className="text-indigo-500 text-xs font-bold">✓</span>}
+                        </button>
+                      );
+                    })}
+                    {locationFilters.size > 0 && (
+                      <div className="border-t border-slate-100 mt-1 pt-1">
+                        <button
+                          onClick={() => setLocationFilters(new Set())}
+                          className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                          Clear all
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -880,8 +906,8 @@ export default function JobverseApp() {
                       Clear type ×
                     </button>
                   )}
-                  {locationFilter !== 'all' && (
-                    <button onClick={() => setLocationFilter('all')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors">
+                  {locationFilters.size > 0 && (
+                    <button onClick={() => setLocationFilters(new Set())} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full transition-colors">
                       Clear location ×
                     </button>
                   )}
