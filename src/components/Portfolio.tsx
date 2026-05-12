@@ -235,19 +235,19 @@ export default function Portfolio() {
               <div className="relative mb-10">
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-[#D8B4FE]/30" />
                 <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  635+ PM roles pulled daily from Ashby, Greenhouse, and Lever across 125+ companies. Filter by experience level, salary, job type, and location. Star dream companies to surface their roles first.
+                  635+ PM roles pulled daily from Ashby and Greenhouse across 200+ companies. Filter by experience level, salary, type, and location. Star dream companies to surface their roles first.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-10">
-                {['React / TypeScript', 'Ashby · Greenhouse · Lever', 'Refreshed Daily'].map(tag => (
+                {['React / TypeScript', 'Ashby · Greenhouse', 'Refreshed Daily'].map(tag => (
                   <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#D8B4FE]/10 text-[#D8B4FE]/80 border border-[#D8B4FE]/20 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
 
               <div className="flex flex-col gap-3">
                 <Link to="/jobverse" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-purple-600 to-[#D8B4FE] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(168,85,247,0.45)]">
-                  View Concept <ChevronRight size={14} />
+                  Explore Jobverse <ChevronRight size={14} />
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => openModal('prd-4')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
@@ -642,9 +642,92 @@ export default function Portfolio() {
                       </div>
                     </div>
 
+                    {/* Target Audience */}
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">3. Target Audience & Personas</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-[#C5A059]/10 flex items-center justify-center text-[#C5A059] font-bold">1</div>
+                            <h3 className="font-bold text-lg text-[#1A1C1E]">The Dual-Income Household</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Primary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-[#3D4347]">
+                            HHI $150K–$300K. They earn well but feel financially reactive. <strong>Top anxieties:</strong> car insurance renewals, property taxes, holiday spending, and daycare lump sums arriving without warning.
+                          </p>
+                        </div>
+                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-[#C5A059]/10 flex items-center justify-center text-[#C5A059] font-bold">2</div>
+                            <h3 className="font-bold text-lg text-[#1A1C1E]">The Self-Employed Professional</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Secondary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-[#3D4347]">
+                            Freelancers and consultants with variable monthly income. <strong>Top priority:</strong> Knowing exactly how much to set aside each month so irregular tax obligations and business expenses never create a cash crunch.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* OKRs */}
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">4. Goals & Success Metrics (OKRs)</h2>
+                      <div className="overflow-x-auto mt-4">
+                        <table className="w-full border-collapse text-[15px]">
+                          <thead>
+                            <tr>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Objective</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Key Result</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Target</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Prove core utility</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Sessions where ≥1 orbit expense is added</td>
+                              <td className="p-4 border-b border-slate-100 text-[#C5A059] font-mono font-semibold">&gt; 55%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Drive surplus awareness</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Users who view the 12-month grid after setup</td>
+                              <td className="p-4 border-b border-slate-100 text-[#C5A059] font-mono font-semibold">&gt; 70%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Build retention</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">D30 Return Rate</td>
+                              <td className="p-4 border-b border-slate-100 text-[#C5A059] font-mono font-semibold">&gt; 30%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Validate AI layer</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Wealth Coach queries per active user / month</td>
+                              <td className="p-4 border-b border-slate-100 text-[#C5A059] font-mono font-semibold">&gt; 2.5</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Competitive Landscape */}
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">5. Competitive Landscape</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        {[
+                          { name: 'YNAB', gap: 'Forces zero-based budgeting on a 30-day cycle. Has no concept of a 12-month orbit or sinking fund visualizer. High learning curve.' },
+                          { name: 'Copilot / Monarch', gap: 'Beautiful transaction categorization, but purely backward-looking. Cannot project forward-looking annual cash flow or model "what if I buy a new car in October?"' },
+                          { name: 'Mint (defunct)', gap: 'Confirmed product-market fit for this segment before shutdown. Its absence is the direct market opportunity Orbit is built to fill.' },
+                        ].map((c, i) => (
+                          <div key={i} className="bg-[#1A1A1A] rounded-lg p-5 border border-[#333]">
+                            <div className="font-bold text-[#C5A059] mb-2">{c.name}</div>
+                            <p className="text-[14px] text-slate-400 leading-relaxed">{c.gap}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="mt-4 text-[14px] text-[#6E8A96] italic">Orbit's wedge: the only tool built around <strong className="text-slate-300">annual</strong> cash flow, not the monthly cycle.</p>
+                    </div>
+
                     {/* Core Features */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">3. Core Features (MVP)</h2>
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">6. Core Features (MVP)</h2>
                       <div className="space-y-6 mt-6">
                         <div className="border border-[#EEEEEF] rounded-lg p-6 bg-green-50/30">
                           <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
@@ -677,6 +760,24 @@ export default function Portfolio() {
                       </div>
                     </div>
 
+                    {/* Out of Scope */}
+                    <div className="mb-8">
+                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">7. Out of Scope (v1.0)</h2>
+                      <ul className="list-none space-y-3 mt-4">
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-[#3D4347]"><strong>Bank API / Plaid Integration:</strong> v1 relies on manual entry and statement uploads. Real-time account sync is deferred to avoid auth complexity and compliance scope in MVP.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-[#3D4347]"><strong>Investment Portfolio Tracking:</strong> Orbit focuses on cash flow and spending, not asset growth. Brokerage account integration is a V4 feature.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-[#3D4347]"><strong>Multi-User / Household Sync:</strong> Shared budgeting between partners is a compelling V2 feature but adds significant auth and state complexity. Out of scope for v1.</span>
+                        </li>
+                      </ul>
+                    </div>
 
                   </div>
                 </>
@@ -819,10 +920,10 @@ export default function Portfolio() {
                           ]
                         },
                         { 
-                          badge: 'V3 — Wealth & Analysis', 
-                          badgeClass: 'bg-green-50 text-green-700 border border-green-100', 
-                          title: 'Deployment & Insights', 
-                          time: 'Q2 2026',
+                          badge: 'V3 — Wealth & Analysis',
+                          badgeClass: 'bg-slate-50 text-slate-500 border border-slate-200',
+                          title: 'Deployment & Insights',
+                          time: 'Q3 2026',
                           items: [
                             { t: 'Surplus Deployment', d: 'Actionable strategies for deploying annual surplus into investments.', s: 'Discovery', dot: 'bg-green-600' },
                             { t: 'Category Drill-downs', d: 'Interactive sub-categorization (e.g. Food → Groceries/Dining).', s: 'Next', dot: 'bg-blue-600' },
@@ -836,7 +937,7 @@ export default function Portfolio() {
                           time: 'Q3 2026+',
                           items: [
                             { t: 'Dynamic Orbit Sync', d: 'Auto-adjust reserve goals based on real-time spend trends.', s: 'Backlog', dot: 'bg-slate-400' },
-                            { t: 'Wealth Simulator', d: 'Comprehensive retirement modeling and scenario analysis.', s: 'In Progress', dot: 'bg-slate-400' },
+                            { t: 'Wealth Simulator', d: 'Comprehensive retirement modeling and scenario analysis.', s: 'Backlog', dot: 'bg-slate-400' },
                           ]
                         }
                       ].map((phase, i) => (
@@ -902,7 +1003,57 @@ export default function Portfolio() {
                         <li><strong>The Data Nerd:</strong> Users who want to see the historical trends and understand the "why" behind pricing before booking.</li>
                       </ul>
 
-                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">3. Core Features (MVP)</h2>
+                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">3. Goals & Success Metrics (OKRs)</h2>
+                      <div className="overflow-x-auto mb-8">
+                        <table className="w-full border-collapse text-[15px]">
+                          <thead>
+                            <tr>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Objective</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Key Result</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Target</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Prove core utility</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Sessions where a route is searched and trend chart viewed</td>
+                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 60%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Validate collaboration feature</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Trip Crews created per 100 users</td>
+                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 20</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Drive AI engagement</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Seasonality insight panel opened per session</td>
+                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 45%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Build retention</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">D7 Return Rate (same route checked again)</td>
+                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 35%</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">4. Competitive Landscape</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        {[
+                          { name: 'Google Flights', gap: 'Excellent price calendar but zero collaboration. No trend context, no AI insight, no shared group decision layer.' },
+                          { name: 'Hopper', gap: 'Predicts price direction (buy/wait) but is a black box. No chart, no history, no crew coordination. Single-user only.' },
+                          { name: 'Kayak / Skyscanner', gap: 'Aggregation tools, not intelligence tools. Show current prices but provide no seasonality context or trend visualization.' },
+                        ].map((c, i) => (
+                          <div key={i} className="bg-slate-50 rounded-lg p-5 border border-slate-100">
+                            <div className="font-bold text-[#137D97] mb-2">{c.name}</div>
+                            <p className="text-[14px] text-slate-500 leading-relaxed">{c.gap}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[14px] text-slate-400 italic mb-8">Waves' wedge: the only tool that combines <strong className="text-slate-600">trend visualization + AI context + group collaboration</strong> in one place.</p>
+
+                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">5. Core Features (MVP)</h2>
                       <div className="space-y-6 mb-8">
                         <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
                           <h4 className="font-bold text-slate-900 text-xl mb-2 flex items-center gap-2"><span className="text-[#137D97]">01.</span> Price Trend Visualization</h4>
@@ -918,6 +1069,21 @@ export default function Portfolio() {
                         </div>
                       </div>
 
+                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4 mt-12">6. Out of Scope (v1.0)</h2>
+                      <ul className="list-none space-y-3 mb-8">
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-slate-600"><strong>Live Flight Booking:</strong> v1 is a research and intelligence tool. Actual ticket purchasing is deferred to V3 via deep-link partnerships, not in-app checkout.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-slate-600"><strong>Hotels & Accommodation:</strong> Flights are the most price-volatile travel cost and the clearest wedge. Hotel intelligence is a natural V3 expansion after the core loop is validated.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-slate-600"><strong>Real-Time Price Alerts (v1):</strong> Push notifications require a backend job scheduler. v1 uses mock trend data; live alerts ship in V2 alongside the Skyscanner API integration.</span>
+                        </li>
+                      </ul>
 
                     </div>
                   </div>
@@ -932,7 +1098,7 @@ export default function Portfolio() {
                         <span className="font-serif font-bold text-slate-900 italic">Waves</span>
                       </div>
                       <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-600"></span> Status: Live (v1.0)</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Status: Coming Soon</span>
                         <span>|</span>
                         <span>Author: TShaikh92</span>
                         <span>|</span>
@@ -1005,19 +1171,293 @@ export default function Portfolio() {
                   </div>
                 </>
               )}
-              {(activeModal === 'prd-4' || activeModal === 'roadmap-4') && (
-                <div className="bg-[#140E22] p-20 text-center min-h-[400px] flex flex-col items-center justify-center">
-                  <div className="font-mono text-[11px] uppercase tracking-widest text-[#D8B4FE] mb-6 bg-[#D8B4FE]/10 px-4 py-1.5 rounded-full border border-[#D8B4FE]/20">Documentation in Progress</div>
-                  <h2 className="text-5xl font-serif font-bold text-white mb-6 italic">Jobverse</h2>
-                  <p className="text-slate-400 max-w-md mx-auto leading-[1.8] text-lg">
-                    The Product Requirements and Strategic Roadmap for Jobverse are currently being visualized.
-                  </p>
-                  <div className="mt-12 flex gap-4">
-                    <div className="w-12 h-1 bg-[#D8B4FE]/20 rounded-full overflow-hidden">
-                      <div className="w-2/3 h-full bg-[#D8B4FE] animate-pulse"></div>
+              {activeModal === 'prd-4' && (
+                <>
+                  <div className="px-10 py-8 border-b border-[#2A1F3D] flex items-start justify-between gap-4 bg-[#140E22] sticky top-0 z-10">
+                    <div>
+                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#D8B4FE] mb-2">Product Requirements Document</div>
+                      <div className="text-4xl leading-none">
+                        <span className="font-serif font-bold italic text-white">Jobverse</span>
+                      </div>
+                      <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400"></span> Status: In Progress</span>
+                        <span>|</span>
+                        <span>Author: TShaikh92</span>
+                        <span>|</span>
+                        <span>Target: Q2 2026</span>
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-white transition-colors">✕</button>
+                  </div>
+
+                  <div className="p-10 bg-white">
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#D8B4FE]/20">1. Executive Summary</h2>
+                      <div className="bg-[#140E22] border-l-4 border-[#D8B4FE] px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-300 italic rounded-r-md">
+                        "Finding a PM role means monitoring 5+ job boards daily, most of which are noisy and unfocused. Jobverse pulls every relevant posting into one aggregated, filterable feed — refreshed daily, PM-only."
+                      </div>
+                      <p className="text-[16px] leading-[1.8] text-slate-600">
+                        Jobverse is a curated PM job board that aggregates postings from Ashby and Greenhouse across 200+ companies, filters to product management roles only, and surfaces salary, location, experience level, and source — all in one interface. Users can save dream companies to prioritize their roles at the top of every search.
+                      </p>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#D8B4FE]/20">2. Problem Statement</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                        <div>
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-purple-500 mb-3">The User Pain</h3>
+                          <p className="text-[15px] leading-[1.7] text-slate-600 mb-4">
+                            Active PM job seekers check LinkedIn, Greenhouse, Ashby job boards, and company career pages separately — often daily. Roles disappear quickly and there's no single view of what's open at the companies they care about.
+                          </p>
+                          <p className="text-[15px] leading-[1.7] text-slate-600">
+                            General job boards (LinkedIn, Indeed) are flooded with irrelevant results and sponsored noise. PM-specific boards are either paywalled or rarely updated.
+                          </p>
+                        </div>
+                        <div className="bg-[#140E22] p-5 rounded-lg border border-[#2A1F3D]">
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-[#D8B4FE] mb-3">The Goal</h3>
+                          <p className="text-[15px] leading-[1.7] text-slate-300">
+                            Build the PM job seeker's daily home base: a zero-noise, high-signal feed that surfaces relevant roles faster than checking boards manually — with enough context (salary, remote, experience tier) to decide in seconds whether to apply.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#D8B4FE]/20">3. Target Audience & Personas</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div className="border border-slate-100 rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 font-bold">1</div>
+                            <h3 className="font-bold text-lg text-slate-900">The Active Candidate</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Primary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
+                            Mid-level PM (3–7 yrs) actively interviewing. Checks job boards daily. <strong>Top needs:</strong> salary transparency, remote-first filter, and a shortlist of target companies surfaced first.
+                          </p>
+                        </div>
+                        <div className="border border-slate-100 rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 font-bold">2</div>
+                            <h3 className="font-bold text-lg text-slate-900">The Passive Watcher</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Secondary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
+                            Employed PM who isn't urgently searching but wants to stay aware of the market. <strong>Top need:</strong> a low-friction weekly pulse check — see what's open at dream companies without a full job search session.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#D8B4FE]/20">4. Goals & Success Metrics (OKRs)</h2>
+                      <div className="overflow-x-auto mt-4">
+                        <table className="w-full border-collapse text-[15px]">
+                          <thead>
+                            <tr>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Objective</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Key Result</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Target</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Prove feed quality</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Sessions with ≥1 job card clicked (Apply / Save)</td>
+                              <td className="p-4 border-b border-slate-100 text-purple-600 font-mono font-semibold">&gt; 50%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Validate dream company feature</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">Users who star ≥1 company per session</td>
+                              <td className="p-4 border-b border-slate-100 text-purple-600 font-mono font-semibold">&gt; 30%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Build daily habit</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">D7 Return Rate</td>
+                              <td className="p-4 border-b border-slate-100 text-purple-600 font-mono font-semibold">&gt; 40%</td>
+                            </tr>
+                            <tr className="hover:bg-slate-50 transition-colors">
+                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Maximize data freshness</td>
+                              <td className="p-4 border-b border-slate-100 text-slate-600">% of listings posted within last 7 days</td>
+                              <td className="p-4 border-b border-slate-100 text-purple-600 font-mono font-semibold">&gt; 60%</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#D8B4FE]/20">5. Competitive Landscape</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        {[
+                          { name: 'LinkedIn Jobs', gap: 'Dominant but noisy. Sponsored listings, non-PM roles, and recruiter spam dilute the feed. No salary transparency without Premium.' },
+                          { name: 'Pallet / Teal', gap: 'PM-adjacent job boards but manually curated, slow to update, and don\'t pull directly from ATS sources. Limited company coverage.' },
+                          { name: 'Company Career Pages', gap: 'The ground truth — but requires visiting 200+ pages individually. No aggregation, no unified filters, no salary view.' },
+                        ].map((c, i) => (
+                          <div key={i} className="bg-[#140E22] rounded-lg p-5 border border-[#2A1F3D]">
+                            <div className="font-bold text-[#D8B4FE] mb-2">{c.name}</div>
+                            <p className="text-[14px] text-slate-400 leading-relaxed">{c.gap}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="mt-4 text-[14px] text-slate-400 italic">Jobverse's wedge: <strong className="text-slate-600">direct ATS source + PM-only filter + salary context + dream company prioritization</strong> — no noise, no paywall.</p>
+                    </div>
+
+                    <div className="mb-8">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#D8B4FE]/20">6. Out of Scope (v1.0)</h2>
+                      <ul className="list-none space-y-3 mt-4">
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-slate-600"><strong>User Accounts / Application Tracking:</strong> Tracking applied jobs and interview stages is a V2 feature. v1 is a discovery and filtering tool, not a full ATS.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-slate-600"><strong>Email / Push Alerts:</strong> Real-time new-role notifications for starred companies require backend infrastructure. Deferred to V2 after core loop is validated.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-red-700 font-bold mt-0.5">✕</span>
+                          <span className="text-[15px] text-slate-600"><strong>Non-PM Roles:</strong> Expanding to engineering, design, or other functions would dilute the PM-first identity and increase noise. Out of scope permanently unless spun into a separate product.</span>
+                        </li>
+                      </ul>
                     </div>
                   </div>
-                </div>
+                </>
+              )}
+              {activeModal === 'roadmap-4' && (
+                <>
+                  {/* Sticky header */}
+                  <div className="px-10 py-8 border-b border-[#2A1F3D] flex items-start justify-between gap-4 bg-[#140E22] sticky top-0 z-10">
+                    <div>
+                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#D8B4FE] mb-2">Product Roadmap</div>
+                      <div className="text-4xl leading-none">
+                        <span className="font-serif font-bold italic text-white">Jobverse</span>
+                      </div>
+                      <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400"></span> Status: In Progress</span>
+                        <span>|</span><span>Author: TShaikh92</span>
+                        <span>|</span><span>Updated: May 2026</span>
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-white transition-colors">✕</button>
+                  </div>
+
+                  {/* North Star banner */}
+                  <div className="bg-[#140E22] px-10 py-12 border-b border-[#2A1F3D]">
+                    <div className="max-w-3xl">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#D8B4FE]/60 mb-4">North Star</div>
+                      <p className="text-[26px] md:text-[32px] font-black text-white leading-[1.2] tracking-tight mb-6">
+                        The PM job seeker's daily home base —<br className="hidden md:block" />
+                        <span className="text-[#D8B4FE]">zero noise, every relevant role, one view.</span>
+                      </p>
+                      <div className="flex flex-wrap gap-8 mt-8">
+                        {[
+                          { label: 'Target Metric', value: '> 40% D7 Return' },
+                          { label: 'Coverage Goal', value: '500+ Companies' },
+                          { label: 'Data Freshness', value: 'Refreshed Nightly' },
+                        ].map((s, i) => (
+                          <div key={i}>
+                            <div className="font-mono text-[10px] uppercase tracking-widest text-[#D8B4FE]/50 mb-1">{s.label}</div>
+                            <div className="text-white font-black text-[18px]">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Timeline */}
+                  <div className="bg-white">
+                    {[
+                      {
+                        phase: '01',
+                        badge: 'Now',
+                        badgeBg: 'bg-amber-400',
+                        badgeText: 'text-amber-900',
+                        title: 'Signal',
+                        sub: 'Build the feed people come back to daily',
+                        time: 'Q2 2026',
+                        accent: 'border-amber-400',
+                        items: [
+                          { t: 'ATS Aggregation Engine', d: 'Pull from Ashby + Greenhouse across 200+ companies, filtered to PM-only keywords. No noise.', s: 'Done', dot: 'bg-green-500' },
+                          { t: 'Filter Suite', d: 'Experience level, salary, remote/hybrid/onsite, location. Instant client-side results.', s: 'Done', dot: 'bg-green-500' },
+                          { t: 'Dream Company Mode', d: 'Star any company to surface its roles at the top of every board session.', s: 'Done', dot: 'bg-green-500' },
+                          { t: 'Nightly Refresh via CI', d: 'GitHub Actions regenerates jobs.json each night so listings never go stale.', s: 'In Progress', dot: 'bg-amber-400' },
+                        ]
+                      },
+                      {
+                        phase: '02',
+                        badge: 'Next',
+                        badgeBg: 'bg-[#D8B4FE]',
+                        badgeText: 'text-purple-900',
+                        title: 'Memory',
+                        sub: 'Make the tool know who you are',
+                        time: 'Q3 2026',
+                        accent: 'border-[#D8B4FE]',
+                        items: [
+                          { t: 'User Accounts & Persistence', d: 'Auth layer so dream companies, saved roles, and filters survive across sessions and devices.', s: 'Planned', dot: 'bg-[#D8B4FE]' },
+                          { t: 'New Role Alerts', d: 'Daily or weekly email digest when a starred company posts a new PM opening.', s: 'Planned', dot: 'bg-[#D8B4FE]' },
+                          { t: 'Application Kanban', d: 'Lightweight tracker: Applied → Interviewing → Offer. No context-switching to another tool.', s: 'Planned', dot: 'bg-[#D8B4FE]' },
+                        ]
+                      },
+                      {
+                        phase: '03',
+                        badge: 'Later',
+                        badgeBg: 'bg-slate-200',
+                        badgeText: 'text-slate-600',
+                        title: 'Intelligence',
+                        sub: 'Surface market insight, not just listings',
+                        time: 'Q4 2026',
+                        accent: 'border-slate-300',
+                        items: [
+                          { t: 'Salary Benchmarking', d: 'Median comp by title, level, and city derived from all aggregated postings — no third-party data buy needed.', s: 'Discovery', dot: 'bg-slate-400' },
+                          { t: 'Hiring Velocity Signal', d: 'Track whether a company is rapidly adding PM headcount or quietly pulling back. Read the market.', s: 'Discovery', dot: 'bg-slate-400' },
+                          { t: 'AI Role Fit Scoring', d: 'User defines 3–5 priorities (early stage, Series B, fintech, etc.) and Jobverse scores every listing against them.', s: 'Discovery', dot: 'bg-slate-400' },
+                        ]
+                      },
+                      {
+                        phase: '04',
+                        badge: 'Vision',
+                        badgeBg: 'bg-slate-100',
+                        badgeText: 'text-slate-400',
+                        title: 'Network',
+                        sub: 'From job board to career layer',
+                        time: 'Q1 2027+',
+                        accent: 'border-slate-200',
+                        items: [
+                          { t: 'Warm Referral Layer', d: 'Match job seekers with PMs already at target companies. The difference between a cold apply and a referral is often the role.', s: 'Backlog', dot: 'bg-slate-300' },
+                          { t: 'Company-Specific Interview Guides', d: 'Community-sourced PM interview questions and formats, tied to specific companies in the board.', s: 'Backlog', dot: 'bg-slate-300' },
+                          { t: 'Monetization', d: 'Recruiter access to a curated PM talent pool, or featured placement for hiring companies. Revenue follows proven utility.', s: 'Backlog', dot: 'bg-slate-300' },
+                        ]
+                      },
+                    ].map((phase, i) => (
+                      <div key={i} className={`border-l-4 ${phase.accent} px-10 py-10 border-b border-slate-100 last:border-b-0`}>
+                        <div className="flex flex-col md:flex-row md:items-start gap-8">
+                          {/* Phase label */}
+                          <div className="md:w-56 shrink-0">
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className={`font-mono text-[10px] font-black px-2.5 py-1 uppercase tracking-widest rounded ${phase.badgeBg} ${phase.badgeText}`}>{phase.badge}</span>
+                              <span className="font-mono text-[10px] text-slate-300 uppercase tracking-widest">{phase.time}</span>
+                            </div>
+                            <div className="font-black text-[48px] leading-none text-slate-100 select-none">{phase.phase}</div>
+                            <h3 className="font-serif text-[22px] font-bold text-slate-900 mt-1">{phase.title}</h3>
+                            <p className="text-[13px] text-slate-400 mt-1 leading-relaxed">{phase.sub}</p>
+                          </div>
+                          {/* Items */}
+                          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {phase.items.map((item, j) => (
+                              <div key={j} className="bg-slate-50 rounded-xl p-5 hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-slate-100">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className={`w-2 h-2 rounded-full shrink-0 ${item.dot}`} />
+                                  <span className="font-mono text-[9px] uppercase tracking-wider text-slate-400">{item.s}</span>
+                                </div>
+                                <h4 className="font-bold text-[14px] text-slate-900 leading-snug mb-2">{item.t}</h4>
+                                <p className="text-[13px] text-slate-500 leading-relaxed">{item.d}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </motion.div>
           </motion.div>
