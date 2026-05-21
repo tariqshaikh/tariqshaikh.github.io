@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, MapPin, Briefcase, DollarSign, Clock, Heart, ArrowRight, Filter, ChevronDown, Bell, Bookmark, Settings, Home, Building2, User, RefreshCw, Loader2, Calendar, Star, X } from 'lucide-react';
 import { fetchAshbyJobs, AshbyJob } from '../../services/ashbyService';
+import { logVisit } from '../../lib/analytics';
 
 const SAVED_JOBS_KEY = 'jobverse_saved';
 const DREAM_COMPANIES_KEY = 'jobverse_dream_companies';
@@ -262,6 +263,7 @@ export default function JobverseApp() {
 
   useEffect(() => {
     loadJobs();
+    logVisit('/jobverse');
   }, [loadJobs]);
 
   useEffect(() => {
