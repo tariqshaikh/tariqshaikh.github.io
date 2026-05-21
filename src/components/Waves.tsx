@@ -966,48 +966,77 @@ export default function Waves() {
     } else {
       if (!forTrip) setIsSearching(true);
       setError(null);
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        const msg = "AI search is not configured. Add your Gemini API key to .env to enable live destination lookup.";
+        if (forTrip) throw new Error(msg);
+        setError(msg);
+        if (!forTrip) setIsSearching(false);
+        return null;
+      }
+
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const prompt = `
-          You are an expert travel planner with deep local knowledge. The user wants to travel to: ${dest}.
-          Provide a comprehensive, highly detailed destination guide with insider knowledge a typical tourist wouldn't know.
-          Format the response exactly as a JSON object with these keys:
-          - "title": Catchy 2-word title (e.g., "The Ultimate").
-          - "subtitle": Destination tagline (e.g., "Kyoto Experience").
-          - "summary": 2-3 sentences summarizing the vibe and overall appeal.
-          - "whyVisit": 2-3 sentences on why people visit this location.
-          - "whenToVisit": 2-3 sentences on the best times to visit and crowd levels.
-          - "averageDailySpend": Estimated average cost per day in USD (number).
-          - "seasons": { "high": "months string", "low": "months string", "shoulder": "months string" }
-          - "weatherCard": { "condition": "Sunny"|"Partly Cloudy"|"Rainy"|"Snow", "tempHigh": number, "tempLow": number, "note": string, "month": string }
-          - "monthlyData": Array of exactly 12 objects (Jan-Dec). Each: "month" (3-letter e.g. "JAN"), "flightCost" (round-trip USD number), "temp" (°F number), "condition": "Sunny"|"Partly Cloudy"|"Rainy"|"Snow", "note": "1-2 sentence local insight", "isIdeal" (boolean, max 3 true), "crowdLevel" (1-10).
-          - "foodAndCulture": {
-              "categories": [
-                { "title": "Breakfast & Morning Rituals", "items": [{ "name": string, "description": string, "imageKeyword": single-word-string }] },
-                { "title": "Lunch & Street Food", "items": [...] },
-                { "title": "Dinner & Fine Dining", "items": [...] },
-                { "title": "Drinks & Nightlife", "items": [...] }
-              ],
-              "mustTry": ["string — specific dish or experience"],
-              "culturalEtiquette": [{ "title": string, "description": string }]
-            }
-          - "topActivities": Array of exactly 6 objects: { "title": string, "description": string, "imageKeyword": single-word }
-          - "nicheActivities": Array of exactly 4 objects: { "title": string, "description": string, "imageKeyword": single-word }
-          - "seasonalHighlights": Array of exactly 5 objects: { "title": string, "description": string, "timeOfYear": string }
-          - "events": Array of 5 notable events/festivals: { "name": string, "month": "JAN"|"FEB"|"MAR"|"APR"|"MAY"|"JUN"|"JUL"|"AUG"|"SEP"|"OCT"|"NOV"|"DEC", "description": string, "type": "festival"|"cultural"|"sporting"|"food"|"music"|"market" }
-          - "insiderTips": Array of exactly 5 objects: { "tip": "specific actionable local insight", "category": "money"|"transport"|"food"|"culture"|"safety" }
-          - "neighborhoods": Array of 4 key neighborhoods: { "name": string, "vibe": 1-2 word descriptor, "bestFor": string, "mustSee": string }
-          - "practicalInfo": { "visa": string, "currency": string, "language": string, "tipping": string, "safety": string, "bestTransport": string, "budgetBreakdown": { "budget": "range+notes", "midRange": "range+notes", "luxury": "range+notes" } }
-        `;
-        
+        const ai = new GoogleGenAI({ apiKey });
+        const prompt = `You are an expert travel planner with deep local knowledge. The user wants to travel to: ${dest}.
+Provide a comprehensive destination guide with insider knowledge a typical tourist wouldn't know.
+Return ONLY a raw JSON object (no markdown, no code fences, no explanation) with exactly these keys:
+{
+  "title": "Catchy 2-word title e.g. The Ultimate",
+  "subtitle": "Destination tagline e.g. Kyoto Experience",
+  "summary": "2-3 sentences on vibe and appeal",
+  "whyVisit": "2-3 sentences on why people visit",
+  "whenToVisit": "2-3 sentences on best times and crowds",
+  "averageDailySpend": 150,
+  "seasons": { "high": "months", "low": "months", "shoulder": "months" },
+  "weatherCard": { "condition": "Sunny", "tempHigh": 75, "tempLow": 55, "note": "string", "month": "October" },
+  "monthlyData": [
+    { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "Local insight", "isIdeal": false, "crowdLevel": 4 }
+    ... 12 total, condition must be one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
+  ],
+  "foodAndCulture": {
+    "categories": [
+      { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "singleword" }] },
+      { "title": "Lunch & Street Food", "items": [...] },
+      { "title": "Dinner & Fine Dining", "items": [...] },
+      { "title": "Drinks & Nightlife", "items": [...] }
+    ],
+    "mustTry": ["specific dish or experience"],
+    "culturalEtiquette": [{ "title": "string", "description": "string" }]
+  },
+  "topActivities": [6 objects: { "title": "string", "description": "string", "imageKeyword": "singleword" }],
+  "nicheActivities": [4 objects: { "title": "string", "description": "string", "imageKeyword": "singleword" }],
+  "seasonalHighlights": [5 objects: { "title": "string", "description": "string", "timeOfYear": "string" }],
+  "events": [5 objects: { "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
+  "insiderTips": [5 objects: { "tip": "actionable local insight", "category": "money" }],
+  "neighborhoods": [4 objects: { "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
+  "practicalInfo": {
+    "visa": "string", "currency": "string", "language": "string",
+    "tipping": "string", "safety": "string", "bestTransport": "string",
+    "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
+  }
+}
+Valid event types: festival, cultural, sporting, food, music, market.
+Valid insiderTip categories: money, transport, food, culture, safety.`;
+
         const response = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.0-flash',
           contents: prompt,
           config: { responseMimeType: 'application/json' }
         });
-        
-        const text = response.text || "{}";
+
+        // Strip any accidental markdown code fences before parsing
+        let text = (response.text || '').trim();
+        text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+        if (!text || text === '{}') throw new Error('Empty response from AI');
+
         data = JSON.parse(text);
+
+        // Ensure required arrays exist (defensive merge)
+        if (!Array.isArray(data.monthlyData) || data.monthlyData.length !== 12) {
+          throw new Error('Malformed response: monthlyData missing');
+        }
+
         if (!forTrip) {
           setIntelligence(data);
           const currentMonthIdx = new Date().getMonth();
@@ -1016,12 +1045,20 @@ export default function Waves() {
           setHasSearched(true);
         }
       } catch (err: any) {
-        console.error("Failed to fetch insights:", err);
-        const limitReached = err?.message?.includes('429') || err?.message?.toLowerCase().includes('quota');
-        const msg = limitReached ? "Search limit reached. Please wait a minute." : "Failed to analyze destination.";
+        console.error("Waves AI error:", err);
+        const isQuota = err?.message?.includes('429') || err?.message?.toLowerCase().includes('quota');
+        const isKey = err?.message?.toLowerCase().includes('api key') || err?.message?.toLowerCase().includes('api_key');
+        const isJson = err instanceof SyntaxError || err?.message?.includes('JSON') || err?.message?.includes('Unexpected token');
+        const msg = isQuota
+          ? "Rate limit reached — please wait a minute and try again."
+          : isKey
+          ? "Invalid API key. Check your GEMINI_API_KEY in .env."
+          : isJson
+          ? "AI returned an unexpected format. Please try again."
+          : `Could not analyze "${dest}". Please try again.`;
         if (forTrip) throw new Error(msg);
         setError(msg);
-        setIsSearching(false);
+        if (!forTrip) setIsSearching(false);
         return null;
       }
     }
