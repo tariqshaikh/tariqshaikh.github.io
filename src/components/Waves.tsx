@@ -1020,7 +1020,7 @@ Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
+          model: 'gemini-1.5-flash',
           contents: prompt,
           config: { responseMimeType: 'application/json' }
         });
@@ -1045,17 +1045,22 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
           setHasSearched(true);
         }
       } catch (err: any) {
-        console.error("Waves AI error:", err);
-        const isQuota = err?.message?.includes('429') || err?.message?.toLowerCase().includes('quota');
-        const isKey = err?.message?.toLowerCase().includes('api key') || err?.message?.toLowerCase().includes('api_key');
-        const isJson = err instanceof SyntaxError || err?.message?.includes('JSON') || err?.message?.includes('Unexpected token');
+        const errMsg = err?.message || err?.toString() || '';
+        const errStatus = err?.status || err?.code || '';
+        console.error("Waves AI error — status:", errStatus, "message:", errMsg, "full:", err);
+        const isQuota = errStatus === 429 || errMsg.includes('429') || errMsg.toLowerCase().includes('resource_exhausted');
+        const isKey = errMsg.toLowerCase().includes('api key') || errMsg.toLowerCase().includes('api_key') || errStatus === 401 || errStatus === 403;
+        const isJson = err instanceof SyntaxError || errMsg.includes('JSON') || errMsg.includes('Unexpected token');
+        const isBilling = errMsg.toLowerCase().includes('billing') || errMsg.toLowerCase().includes('payment');
         const msg = isQuota
           ? "Rate limit reached — please wait a minute and try again."
+          : isBilling
+          ? "Billing not enabled on this API key. Enable it in Google Cloud Console."
           : isKey
           ? "Invalid API key. Check your GEMINI_API_KEY in .env."
           : isJson
           ? "AI returned an unexpected format. Please try again."
-          : `Could not analyze "${dest}". Please try again.`;
+          : `Could not analyze "${dest}" (${errStatus || 'unknown error'}). Check console for details.`;
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
