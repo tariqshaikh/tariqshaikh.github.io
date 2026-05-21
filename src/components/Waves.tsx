@@ -6,10 +6,9 @@ import {
   ThermometerSun, CheckCircle2, RefreshCw, Sparkles, Plane,
   Bookmark, SlidersHorizontal, Clock, AlertCircle,
   Copy, Link2, Ghost, Crown, DollarSign,
-  Lightbulb, Map, Info, Star, Wallet, ChevronRight
+  Lightbulb, Map as MapIcon, Info, Star, Wallet, ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GoogleGenAI } from '@google/genai';
 import { logVisit } from '../lib/analytics';
 import { db, auth } from '../firebase';
 import { 
@@ -88,6 +87,14 @@ interface TripIntelligence {
     tip: string;
     category: 'money' | 'transport' | 'food' | 'culture' | 'safety';
   }[];
+  topRestaurants?: {
+    name: string;
+    cuisine: string;
+    priceRange: string;
+    mustOrder: string;
+    neighborhood: string;
+    localTip: string;
+  }[];
   neighborhoods?: {
     name: string;
     vibe: string;
@@ -162,6 +169,14 @@ const fallbackIntelligence: TripIntelligence = {
         items: [
           { name: "Kaiseki Ryori", description: "A traditional multi-course Japanese dinner, a true culinary art form.", imageKeyword: "kaiseki" }
         ]
+      },
+      {
+        title: "Café Culture",
+        items: [
+          { name: "% Arabica Kyoto", description: "Minimalist third-wave coffee bar with garden views near the Philosopher's Path. Order the single-origin pour-over and take it outside — locals do.", imageKeyword: "arabica coffee kyoto" },
+          { name: "Café Bibliotic Hello!", description: "Two-floor literary café in Nakagyo ward with exposed brick, floor-to-ceiling bookshelves, and an honest espresso. Hidden gem with a loyal local following.", imageKeyword: "kyoto cafe books" },
+          { name: "WEEKENDERS COFFEE All Right", description: "Specialty micro-roaster tucked inside a converted machiya townhouse. The house blend is designed to pair with Kyoto's mineral water — complex and clean.", imageKeyword: "specialty coffee kyoto" }
+        ]
       }
     ],
     mustTry: ["Kyo-kaiseki", "Obanzai (Kyoto home cooking)", "Yatsuhashi (cinnamon mochi)"],
@@ -205,6 +220,12 @@ const fallbackIntelligence: TripIntelligence = {
     { tip: "A 1-day bus pass (¥700) covers every major site. Multi-day bus passes are a trap — the subway is faster for many routes.", category: "money" as const },
     { tip: "Book Kaiseki restaurants at least 3 months ahead during sakura season. Many only take reservations via hotel concierge.", category: "culture" as const },
     { tip: "Philosopher's Path is impassable with a stroller in April. Maruyama Park is the better family cherry blossom spot.", category: "safety" as const },
+  ],
+  topRestaurants: [
+    { name: "Kikunoi Honten", cuisine: "Kaiseki", priceRange: "$$$$", mustOrder: "Seasonal 10-course kaiseki omakase", neighborhood: "Higashiyama", localTip: "Book 2-3 months ahead via their website (kikunoi.jp). Request the chef's counter to watch plating. Lunch courses (¥13,200) are half the dinner price." },
+    { name: "Ippudo Ramen Kyoto", cuisine: "Ramen", priceRange: "$", mustOrder: "Shiromaru Classic with extra noodles (kaedama)", neighborhood: "Downtown Kyoto", localTip: "Open until 3am on weekends. Order firm noodles (katame) — they turn mushy fast in the broth." },
+    { name: "Nishiki Warai", cuisine: "Obanzai (Kyoto home cooking)", priceRange: "$$", mustOrder: "Seasonal obanzai set with yudofu and pickles", neighborhood: "Nishiki Market", localTip: "8-seat counter, no reservations. Arrive at 11:30am sharp or face a 45-minute wait. Cash only." },
+    { name: "Tankuma Kitamise", cuisine: "Kaiseki", priceRange: "$$$", mustOrder: "Lunch kaiseki bento (¥7,700)", neighborhood: "Gion", localTip: "Their lunch bento offers kaiseki quality at half the price. Easier to reserve than Kikunoi — book 3-4 weeks ahead." },
   ],
   neighborhoods: [
     { name: "Gion", vibe: "Historic", bestFor: "Geisha spotting, traditional architecture, upscale kaiseki restaurants", mustSee: "Hanamikoji Street at dusk, Gion Corner traditional arts shows" },
@@ -283,6 +304,14 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
             { name: "Steak Frites", description: "The quintessential bistro meal with herb butter.", imageKeyword: "steak" },
             { name: "Duck Confit", description: "Slow-cooked duck leg with crispy skin and tender meat.", imageKeyword: "duck" }
           ]
+        },
+        {
+          title: "Café Culture",
+          items: [
+            { name: "Café de Flore", description: "The grande dame of Saint-Germain. A café au lait and a croissant here isn't breakfast — it's a Paris rite of passage. Sit outside and watch the boulevard.", imageKeyword: "cafe de flore paris" },
+            { name: "Télescope Café", description: "Paris's first serious third-wave roaster, tucked in a 1st-arrondissement alley. Razor-sharp espresso with none of the tourist premium. Tiny — arrive early.", imageKeyword: "paris specialty coffee" },
+            { name: "Ten Belles", description: "Beloved Canal Saint-Martin café that put specialty coffee on the Paris map. Get the batch brew and a kouign-amann — tables on the canal feel earned.", imageKeyword: "canal saint martin coffee" }
+          ]
         }
       ],
       mustTry: ["Fresh Baguette from a Boulangerie", "Onion Soup Gratinée", "Coq au Vin", "Macarons from Ladurée"],
@@ -326,6 +355,12 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { tip: "'Menu du déjeuner' at bistros is 2-3 courses for €15-22. The exact same dinner costs 3× more. Always eat your main meal at lunch.", category: "food" as const },
       { tip: "The Eiffel Tower sparkles every hour after dark for exactly 5 minutes. Best spot is Trocadéro, not directly below.", category: "culture" as const },
       { tip: "Metro pickpockets work in groups. Keep your bag in front, especially at Châtelet-Les Halles, Montmartre, and tourist-heavy trains.", category: "safety" as const },
+    ],
+    topRestaurants: [
+      { name: "Le Comptoir du Relais", cuisine: "Classic Bistro", priceRange: "$$$", mustOrder: "Terrine maison and slow-roasted pork with lentils", neighborhood: "Saint-Germain-des-Prés", localTip: "Saturday dinner is a single seating (book 6 weeks ahead). Weekday lunch is walk-in — order the €18 formule." },
+      { name: "Frenchie Bar à Vins", cuisine: "Modern Natural Wine Bistro", priceRange: "$$", mustOrder: "Burrata with heirloom tomatoes and the charcuterie plank", neighborhood: "Sentier/2nd arrondissement", localTip: "No reservations at the wine bar — arrive at 6:45pm when they open. The main Frenchie restaurant books out 3 months ahead." },
+      { name: "Le Baratin", cuisine: "Natural Wine & Bistro", priceRange: "$$", mustOrder: "Boudin noir with apples and whatever terrine is listed on the chalkboard", neighborhood: "Belleville (20th)", localTip: "Cash only, Wednesday lunch specials are legendary. This is where Parisian chefs eat on their nights off — zero tourists." },
+      { name: "Du Pain et des Idées", cuisine: "Artisan Bakery", priceRange: "$", mustOrder: "Escargot pistache-chocolat or the pain des amis loaf", neighborhood: "Canal Saint-Martin (10th)", localTip: "Closed weekends. Arrive before 9am or the best pastries sell out. The escargot is the best pastry in Paris, full stop." },
     ],
     neighborhoods: [
       { name: "Le Marais", vibe: "Trendy", bestFor: "Art galleries, falafel on Rue des Rosiers, LGBTQ+-friendly bars, fashion boutiques", mustSee: "Place des Vosges, Picasso Museum, L'As du Fallafel on weekday lunch" },
@@ -401,6 +436,14 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
             { name: "Omakase Sushi", description: "Let the chef choose the best seasonal cuts for you.", imageKeyword: "sushi" },
             { name: "Wagyu Teppanyaki", description: "Premium beef grilled to perfection before your eyes.", imageKeyword: "wagyu" }
           ]
+        },
+        {
+          title: "Café Culture",
+          items: [
+            { name: "Fuglen Tokyo", description: "Oslo-born café in Tomigaya that single-handedly built Tokyo's third-wave scene. The vintage Scandinavian furniture and house-roasted filter coffee make it impossible to leave.", imageKeyword: "fuglen tokyo coffee" },
+            { name: "Café de l'Ambre", description: "Shinjuku institution open since 1948. They age their beans for years before roasting — you can order a coffee from a specific vintage. Time-capsule atmosphere with zero compromise.", imageKeyword: "tokyo vintage cafe" },
+            { name: "Sarutahiko Coffee Ebisu", description: "Barista champion–owned with one of the best espresso bars in Asia. Watch the extraction at the counter — the depth of knowledge here is extraordinary.", imageKeyword: "sarutahiko coffee ebisu" }
+          ]
         }
       ],
       mustTry: ["Tsukiji Fish Market Breakfast", "Izakaya Hopping in Shinjuku", "Matcha in a Traditional Garden", "Convenience Store Egg Salad Sandwich"],
@@ -444,6 +487,12 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { tip: "Konbini (7-Eleven, Lawson, FamilyMart) breakfast is legitimately excellent at ¥400-700. Egg salad sandwiches and onigiri are national treasures.", category: "food" as const },
       { tip: "Ghibli Museum and TeamLab tickets sell out months in advance and cannot be purchased on-site. Book online before your trip or you won't get in.", category: "culture" as const },
       { tip: "Withdraw Yen from 7-Eleven ATMs in Japan — they reliably accept foreign cards and give near-interbank exchange rates.", category: "money" as const },
+    ],
+    topRestaurants: [
+      { name: "Ichiran Ramen", cuisine: "Solo-booth Tonkotsu Ramen", priceRange: "$", mustOrder: "Tonkotsu ramen, extra firm noodles, rich broth strength, green onion on the side", neighborhood: "Multiple locations (Shinjuku/Shibuya)", localTip: "Open 24 hours. The solo booth system means no awkward table sharing — perfect at 2am. Order via the ticket machine: flavor strength 5 and spice level 3." },
+      { name: "Sushi Saito", cuisine: "Omakase Sushi", priceRange: "$$$$", mustOrder: "Full 18-piece omakase — no à la carte", neighborhood: "Minato (near US Embassy)", localTip: "Virtually impossible without a hotel concierge from a luxury property. If you can't get in, try Sushi Yoshitake (3 Michelin stars, slightly easier to book)." },
+      { name: "Gonpachi Nishi-Azabu", cuisine: "Izakaya (Japanese gastropub)", priceRange: "$$", mustOrder: "Soba noodles and the chicken yakitori skewers from the open charcoal grill", neighborhood: "Nishi-Azabu", localTip: "The Kill Bill swordfight scene was filmed here but locals still genuinely come for the food. Go Tuesday–Thursday to avoid the tourist rush." },
+      { name: "Tsuta", cuisine: "Shoyu Ramen", priceRange: "$$", mustOrder: "Truffle shoyu soba (the original Michelin-starred ramen)", neighborhood: "Sugamo", localTip: "World's first Michelin-starred ramen shop. Reservations now available online — book the day before via their website. Cash only." },
     ],
     neighborhoods: [
       { name: "Shinjuku", vibe: "Electric", bestFor: "Golden Gai tiny bars, Kabukicho nightlife, incredible ramen, the free Metropolitan Government observation deck", mustSee: "Omoide Yokocho (Memory Lane) at night, the 8-floor Yodobashi Camera" },
@@ -512,6 +561,14 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
             { name: "Delizia al Limone", description: "A light sponge cake filled and covered with lemon cream.", imageKeyword: "lemon" },
             { name: "Limoncello", description: "The famous local lemon liqueur, served ice cold.", imageKeyword: "limoncello" }
           ]
+        },
+        {
+          title: "Café Culture",
+          items: [
+            { name: "Bar Pasticceria Pansa", description: "Since 1830, the best bar counter in Amalfi. Order a caffè and a sfogliatella and stand with the locals — sitting costs double and misses the point entirely.", imageKeyword: "amalfi cafe pastry" },
+            { name: "La Zagara Positano", description: "Lemon-tree terrace in the heart of Positano. The affogato — espresso poured over house-made gelato — with a sea view is one of the coast's defining moments.", imageKeyword: "positano cafe terrace" },
+            { name: "Caffè Calce Praiano", description: "Zero-tourist bar in quiet Praiano where fishermen drink their morning espresso. Stone walls, cheap prices, and real locals only.", imageKeyword: "praiano espresso bar" }
+          ]
         }
       ],
       mustTry: ["Fried Calamari in a Paper Cone", "Buffalo Mozzarella from Campania", "Fresh Figs in Summer", "Amalfi Lemon Sorbet"],
@@ -555,6 +612,12 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { tip: "The Path of the Gods (Sentiero degli Dei) officially runs Agerola to Positano. Take the bus up to Agerola and hike downhill for the best experience.", category: "transport" as const },
       { tip: "Amalfi's Sfusato Amalfitano lemons are DOP-protected. Limoncello made here is worlds apart from supermarket versions — look for 'prodotto artigianale'.", category: "food" as const },
       { tip: "Driving the SS163 road in July/August is harrowing with tour coaches clogging the single lane. Take transit or visit in May/September.", category: "safety" as const },
+    ],
+    topRestaurants: [
+      { name: "Lo Scoglio", cuisine: "Seafood & Pasta", priceRange: "$$$", mustOrder: "Spaghetti alla nerano (original recipe, created here) and grilled orata", neighborhood: "Marina del Cantone, Nerano", localTip: "Drive 40 minutes from Positano to Nerano — this dish was invented here and the family still runs it. Reserve a week ahead; waterfront tables go fast." },
+      { name: "Ristorante Max", cuisine: "Refined Campanian", priceRange: "$$$", mustOrder: "Paccheri al ragù di cernia and buffalo mozzarella with local anchovies", neighborhood: "Positano (main piazza)", localTip: "Best sunset views in Positano. Book the terrace specifically (mention 'terrazza' in your reservation). The cheese cart is worth ordering just for the theatre." },
+      { name: "Pizzeria Da Giovanna", cuisine: "Neapolitan Pizza", priceRange: "$", mustOrder: "Margherita DOC with San Marzano tomatoes and bufala mozzarella", neighborhood: "Atrani (3-minute walk from Amalfi town)", localTip: "Atrani is the village next door with zero tourists. This place has a wood-burning oven and costs 30% less than any pizza in Amalfi proper." },
+      { name: "Il Buco", cuisine: "Cave Restaurant / Modern Italian", priceRange: "$$$", mustOrder: "Pasta with local sea urchin and the tasting menu paired with Furore wine", neighborhood: "Sorrento", localTip: "Literally carved into a 1,000-year-old cave. Book the 'stone table' in the deepest part of the cave for the most dramatic atmosphere. Reserve 2+ weeks ahead." },
     ],
     neighborhoods: [
       { name: "Positano", vibe: "Glamorous", bestFor: "Iconic views, boutique shopping, beach clubs, upscale restaurants", mustSee: "The vertical cascade of pastel buildings from the beach at golden hour" },
@@ -630,6 +693,14 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
             { name: "Friday Fish Fry", description: "Beer-battered cod served with rye bread and coleslaw.", imageKeyword: "fish" },
             { name: "Brandy Old Fashioned", description: "The state drink, muddled with fruit and topped with soda.", imageKeyword: "cocktail" }
           ]
+        },
+        {
+          title: "Café Culture",
+          items: [
+            { name: "Bradbury's Coffee", description: "Madison's most serious single-origin roaster on E. Johnson. The rotating pourover menu reads like a tasting menu — staff knowledge is graduate-level. Go weekday mornings to actually get a seat.", imageKeyword: "bradburys coffee madison" },
+            { name: "Colectivo Coffee (State St.)", description: "The anchor of State Street's café scene. Massive historic building with excellent espresso drinks and the best place to set up with a laptop while watching university life roll by.", imageKeyword: "colectivo coffee madison" },
+            { name: "Johnson Public House", description: "Neighborhood café on the near east side with house-baked goods that rival the coffee. The cardamom latte and morning bun are a Madison institution. Packed but worth the wait.", imageKeyword: "johnson public house madison cafe" }
+          ]
         }
       ],
       mustTry: ["Saturday Farmers Market on the Square", "Stella's Hot Spicy Cheese Bread", "A Pitcher at the Memorial Union Terrace"],
@@ -673,6 +744,12 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { tip: "Spotted Cow ale by New Glarus Brewing is only legally sold within Wisconsin. Stock up — you legally cannot buy it once you leave the state.", category: "food" as const },
       { tip: "Parking near the Capitol is brutal on game days and summer weekends. Take the free UW shuttle or rent a Bcycle bike ($15/day) — it's faster.", category: "transport" as const },
       { tip: "Babcock Dairy on the UW campus sells legendary ice cream below market prices. Best soft-serve in the Midwest.", category: "money" as const },
+    ],
+    topRestaurants: [
+      { name: "L'Etoile", cuisine: "Fine Dining / Farm-to-Table", priceRange: "$$$$", mustOrder: "5-course tasting menu with Wisconsin cheese course", neighborhood: "Capitol Square", localTip: "Best farm-to-table in the Midwest. Tuesday–Thursday reservations are easier to get. The bar menu offers 3-course versions of tasting menu dishes at 40% less." },
+      { name: "The Old Fashioned", cuisine: "Wisconsin Supper Club", priceRange: "$$", mustOrder: "Wisconsin Old Fashioned cocktail (brandy, not whiskey) and Friday fish fry", neighborhood: "Capitol Square", localTip: "This is the real deal Wisconsin supper club experience. Friday night fish fry has a 90-minute wait — put your name in at 4:30pm before they open." },
+      { name: "Grampa's Pizzeria", cuisine: "New York-Style Pizza", priceRange: "$", mustOrder: "White pie with ricotta and the vodka sauce slice", neighborhood: "Willy Street (Williamson)", localTip: "UW students and locals swear this is the best pizza in town. Counter seating only, cash preferred. Closes when they sell out — usually by 9pm." },
+      { name: "Merchant", cuisine: "Craft Cocktails & New American", priceRange: "$$", mustOrder: "Duck fat fries and whatever seasonal craft cocktail the bartender recommends", neighborhood: "State Street", localTip: "The kitchen stays open until midnight. After 10pm the duck poutine appears on the late-night menu — order it." },
     ],
     neighborhoods: [
       { name: "State Street", vibe: "University Energy", bestFor: "Pedestrian mall bars, eclectic shops, quick cheap eats, the hub between UW campus and the Capitol", mustSee: "Memorial Union Terrace (campus end), Comedy Club on State on weeknights" },
@@ -748,6 +825,14 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
             { name: "Assyrtiko Wine", description: "Crisp, mineral-rich white wine from volcanic soil.", imageKeyword: "wine" },
             { name: "Vinsanto", description: "Naturally sweet dessert wine made from sun-dried grapes.", imageKeyword: "vinsanto" }
           ]
+        },
+        {
+          title: "Café Culture",
+          items: [
+            { name: "Lava Café Firá", description: "Cliff-edge café above the caldera in Firá. The Greek frappé — intensely foamy, iced, and sweet — with that view is everything. Open late, full of locals who know better than to rush.", imageKeyword: "santorini caldera cafe" },
+            { name: "Batz Café Oia", description: "Tucked down a whitewashed alley away from the Oia tourist drag. Strong Greek coffee, thin honey cakes, and a quiet terrace that feels like a secret even when it's not.", imageKeyword: "oia santorini cafe" },
+            { name: "Lucky's Café Perissa", description: "Black sand beach café in Perissa that does excellent freddo cappuccino. Unpretentious, cheap, and perfectly positioned post-swim. The opposite of Oia prices.", imageKeyword: "perissa beach santorini" }
+          ]
         }
       ],
       mustTry: ["Sunset Dinner in Oia", "Wine Tasting in a Traditional Canava", "Fresh Grilled Octopus", "Greek Yogurt with Local Honey"],
@@ -792,6 +877,12 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { tip: "ATV/quad bike rentals are ubiquitous but have a very high accident rate on Santorini's narrow cliff roads. If you rent one, go slow — locals will pass on blind corners.", category: "safety" as const },
       { tip: "Book caldera-view restaurants for lunch not dinner — identical views, 25-30% lower prices, and you can actually see the caldera instead of racing darkness.", category: "money" as const },
     ],
+    topRestaurants: [
+      { name: "Metaxy Mas", cuisine: "Traditional Greek Taverna", priceRange: "$$", mustOrder: "Fava (yellow split pea purée), slow-cooked lamb, and fresh bread", neighborhood: "Exo Gonia (inland village)", localTip: "30-minute drive from Oia but locals unanimously call it the best food on the island. Zero views, 100% flavor. Book ahead — word is out among savvy travelers." },
+      { name: "Argo", cuisine: "Greek Seafood with Caldera Views", priceRange: "$$$", mustOrder: "Grilled octopus with fava and caperberries, fresh sea bass", neighborhood: "Fira", localTip: "Book specifically for lunch (12:30–2:30pm) — same caldera view as dinner, 25-35% lower prices, and you can actually see the blue water instead of fighting darkness." },
+      { name: "Lucky's Souvlaki", cuisine: "Souvlaki / Greek Street Food", priceRange: "$", mustOrder: "Pork souvlaki wrap with extra tzatziki and tomato", neighborhood: "Fira town center", localTip: "The only place locals eat on a budget. €3.50 for the best souvlaki wrap on the island. Find it on the main road through Fira — queue of locals = good sign." },
+      { name: "Selene", cuisine: "Modern Santorinian Fine Dining", priceRange: "$$$$", mustOrder: "Santorinian tomato fritters with smoked eggplant and the tasting menu", neighborhood: "Pyrgos village", localTip: "Pyrgos is Santorini's best-kept secret village — hilltop, authentic, no cruise ship crowds. Book 3+ weeks ahead. The sommelier's local wine pairing is non-negotiable." },
+    ],
     neighborhoods: [
       { name: "Oia", vibe: "Iconic Luxury", bestFor: "Sunset views, blue-domed churches, upscale caldera hotels, honeymoon atmosphere", mustSee: "Byzantine castle ruins at sunset — arrive 2 hours early in peak season" },
       { name: "Fira", vibe: "Vibrant Capital", bestFor: "Shopping, Archaeological Museum, budget accommodation, cable car access to the port", mustSee: "Museum of Prehistoric Thera — includes 3,600-year-old Minoan frescoes" },
@@ -822,12 +913,48 @@ const WavesLogo = () => (
     <path d="M8 14C8 14 12 8 16 14C20 20 24 14 24 14" stroke="url(#logo_grad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
     <defs>
       <linearGradient id="logo_grad" x1="4" y1="20" x2="28" y2="20" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#38BDF8" />
-        <stop offset="1" stopColor="#818CF8" />
+        <stop stopColor="#2DD4BF" />
+        <stop offset="1" stopColor="#22D3EE" />
       </linearGradient>
     </defs>
   </svg>
 );
+
+// --- Wikipedia image component ---
+const wikiCache = new Map<string, string>();
+
+const WikiImg = ({ keyword, className, alt }: { keyword: string; className: string; alt: string }) => {
+  const [src, setSrc] = useState(wikiCache.get(keyword) ?? '');
+
+  useEffect(() => {
+    if (wikiCache.has(keyword)) return;
+    const tryFetch = (q: string) =>
+      fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then((d: any) => d.originalimage?.source || d.thumbnail?.source || null);
+
+    const title = keyword.replace(/\s+/g, ' ').trim();
+    const firstWord = title.split(' ')[0];
+
+    tryFetch(title)
+      .then(url => url ? url : tryFetch(firstWord))
+      .then(url => {
+        const final = url ?? '';
+        wikiCache.set(keyword, final);
+        setSrc(final);
+      })
+      .catch(() => { wikiCache.set(keyword, ''); });
+  }, [keyword]);
+
+  if (!src) {
+    return (
+      <div className={`${className} bg-gradient-to-br from-slate-800/80 to-slate-900 flex items-center justify-center`}>
+        <span className="text-[9px] uppercase tracking-widest text-slate-600 text-center px-3 leading-relaxed">{keyword}</span>
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setSrc('')} />;
+};
 
 export default function Waves() {
   const { tripId } = useParams();
@@ -838,10 +965,26 @@ export default function Waves() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [activeFoodCat, setActiveFoodCat] = useState(0);
   
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
+  // Reset food category tab whenever a new destination loads
+  useEffect(() => { setActiveFoodCat(0); }, [intelligence]);
   const [activeMonthIndex, setActiveMonthIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // Currency Converter State
+  const [convAmount, setConvAmount] = useState('100');
+  const [convFrom, setConvFrom] = useState('USD');
+  const [convTo, setConvTo] = useState('EUR');
+  const [convRates, setConvRates] = useState<Record<string, number>>({});
+  const [convLoading, setConvLoading] = useState(false);
+
+  // Restaurant Reviews Modal State
+  const [reviewRestaurant, setReviewRestaurant] = useState<{
+    name: string; cuisine: string; priceRange: string;
+    mustOrder: string; neighborhood: string; localTip: string;
+  } | null>(null);
 
   // Collaboration State
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -857,6 +1000,16 @@ export default function Waves() {
       setUser(u);
     });
     return () => unsubscribe();
+  }, []);
+
+  // Fetch exchange rates (free, no-key API)
+  useEffect(() => {
+    setConvLoading(true);
+    fetch('https://api.exchangerate-api.com/v4/latest/USD')
+      .then(r => r.json())
+      .then((d: any) => { setConvRates(d.rates || {}); })
+      .catch(() => {})
+      .finally(() => setConvLoading(false));
   }, []);
 
   // Trip Listener
@@ -967,9 +1120,9 @@ export default function Waves() {
       if (!forTrip) setIsSearching(true);
       setError(null);
 
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GROQ_API_KEY;
       if (!apiKey) {
-        const msg = "AI search is not configured. Add your Gemini API key to .env to enable live destination lookup.";
+        const msg = "AI search is not configured. Add your GROQ_API_KEY to .env to enable live destination lookup.";
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
@@ -977,10 +1130,9 @@ export default function Waves() {
       }
 
       try {
-        const ai = new GoogleGenAI({ apiKey });
         const prompt = `You are an expert travel planner with deep local knowledge. The user wants to travel to: ${dest}.
 Provide a comprehensive destination guide with insider knowledge a typical tourist wouldn't know.
-Return ONLY a raw JSON object (no markdown, no code fences, no explanation) with exactly these keys:
+Return ONLY a valid JSON object (no markdown, no code fences, no explanation) with exactly these keys:
 {
   "title": "Catchy 2-word title e.g. The Ultimate",
   "subtitle": "Destination tagline e.g. Kyoto Experience",
@@ -991,45 +1143,59 @@ Return ONLY a raw JSON object (no markdown, no code fences, no explanation) with
   "seasons": { "high": "months", "low": "months", "shoulder": "months" },
   "weatherCard": { "condition": "Sunny", "tempHigh": 75, "tempLow": 55, "note": "string", "month": "October" },
   "monthlyData": [
-    { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "Local insight", "isIdeal": false, "crowdLevel": 4 }
-    ... 12 total, condition must be one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
+    { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "Local insight", "isIdeal": false, "crowdLevel": 4 },
+    ... exactly 12 objects Jan-Dec. condition must be one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
   ],
   "foodAndCulture": {
     "categories": [
-      { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "singleword" }] },
+      { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "2-3 descriptive words for photo search e.g. japanese matcha tea ceremony" }] },
       { "title": "Lunch & Street Food", "items": [...] },
       { "title": "Dinner & Fine Dining", "items": [...] },
-      { "title": "Drinks & Nightlife", "items": [...] }
+      { "title": "Drinks & Nightlife", "items": [...] },
+      { "title": "Café Culture", "items": [{ "name": "Specific real café name", "description": "What makes it worth visiting — specific details, not generic praise. Include what to order, when to go, and what makes it local. 2-3 sentences.", "imageKeyword": "cafe name + city keywords" }] }
     ],
     "mustTry": ["specific dish or experience"],
     "culturalEtiquette": [{ "title": "string", "description": "string" }]
   },
-  "topActivities": [6 objects: { "title": "string", "description": "string", "imageKeyword": "singleword" }],
-  "nicheActivities": [4 objects: { "title": "string", "description": "string", "imageKeyword": "singleword" }],
-  "seasonalHighlights": [5 objects: { "title": "string", "description": "string", "timeOfYear": "string" }],
-  "events": [5 objects: { "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
-  "insiderTips": [5 objects: { "tip": "actionable local insight", "category": "money" }],
-  "neighborhoods": [4 objects: { "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
+  "topActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 descriptive words for photo search e.g. bamboo forest path japan" }],
+  "nicheActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 descriptive words for photo search" }],
+  "seasonalHighlights": [{ "title": "string", "description": "string", "timeOfYear": "string" }],
+  "events": [{ "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
+  "insiderTips": [{ "tip": "HYPER-SPECIFIC tip with real venue names, actual prices, exact times — never generic. Example: 'Book Sukiyabashi Jiro (Ginza) 2 months ahead via hotel concierge only — they reject direct tourist bookings. Lunch omakase ¥55,000 vs dinner ¥110,000, same fish.'", "category": "money" }],
+  "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
+  "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
   "practicalInfo": {
     "visa": "string", "currency": "string", "language": "string",
     "tipping": "string", "safety": "string", "bestTransport": "string",
     "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
   }
 }
+Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. neighborhoods exactly 4. monthlyData exactly 12.
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: prompt,
-          config: { responseMimeType: 'application/json' }
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: 'json_object' },
+            temperature: 0.7,
+            max_tokens: 4000,
+          }),
         });
 
-        // Strip any accidental markdown code fences before parsing
-        let text = (response.text || '').trim();
-        text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-        if (!text || text === '{}') throw new Error('Empty response from AI');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw Object.assign(new Error(JSON.stringify(errData)), { status: res.status });
+        }
 
+        const result = await res.json();
+        const text = result.choices?.[0]?.message?.content || '{}';
         data = JSON.parse(text);
 
         // Ensure required arrays exist (defensive merge)
@@ -1047,20 +1213,17 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
       } catch (err: any) {
         const errMsg = err?.message || err?.toString() || '';
         const errStatus = err?.status || err?.code || '';
-        console.error("Waves AI error — status:", errStatus, "message:", errMsg, "full:", err);
-        const isQuota = errStatus === 429 || errMsg.includes('429') || errMsg.toLowerCase().includes('resource_exhausted');
-        const isKey = errMsg.toLowerCase().includes('api key') || errMsg.toLowerCase().includes('api_key') || errStatus === 401 || errStatus === 403;
+        console.error("Waves AI error — status:", errStatus, "message:", errMsg);
+        const isQuota = errStatus === 429 || errMsg.includes('429') || errMsg.toLowerCase().includes('rate_limit');
+        const isKey = errStatus === 401 || errStatus === 403 || errMsg.toLowerCase().includes('invalid api key');
         const isJson = err instanceof SyntaxError || errMsg.includes('JSON') || errMsg.includes('Unexpected token');
-        const isBilling = errMsg.toLowerCase().includes('billing') || errMsg.toLowerCase().includes('payment');
         const msg = isQuota
-          ? "Rate limit reached — please wait a minute and try again."
-          : isBilling
-          ? "Billing not enabled on this API key. Enable it in Google Cloud Console."
+          ? "Rate limit reached — please wait a moment and try again."
           : isKey
-          ? "Invalid API key. Check your GEMINI_API_KEY in .env."
+          ? "Invalid API key. Check your GROQ_API_KEY in .env."
           : isJson
           ? "AI returned an unexpected format. Please try again."
-          : `Could not analyze "${dest}" (${errStatus || 'unknown error'}). Check console for details.`;
+          : `Could not analyze "${dest}". Please try again.`;
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
@@ -1138,6 +1301,67 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
     }
   };
 
+  if (isSearching && !hasSearched) {
+    return (
+      <div className="min-h-screen bg-[#050B14] flex flex-col items-center justify-center gap-12 relative overflow-hidden">
+        {/* Background glow */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[120px]" />
+        </div>
+        {/* Animated wave loader */}
+        <div className="relative flex flex-col items-center gap-10">
+          <svg width="220" height="90" viewBox="0 0 220 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="wl_g" x1="0" y1="0" x2="220" y2="0" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#38BDF8" />
+                <stop offset="1" stopColor="#818CF8" />
+              </linearGradient>
+            </defs>
+            {/* Wave 1 */}
+            <motion.path
+              d="M10 55 C32 30, 55 80, 77 55 C99 30, 121 80, 143 55 C165 30, 188 80, 210 55"
+              stroke="url(#wl_g)" strokeWidth="3.5" strokeLinecap="round" fill="none"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: [0, 1, 1], opacity: [0, 1, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", times: [0, 0.6, 1] }}
+            />
+            {/* Wave 2 - smaller, offset */}
+            <motion.path
+              d="M25 40 C42 22, 60 58, 77 40 C94 22, 112 58, 129 40 C146 22, 164 58, 181 40 C198 22, 210 40, 210 40"
+              stroke="url(#wl_g)" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: [0, 1, 1], opacity: [0, 0.5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.35, times: [0, 0.6, 1] }}
+            />
+            {/* Wave 3 - smallest, highest */}
+            <motion.path
+              d="M40 28 C53 16, 66 40, 79 28 C92 16, 105 40, 118 28 C131 16, 144 40, 157 28 C170 16, 183 28, 183 28"
+              stroke="url(#wl_g)" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.25"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: [0, 1, 1], opacity: [0, 0.25, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.7, times: [0, 0.6, 1] }}
+            />
+          </svg>
+          <div className="text-center">
+            <p className="text-white font-serif text-2xl mb-3 tracking-tight">Charting the waves</p>
+            <p className="text-slate-500 text-sm tracking-widest uppercase">{destination}</p>
+          </div>
+        </div>
+        {/* Subtle animated dots */}
+        <div className="flex items-center gap-2">
+          {[0, 0.2, 0.4].map((delay, i) => (
+            <motion.span
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-cyan-500/50"
+              animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+              transition={{ duration: 1.2, repeat: Infinity, delay, ease: "easeInOut" }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (!hasSearched) {
     return (
       <div className="min-h-screen bg-[#050B14] text-slate-300 font-sans selection:bg-cyan-500/30 flex flex-col">
@@ -1150,7 +1374,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
           </div>
         </nav>
 
-        <main className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
+        <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 px-6 relative z-10">
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -1162,7 +1386,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             </h1>
             
             <form onSubmit={handleSearch} className="relative group mb-12">
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-purple-500/20 rounded-[2rem] blur-lg opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/20 via-cyan-500/20 to-teal-400/10 rounded-[2rem] blur-lg opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               <div className="relative bg-[#0B1221]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex flex-col md:flex-row items-center gap-4 shadow-2xl">
                 
                 <div className="flex-1 flex items-center w-full bg-white/5 rounded-2xl px-6 py-4 border border-white/5 hover:border-white/10 transition-colors">
@@ -1206,7 +1430,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                 <button 
                   type="submit"
                   disabled={isSearching || !destination.trim()}
-                  className="w-full md:w-auto h-full min-h-[72px] px-10 bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-2xl text-white text-[11px] uppercase tracking-[0.2em] font-medium hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full md:w-auto h-full min-h-[72px] px-10 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-2xl text-white text-[11px] uppercase tracking-[0.2em] font-medium hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {isSearching ? <RefreshCw size={18} className="animate-spin" /> : <Search size={18} />}
                   <span className="md:hidden">Analyze Trip</span>
@@ -1219,68 +1443,29 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
               )}
             </form>
 
-            {!hasSearched && !isSearching && (
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="w-full max-w-4xl"
-              >
-                <div className="flex items-center justify-between mb-8 px-4">
-                  <div className="flex items-center gap-3">
-                    <Globe size={18} className="text-cyan-400" />
-                    <h2 className="text-sm font-bold text-white uppercase tracking-[0.2em]">Explore Global Regions</h2>
-                  </div>
-                  <div className="text-[9px] text-slate-500 uppercase tracking-widest font-medium italic">
-                    AI-Powered Discovery
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
-                  {[
-                    { name: 'Nordic Escapes', icon: Snowflake, color: 'text-blue-400', search: 'Scandinavia' },
-                    { name: 'Mediterranean Sun', icon: Sun, color: 'text-amber-400', search: 'Mediterranean Coast' },
-                    { name: 'Asian Metropolis', icon: MapPin, color: 'text-rose-400', search: 'Tokyo or Seoul' },
-                    { name: 'Tropical Islands', icon: Plane, color: 'text-emerald-400', search: 'Bali or Maldives' },
-                    { name: 'Alpine Peaks', icon: Cloud, color: 'text-indigo-400', search: 'Swiss Alps' },
-                    { name: 'Serengeti Plains', icon: SlidersHorizontal, color: 'text-orange-400', search: 'Serengeti, Tanzania' },
-                    { name: 'Hidden Gems', icon: Sparkles, color: 'text-purple-400', search: 'Hidden gems in Europe' },
-                    { name: 'Ancient Heritage', icon: Clock, color: 'text-yellow-400', search: 'Ancient ruins world' }
-                  ].map((cat) => (
-                    <button
-                      key={cat.name}
-                      onClick={() => {
-                        setDestination(cat.search);
-                        fetchDestinationIntelligence(cat.search);
-                      }}
-                      className="group flex flex-col items-center gap-4 p-6 bg-[#0B1221]/40 border border-white/5 rounded-3xl hover:bg-[#0B1221] hover:border-cyan-500/50 transition-all duration-500"
-                    >
-                      <div className={`p-4 rounded-2xl bg-white/5 group-hover:bg-cyan-500/10 ${cat.color} transition-all`}>
-                        <cat.icon size={20} />
-                      </div>
-                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center group-hover:text-white transition-colors">{cat.name}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mt-12 flex flex-wrap justify-center gap-3">
-                  <p className="w-full text-center text-[10px] uppercase tracking-widest text-slate-500 mb-2">Popular Cities</p>
-                  {Object.keys(DEMO_DATA).map(city => (
-                    <button
-                      key={city}
-                      type="button"
-                      onClick={() => {
-                        setDestination(city);
-                        fetchDestinationIntelligence(city);
-                      }}
-                      className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase tracking-widest font-black text-slate-400 hover:bg-white/10 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"
-                    >
-                      {city.split(',')[0]}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="w-full max-w-3xl mt-10"
+            >
+              <p className="text-center text-[10px] uppercase tracking-widest text-slate-500 mb-5">Popular Destinations</p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {Object.keys(DEMO_DATA).map(city => (
+                  <button
+                    key={city}
+                    type="button"
+                    onClick={() => {
+                      setDestination(city);
+                      fetchDestinationIntelligence(city);
+                    }}
+                    className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase tracking-widest font-bold text-slate-400 hover:bg-white/10 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"
+                  >
+                    {city.split(',')[0]}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
         </main>
       </div>
@@ -1370,7 +1555,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
       <main className="flex-1 p-6 lg:p-12 overflow-y-auto">
         
         {/* Top Nav */}
-        <header className="flex items-center justify-between mb-16">
+        <header className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6 text-xs uppercase tracking-widest text-slate-400 font-medium">
             <button 
               onClick={() => setHasSearched(false)}
@@ -1392,6 +1577,33 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             </button>
           </div>
         </header>
+
+        {/* Destination Hero */}
+        <section className="mb-20 relative rounded-[2.5rem] overflow-hidden h-72 md:h-96 border border-white/5">
+          <WikiImg
+            keyword={destination}
+            alt={destination}
+            className="w-full h-full object-cover"
+          />
+          {/* Gradient overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050B14]/90 via-[#050B14]/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050B14]/80 via-transparent to-transparent" />
+          {/* Content */}
+          <div className="absolute inset-0 p-10 md:p-14 flex flex-col justify-end">
+            <p className="text-[9px] uppercase tracking-[0.3em] text-teal-400 font-bold mb-3 flex items-center gap-2">
+              <MapPin size={10} />
+              Currently Exploring
+            </p>
+            <h1 className="text-5xl md:text-7xl text-white font-serif tracking-tight leading-none mb-4">
+              {destination}
+            </h1>
+            <p className="text-slate-400 text-sm font-light italic max-w-md">{data.subtitle}</p>
+          </div>
+          {/* Top-right watermark */}
+          <div className="absolute top-8 right-8 opacity-20">
+            <WavesLogo />
+          </div>
+        </section>
 
         {/* Year-Round Flights & Climate - COLLABORATIVE WORKSPACE */}
         <section className="mb-24">
@@ -1472,7 +1684,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                 const monthEvents = (data.events || []).filter(e => e.month === item.month);
                 const crowdLabel = item.crowdLevel >= 8 ? 'Very Busy' : item.crowdLevel >= 6 ? 'Moderate' : item.crowdLevel >= 4 ? 'Manageable' : 'Quiet';
                 const crowdColor = item.crowdLevel >= 8 ? 'text-rose-400' : item.crowdLevel >= 6 ? 'text-amber-400' : 'text-emerald-400';
-                const weatherIcon = item.condition.includes('Sun') ? <Sun size={18} className="text-amber-400" /> : item.condition.includes('Rain') ? <CloudRain size={18} className="text-cyan-400" /> : item.condition.includes('Snow') ? <Snowflake size={18} className="text-indigo-400" /> : <Cloud size={18} className="text-slate-400" />;
+                const weatherIcon = item.condition.includes('Sun') ? <Sun size={18} className="text-amber-400" /> : item.condition.includes('Rain') ? <CloudRain size={18} className="text-cyan-400" /> : item.condition.includes('Snow') ? <Snowflake size={18} className="text-teal-400" /> : <Cloud size={18} className="text-slate-400" />;
                 return (
                   <motion.div
                     key={activeMonthIndex}
@@ -1544,7 +1756,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             </div>
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400">
                   <Calendar size={20} />
                 </div>
                 <h3 className="text-2xl text-white font-serif">When to Go</h3>
@@ -1585,7 +1797,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                 const cond = monthData?.condition || "Sunny";
                 if (cond.includes('Sun')) return <Sun size={24} className="text-amber-400" />;
                 if (cond.includes('Rain')) return <CloudRain size={24} className="text-cyan-400" />;
-                if (cond.includes('Snow')) return <Snowflake size={24} className="text-indigo-400" />;
+                if (cond.includes('Snow')) return <Snowflake size={24} className="text-teal-400" />;
                 return <Cloud size={24} className="text-slate-400" />;
               })()}
             </div>
@@ -1626,102 +1838,151 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             <h2 className="text-4xl md:text-6xl text-white font-serif tracking-tight">The Culinary Journey</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-            {/* Left Column: Categories */}
-            <div className="lg:col-span-8 space-y-24">
-              {data.foodAndCulture.categories.map((cat, idx) => (
-                <div key={idx} className="relative">
-                  <div className="flex items-center gap-6 mb-12">
-                    <span className="text-6xl font-serif text-white/5 select-none">0{idx + 1}</span>
-                    <h3 className="text-3xl text-white font-serif border-b border-white/10 pb-4 flex-1">{cat.title}</h3>
+          {/* Category Tab Bar */}
+          <div className="flex flex-wrap gap-2 mb-10">
+            {data.foodAndCulture.categories.map((cat, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveFoodCat(idx)}
+                className={`px-5 py-2.5 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all ${
+                  activeFoodCat === idx
+                    ? 'bg-cyan-500 text-white shadow-[0_0_16px_rgba(6,182,212,0.4)]'
+                    : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                }`}
+              >
+                {cat.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content: full-width grid */}
+          <AnimatePresence mode="wait">
+            {data.foodAndCulture.categories[activeFoodCat] && (
+              <motion.div
+                key={activeFoodCat}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16"
+              >
+                {data.foodAndCulture.categories[activeFoodCat].items.map((item, i) => (
+                  <div key={i} className="group flex gap-4 bg-white/5 border border-white/10 rounded-3xl p-5 hover:border-cyan-500/20 transition-all">
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
+                      <WikiImg
+                        keyword={item.imageKeyword}
+                        alt={item.name}
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center min-w-0">
+                      <h4 className="text-sm text-white font-serif mb-1 group-hover:text-cyan-400 transition-colors leading-snug">{item.name}</h4>
+                      <p className="text-xs text-slate-500 font-light leading-relaxed line-clamp-2">{item.description}</p>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {cat.items.map((item, i) => (
-                      <div key={i} className="group flex flex-col gap-6 items-start">
-                        <div className="w-full aspect-square rounded-[2.5rem] overflow-hidden border border-white/10 relative">
-                          <img 
-                            src={`https://picsum.photos/seed/${item.imageKeyword}/600/600`} 
-                            alt={item.name}
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#050B14]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        </div>
-                        <div className="px-2">
-                          <h4 className="text-xl text-white font-serif mb-3 group-hover:text-cyan-400 transition-colors">{item.name}</h4>
-                          <p className="text-sm text-slate-400 font-light leading-relaxed">
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Must-Haves + Etiquette: side by side below the tabs */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-[#0B1221] border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-6 opacity-5">
+                <CheckCircle2 size={100} />
+              </div>
+              <h4 className="text-white font-serif text-xl mb-8">The Must-Haves</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {data.foodAndCulture.mustTry.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 group">
+                    <div className="w-7 h-7 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-[10px] font-bold shrink-0 transition-all group-hover:bg-cyan-500 group-hover:text-white">
+                      {i + 1}
+                    </div>
+                    <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item}</span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Right Column: Etiquette & Must-Haves - CLEANED UP */}
-            <div className="lg:col-span-4">
-              <div className="sticky top-12 space-y-12">
-                <div className="bg-[#0B1221] border border-white/10 rounded-[3rem] p-10 relative overflow-hidden shadow-2xl">
-                  <div className="absolute top-0 right-0 p-6 opacity-5">
-                    <CheckCircle2 size={120} />
+            <div className="bg-gradient-to-br from-teal-500/10 to-cyan-500/5 border border-white/10 rounded-[2.5rem] p-8">
+              <h4 className="text-white font-serif text-xl mb-8 flex items-center gap-3">
+                <Users size={18} className="text-teal-400" />
+                Local Etiquette
+              </h4>
+              <div className="space-y-6">
+                {data.foodAndCulture.culturalEtiquette.map((item, i) => (
+                  <div key={i} className="relative pl-5 border-l-2 border-teal-500/20 hover:border-teal-500 transition-colors">
+                    <h5 className="text-[10px] uppercase tracking-[0.2em] text-teal-400 font-bold mb-1">{item.title}</h5>
+                    <p className="text-xs text-slate-400 font-light leading-relaxed">"{item.description}"</p>
                   </div>
-                  <h4 className="text-white font-serif text-2xl mb-10">The Must-Haves</h4>
-                  <div className="space-y-8">
-                    {data.foodAndCulture.mustTry.map((item, i) => (
-                      <div key={i} className="flex items-center gap-5 group">
-                        <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs font-bold transition-all group-hover:bg-cyan-500 group-hover:text-white">
-                          {i + 1}
-                        </div>
-                        <span className="text-base text-slate-300 group-hover:text-white transition-colors">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/10 rounded-[3rem] p-10 shadow-2xl">
-                  <h4 className="text-white font-serif text-2xl mb-10 flex items-center gap-4">
-                    <Users size={24} className="text-indigo-400" />
-                    Local Etiquette
-                  </h4>
-                  <div className="space-y-10">
-                    {data.foodAndCulture.culturalEtiquette.map((item, i) => (
-                      <div key={i} className="relative pl-6 border-l-2 border-indigo-500/20 hover:border-indigo-500 transition-colors">
-                        <h5 className="text-[10px] uppercase tracking-[0.2em] text-indigo-400 font-bold mb-3">{item.title}</h5>
-                        <p className="text-sm text-slate-400 font-light leading-relaxed italic">
-                          "{item.description}"
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Top Activities - Bento Grid */}
+        {/* Top Restaurants */}
+        {data.topRestaurants && data.topRestaurants.length > 0 && (
+          <section className="mb-24">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-400">
+                <DollarSign size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl text-white font-serif">Where to Eat</h2>
+                <p className="text-slate-500 text-xs mt-1">Specific picks — not a generic list</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {data.topRestaurants.map((r, i) => (
+                <div key={i} className="group bg-[#0B1221]/60 border border-white/10 rounded-[2.5rem] p-8 hover:border-orange-500/20 transition-all flex flex-col gap-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="text-xl text-white font-serif group-hover:text-orange-400 transition-colors mb-1">{r.name}</h4>
+                      <p className="text-xs text-slate-500 uppercase tracking-widest">{r.cuisine}</p>
+                    </div>
+                    <span className="text-base font-bold text-orange-400 shrink-0 ml-4">{r.priceRange}</span>
+                  </div>
+                  <div className="pb-5 border-b border-white/5">
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-1.5">Must Order</p>
+                    <p className="text-sm text-teal-400 font-medium">{r.mustOrder}</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <MapPin size={12} className="text-slate-600 shrink-0 mt-0.5" />
+                    <span className="text-xs text-slate-500">{r.neighborhood}</span>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white/5 rounded-2xl p-4">
+                    <Lightbulb size={14} className="text-yellow-400 shrink-0 mt-0.5" />
+                    <p className="text-xs text-slate-300 font-light leading-relaxed">{r.localTip}</p>
+                  </div>
+                  <button
+                    onClick={() => setReviewRestaurant({ name: r.name, cuisine: r.cuisine, priceRange: r.priceRange, mustOrder: r.mustOrder, neighborhood: r.neighborhood, localTip: r.localTip })}
+                    className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest text-slate-400 hover:text-white hover:border-orange-500/30 hover:bg-orange-500/5 transition-all w-full cursor-pointer"
+                  >
+                    <Star size={12} />
+                    Google Reviews
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Top Activities */}
         <section className="mb-24">
           <div className="flex items-center gap-3 mb-12">
             <MapPin size={24} className="text-cyan-400" />
             <h2 className="text-3xl md:text-4xl text-white font-serif">Top Activities</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.topActivities.map((act, i) => (
-              <div key={i} className="group relative h-80 rounded-[2rem] overflow-hidden border border-white/10">
-                <img 
-                  src={`https://picsum.photos/seed/${act.imageKeyword}/800/600`} 
-                  alt={act.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050B14] via-[#050B14]/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                <div className="absolute bottom-0 left-0 p-8">
-                  <h4 className="text-xl text-white font-serif mb-2">{act.title}</h4>
-                  <p className="text-xs text-slate-300 font-light line-clamp-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-4 group-hover:translate-y-0">
-                    {act.description}
-                  </p>
+              <div key={i} className="group flex gap-5 p-6 bg-white/5 border border-white/10 rounded-3xl hover:border-cyan-500/30 hover:bg-white/[0.07] transition-all">
+                <span className="text-3xl font-serif text-white/10 group-hover:text-cyan-500/30 transition-colors leading-none shrink-0 select-none">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="min-w-0">
+                  <h4 className="text-base text-white font-serif mb-1.5 group-hover:text-cyan-400 transition-colors leading-snug">{act.title}</h4>
+                  <p className="text-xs text-slate-500 font-light leading-relaxed">{act.description}</p>
                 </div>
               </div>
             ))}
@@ -1734,24 +1995,26 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             <Sparkles size={24} className="text-cyan-400" />
             <h2 className="text-3xl md:text-4xl text-white font-serif">Niche Experiences</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.nicheActivities.map((act, i) => (
-              <div key={i} className="group flex flex-col md:flex-row gap-8 bg-white/5 border border-white/10 rounded-[2.5rem] p-8 hover:border-white/20 transition-all">
-                <div className="w-full md:w-48 h-48 rounded-3xl overflow-hidden shrink-0">
-                  <img 
-                    src={`https://picsum.photos/seed/${act.imageKeyword}/400/400`} 
-                    alt={act.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    referrerPolicy="no-referrer"
-                  />
+              <a
+                key={i}
+                href={`https://www.google.com/search?q=${encodeURIComponent(act.title + ' ' + destination)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex gap-5 p-7 bg-white/5 border border-white/10 rounded-[2.5rem] hover:border-cyan-500/30 hover:bg-white/[0.07] transition-all"
+              >
+                <span className="text-4xl font-serif text-white/8 group-hover:text-cyan-500/25 transition-colors leading-none shrink-0 select-none mt-0.5">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="flex flex-col justify-center min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h4 className="text-lg text-white font-serif group-hover:text-cyan-400 transition-colors leading-snug">{act.title}</h4>
+                    <ChevronRight size={14} className="text-slate-600 group-hover:text-cyan-400 transition-colors shrink-0" />
+                  </div>
+                  <p className="text-sm text-slate-500 font-light leading-relaxed">{act.description}</p>
                 </div>
-                <div className="flex flex-col justify-center">
-                  <h4 className="text-2xl text-white font-serif mb-4">{act.title}</h4>
-                  <p className="text-sm text-slate-400 font-light leading-relaxed">
-                    {act.description}
-                  </p>
-                </div>
-              </div>
+              </a>
             ))}
           </div>
         </section>
@@ -1848,27 +2111,27 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                   <p className="text-slate-500 text-xs mt-1">Things only locals know</p>
                 </div>
               </div>
-              <div className="space-y-8 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 {data.insiderTips.map((tip, i) => {
-                  const catStyles: Record<string, string> = {
-                    money: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                    transport: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-                    food: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-                    culture: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                    safety: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+                  const catConfig: Record<string, { style: string; icon: React.ReactNode; label: string }> = {
+                    money: { style: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: <Wallet size={14} />, label: 'Save Money' },
+                    transport: { style: 'text-teal-400 bg-teal-500/10 border-teal-500/20', icon: <Plane size={14} />, label: 'Getting Around' },
+                    food: { style: 'text-orange-400 bg-orange-500/10 border-orange-500/20', icon: <DollarSign size={14} />, label: 'Food & Drink' },
+                    culture: { style: 'text-purple-400 bg-purple-500/10 border-purple-500/20', icon: <Info size={14} />, label: 'Local Culture' },
+                    safety: { style: 'text-rose-400 bg-rose-500/10 border-rose-500/20', icon: <AlertCircle size={14} />, label: 'Stay Safe' },
                   };
-                  const style = catStyles[tip.category] || catStyles.culture;
+                  const cat = catConfig[tip.category] || catConfig.culture;
                   return (
-                    <div key={i} className="flex items-start gap-6 group">
-                      <div className="w-10 h-10 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold text-sm shrink-0 group-hover:bg-yellow-500 group-hover:text-white transition-all">
-                        {i + 1}
-                      </div>
-                      <div className="flex-1 pt-1">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-bold border mb-2 ${style}`}>
-                          {tip.category}
+                    <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-7 hover:border-yellow-500/20 transition-all group flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] uppercase tracking-widest font-bold border ${cat.style}`}>
+                          {cat.icon}{cat.label}
                         </span>
-                        <p className="text-slate-300 font-light leading-relaxed">{tip.tip}</p>
+                        <span className="w-7 h-7 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold text-xs group-hover:bg-yellow-500 group-hover:text-white transition-all">
+                          {i + 1}
+                        </span>
                       </div>
+                      <p className="text-slate-200 font-light leading-relaxed text-sm">{tip.tip}</p>
                     </div>
                   );
                 })}
@@ -1881,8 +2144,8 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         {data.neighborhoods && data.neighborhoods.length > 0 && (
           <section className="mb-24">
             <div className="flex items-center gap-4 mb-12">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-                <Map size={24} />
+              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-400">
+                <MapIcon size={24} />
               </div>
               <div>
                 <h2 className="text-3xl md:text-4xl text-white font-serif">Neighborhood Guide</h2>
@@ -1891,10 +2154,10 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {data.neighborhoods.map((hood, i) => (
-                <div key={i} className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 hover:border-indigo-500/30 transition-all group">
+                <div key={i} className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 hover:border-teal-500/30 transition-all group">
                   <div className="flex items-start justify-between mb-6">
-                    <h4 className="text-2xl text-white font-serif group-hover:text-indigo-400 transition-colors">{hood.name}</h4>
-                    <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[9px] uppercase tracking-widest text-indigo-400 font-bold shrink-0">{hood.vibe}</span>
+                    <h4 className="text-2xl text-white font-serif group-hover:text-teal-400 transition-colors">{hood.name}</h4>
+                    <span className="px-3 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full text-[9px] uppercase tracking-widest text-teal-400 font-bold shrink-0">{hood.vibe}</span>
                   </div>
                   <div className="space-y-4">
                     <div>
@@ -1947,7 +2210,19 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
               </div>
               <div className="bg-[#0B1221] border border-white/10 rounded-[2.5rem] p-8 flex flex-col">
                 <h4 className="text-white font-serif text-xl mb-2">Budget Breakdown</h4>
-                <p className="text-xs text-slate-500 mb-8 font-light">Estimated all-in daily spend (incl. accommodation)</p>
+                <p className="text-xs text-slate-500 mb-4 font-light">Estimated all-in daily spend per person</p>
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {[
+                    { icon: '🏨', label: 'Accommodation' },
+                    { icon: '🍽', label: '3 meals' },
+                    { icon: '🚌', label: 'Local transport' },
+                    { icon: '🎭', label: '1–2 activities' },
+                  ].map(({ icon, label }) => (
+                    <span key={label} className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white/5 border border-white/10 rounded-full px-3 py-1">
+                      <span>{icon}</span>{label}
+                    </span>
+                  ))}
+                </div>
                 <div className="space-y-3 flex-1">
                   {([
                     { tier: 'Budget', price: data.practicalInfo.budgetBreakdown.budget, color: 'text-emerald-400', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20' },
@@ -1962,14 +2237,189 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                 </div>
               </div>
             </div>
+
+            {/* Currency Converter */}
+            {Object.keys(convRates).length > 0 && (() => {
+              const CURRENCIES = [
+                { code: 'USD', label: 'US Dollar' },
+                { code: 'EUR', label: 'Euro' },
+                { code: 'GBP', label: 'British Pound' },
+                { code: 'JPY', label: 'Japanese Yen' },
+                { code: 'AUD', label: 'Australian Dollar' },
+                { code: 'CAD', label: 'Canadian Dollar' },
+                { code: 'CHF', label: 'Swiss Franc' },
+                { code: 'CNY', label: 'Chinese Yuan' },
+                { code: 'INR', label: 'Indian Rupee' },
+                { code: 'MXN', label: 'Mexican Peso' },
+                { code: 'BRL', label: 'Brazilian Real' },
+                { code: 'KRW', label: 'South Korean Won' },
+                { code: 'SGD', label: 'Singapore Dollar' },
+                { code: 'HKD', label: 'Hong Kong Dollar' },
+                { code: 'THB', label: 'Thai Baht' },
+                { code: 'AED', label: 'UAE Dirham' },
+                { code: 'TRY', label: 'Turkish Lira' },
+                { code: 'ZAR', label: 'South African Rand' },
+                { code: 'SEK', label: 'Swedish Krona' },
+                { code: 'NOK', label: 'Norwegian Krone' },
+                { code: 'NZD', label: 'New Zealand Dollar' },
+                { code: 'PLN', label: 'Polish Złoty' },
+              ];
+              const amt = parseFloat(convAmount) || 0;
+              const fromRate = convRates[convFrom] ?? 1;
+              const toRate = convRates[convTo] ?? 1;
+              const converted = (amt / fromRate) * toRate;
+              const formatted = new Intl.NumberFormat('en-US', {
+                maximumFractionDigits: convTo === 'JPY' || convTo === 'KRW' ? 0 : 2,
+                minimumFractionDigits: convTo === 'JPY' || convTo === 'KRW' ? 0 : 2,
+              }).format(converted);
+              return (
+                <div className="mt-6 bg-[#0B1221] border border-white/10 rounded-[2.5rem] p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-400">
+                      <DollarSign size={18} />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-serif text-xl leading-none">Currency Converter</h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Live rates · tap to convert</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-stretch gap-3">
+                    {/* Amount */}
+                    <input
+                      type="number"
+                      value={convAmount}
+                      onChange={e => setConvAmount(e.target.value)}
+                      className="w-full sm:w-36 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-teal-500/50 transition-colors"
+                      placeholder="Amount"
+                      min="0"
+                    />
+                    {/* From */}
+                    <select
+                      value={convFrom}
+                      onChange={e => setConvFrom(e.target.value)}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 transition-colors appearance-none cursor-pointer"
+                    >
+                      {CURRENCIES.map(c => (
+                        <option key={c.code} value={c.code} className="bg-[#0B1221]">{c.code} — {c.label}</option>
+                      ))}
+                    </select>
+                    {/* Swap */}
+                    <button
+                      onClick={() => { const tmp = convFrom; setConvFrom(convTo); setConvTo(tmp); }}
+                      className="w-10 h-10 mx-auto sm:mx-0 shrink-0 self-center rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 hover:bg-teal-500/20 transition-colors"
+                    >
+                      <RefreshCw size={14} />
+                    </button>
+                    {/* To */}
+                    <select
+                      value={convTo}
+                      onChange={e => setConvTo(e.target.value)}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 transition-colors appearance-none cursor-pointer"
+                    >
+                      {CURRENCIES.map(c => (
+                        <option key={c.code} value={c.code} className="bg-[#0B1221]">{c.code} — {c.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* Result */}
+                  <div className="mt-4 p-5 bg-teal-500/5 border border-teal-500/20 rounded-2xl flex items-center justify-between gap-4">
+                    <span className="text-slate-400 text-sm">{convAmount || '0'} {convFrom} =</span>
+                    <span className="text-teal-300 text-2xl font-serif tracking-tight">{formatted} <span className="text-base text-teal-400/70">{convTo}</span></span>
+                  </div>
+                  <p className="text-[9px] text-slate-600 mt-3 text-right">Rates from exchangerate-api.com · indicative only</p>
+                </div>
+              );
+            })()}
           </section>
         )}
       </main>
-      <InviteModal 
-        show={showInviteModal} 
-        onClose={() => setShowInviteModal(false)} 
-        tripId={tripId || ''} 
+      <InviteModal
+        show={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        tripId={tripId || ''}
       />
+      {reviewRestaurant && (
+        <ReviewsModal
+          name={reviewRestaurant.name}
+          cuisine={reviewRestaurant.cuisine}
+          priceRange={reviewRestaurant.priceRange}
+          mustOrder={reviewRestaurant.mustOrder}
+          neighborhood={reviewRestaurant.neighborhood}
+          localTip={reviewRestaurant.localTip}
+          destination={destination}
+          onClose={() => setReviewRestaurant(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ReviewsModal({ name, cuisine, priceRange, mustOrder, neighborhood, localTip, destination, onClose }: {
+  name: string;
+  cuisine: string;
+  priceRange: string;
+  mustOrder: string;
+  neighborhood: string;
+  localTip: string;
+  destination: string;
+  onClose: () => void;
+}) {
+  const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(name + ' ' + neighborhood + ' ' + destination)}`;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
+      <div className="absolute inset-0 bg-[#050B14]/80 backdrop-blur-md" onClick={onClose} />
+      <motion.div
+        initial={{ y: 60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 60, opacity: 0 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+        className="relative bg-[#0B1221] border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between px-8 pt-8 pb-5">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <h3 className="text-2xl text-white font-serif leading-tight truncate">{name}</h3>
+              <span className="text-base font-bold text-orange-400 shrink-0">{priceRange}</span>
+            </div>
+            <p className="text-xs text-slate-500 flex items-center gap-1.5">
+              <MapPin size={10} className="shrink-0" />{neighborhood} · <span className="text-slate-600">{cuisine}</span>
+            </p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors shrink-0 ml-4">
+            ✕
+          </button>
+        </div>
+
+        <div className="px-8 pb-8 space-y-5">
+          {/* Must Order */}
+          <div className="p-5 bg-teal-500/5 border border-teal-500/15 rounded-2xl">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-teal-400 font-bold mb-1.5">Must Order</p>
+            <p className="text-sm text-white font-medium">{mustOrder}</p>
+          </div>
+
+          {/* Local Tip */}
+          <div className="flex items-start gap-3 p-5 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl">
+            <Lightbulb size={14} className="text-yellow-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-300 font-light leading-relaxed">{localTip}</p>
+          </div>
+
+          {/* Google Reviews CTA */}
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between w-full p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-orange-500/30 hover:bg-orange-500/5 transition-all group"
+          >
+            <div>
+              <p className="text-xs font-semibold text-white group-hover:text-orange-300 transition-colors">See Reviews on Google Maps</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Opens ratings, photos & reviews</p>
+            </div>
+            <ChevronRight size={16} className="text-slate-500 group-hover:text-orange-400 transition-colors shrink-0" />
+          </a>
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -2012,7 +2462,7 @@ function InviteModal({ show, onClose, tripId }: { show: boolean, onClose: () => 
           </div>
           <button 
             onClick={onClose}
-            className="w-full py-5 bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-2xl text-white text-[11px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-cyan-500/20"
+            className="w-full py-5 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-2xl text-white text-[11px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-cyan-500/20"
           >
             Enter Workspace
           </button>
