@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { 
-  Calendar, Users, Bell, TrendingDown, TrendingUp, 
+import {
+  Calendar, Users, Bell, TrendingDown, TrendingUp,
   Share2, MapPin, Search, ArrowRight, Sun, Cloud, CloudRain, Snowflake, Globe,
   ThermometerSun, CheckCircle2, RefreshCw, Sparkles, Plane,
   Bookmark, SlidersHorizontal, Clock, AlertCircle,
-  Copy, Link2, Ghost, Crown, DollarSign
+  Copy, Link2, Ghost, Crown, DollarSign,
+  Lightbulb, Map, Info, Star, Wallet, ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from '@google/genai';
@@ -77,6 +78,35 @@ interface TripIntelligence {
     description: string;
     timeOfYear: string;
   }[];
+  events?: {
+    name: string;
+    month: string;
+    description: string;
+    type: 'festival' | 'cultural' | 'sporting' | 'food' | 'music' | 'market';
+  }[];
+  insiderTips?: {
+    tip: string;
+    category: 'money' | 'transport' | 'food' | 'culture' | 'safety';
+  }[];
+  neighborhoods?: {
+    name: string;
+    vibe: string;
+    bestFor: string;
+    mustSee: string;
+  }[];
+  practicalInfo?: {
+    visa: string;
+    currency: string;
+    language: string;
+    tipping: string;
+    safety: string;
+    bestTransport: string;
+    budgetBreakdown: {
+      budget: string;
+      midRange: string;
+      luxury: string;
+    };
+  };
 }
 
 // --- Fallback Data ---
@@ -161,7 +191,40 @@ const fallbackIntelligence: TripIntelligence = {
     { title: "Autumn Foliage", description: "Historic temples light up their gardens at night.", timeOfYear: "Late November" },
     { title: "Setsubun Festival", description: "Bean-throwing ceremonies to drive away evil spirits.", timeOfYear: "February" },
     { title: "Daimonji Gozan Okuribi", description: "Giant bonfires lit on mountainsides.", timeOfYear: "August 16" }
-  ]
+  ],
+  events: [
+    { name: "Cherry Blossom Viewing", month: "APR", description: "Maruyama Park and Philosopher's Path turn pink. Night illuminations at major temples.", type: "cultural" as const },
+    { name: "Gion Matsuri", month: "JUL", description: "One of Japan's three great festivals — month-long events, yoi-yama street parties and massive float processions.", type: "festival" as const },
+    { name: "Daimonji Gozan Okuribi", month: "AUG", description: "Five enormous bonfires lit on surrounding mountains to guide ancestral spirits back to the afterlife.", type: "cultural" as const },
+    { name: "Jidai Matsuri", month: "OCT", description: "Festival of Ages — 2,000 people parade in historical costumes spanning 1,100 years of Japanese history.", type: "cultural" as const },
+    { name: "Higashiyama Hanatoro", month: "MAR", description: "10,000 bamboo lanterns illuminate the stone-paved lanes of Higashiyama for 10 magical nights.", type: "festival" as const },
+  ],
+  insiderTips: [
+    { tip: "Take the train to Fushimi Inari at 5am — the gates are completely empty for the first 2 hours. Midday is a nightmare.", category: "transport" as const },
+    { tip: "Nishiki Market vendors give the most samples right before closing (~5:30pm). Pickled vegetables are cheapest here.", category: "food" as const },
+    { tip: "A 1-day bus pass (¥700) covers every major site. Multi-day bus passes are a trap — the subway is faster for many routes.", category: "money" as const },
+    { tip: "Book Kaiseki restaurants at least 3 months ahead during sakura season. Many only take reservations via hotel concierge.", category: "culture" as const },
+    { tip: "Philosopher's Path is impassable with a stroller in April. Maruyama Park is the better family cherry blossom spot.", category: "safety" as const },
+  ],
+  neighborhoods: [
+    { name: "Gion", vibe: "Historic", bestFor: "Geisha spotting, traditional architecture, upscale kaiseki restaurants", mustSee: "Hanamikoji Street at dusk, Gion Corner traditional arts shows" },
+    { name: "Arashiyama", vibe: "Serene", bestFor: "Bamboo groves, temple hopping, river boat rides, monkey park", mustSee: "Tenryu-ji garden, bamboo grove at 7am before the crowds arrive" },
+    { name: "Fushimi", vibe: "Cultural", bestFor: "Sake distilleries, Fushimi Inari Shrine, traditional shotengai shopping", mustSee: "The sake brewery trail, Teradaya inn where Ryoma Sakamoto stayed" },
+    { name: "Nishiki / Downtown", vibe: "Lively", bestFor: "Street food, market shopping, modern izakayas and craft cocktail bars", mustSee: "Nishiki Market five-block stretch and Pontocho alley at night" },
+  ],
+  practicalInfo: {
+    visa: "Americans get 90 days visa-free. Most nationalities need only a valid passport for tourist stays.",
+    currency: "Japanese Yen (¥). Cash is king — many temples and small restaurants are cash-only.",
+    language: "Japanese. English minimal outside major hotels. Google Translate camera mode is essential for menus.",
+    tipping: "Tipping is considered rude in Japan. Exceptional service is standard, always expected.",
+    safety: "Extremely safe. One of the safest destinations in the world, including for solo female travelers.",
+    bestTransport: "City buses and Hankyu/Keihan train lines. IC card (Suica/Pasmo) works seamlessly everywhere.",
+    budgetBreakdown: {
+      budget: "¥8,000–12,000/day (~$55-80) — hostel, ramen, bus pass",
+      midRange: "¥20,000–35,000/day (~$140-230) — boutique ryokan, izakayas",
+      luxury: "¥80,000+/day (~$550+) — traditional ryokan with onsen, kaiseki dinners",
+    },
+  },
 };
 
 // --- Demo Data for Featured Destinations ---
@@ -249,7 +312,40 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { title: "Christmas Markets", description: "Festive lights and artisanal crafts across the city.", timeOfYear: "December" },
       { title: "Nuit Blanche", description: "An all-night contemporary art festival across the city.", timeOfYear: "October" },
       { title: "Fête de la Musique", description: "Free live music on every street corner.", timeOfYear: "June 21" }
-    ]
+    ],
+    events: [
+      { name: "Paris Fashion Week", month: "SEP", description: "The world's most prestigious fashion event transforms the city with runway shows, pop-ups, and industry parties.", type: "cultural" as const },
+      { name: "Bastille Day", month: "JUL", description: "France's national holiday — world's oldest military parade down the Champs-Élysées, fireworks at the Eiffel Tower.", type: "festival" as const },
+      { name: "Fête de la Musique", month: "JUN", description: "On the summer solstice, every street corner becomes a stage. Over 10,000 free concerts across the city.", type: "music" as const },
+      { name: "Christmas Markets", month: "DEC", description: "Alsatian-style markets line the Champs-Élysées with mulled wine, crepes, and artisan gifts.", type: "market" as const },
+      { name: "Nuit Blanche", month: "OCT", description: "One night a year Paris stays awake. Hundreds of free art installations fill streets and museums until dawn.", type: "cultural" as const },
+    ],
+    insiderTips: [
+      { tip: "The Louvre is free on the first Friday evening of every month (after 6pm) and the first Sunday of every month. Book timed entry online even for free visits.", category: "money" as const },
+      { tip: "Paris Vélib' bikes are €1.70 for 24 hours — faster than the Metro for sightseeing and the most romantic way to cross the city.", category: "transport" as const },
+      { tip: "'Menu du déjeuner' at bistros is 2-3 courses for €15-22. The exact same dinner costs 3× more. Always eat your main meal at lunch.", category: "food" as const },
+      { tip: "The Eiffel Tower sparkles every hour after dark for exactly 5 minutes. Best spot is Trocadéro, not directly below.", category: "culture" as const },
+      { tip: "Metro pickpockets work in groups. Keep your bag in front, especially at Châtelet-Les Halles, Montmartre, and tourist-heavy trains.", category: "safety" as const },
+    ],
+    neighborhoods: [
+      { name: "Le Marais", vibe: "Trendy", bestFor: "Art galleries, falafel on Rue des Rosiers, LGBTQ+-friendly bars, fashion boutiques", mustSee: "Place des Vosges, Picasso Museum, L'As du Fallafel on weekday lunch" },
+      { name: "Montmartre", vibe: "Bohemian", bestFor: "Street artists, panoramic views, the last Parisian vineyard, classic cabarets", mustSee: "Sacré-Cœur at sunrise, La Maison Rose, the original Le Lapin Agile cabaret" },
+      { name: "Saint-Germain", vibe: "Literary", bestFor: "Legendary cafes (Deux Magots, Café de Flore), Left Bank bookshops, gallery hopping", mustSee: "Shakespeare and Company, Musée d'Orsay, Jardin du Luxembourg" },
+      { name: "Belleville", vibe: "Multicultural", bestFor: "Authentic Chinese, African, and Middle Eastern food, street art, rooftop views", mustSee: "Parc de Belleville at sunset — the best Paris panorama locals actually use" },
+    ],
+    practicalInfo: {
+      visa: "US, UK, EU citizens get 90 days visa-free in the Schengen Area. ETIAS pre-clearance required soon.",
+      currency: "Euro (€). Cards accepted almost everywhere. Carry €20 cash for markets and small cafes.",
+      language: "French. Attempting even 'Bonjour' and 'Merci' dramatically improves your welcome.",
+      tipping: "Not required. Round up the bill or leave 5-10% for exceptional service. Never expected.",
+      safety: "Generally safe, but pickpockets target tourist zones. Avoid RER B late at night alone.",
+      bestTransport: "The Metro is excellent. Buy a Navigo Semaine pass (€22.80, Mon-Sun all zones) for 4+ days.",
+      budgetBreakdown: {
+        budget: "€80-120/day — hostels, boulangerie meals, Metro pass",
+        midRange: "€200-300/day — boutique hotel, bistro dinners, museum passes",
+        luxury: "€600+/day — palace hotels, Michelin-starred dining, private tours",
+      },
+    },
   },
   "Tokyo, Japan": {
     title: "The Neon",
@@ -334,7 +430,40 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { title: "Meiji Jingu New Year", description: "Join millions for the first shrine visit of the year.", timeOfYear: "Jan 1" },
       { title: "Koyo (Autumn Leaves)", description: "The city's ginkgo and maple trees turn brilliant gold and red.", timeOfYear: "November" },
       { title: "Winter Illuminations", description: "Spectacular light displays in Roppongi and Marunouchi.", timeOfYear: "December" }
-    ]
+    ],
+    events: [
+      { name: "Hanami (Sakura Season)", month: "APR", description: "The nationwide cherry blossom celebration. Ueno, Shinjuku Gyoen, and Yoyogi fill with picnickers for flower-viewing parties.", type: "cultural" as const },
+      { name: "Sumida River Fireworks", month: "JUL", description: "Tokyo's largest fireworks display — 20,000 shells launched over the Sumida River. Book a riverside restaurant months ahead.", type: "festival" as const },
+      { name: "Tokyo Game Show", month: "SEP", description: "The world's largest gaming convention draws 250,000 attendees to Makuhari Messe.", type: "cultural" as const },
+      { name: "Comiket (Comic Market)", month: "AUG", description: "The world's largest self-published manga convention — 750,000 attendees descend on Tokyo Big Sight over 3 days.", type: "cultural" as const },
+      { name: "New Year at Meiji Shrine", month: "JAN", description: "Hatsumode — the first shrine visit of the New Year. Over 3 million people visit Meiji Shrine in the first three days of January.", type: "cultural" as const },
+    ],
+    insiderTips: [
+      { tip: "The best ramen is in basement food halls (depachika) of Isetan in Shinjuku, not in tourist ramen museums. Look for lines of salarymen.", category: "food" as const },
+      { tip: "A 7-day JR Pass ($255) pays off only if you're taking 2+ Shinkansen trips. For Tokyo-only travel, Pasmo IC card is all you need.", category: "transport" as const },
+      { tip: "Konbini (7-Eleven, Lawson, FamilyMart) breakfast is legitimately excellent at ¥400-700. Egg salad sandwiches and onigiri are national treasures.", category: "food" as const },
+      { tip: "Ghibli Museum and TeamLab tickets sell out months in advance and cannot be purchased on-site. Book online before your trip or you won't get in.", category: "culture" as const },
+      { tip: "Withdraw Yen from 7-Eleven ATMs in Japan — they reliably accept foreign cards and give near-interbank exchange rates.", category: "money" as const },
+    ],
+    neighborhoods: [
+      { name: "Shinjuku", vibe: "Electric", bestFor: "Golden Gai tiny bars, Kabukicho nightlife, incredible ramen, the free Metropolitan Government observation deck", mustSee: "Omoide Yokocho (Memory Lane) at night, the 8-floor Yodobashi Camera" },
+      { name: "Yanaka", vibe: "Old Tokyo", bestFor: "Pre-war wooden buildings, cats everywhere, traditional shops, a genuine non-touristy neighborhood", mustSee: "Yanaka Ginza shotengai, Nezu Shrine (like Fushimi Inari with zero crowds)" },
+      { name: "Shimokitazawa", vibe: "Indie", bestFor: "Vintage clothing stores, tiny live music venues, artisan coffee, Tokyo's bohemian creative class", mustSee: "Sunday vintage market, Shimokita Theater, local jazz bars" },
+      { name: "Akihabara", vibe: "Neon Otaku", bestFor: "Electronics, anime merchandise, retro video games, maid cafes, multi-floor arcades", mustSee: "Super Potato retro gaming store, the full 8 floors of Yodobashi Camera" },
+    ],
+    practicalInfo: {
+      visa: "US, UK, EU, Aus/NZ citizens receive 90-day visa-free entry. Check MOFA Japan's site for other nationalities.",
+      currency: "Japanese Yen (¥). Japan is heavily cash-based — withdraw at 7-Eleven ATMs for reliable foreign card access.",
+      language: "Japanese. More English than Kyoto but still minimal. Google Translate camera mode is essential for menus.",
+      tipping: "Never tip in Japan. It causes confusion and can offend. Service is always exceptional regardless.",
+      safety: "Among the safest major cities in the world. Crime against tourists is extremely rare.",
+      bestTransport: "Tokyo Metro + JR lines. Pasmo IC card works on all transit. Taxis are expensive but always metered and honest.",
+      budgetBreakdown: {
+        budget: "¥7,000–12,000/day (~$48-82) — capsule hotel, ramen, IC card",
+        midRange: "¥22,000–40,000/day (~$150-270) — mid-range hotel, izakaya hopping, day trips",
+        luxury: "¥80,000+/day (~$550+) — Park Hyatt, omakase sushi, private sake bar experiences",
+      },
+    },
   },
   "Amalfi Coast, Italy": {
     title: "The Azure",
@@ -412,7 +541,40 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { title: "Christmas in Atrani", description: "The tiny village is illuminated with thousands of lights.", timeOfYear: "December" },
       { title: "Sagra del Pesce", description: "A massive fish festival on the beach in Positano.", timeOfYear: "September" },
       { title: "Regata delle Antiche Repubbliche", description: "A historic boat race between Amalfi, Genoa, Pisa, and Venice.", timeOfYear: "June (Rotating)" }
-    ]
+    ],
+    events: [
+      { name: "Ravello Festival", month: "JUL", description: "Classical music on a stage that cantilevers over the Mediterranean — one of Earth's most dramatic concert venues.", type: "music" as const },
+      { name: "Regata delle Antiche Repubbliche", month: "JUN", description: "A boat race between historic maritime rivals Amalfi, Genoa, Pisa, and Venice. Hosted by Amalfi every 4 years.", type: "cultural" as const },
+      { name: "Sagra del Pesce", month: "SEP", description: "Positano's giant beach fish festival — freshly caught seafood grilled over open fires right on the sand.", type: "food" as const },
+      { name: "Infiorata di Positano", month: "JUN", description: "For Corpus Christi, the streets of Positano are carpeted with elaborate designs made from thousands of flower petals.", type: "cultural" as const },
+      { name: "Easter Holy Week", month: "APR", description: "Medieval streets of Amalfi town host torchlight processions culminating in a spectacular Good Friday ceremony.", type: "cultural" as const },
+    ],
+    insiderTips: [
+      { tip: "The SITA bus connects every coastal town for €1.30 — the ferry costs 10× more for the same 20-minute journey. Locals always take the bus.", category: "transport" as const },
+      { tip: "Book lodging in Ravello or Praiano instead of Positano — 30-40% cheaper with identical views and far fewer crowds.", category: "money" as const },
+      { tip: "The Path of the Gods (Sentiero degli Dei) officially runs Agerola to Positano. Take the bus up to Agerola and hike downhill for the best experience.", category: "transport" as const },
+      { tip: "Amalfi's Sfusato Amalfitano lemons are DOP-protected. Limoncello made here is worlds apart from supermarket versions — look for 'prodotto artigianale'.", category: "food" as const },
+      { tip: "Driving the SS163 road in July/August is harrowing with tour coaches clogging the single lane. Take transit or visit in May/September.", category: "safety" as const },
+    ],
+    neighborhoods: [
+      { name: "Positano", vibe: "Glamorous", bestFor: "Iconic views, boutique shopping, beach clubs, upscale restaurants", mustSee: "The vertical cascade of pastel buildings from the beach at golden hour" },
+      { name: "Ravello", vibe: "Elevated", bestFor: "Classical concerts, villa gardens, the most spectacular cliff-top views, peaceful solitude", mustSee: "Villa Cimbrone's Terrace of Infinity with its 900m drop to the sea" },
+      { name: "Amalfi Town", vibe: "Historical", bestFor: "The Duomo, the paper museum, genuine working-town atmosphere away from resort prices", mustSee: "Cathedral's 9th-century bronze doors and the Chiostro del Paradiso cloister" },
+      { name: "Atrani", vibe: "Authentic", bestFor: "The coast's best-kept secret — a genuine village with locals, a tiny beach, no tourist buses", mustSee: "Piazza Umberto I, the oldest town square in the region" },
+    ],
+    practicalInfo: {
+      visa: "Schengen Area — US/UK/Aus get 90 days visa-free. ETIAS electronic pre-clearance coming soon.",
+      currency: "Euro (€). Cash important for small trattorias, bus tickets, and market vendors.",
+      language: "Italian. Very little English outside hotels. Learn 'posso avere il conto?' (can I have the bill?).",
+      tipping: "Not customary. 5-10% for exceptional service. A 'coperto' cover charge (€1-3) is already on the bill.",
+      safety: "Very safe. Watch for aggressive vendors in Positano and keep bags secured on crowded buses.",
+      bestTransport: "SITA buses (cheap, scenic, thrilling). Ferries between towns in summer. Car rental not recommended July-August.",
+      budgetBreakdown: {
+        budget: "€90-130/day — B&B in Praiano, trattoria set lunches, bus passes",
+        midRange: "€220-350/day — 3-star hotel in Positano, dinners, day ferries",
+        luxury: "€600+/day — 5-star cliff-side villa, private boat, Michelin dining",
+      },
+    },
   },
   "Madison, Wisconsin": {
     title: "The Isthmus",
@@ -497,7 +659,40 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { title: "Winter Carnival", description: "Ice activities and the famous 'Statue of Liberty' on the lake.", timeOfYear: "February" },
       { title: "Great Taste of the Midwest", description: "One of the premier beer festivals in the country.", timeOfYear: "August" },
       { title: "Taste of Madison", description: "Sample food from over 80 local restaurants on the square.", timeOfYear: "Labor Day Weekend" }
-    ]
+    ],
+    events: [
+      { name: "Art on the Square", month: "JUL", description: "200+ artists exhibit around the Capitol in one of the Midwest's premier outdoor art fairs. 200,000 visitors over two days.", type: "cultural" as const },
+      { name: "Great Taste of the Midwest", month: "AUG", description: "A legendary craft beer festival running since 1987. Tickets sell out in seconds. Over 150 Midwest breweries.", type: "food" as const },
+      { name: "Concerts on the Square", month: "JUN", description: "Six Wednesday evenings of free orchestra concerts on the Capitol lawn. Bring a blanket, local cheese, and Spotted Cow.", type: "music" as const },
+      { name: "UW Badgers Football", month: "SEP", description: "Game Day Saturdays in Camp Randall Stadium turn the entire city red. The 'Jump Around' tradition is a genuine cultural experience.", type: "sporting" as const },
+      { name: "Taste of Madison", month: "SEP", description: "Labor Day weekend: 80+ local restaurants set up booths around the Capitol Square — Madison's favorite end-of-summer celebration.", type: "food" as const },
+    ],
+    insiderTips: [
+      { tip: "The Saturday Dane County Farmers Market (the largest producers-only market in the US) sells out by 10am. Arrive early for the Stella's hot spicy cheese bread.", category: "food" as const },
+      { tip: "Memorial Union Terrace fills instantly on sunny weekends. Go Monday-Thursday before 5pm to easily snag the iconic sunburst chairs by the water.", category: "culture" as const },
+      { tip: "Spotted Cow ale by New Glarus Brewing is only legally sold within Wisconsin. Stock up — you legally cannot buy it once you leave the state.", category: "food" as const },
+      { tip: "Parking near the Capitol is brutal on game days and summer weekends. Take the free UW shuttle or rent a Bcycle bike ($15/day) — it's faster.", category: "transport" as const },
+      { tip: "Babcock Dairy on the UW campus sells legendary ice cream below market prices. Best soft-serve in the Midwest.", category: "money" as const },
+    ],
+    neighborhoods: [
+      { name: "State Street", vibe: "University Energy", bestFor: "Pedestrian mall bars, eclectic shops, quick cheap eats, the hub between UW campus and the Capitol", mustSee: "Memorial Union Terrace (campus end), Comedy Club on State on weeknights" },
+      { name: "Atwood", vibe: "Quirky Local", bestFor: "Madison's most unique neighborhood — bookshops, galleries, dive bars, the best pizza in the city", mustSee: "Cargo Coffee on Atwood, The Magic Moment bar, Barrymore Theatre" },
+      { name: "Willy Street", vibe: "Co-op Hipster", bestFor: "Community co-ops, tattoo parlors, the best breakfast spots, live music, the authentic Madison ethos", mustSee: "Original Willy Street Co-op, Mother Fool's Coffeehouse for live music" },
+      { name: "Monroe Street", vibe: "Neighborhood Gem", bestFor: "Local restaurants without tourist markup, independent coffee shops, Regent neighborhood vibes", mustSee: "Fromagination cheese shop, The Old Fashioned for classic Wisconsin supper club dishes" },
+    ],
+    practicalInfo: {
+      visa: "Domestic US destination — no visa required. International visitors use standard US visitor visa or ESTA.",
+      currency: "US Dollar (USD). Cards accepted everywhere. ATMs abundant throughout downtown.",
+      language: "English. Also: 'ope' means 'excuse me', 'bubbler' is a water fountain, 'supper club' is fine-casual dining.",
+      tipping: "Standard US tipping: 18-20% at restaurants, $1-2 per drink at bars.",
+      safety: "Very safe for a US city. Normal urban precautions near State Street late night on weekends.",
+      bestTransport: "Madison Metro buses cover the city well ($2/ride). Highly bike-friendly — Bcycle rental stations everywhere.",
+      budgetBreakdown: {
+        budget: "$80-120/day — budget motel, food cart meals, bus pass",
+        midRange: "$180-250/day — downtown hotel, restaurant dinners, some activities",
+        luxury: "$350+/day — boutique hotel, supper club dining, private event tickets",
+      },
+    },
   },
   "Santorini, Greece": {
     title: "The Volcanic",
@@ -582,7 +777,40 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { title: "Wine Harvest", description: "The island's unique vineyards are busy with activity.", timeOfYear: "August" },
       { title: "Santorini Arts Festival", description: "Concerts and exhibitions in various venues.", timeOfYear: "Summer" },
       { title: "Panigiri of Prophet Elias", description: "A traditional religious festival with food and music.", timeOfYear: "July 20" }
-    ]
+    ],
+    events: [
+      { name: "Ifestia Festival", month: "SEP", description: "Annual re-enactment of the volcanic eruption — fireworks cascade over the caldera from Oia's cliffs in one of Europe's most spectacular displays.", type: "festival" as const },
+      { name: "Greek Orthodox Easter", month: "APR", description: "The most important Greek holiday. Candlelit midnight processions, 'Christos Anesti' exchanges, and lamb roasted outdoors.", type: "cultural" as const },
+      { name: "Santorini Music Festival", month: "SEP", description: "World-class chamber music in the Nomikos Centre — a venue carved into the cliff face with caldera views.", type: "music" as const },
+      { name: "Assyrtiko Wine Harvest", month: "AUG", description: "Santorini's ancient basket-pruned vines are harvested. Wineries offer harvest experiences and new vintage tastings.", type: "food" as const },
+      { name: "Panormos Film Festival", month: "AUG", description: "Open-air cinema screenings on a sea-view terrace. Greek and international films under the stars.", type: "cultural" as const },
+    ],
+    insiderTips: [
+      { tip: "The 'famous Oia sunset' attracts 3,000+ people to one tiny viewpoint. Locals watch from Imerovigli — better angle, zero crowds, and you can actually sit down.", category: "culture" as const },
+      { tip: "Donkeys for the Fira-to-port ascent are no longer recommended (animal welfare). Take the cable car (€6) or walk the 300 steps — both are better.", category: "transport" as const },
+      { tip: "Assyrtiko wine direct from small family wineries (Santo Wines, Estate Argyros) costs 40% less than the same bottles at caldera restaurants.", category: "money" as const },
+      { tip: "ATV/quad bike rentals are ubiquitous but have a very high accident rate on Santorini's narrow cliff roads. If you rent one, go slow — locals will pass on blind corners.", category: "safety" as const },
+      { tip: "Book caldera-view restaurants for lunch not dinner — identical views, 25-30% lower prices, and you can actually see the caldera instead of racing darkness.", category: "money" as const },
+    ],
+    neighborhoods: [
+      { name: "Oia", vibe: "Iconic Luxury", bestFor: "Sunset views, blue-domed churches, upscale caldera hotels, honeymoon atmosphere", mustSee: "Byzantine castle ruins at sunset — arrive 2 hours early in peak season" },
+      { name: "Fira", vibe: "Vibrant Capital", bestFor: "Shopping, Archaeological Museum, budget accommodation, cable car access to the port", mustSee: "Museum of Prehistoric Thera — includes 3,600-year-old Minoan frescoes" },
+      { name: "Imerovigli", vibe: "Serene Caldera", bestFor: "The best caldera views on the island with far fewer tourists than Oia, sunrise watching", mustSee: "Skaros Rock hike to medieval fortress ruins at the tip of the headland" },
+      { name: "Pyrgos", vibe: "Authentic Village", bestFor: "Real Santorini life away from tourists, castle ruins, best winery access, local tavernas", mustSee: "Medieval castle of Pyrgos at night, Franco's Bar for rooftop sunset cocktails" },
+    ],
+    practicalInfo: {
+      visa: "Schengen Area — US/UK/Aus get 90 days visa-free. ETIAS electronic pre-clearance coming soon.",
+      currency: "Euro (€). Most places accept cards, but carry cash for smaller tavernas and the local bus.",
+      language: "Greek. English widely spoken in tourist areas. Locals love even a 'Yiasas' (cheers) or 'Efcharistó' (thank you).",
+      tipping: "Round up the bill or leave 5-10% for sit-down service. Not mandatory but appreciated.",
+      safety: "Very safe. Main risks are traffic accidents (especially ATVs) and dehydration in summer heat.",
+      bestTransport: "Local KTEL bus connects major villages cheaply. The caldera path walk (Fira-Firostefani-Imerovigli-Oia, 10km) is the best way to see the island.",
+      budgetBreakdown: {
+        budget: "€80-120/day — inland studios, taverna meals, local bus",
+        midRange: "€250-400/day — caldera-view hotel, restaurant dinners, wine tastings",
+        luxury: "€800+/day — private cave suite in Oia, sunset dinner, private catamaran",
+      },
+    },
   }
 };
 
@@ -741,32 +969,35 @@ export default function Waves() {
       try {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const prompt = `
-          You are an expert travel planner. The user wants to travel to: ${dest}.
-          Provide a comprehensive, highly detailed destination guide. 
-          Focus heavily on local culture, food, and "in the weeds" details that only a local would know.
+          You are an expert travel planner with deep local knowledge. The user wants to travel to: ${dest}.
+          Provide a comprehensive, highly detailed destination guide with insider knowledge a typical tourist wouldn't know.
           Format the response exactly as a JSON object with these keys:
-          - "title": Catchy title (e.g., "The Ultimate").
-          - "subtitle": Destination name (e.g., "Kyoto Experience").
+          - "title": Catchy 2-word title (e.g., "The Ultimate").
+          - "subtitle": Destination tagline (e.g., "Kyoto Experience").
           - "summary": 2-3 sentences summarizing the vibe and overall appeal.
           - "whyVisit": 2-3 sentences on why people visit this location.
           - "whenToVisit": 2-3 sentences on the best times to visit and crowd levels.
           - "averageDailySpend": Estimated average cost per day in USD (number).
-          - "seasons": { "high": "string", "low": "string", "shoulder": "string" }
-          - "weatherCard": { "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "tempHigh": number, "tempLow": number, "note": string, "month": string }
-          - "monthlyData": Array of exactly 12 objects (Jan-Dec). Each: "month" (e.g., "JAN"), "flightCost" (number), "temp" (number), "condition": "Sunny" | "Partly Cloudy" | "Rainy" | "Snow", "note": "string", "isIdeal" (boolean), and "crowdLevel" (number 1-10).
-          - "foodAndCulture": { 
+          - "seasons": { "high": "months string", "low": "months string", "shoulder": "months string" }
+          - "weatherCard": { "condition": "Sunny"|"Partly Cloudy"|"Rainy"|"Snow", "tempHigh": number, "tempLow": number, "note": string, "month": string }
+          - "monthlyData": Array of exactly 12 objects (Jan-Dec). Each: "month" (3-letter e.g. "JAN"), "flightCost" (round-trip USD number), "temp" (°F number), "condition": "Sunny"|"Partly Cloudy"|"Rainy"|"Snow", "note": "1-2 sentence local insight", "isIdeal" (boolean, max 3 true), "crowdLevel" (1-10).
+          - "foodAndCulture": {
               "categories": [
-                { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
-                { "title": "Lunch & Street Food", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
-                { "title": "Dinner & Fine Dining", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] },
-                { "title": "Drinks & Nightlife", "items": [{ "name": "string", "description": "string", "imageKeyword": "string" }] }
-              ], 
-              "mustTry": ["string"], 
-              "culturalEtiquette": [{ "title": "string", "description": "string" }] 
+                { "title": "Breakfast & Morning Rituals", "items": [{ "name": string, "description": string, "imageKeyword": single-word-string }] },
+                { "title": "Lunch & Street Food", "items": [...] },
+                { "title": "Dinner & Fine Dining", "items": [...] },
+                { "title": "Drinks & Nightlife", "items": [...] }
+              ],
+              "mustTry": ["string — specific dish or experience"],
+              "culturalEtiquette": [{ "title": string, "description": string }]
             }
-          - "topActivities": Array of exactly 6 (title, description, imageKeyword)
-          - "nicheActivities": Array of exactly 4 (title, description, imageKeyword)
-          - "seasonalHighlights": Array of exactly 5 (title, description, timeOfYear)
+          - "topActivities": Array of exactly 6 objects: { "title": string, "description": string, "imageKeyword": single-word }
+          - "nicheActivities": Array of exactly 4 objects: { "title": string, "description": string, "imageKeyword": single-word }
+          - "seasonalHighlights": Array of exactly 5 objects: { "title": string, "description": string, "timeOfYear": string }
+          - "events": Array of 5 notable events/festivals: { "name": string, "month": "JAN"|"FEB"|"MAR"|"APR"|"MAY"|"JUN"|"JUL"|"AUG"|"SEP"|"OCT"|"NOV"|"DEC", "description": string, "type": "festival"|"cultural"|"sporting"|"food"|"music"|"market" }
+          - "insiderTips": Array of exactly 5 objects: { "tip": "specific actionable local insight", "category": "money"|"transport"|"food"|"culture"|"safety" }
+          - "neighborhoods": Array of 4 key neighborhoods: { "name": string, "vibe": 1-2 word descriptor, "bestFor": string, "mustSee": string }
+          - "practicalInfo": { "visa": string, "currency": string, "language": string, "tipping": string, "safety": string, "bestTransport": string, "budgetBreakdown": { "budget": "range+notes", "midRange": "range+notes", "luxury": "range+notes" } }
         `;
         
         const response = await ai.models.generateContent({
@@ -1038,9 +1269,42 @@ export default function Waves() {
               <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] animate-pulse"></span>
               <span className="text-xs uppercase tracking-widest text-cyan-400 font-medium">Optimal Window Found</span>
             </div>
-            <p className="text-sm text-slate-400 font-light leading-relaxed">
-              Analyzing historical weather data, crowd levels, and local events to find the perfect time for your trip.
+            <p className="text-sm text-slate-400 font-light leading-relaxed mb-8">
+              {data.summary}
             </p>
+
+            {/* Season Breakdown */}
+            <div className="space-y-3">
+              <p className="text-[9px] uppercase tracking-[0.2em] text-slate-600 font-bold mb-3">Season Guide</p>
+              <div className="flex items-start gap-3">
+                <span className="px-2.5 py-1 bg-rose-500/10 border border-rose-500/20 rounded-full text-[9px] uppercase tracking-widest text-rose-400 font-bold shrink-0">Peak</span>
+                <span className="text-xs text-slate-500 font-light leading-relaxed">{data.seasons.high}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] uppercase tracking-widest text-amber-400 font-bold shrink-0">Shoulder</span>
+                <span className="text-xs text-slate-500 font-light leading-relaxed">{data.seasons.shoulder}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[9px] uppercase tracking-widest text-emerald-400 font-bold shrink-0">Low Season</span>
+                <span className="text-xs text-slate-500 font-light leading-relaxed">{data.seasons.low}</span>
+              </div>
+            </div>
+
+            {/* Best Value Month */}
+            {(() => {
+              const minCost = Math.min(...data.monthlyData.map(m => m.flightCost));
+              const bestMonth = data.monthlyData.find(m => m.flightCost === minCost);
+              return bestMonth ? (
+                <div className="mt-6 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+                  <p className="text-[9px] uppercase tracking-widest text-emerald-400 font-bold mb-2">Best Value Month</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium text-sm">{bestMonth.month}</span>
+                    <span className="text-emerald-400 font-bold">${bestMonth.flightCost}</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 font-light">{bestMonth.note}</p>
+                </div>
+              ) : null;
+            })()}
           </div>
         </div>
 
@@ -1144,12 +1408,80 @@ export default function Waves() {
                           <span className={`text-[10px] font-black tracking-widest uppercase ${isSelected ? 'text-cyan-400' : 'text-slate-600'}`}>
                             {item.month}
                           </span>
+                          {/* Crowd dots */}
+                          <div className="flex gap-0.5">
+                            {[1,2,3,4,5].map(dot => (
+                              <div key={dot} className={`w-1 h-1 rounded-full transition-colors ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
+                            ))}
+                          </div>
                         </div>
                       </div>
                     );
                   });
                 })()}
               </div>
+
+              {/* Month Deep-Dive Card */}
+              {(() => {
+                const item = data.monthlyData[activeMonthIndex];
+                const maxCost = Math.max(...data.monthlyData.map(d => d.flightCost));
+                const minCost = Math.min(...data.monthlyData.map(d => d.flightCost));
+                const savingsPct = maxCost > minCost ? Math.round(((maxCost - item.flightCost) / (maxCost - minCost)) * 100) : 0;
+                const monthEvents = (data.events || []).filter(e => e.month === item.month);
+                const crowdLabel = item.crowdLevel >= 8 ? 'Very Busy' : item.crowdLevel >= 6 ? 'Moderate' : item.crowdLevel >= 4 ? 'Manageable' : 'Quiet';
+                const crowdColor = item.crowdLevel >= 8 ? 'text-rose-400' : item.crowdLevel >= 6 ? 'text-amber-400' : 'text-emerald-400';
+                const weatherIcon = item.condition.includes('Sun') ? <Sun size={18} className="text-amber-400" /> : item.condition.includes('Rain') ? <CloudRain size={18} className="text-cyan-400" /> : item.condition.includes('Snow') ? <Snowflake size={18} className="text-indigo-400" /> : <Cloud size={18} className="text-slate-400" />;
+                return (
+                  <motion.div
+                    key={activeMonthIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-8 bg-[#050B14] border border-white/10 rounded-3xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6"
+                  >
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Temperature</p>
+                      <div className="flex items-center gap-2">
+                        {weatherIcon}
+                        <span className="text-2xl text-white font-light">{item.temp}°F</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">{item.condition}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Round-Trip Flight</p>
+                      <span className="text-2xl text-white font-light">${item.flightCost.toLocaleString()}</span>
+                      {savingsPct > 10 && (
+                        <p className="text-[10px] text-emerald-400 mt-1 font-bold">Save ~{savingsPct}% vs peak</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Crowd Level</p>
+                      <div className="flex gap-1 mb-1">
+                        {[1,2,3,4,5].map(dot => (
+                          <div key={dot} className={`w-3 h-3 rounded-full ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
+                        ))}
+                      </div>
+                      <p className={`text-[10px] font-bold ${crowdColor}`}>{crowdLabel}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Local Vibe</p>
+                      <p className="text-xs text-slate-300 font-light leading-relaxed">{item.note}</p>
+                    </div>
+                    {monthEvents.length > 0 && (
+                      <div className="col-span-full border-t border-white/5 pt-4">
+                        <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-3 font-bold flex items-center gap-2">
+                          <Star size={10} className="text-amber-400" /> Events This Month
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {monthEvents.map((event, i) => (
+                            <span key={i} className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs text-amber-400 font-medium">{event.name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })()}
             </div>
           </div>
         </section>
@@ -1417,6 +1749,179 @@ export default function Waves() {
             </div>
           </div>
         </section>
+
+        {/* Events & Festivals */}
+        {data.events && data.events.length > 0 && (
+          <section className="mb-24">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                <Star size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl text-white font-serif">Events & Festivals</h2>
+                <p className="text-slate-500 text-xs mt-1">What's happening when you're there</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data.events.map((event, i) => {
+                const typeStyles: Record<string, string> = {
+                  festival: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+                  cultural: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+                  sporting: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                  food: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+                  music: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
+                  market: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                };
+                const style = typeStyles[event.type] || typeStyles.cultural;
+                return (
+                  <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-7 hover:border-amber-500/20 transition-all group">
+                    <div className="flex items-start justify-between mb-5">
+                      <span className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-widest font-bold border ${style}`}>
+                        {event.type}
+                      </span>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold bg-white/5 px-2.5 py-1 rounded-full">{event.month}</span>
+                    </div>
+                    <h4 className="text-lg text-white font-serif mb-3 group-hover:text-amber-400 transition-colors">{event.name}</h4>
+                    <p className="text-sm text-slate-400 font-light leading-relaxed">{event.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Insider Knowledge */}
+        {data.insiderTips && data.insiderTips.length > 0 && (
+          <section className="mb-24">
+            <div className="bg-[#0B1221]/80 border border-white/10 rounded-[3rem] p-10 md:p-14 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
+                <Lightbulb size={200} />
+              </div>
+              <div className="flex items-center gap-4 mb-12 relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-400">
+                  <Lightbulb size={24} />
+                </div>
+                <div>
+                  <h2 className="text-3xl text-white font-serif">Insider Knowledge</h2>
+                  <p className="text-slate-500 text-xs mt-1">Things only locals know</p>
+                </div>
+              </div>
+              <div className="space-y-8 relative z-10">
+                {data.insiderTips.map((tip, i) => {
+                  const catStyles: Record<string, string> = {
+                    money: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                    transport: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+                    food: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+                    culture: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+                    safety: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+                  };
+                  const style = catStyles[tip.category] || catStyles.culture;
+                  return (
+                    <div key={i} className="flex items-start gap-6 group">
+                      <div className="w-10 h-10 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold text-sm shrink-0 group-hover:bg-yellow-500 group-hover:text-white transition-all">
+                        {i + 1}
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-bold border mb-2 ${style}`}>
+                          {tip.category}
+                        </span>
+                        <p className="text-slate-300 font-light leading-relaxed">{tip.tip}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Neighborhood Guide */}
+        {data.neighborhoods && data.neighborhoods.length > 0 && (
+          <section className="mb-24">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                <Map size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl text-white font-serif">Neighborhood Guide</h2>
+                <p className="text-slate-500 text-xs mt-1">Where to base yourself and what to expect</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {data.neighborhoods.map((hood, i) => (
+                <div key={i} className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 hover:border-indigo-500/30 transition-all group">
+                  <div className="flex items-start justify-between mb-6">
+                    <h4 className="text-2xl text-white font-serif group-hover:text-indigo-400 transition-colors">{hood.name}</h4>
+                    <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[9px] uppercase tracking-widest text-indigo-400 font-bold shrink-0">{hood.vibe}</span>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1.5">Best For</p>
+                      <p className="text-sm text-slate-300 font-light leading-relaxed">{hood.bestFor}</p>
+                    </div>
+                    <div className="border-t border-white/5 pt-4">
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1.5 flex items-center gap-1.5"><ChevronRight size={10} /> Don't Miss</p>
+                      <p className="text-sm text-slate-300 font-light leading-relaxed">{hood.mustSee}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Practical Trip Intelligence */}
+        {data.practicalInfo && (
+          <section className="mb-24">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-400">
+                <Info size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl text-white font-serif">Trip Intelligence</h2>
+                <p className="text-slate-500 text-xs mt-1">Everything you need to know before you go</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                {([
+                  { label: 'Visa', value: data.practicalInfo.visa, icon: Globe },
+                  { label: 'Currency', value: data.practicalInfo.currency, icon: DollarSign },
+                  { label: 'Language', value: data.practicalInfo.language, icon: Globe },
+                  { label: 'Tipping', value: data.practicalInfo.tipping, icon: Wallet },
+                  { label: 'Safety', value: data.practicalInfo.safety, icon: CheckCircle2 },
+                  { label: 'Best Transport', value: data.practicalInfo.bestTransport, icon: Plane },
+                ] as { label: string; value: string; icon: React.ElementType }[]).map(({ label, value, icon: Icon }) => (
+                  <div key={label} className="flex items-start gap-4 p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-white/20 transition-all">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 shrink-0">
+                      <Icon size={16} />
+                    </div>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">{label}</p>
+                      <p className="text-sm text-slate-300 font-light leading-relaxed">{value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-[#0B1221] border border-white/10 rounded-[2.5rem] p-8 flex flex-col">
+                <h4 className="text-white font-serif text-xl mb-2">Budget Breakdown</h4>
+                <p className="text-xs text-slate-500 mb-8 font-light">Estimated all-in daily spend (incl. accommodation)</p>
+                <div className="space-y-3 flex-1">
+                  {([
+                    { tier: 'Budget', price: data.practicalInfo.budgetBreakdown.budget, color: 'text-emerald-400', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20' },
+                    { tier: 'Mid-Range', price: data.practicalInfo.budgetBreakdown.midRange, color: 'text-cyan-400', bg: 'bg-cyan-500/5', border: 'border-cyan-500/20' },
+                    { tier: 'Luxury', price: data.practicalInfo.budgetBreakdown.luxury, color: 'text-purple-400', bg: 'bg-purple-500/5', border: 'border-purple-500/20' },
+                  ]).map(({ tier, price, color, bg, border }) => (
+                    <div key={tier} className={`flex items-start justify-between p-5 ${bg} border ${border} rounded-2xl gap-4`}>
+                      <span className={`text-[10px] uppercase tracking-widest font-bold ${color} shrink-0 mt-0.5`}>{tier}</span>
+                      <span className="text-slate-300 text-sm font-light text-right leading-relaxed">{price}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </main>
       <InviteModal 
         show={showInviteModal} 
