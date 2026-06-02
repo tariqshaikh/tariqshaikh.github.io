@@ -95,6 +95,14 @@ interface TripIntelligence {
     neighborhood: string;
     localTip: string;
   }[];
+  popularRestaurants?: {
+    name: string;
+    cuisine: string;
+    rating: number;
+    reviewCount: number;
+    priceRange: string;
+    neighborhood: string;
+  }[];
   neighborhoods?: {
     name: string;
     vibe: string;
@@ -226,6 +234,18 @@ const fallbackIntelligence: TripIntelligence = {
     { name: "Ippudo Ramen Kyoto", cuisine: "Ramen", priceRange: "$", mustOrder: "Shiromaru Classic with extra noodles (kaedama)", neighborhood: "Downtown Kyoto", localTip: "Open until 3am on weekends. Order firm noodles (katame) — they turn mushy fast in the broth." },
     { name: "Nishiki Warai", cuisine: "Obanzai (Kyoto home cooking)", priceRange: "$$", mustOrder: "Seasonal obanzai set with yudofu and pickles", neighborhood: "Nishiki Market", localTip: "8-seat counter, no reservations. Arrive at 11:30am sharp or face a 45-minute wait. Cash only." },
     { name: "Tankuma Kitamise", cuisine: "Kaiseki", priceRange: "$$$", mustOrder: "Lunch kaiseki bento (¥7,700)", neighborhood: "Gion", localTip: "Their lunch bento offers kaiseki quality at half the price. Easier to reserve than Kikunoi — book 3-4 weeks ahead." },
+  ],
+  popularRestaurants: [
+    { name: "Nishiki Market", cuisine: "Street Food / Market", rating: 4.4, reviewCount: 28400, priceRange: "$", neighborhood: "Nakagyo" },
+    { name: "Ippudo Ramen Kyoto", cuisine: "Ramen", rating: 4.3, reviewCount: 11200, priceRange: "$", neighborhood: "Downtown" },
+    { name: "Tofu Cuisine Sagano", cuisine: "Vegetarian / Tofu", rating: 4.5, reviewCount: 8900, priceRange: "$$", neighborhood: "Arashiyama" },
+    { name: "Gion Kappa", cuisine: "Izakaya", rating: 4.2, reviewCount: 7600, priceRange: "$$", neighborhood: "Gion" },
+    { name: "Kikunoi Honten", cuisine: "Kaiseki", rating: 4.7, reviewCount: 6800, priceRange: "$$$$", neighborhood: "Higashiyama" },
+    { name: "Omen Noodle", cuisine: "Udon", rating: 4.4, reviewCount: 5900, priceRange: "$", neighborhood: "Gion" },
+    { name: "Mumokuteki Café", cuisine: "Vegan / Organic", rating: 4.3, reviewCount: 4700, priceRange: "$$", neighborhood: "Downtown" },
+    { name: "Pontocho Alley Restaurants", cuisine: "Various", rating: 4.2, reviewCount: 4300, priceRange: "$$", neighborhood: "Pontocho" },
+    { name: "Nakamura-ro", cuisine: "Kaiseki / Historic", rating: 4.6, reviewCount: 3800, priceRange: "$$$$", neighborhood: "Yasaka Shrine" },
+    { name: "Kushitora Gion", cuisine: "Kushikatsu", rating: 4.3, reviewCount: 3200, priceRange: "$$", neighborhood: "Gion" },
   ],
   neighborhoods: [
     { name: "Gion", vibe: "Historic", bestFor: "Geisha spotting, traditional architecture, upscale kaiseki restaurants", mustSee: "Hanamikoji Street at dusk, Gion Corner traditional arts shows" },
@@ -362,6 +382,18 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Le Baratin", cuisine: "Natural Wine & Bistro", priceRange: "$$", mustOrder: "Boudin noir with apples and whatever terrine is listed on the chalkboard", neighborhood: "Belleville (20th)", localTip: "Cash only, Wednesday lunch specials are legendary. This is where Parisian chefs eat on their nights off — zero tourists." },
       { name: "Du Pain et des Idées", cuisine: "Artisan Bakery", priceRange: "$", mustOrder: "Escargot pistache-chocolat or the pain des amis loaf", neighborhood: "Canal Saint-Martin (10th)", localTip: "Closed weekends. Arrive before 9am or the best pastries sell out. The escargot is the best pastry in Paris, full stop." },
     ],
+    popularRestaurants: [
+      { name: "Café de Flore", cuisine: "Café / Brasserie", rating: 4.2, reviewCount: 41200, priceRange: "$$", neighborhood: "Saint-Germain-des-Prés" },
+      { name: "Les Deux Magots", cuisine: "Café / Brasserie", rating: 4.1, reviewCount: 38700, priceRange: "$$", neighborhood: "Saint-Germain-des-Prés" },
+      { name: "L'As du Fallafel", cuisine: "Israeli / Falafel", rating: 4.4, reviewCount: 22100, priceRange: "$", neighborhood: "Le Marais" },
+      { name: "Brasserie Lipp", cuisine: "Classic Brasserie", rating: 4.2, reviewCount: 14300, priceRange: "$$$", neighborhood: "Saint-Germain-des-Prés" },
+      { name: "Du Pain et des Idées", cuisine: "Artisan Bakery", rating: 4.7, reviewCount: 12800, priceRange: "$", neighborhood: "Canal Saint-Martin" },
+      { name: "Septime", cuisine: "Modern French", rating: 4.6, reviewCount: 9400, priceRange: "$$$", neighborhood: "Bastille / 11th" },
+      { name: "Le Bouillon Chartier", cuisine: "Traditional French", rating: 4.2, reviewCount: 8900, priceRange: "$", neighborhood: "Grands Boulevards" },
+      { name: "Frenchie Bar à Vins", cuisine: "Natural Wine Bistro", rating: 4.5, reviewCount: 7200, priceRange: "$$", neighborhood: "Sentier" },
+      { name: "Pierre Hermé", cuisine: "Pâtisserie / Macarons", rating: 4.6, reviewCount: 6800, priceRange: "$$", neighborhood: "Saint-Germain-des-Prés" },
+      { name: "Breizh Café", cuisine: "Crêperie / Breton", rating: 4.4, reviewCount: 5900, priceRange: "$$", neighborhood: "Le Marais" },
+    ],
     neighborhoods: [
       { name: "Le Marais", vibe: "Trendy", bestFor: "Art galleries, falafel on Rue des Rosiers, LGBTQ+-friendly bars, fashion boutiques", mustSee: "Place des Vosges, Picasso Museum, L'As du Fallafel on weekday lunch" },
       { name: "Montmartre", vibe: "Bohemian", bestFor: "Street artists, panoramic views, the last Parisian vineyard, classic cabarets", mustSee: "Sacré-Cœur at sunrise, La Maison Rose, the original Le Lapin Agile cabaret" },
@@ -494,6 +526,18 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Gonpachi Nishi-Azabu", cuisine: "Izakaya (Japanese gastropub)", priceRange: "$$", mustOrder: "Soba noodles and the chicken yakitori skewers from the open charcoal grill", neighborhood: "Nishi-Azabu", localTip: "The Kill Bill swordfight scene was filmed here but locals still genuinely come for the food. Go Tuesday–Thursday to avoid the tourist rush." },
       { name: "Tsuta", cuisine: "Shoyu Ramen", priceRange: "$$", mustOrder: "Truffle shoyu soba (the original Michelin-starred ramen)", neighborhood: "Sugamo", localTip: "World's first Michelin-starred ramen shop. Reservations now available online — book the day before via their website. Cash only." },
     ],
+    popularRestaurants: [
+      { name: "Ichiran Ramen Shibuya", cuisine: "Tonkotsu Ramen", rating: 4.3, reviewCount: 52400, priceRange: "$", neighborhood: "Shibuya" },
+      { name: "Kura Sushi Akihabara", cuisine: "Conveyor Belt Sushi", rating: 4.1, reviewCount: 31800, priceRange: "$", neighborhood: "Akihabara" },
+      { name: "Gonpachi Nishi-Azabu", cuisine: "Izakaya", rating: 4.2, reviewCount: 24600, priceRange: "$$", neighborhood: "Nishi-Azabu" },
+      { name: "Fuunji Shinjuku", cuisine: "Tsukemen (Dipping Ramen)", rating: 4.5, reviewCount: 18200, priceRange: "$", neighborhood: "Shinjuku" },
+      { name: "Sushi Dai Tsukiji", cuisine: "Fresh Sushi / Omakase", rating: 4.6, reviewCount: 14700, priceRange: "$$", neighborhood: "Tsukiji Outer Market" },
+      { name: "Nakiryu", cuisine: "Michelin Dan Dan Noodles", rating: 4.4, reviewCount: 11300, priceRange: "$$", neighborhood: "Otsuka" },
+      { name: "Afuri Ramen Ebisu", cuisine: "Yuzu Shio Ramen", rating: 4.3, reviewCount: 9800, priceRange: "$$", neighborhood: "Ebisu" },
+      { name: "Tsuta Ramen Sugamo", cuisine: "Michelin Shoyu Ramen", rating: 4.4, reviewCount: 8600, priceRange: "$$", neighborhood: "Sugamo" },
+      { name: "Tonkatsu Maisen Omotesando", cuisine: "Tonkatsu", rating: 4.4, reviewCount: 7900, priceRange: "$$", neighborhood: "Omotesando" },
+      { name: "Kyubey Ginza", cuisine: "Edomae Sushi", rating: 4.5, reviewCount: 6400, priceRange: "$$$$", neighborhood: "Ginza" },
+    ],
     neighborhoods: [
       { name: "Shinjuku", vibe: "Electric", bestFor: "Golden Gai tiny bars, Kabukicho nightlife, incredible ramen, the free Metropolitan Government observation deck", mustSee: "Omoide Yokocho (Memory Lane) at night, the 8-floor Yodobashi Camera" },
       { name: "Yanaka", vibe: "Old Tokyo", bestFor: "Pre-war wooden buildings, cats everywhere, traditional shops, a genuine non-touristy neighborhood", mustSee: "Yanaka Ginza shotengai, Nezu Shrine (like Fushimi Inari with zero crowds)" },
@@ -618,6 +662,18 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Ristorante Max", cuisine: "Refined Campanian", priceRange: "$$$", mustOrder: "Paccheri al ragù di cernia and buffalo mozzarella with local anchovies", neighborhood: "Positano (main piazza)", localTip: "Best sunset views in Positano. Book the terrace specifically (mention 'terrazza' in your reservation). The cheese cart is worth ordering just for the theatre." },
       { name: "Pizzeria Da Giovanna", cuisine: "Neapolitan Pizza", priceRange: "$", mustOrder: "Margherita DOC with San Marzano tomatoes and bufala mozzarella", neighborhood: "Atrani (3-minute walk from Amalfi town)", localTip: "Atrani is the village next door with zero tourists. This place has a wood-burning oven and costs 30% less than any pizza in Amalfi proper." },
       { name: "Il Buco", cuisine: "Cave Restaurant / Modern Italian", priceRange: "$$$", mustOrder: "Pasta with local sea urchin and the tasting menu paired with Furore wine", neighborhood: "Sorrento", localTip: "Literally carved into a 1,000-year-old cave. Book the 'stone table' in the deepest part of the cave for the most dramatic atmosphere. Reserve 2+ weeks ahead." },
+    ],
+    popularRestaurants: [
+      { name: "Da Adolfo Positano", cuisine: "Casual Seafood", rating: 4.6, reviewCount: 9800, priceRange: "$$", neighborhood: "Laurito Beach (boat access)" },
+      { name: "Lo Scoglio Nerano", cuisine: "Seafood & Pasta", rating: 4.7, reviewCount: 8400, priceRange: "$$$", neighborhood: "Marina del Cantone" },
+      { name: "Ristorante Max Positano", cuisine: "Campanian Fine Dining", rating: 4.5, reviewCount: 7200, priceRange: "$$$", neighborhood: "Positano" },
+      { name: "Trattoria da Gemma Amalfi", cuisine: "Traditional Amalfitan", rating: 4.4, reviewCount: 6100, priceRange: "$$", neighborhood: "Amalfi Town" },
+      { name: "Bar Calypso Positano", cuisine: "Café / Light Bites", rating: 4.3, reviewCount: 5400, priceRange: "$", neighborhood: "Positano Beach" },
+      { name: "La Sponda Positano", cuisine: "Luxury Italian", rating: 4.7, reviewCount: 4800, priceRange: "$$$$", neighborhood: "Le Sirenuse Hotel" },
+      { name: "Il Pirata Praiano", cuisine: "Cliffside Seafood", rating: 4.5, reviewCount: 4200, priceRange: "$$", neighborhood: "Praiano" },
+      { name: "Pizzeria Da Giovanna Atrani", cuisine: "Neapolitan Pizza", rating: 4.4, reviewCount: 3700, priceRange: "$", neighborhood: "Atrani" },
+      { name: "Ristorante Eolo Amalfi", cuisine: "Seafood Terrace", rating: 4.3, reviewCount: 3200, priceRange: "$$$", neighborhood: "Amalfi Town" },
+      { name: "Il Buco Sorrento", cuisine: "Cave Restaurant", rating: 4.5, reviewCount: 2900, priceRange: "$$$", neighborhood: "Sorrento" },
     ],
     neighborhoods: [
       { name: "Positano", vibe: "Glamorous", bestFor: "Iconic views, boutique shopping, beach clubs, upscale restaurants", mustSee: "The vertical cascade of pastel buildings from the beach at golden hour" },
@@ -751,6 +807,18 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Grampa's Pizzeria", cuisine: "New York-Style Pizza", priceRange: "$", mustOrder: "White pie with ricotta and the vodka sauce slice", neighborhood: "Willy Street (Williamson)", localTip: "UW students and locals swear this is the best pizza in town. Counter seating only, cash preferred. Closes when they sell out — usually by 9pm." },
       { name: "Merchant", cuisine: "Craft Cocktails & New American", priceRange: "$$", mustOrder: "Duck fat fries and whatever seasonal craft cocktail the bartender recommends", neighborhood: "State Street", localTip: "The kitchen stays open until midnight. After 10pm the duck poutine appears on the late-night menu — order it." },
     ],
+    popularRestaurants: [
+      { name: "The Old Fashioned", cuisine: "Wisconsin Supper Club", rating: 4.4, reviewCount: 8900, priceRange: "$$", neighborhood: "Capitol Square" },
+      { name: "Graze", cuisine: "Farm-to-Table", rating: 4.4, reviewCount: 6700, priceRange: "$$", neighborhood: "Capitol Square" },
+      { name: "Marigold Kitchen", cuisine: "Breakfast / Brunch", rating: 4.5, reviewCount: 5800, priceRange: "$$", neighborhood: "Willy Street" },
+      { name: "Steenbock's on Orchard", cuisine: "New American", rating: 4.3, reviewCount: 4900, priceRange: "$$", neighborhood: "UW Campus" },
+      { name: "Grampa's Pizzeria", cuisine: "New York Pizza", rating: 4.4, reviewCount: 4200, priceRange: "$", neighborhood: "Williamson Street" },
+      { name: "L'Etoile", cuisine: "Fine Dining", rating: 4.5, reviewCount: 3800, priceRange: "$$$$", neighborhood: "Capitol Square" },
+      { name: "Merchant", cuisine: "New American / Cocktails", rating: 4.3, reviewCount: 3400, priceRange: "$$", neighborhood: "State Street" },
+      { name: "Short Stack Eatery", cuisine: "Breakfast All Day", rating: 4.4, reviewCount: 3100, priceRange: "$", neighborhood: "Capitol Area" },
+      { name: "Lucille", cuisine: "Southern American", rating: 4.4, reviewCount: 2800, priceRange: "$$", neighborhood: "Williamson Street" },
+      { name: "Ha Long Bay", cuisine: "Vietnamese", rating: 4.5, reviewCount: 2400, priceRange: "$", neighborhood: "East Side" },
+    ],
     neighborhoods: [
       { name: "State Street", vibe: "University Energy", bestFor: "Pedestrian mall bars, eclectic shops, quick cheap eats, the hub between UW campus and the Capitol", mustSee: "Memorial Union Terrace (campus end), Comedy Club on State on weeknights" },
       { name: "Atwood", vibe: "Quirky Local", bestFor: "Madison's most unique neighborhood — bookshops, galleries, dive bars, the best pizza in the city", mustSee: "Cargo Coffee on Atwood, The Magic Moment bar, Barrymore Theatre" },
@@ -882,6 +950,18 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Argo", cuisine: "Greek Seafood with Caldera Views", priceRange: "$$$", mustOrder: "Grilled octopus with fava and caperberries, fresh sea bass", neighborhood: "Fira", localTip: "Book specifically for lunch (12:30–2:30pm) — same caldera view as dinner, 25-35% lower prices, and you can actually see the blue water instead of fighting darkness." },
       { name: "Lucky's Souvlaki", cuisine: "Souvlaki / Greek Street Food", priceRange: "$", mustOrder: "Pork souvlaki wrap with extra tzatziki and tomato", neighborhood: "Fira town center", localTip: "The only place locals eat on a budget. €3.50 for the best souvlaki wrap on the island. Find it on the main road through Fira — queue of locals = good sign." },
       { name: "Selene", cuisine: "Modern Santorinian Fine Dining", priceRange: "$$$$", mustOrder: "Santorinian tomato fritters with smoked eggplant and the tasting menu", neighborhood: "Pyrgos village", localTip: "Pyrgos is Santorini's best-kept secret village — hilltop, authentic, no cruise ship crowds. Book 3+ weeks ahead. The sommelier's local wine pairing is non-negotiable." },
+    ],
+    popularRestaurants: [
+      { name: "Argo Restaurant Fira", cuisine: "Greek / Caldera Views", rating: 4.4, reviewCount: 12600, priceRange: "$$$", neighborhood: "Fira" },
+      { name: "Metaxy Mas", cuisine: "Traditional Taverna", rating: 4.7, reviewCount: 9800, priceRange: "$$", neighborhood: "Exo Gonia" },
+      { name: "Kastro Oia", cuisine: "Mediterranean / Sunset Views", rating: 4.3, reviewCount: 8200, priceRange: "$$$", neighborhood: "Oia" },
+      { name: "Lucky's Souvlaki", cuisine: "Street Food", rating: 4.5, reviewCount: 6700, priceRange: "$", neighborhood: "Fira" },
+      { name: "Ammoudi Fish Tavern", cuisine: "Fresh Seafood", rating: 4.4, reviewCount: 5900, priceRange: "$$", neighborhood: "Ammoudi Bay (below Oia)" },
+      { name: "Selene Pyrgos", cuisine: "Modern Santorinian", rating: 4.6, reviewCount: 5100, priceRange: "$$$$", neighborhood: "Pyrgos" },
+      { name: "Naoussa Oia", cuisine: "Greek / Mediterranean", rating: 4.3, reviewCount: 4400, priceRange: "$$", neighborhood: "Oia" },
+      { name: "Ouzeri Restaurant Fira", cuisine: "Meze / Greek", rating: 4.3, reviewCount: 3800, priceRange: "$$", neighborhood: "Fira" },
+      { name: "1800 Restaurant Oia", cuisine: "Mediterranean Fine Dining", rating: 4.5, reviewCount: 3200, priceRange: "$$$$", neighborhood: "Oia" },
+      { name: "Pitogyros Fira", cuisine: "Gyros / Street Food", rating: 4.4, reviewCount: 2900, priceRange: "$", neighborhood: "Fira" },
     ],
     neighborhoods: [
       { name: "Oia", vibe: "Iconic Luxury", bestFor: "Sunset views, blue-domed churches, upscale caldera hotels, honeymoon atmosphere", mustSee: "Byzantine castle ruins at sunset — arrive 2 hours early in peak season" },
@@ -1120,7 +1200,7 @@ export default function Waves() {
       if (!forTrip) setIsSearching(true);
       setError(null);
 
-      const apiKey = process.env.GROQ_API_KEY;
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
       if (!apiKey) {
         const msg = "AI search is not configured. Add your GROQ_API_KEY to .env to enable live destination lookup.";
         if (forTrip) throw new Error(msg);
@@ -1163,6 +1243,7 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation) wi
   "events": [{ "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
   "insiderTips": [{ "tip": "HYPER-SPECIFIC tip with real venue names, actual prices, exact times — never generic. Example: 'Book Sukiyabashi Jiro (Ginza) 2 months ahead via hotel concierge only — they reject direct tourist bookings. Lunch omakase ¥55,000 vs dinner ¥110,000, same fish.'", "category": "money" }],
   "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
+  "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }],
   "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
   "practicalInfo": {
     "visa": "string", "currency": "string", "language": "string",
@@ -1170,7 +1251,7 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation) wi
     "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
   }
 }
-Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. neighborhoods exactly 4. monthlyData exactly 12.
+Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12.
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
@@ -1963,6 +2044,58 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                     Google Reviews
                   </button>
                 </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Most Reviewed */}
+        {data.popularRestaurants && data.popularRestaurants.length > 0 && (
+          <section className="mb-24">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-400">
+                <Star size={22} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl text-white font-serif">Most Reviewed</h2>
+                <p className="text-slate-500 text-xs mt-1">Sorted by real-world Google review volume</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-600 uppercase tracking-widest mb-10">AI-curated from training data · verify on Google Maps</p>
+            <div className="space-y-2">
+              {data.popularRestaurants.map((r, i) => (
+                <a
+                  key={i}
+                  href={`https://www.google.com/maps/search/${encodeURIComponent(r.name + ' ' + destination)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-5 p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-yellow-500/30 hover:bg-yellow-500/5 transition-all"
+                >
+                  {/* Rank */}
+                  <span className="text-2xl font-serif text-white/10 group-hover:text-yellow-500/30 transition-colors w-8 shrink-0 text-center leading-none">
+                    {i + 1}
+                  </span>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm text-white font-medium group-hover:text-yellow-300 transition-colors">{r.name}</span>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest">{r.cuisine}</span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-0.5">{r.neighborhood}</p>
+                  </div>
+                  {/* Rating + reviews */}
+                  <div className="flex items-center gap-4 shrink-0">
+                    <div className="text-right hidden sm:block">
+                      <div className="flex items-center gap-1 justify-end">
+                        <Star size={10} className="text-yellow-400 fill-yellow-400" />
+                        <span className="text-sm text-white font-medium">{r.rating.toFixed(1)}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500">{r.reviewCount.toLocaleString()} reviews</span>
+                    </div>
+                    <span className="text-xs text-slate-500 font-medium">{r.priceRange}</span>
+                    <ChevronRight size={14} className="text-slate-600 group-hover:text-yellow-400 transition-colors" />
+                  </div>
+                </a>
               ))}
             </div>
           </section>
