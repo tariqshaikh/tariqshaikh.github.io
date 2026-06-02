@@ -1074,11 +1074,57 @@ export default function Waves() {
   const { tripId } = useParams();
   const navigate = useNavigate();
 
+  const TRENDING_2025 = [
+    { name: "Kyoto, Japan",           tag: "Cherry Blossom" },
+    { name: "Lisbon, Portugal",        tag: "Rising Star"    },
+    { name: "Medellín, Colombia",      tag: "City Comeback"  },
+    { name: "Bali, Indonesia",         tag: "Perennial Fave" },
+    { name: "Oaxaca, Mexico",          tag: "Food & Culture" },
+    { name: "Dubrovnik, Croatia",      tag: "Adriatic Coast" },
+    { name: "Chiang Mai, Thailand",    tag: "Temples & Jungle"},
+    { name: "Marrakech, Morocco",      tag: "Sensory Rush"   },
+    { name: "Porto, Portugal",         tag: "Wine & Tiles"   },
+    { name: "Seoul, South Korea",      tag: "Street Food"    },
+    { name: "Hoi An, Vietnam",         tag: "Ancient Town"   },
+    { name: "Lake Como, Italy",        tag: "Lakeside Luxury"},
+    { name: "Barcelona, Spain",        tag: "Architecture"   },
+    { name: "Reykjavik, Iceland",      tag: "Northern Lights"},
+    { name: "Queenstown, New Zealand", tag: "Adventure"      },
+    { name: "Cartagena, Colombia",     tag: "Colonial Charm" },
+    { name: "Tulum, Mexico",           tag: "Cenotes"        },
+    { name: "Amalfi Coast, Italy",     tag: "Mediterranean"  },
+    { name: "Santorini, Greece",       tag: "Island Escape"  },
+    { name: "Tokyo, Japan",            tag: "Neon & Ramen"   },
+    { name: "Patagonia, Argentina",    tag: "End of the World"},
+    { name: "Machu Picchu, Peru",      tag: "Ancient Wonder" },
+  ];
+  const PLACEHOLDER_CYCLE = [
+    "e.g., Kyoto, Japan",
+    "e.g., Lisbon, Portugal",
+    "e.g., Bali, Indonesia",
+    "e.g., Oaxaca, Mexico",
+    "e.g., Santorini, Greece",
+    "e.g., Seoul, South Korea",
+  ];
+  const ITEMS_PER_PAGE = 6;
+
   const [destination, setDestination] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [trendingPage, setTrendingPage] = useState(0);
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setTrendingPage(p => (p + 1) % Math.ceil(TRENDING_2025.length / ITEMS_PER_PAGE)), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => setPlaceholderIdx(i => (i + 1) % PLACEHOLDER_CYCLE.length), 3000);
+    return () => clearInterval(t);
+  }, []);
   const [activeFoodCat, setActiveFoodCat] = useState(0);
   
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
@@ -1572,7 +1618,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                       onFocus={() => setShowSuggestions(true)}
                       onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                       className="w-full bg-transparent border-none outline-none font-light text-lg md:text-xl text-white placeholder:text-slate-600 tracking-wide"
-                      placeholder="e.g., Kyoto, Japan or The Amalfi Coast"
+                      placeholder={PLACEHOLDER_CYCLE[placeholderIdx]}
                     />
                     
                     {/* Autocomplete Dropdown */}
@@ -1618,22 +1664,44 @@ Return ONLY a JSON object, no markdown, no explanation:
               transition={{ delay: 0.25 }}
               className="w-full max-w-3xl mt-10"
             >
-              <p className="text-center text-[10px] uppercase tracking-widest text-slate-500 mb-5">Popular Destinations</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {Object.keys(DEMO_DATA).map(city => (
-                  <button
-                    key={city}
-                    type="button"
-                    onClick={() => {
-                      setDestination(city);
-                      fetchDestinationIntelligence(city);
-                    }}
-                    className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase tracking-widest font-bold text-slate-400 hover:bg-white/10 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"
-                  >
-                    {city.split(',')[0]}
-                  </button>
-                ))}
+              <div className="flex items-center justify-center gap-3 mb-5">
+                <span className="text-[10px] uppercase tracking-widest text-slate-500">Trending in 2025</span>
+                <span className="flex gap-1">
+                  {Array.from({ length: Math.ceil(TRENDING_2025.length / ITEMS_PER_PAGE) }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setTrendingPage(i)}
+                      className={`w-1 h-1 rounded-full transition-all ${i === trendingPage ? 'bg-cyan-400 w-3' : 'bg-white/20 hover:bg-white/40'}`}
+                    />
+                  ))}
+                </span>
               </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={trendingPage}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35 }}
+                  className="flex flex-wrap justify-center gap-2.5"
+                >
+                  {TRENDING_2025.slice(trendingPage * ITEMS_PER_PAGE, (trendingPage + 1) * ITEMS_PER_PAGE).map(({ name, tag }) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => { setDestination(name); fetchDestinationIntelligence(name); }}
+                      className="group flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-cyan-500/30 transition-all"
+                    >
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300 group-hover:text-cyan-400 transition-colors">
+                        {name.split(',')[0]}
+                      </span>
+                      <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
+                        {tag}
+                      </span>
+                    </button>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
             </motion.div>
           </motion.div>
         </main>
