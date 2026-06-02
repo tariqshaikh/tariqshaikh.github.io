@@ -598,18 +598,18 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       month: "September"
     },
     monthlyData: [
-      { month: "JAN", flightCost: 550, temp: 54, condition: "Rainy", note: "Quiet and cool, many shops closed.", isIdeal: false, crowdLevel: 1 },
-      { month: "FEB", flightCost: 520, temp: 55, condition: "Rainy", note: "Peaceful but limited services.", isIdeal: false, crowdLevel: 1 },
-      { month: "MAR", flightCost: 650, temp: 60, condition: "Partly Cloudy", note: "Spring begins to wake the coast.", isIdeal: false, crowdLevel: 2 },
-      { month: "APR", flightCost: 850, temp: 66, condition: "Sunny", note: "Easter brings the first big crowds.", isIdeal: false, crowdLevel: 5 },
-      { month: "MAY", flightCost: 1000, temp: 73, condition: "Sunny", note: "Flowers in bloom, perfect hiking.", isIdeal: true, crowdLevel: 7 },
-      { month: "JUN", flightCost: 1200, temp: 80, condition: "Sunny", note: "Summer energy and warm waters.", isIdeal: true, crowdLevel: 9 },
-      { month: "JUL", flightCost: 1400, temp: 85, condition: "Sunny", note: "Peak heat and peak crowds.", isIdeal: false, crowdLevel: 10 },
-      { month: "AUG", flightCost: 1450, temp: 86, condition: "Sunny", note: "The busiest month of the year.", isIdeal: false, crowdLevel: 10 },
-      { month: "SEP", flightCost: 1100, temp: 80, condition: "Sunny", note: "The best month for swimming.", isIdeal: true, crowdLevel: 8 },
-      { month: "OCT", flightCost: 850, temp: 72, condition: "Partly Cloudy", note: "Mild days and cooler evenings.", isIdeal: false, crowdLevel: 5 },
-      { month: "NOV", flightCost: 600, temp: 62, condition: "Rainy", note: "The start of the quiet season.", isIdeal: false, crowdLevel: 2 },
-      { month: "DEC", flightCost: 750, temp: 56, condition: "Partly Cloudy", note: "Festive lights in the villages.", isIdeal: false, crowdLevel: 3 },
+      { month: "JAN", flightCost: 720, temp: 54, condition: "Rainy", note: "Quiet and cool, many shops closed.", isIdeal: false, crowdLevel: 1 },
+      { month: "FEB", flightCost: 690, temp: 55, condition: "Rainy", note: "Peaceful but limited services.", isIdeal: false, crowdLevel: 1 },
+      { month: "MAR", flightCost: 820, temp: 60, condition: "Partly Cloudy", note: "Spring begins to wake the coast.", isIdeal: false, crowdLevel: 2 },
+      { month: "APR", flightCost: 1050, temp: 66, condition: "Sunny", note: "Easter brings the first big crowds.", isIdeal: false, crowdLevel: 5 },
+      { month: "MAY", flightCost: 1200, temp: 73, condition: "Sunny", note: "Flowers in bloom, perfect hiking.", isIdeal: true, crowdLevel: 7 },
+      { month: "JUN", flightCost: 1420, temp: 80, condition: "Sunny", note: "Summer energy and warm waters.", isIdeal: true, crowdLevel: 9 },
+      { month: "JUL", flightCost: 1650, temp: 85, condition: "Sunny", note: "Peak heat and peak crowds.", isIdeal: false, crowdLevel: 10 },
+      { month: "AUG", flightCost: 1700, temp: 86, condition: "Sunny", note: "The busiest month of the year.", isIdeal: false, crowdLevel: 10 },
+      { month: "SEP", flightCost: 1350, temp: 80, condition: "Sunny", note: "The best month for swimming.", isIdeal: true, crowdLevel: 8 },
+      { month: "OCT", flightCost: 1050, temp: 72, condition: "Partly Cloudy", note: "Mild days and cooler evenings.", isIdeal: false, crowdLevel: 5 },
+      { month: "NOV", flightCost: 780, temp: 62, condition: "Rainy", note: "The start of the quiet season.", isIdeal: false, crowdLevel: 2 },
+      { month: "DEC", flightCost: 920, temp: 56, condition: "Partly Cloudy", note: "Festive lights in the villages.", isIdeal: false, crowdLevel: 3 },
     ],
     foodAndCulture: {
       categories: [
@@ -888,18 +888,18 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       month: "September"
     },
     monthlyData: [
-      { month: "JAN", flightCost: 450, temp: 57, condition: "Rainy", note: "Quiet, windy, and many hotels closed.", isIdeal: false, crowdLevel: 1 },
-      { month: "FEB", flightCost: 420, temp: 57, condition: "Rainy", note: "Peaceful but limited services.", isIdeal: false, crowdLevel: 1 },
-      { month: "MAR", flightCost: 550, temp: 61, condition: "Partly Cloudy", note: "The island begins to wake up.", isIdeal: false, crowdLevel: 2 },
-      { month: "APR", flightCost: 750, temp: 65, condition: "Sunny", note: "Easter is a beautiful time to visit.", isIdeal: false, crowdLevel: 4 },
-      { month: "MAY", flightCost: 900, temp: 72, condition: "Sunny", note: "Perfect weather and blooming flowers.", isIdeal: true, crowdLevel: 6 },
-      { month: "JUN", flightCost: 1100, temp: 79, condition: "Sunny", note: "Summer starts, energy is high.", isIdeal: true, crowdLevel: 8 },
-      { month: "JUL", flightCost: 1300, temp: 84, condition: "Sunny", note: "Peak heat and peak crowds.", isIdeal: false, crowdLevel: 10 },
-      { month: "AUG", flightCost: 1350, temp: 84, condition: "Sunny", note: "The island is at full capacity.", isIdeal: false, crowdLevel: 10 },
-      { month: "SEP", flightCost: 1050, temp: 79, condition: "Sunny", note: "Warm water and slightly fewer people.", isIdeal: true, crowdLevel: 8 },
-      { month: "OCT", flightCost: 800, temp: 72, condition: "Sunny", note: "Mild days and beautiful sunsets.", isIdeal: false, crowdLevel: 5 },
-      { month: "NOV", flightCost: 500, temp: 64, condition: "Rainy", note: "The start of the quiet season.", isIdeal: false, crowdLevel: 2 },
-      { month: "DEC", flightCost: 650, temp: 59, condition: "Partly Cloudy", note: "Cool and calm holiday season.", isIdeal: false, crowdLevel: 2 },
+      { month: "JAN", flightCost: 880, temp: 57, condition: "Rainy", note: "Quiet, windy, and many hotels closed.", isIdeal: false, crowdLevel: 1 },
+      { month: "FEB", flightCost: 850, temp: 57, condition: "Rainy", note: "Peaceful but limited services.", isIdeal: false, crowdLevel: 1 },
+      { month: "MAR", flightCost: 980, temp: 61, condition: "Partly Cloudy", note: "The island begins to wake up.", isIdeal: false, crowdLevel: 2 },
+      { month: "APR", flightCost: 1180, temp: 65, condition: "Sunny", note: "Easter is a beautiful time to visit.", isIdeal: false, crowdLevel: 4 },
+      { month: "MAY", flightCost: 1320, temp: 72, condition: "Sunny", note: "Perfect weather and blooming flowers.", isIdeal: true, crowdLevel: 6 },
+      { month: "JUN", flightCost: 1520, temp: 79, condition: "Sunny", note: "Summer starts, energy is high.", isIdeal: true, crowdLevel: 8 },
+      { month: "JUL", flightCost: 1780, temp: 84, condition: "Sunny", note: "Peak heat and peak crowds.", isIdeal: false, crowdLevel: 10 },
+      { month: "AUG", flightCost: 1820, temp: 84, condition: "Sunny", note: "The island is at full capacity.", isIdeal: false, crowdLevel: 10 },
+      { month: "SEP", flightCost: 1420, temp: 79, condition: "Sunny", note: "Warm water and slightly fewer people.", isIdeal: true, crowdLevel: 8 },
+      { month: "OCT", flightCost: 1100, temp: 72, condition: "Sunny", note: "Mild days and beautiful sunsets.", isIdeal: false, crowdLevel: 5 },
+      { month: "NOV", flightCost: 880, temp: 64, condition: "Rainy", note: "The start of the quiet season.", isIdeal: false, crowdLevel: 2 },
+      { month: "DEC", flightCost: 980, temp: 59, condition: "Partly Cloudy", note: "Cool and calm holiday season.", isIdeal: false, crowdLevel: 2 },
     ],
     foodAndCulture: {
       categories: [
@@ -1271,6 +1271,7 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation) wi
     { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "Local insight", "isIdeal": false, "crowdLevel": 4 },
     ... exactly 12 objects Jan-Dec. condition must be one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
   ],
+flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use Google Flights-calibrated seasonal ranges — not random numbers. Reference ranges: domestic US $150–550; Mexico/Caribbean $300–900; Europe $450–1,600; Japan/SE Asia $700–1,900; Middle East/Africa $800–2,200; South America $600–1,500; Australia/NZ $1,000–2,400. Peak travel months (Jul/Aug + local holidays) push toward the top of the range. Off-peak months approach the floor. Costs must feel realistic to someone checking Google Flights today.
   "foodAndCulture": {
     "categories": [
       { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "2-3 descriptive words for photo search e.g. japanese matcha tea ceremony" }] },
@@ -1367,10 +1368,19 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
     if (!apiKey) return;
     setFetchingFlightCosts(true);
     try {
-      const prompt = `Give me estimated round-trip flight costs in USD for each month of the year flying from ${fromAirport} to ${toAirport} (near ${dest}).
-Return ONLY a JSON object with 12 keys: JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC. Values are integers (USD round-trip).
-Consider seasonality, holidays, and typical demand. No markdown, no explanation.
-Example: {"JAN":650,"FEB":620,"MAR":750,"APR":950,"MAY":1100,"JUN":1300,"JUL":1500,"AUG":1450,"SEP":1100,"OCT":850,"NOV":700,"DEC":900}`;
+      const prompt = `You are a flight pricing expert. Estimate realistic round-trip airfare in USD for each month, flying from ${fromAirport} to ${toAirport} (gateway airport for ${dest}).
+
+Rules:
+- Use Google Flights-calibrated prices as of 2024-2025. Do NOT invent numbers — anchor on real market rates.
+- Domestic US routes (both airports in USA): typical range $150–$550. Do not exceed $700.
+- Short-haul international (same continent, under 5hr flight): $300–$900.
+- Transatlantic / Europe from USA: $450–$1,600. Peak Jul/Aug push higher.
+- Asia / Pacific from USA: $700–$1,900. Japan peaks around cherry blossom (Mar-Apr) and New Year.
+- Peak months (Jul, Aug, Dec holidays, local festival peaks) hit range ceiling. Jan/Feb/Nov are typically cheapest.
+- Apply realistic seasonal variation — spread should be 2–3x between cheapest and most expensive month.
+
+Return ONLY a JSON object, no markdown, no explanation:
+{"JAN":0,"FEB":0,"MAR":0,"APR":0,"MAY":0,"JUN":0,"JUL":0,"AUG":0,"SEP":0,"OCT":0,"NOV":0,"DEC":0}`;
 
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -1951,7 +1961,7 @@ Example: {"JAN":650,"FEB":620,"MAR":750,"APR":950,"MAY":1100,"JUN":1300,"JUL":15
                             <div>
                               <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold flex items-center gap-1">
                                 Round-Trip Flight
-                                <span className="text-[8px] text-teal-500/70 font-normal ml-1">AI est.</span>
+                                <span className="text-[8px] text-teal-500/70 font-normal ml-1">{homeAirport ? `from ${homeAirport}` : 'from US hub · AI est.'}</span>
                               </p>
                               <span className="text-2xl text-white font-light">${activeCost.toLocaleString()}</span>
                               {savingsPct > 10 && (
