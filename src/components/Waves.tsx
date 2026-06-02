@@ -1424,7 +1424,7 @@ flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use G
     "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
   }
 }
-Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. airports: 1-3 entries only where applicable (skip for landlocked cities with one obvious airport); costModifier is relative to the primary airport (1.0 = baseline).
+Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. airports: 1-3 entries, include ALL major airports that serve the destination — e.g. New York needs JFK + LGA + EWR, London needs LHR + LGW + STN, Paris needs CDG + ORY, Chicago needs ORD + MDW, Los Angeles needs LAX + BUR + LGB. Skip only if destination has a single obvious airport. costModifier is relative to the primary airport (1.0 = baseline).
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
