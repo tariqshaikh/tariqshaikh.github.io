@@ -1129,12 +1129,12 @@ export default function Waves() {
 
   // Fetch Wikipedia page views for the last 6 months, cache for 24h
   useEffect(() => {
-    const CACHE_KEY = 'waves_trending_v1';
+    const CACHE_KEY = 'waves_trending_v3';
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const { ts, data } = JSON.parse(cached);
-        if (Date.now() - ts < 24 * 60 * 60 * 1000) {
+        if (Date.now() - ts < 24 * 60 * 60 * 1000 && Array.isArray(data) && data.length > 0) {
           setTrendingList(data);
           setTrendingLoading(false);
           return;
@@ -1172,7 +1172,7 @@ export default function Waves() {
         .map((r) => r.value)
         .sort((a, b) => b.views - a.views);
       const final = sorted.length > 0 ? sorted : fallback;
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: final })); } catch {}
+      try { localStorage.setItem('waves_trending_v3', JSON.stringify({ ts: Date.now(), data: final })); } catch {}
       setTrendingList(final);
       setTrendingLoading(false);
     }).catch(() => {
