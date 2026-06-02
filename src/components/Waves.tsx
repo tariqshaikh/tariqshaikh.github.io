@@ -95,6 +95,14 @@ interface TripIntelligence {
     neighborhood: string;
     localTip: string;
   }[];
+  airports?: {
+    iata: string;
+    name: string;
+    city: string;
+    transitToCity: string;
+    costModifier: number;
+    note: string;
+  }[];
   popularRestaurants?: {
     name: string;
     cuisine: string;
@@ -234,6 +242,11 @@ const fallbackIntelligence: TripIntelligence = {
     { name: "Ippudo Ramen Kyoto", cuisine: "Ramen", priceRange: "$", mustOrder: "Shiromaru Classic with extra noodles (kaedama)", neighborhood: "Downtown Kyoto", localTip: "Open until 3am on weekends. Order firm noodles (katame) — they turn mushy fast in the broth." },
     { name: "Nishiki Warai", cuisine: "Obanzai (Kyoto home cooking)", priceRange: "$$", mustOrder: "Seasonal obanzai set with yudofu and pickles", neighborhood: "Nishiki Market", localTip: "8-seat counter, no reservations. Arrive at 11:30am sharp or face a 45-minute wait. Cash only." },
     { name: "Tankuma Kitamise", cuisine: "Kaiseki", priceRange: "$$$", mustOrder: "Lunch kaiseki bento (¥7,700)", neighborhood: "Gion", localTip: "Their lunch bento offers kaiseki quality at half the price. Easier to reserve than Kikunoi — book 3-4 weeks ahead." },
+  ],
+  airports: [
+    { iata: 'KIX', name: 'Kansai International', city: 'Osaka', transitToCity: '75 min by Haruka Express', costModifier: 1.0, note: 'Primary gateway to Kyoto' },
+    { iata: 'ITM', name: 'Osaka Itami', city: 'Osaka', transitToCity: '70 min by airport limousine bus', costModifier: 0.90, note: 'Domestic flights only — connect via Tokyo or Osaka' },
+    { iata: 'NRT', name: 'Tokyo Narita', city: 'Tokyo', transitToCity: '2.5hr by Shinkansen from Tokyo', costModifier: 1.15, note: 'More flight options but add Shinkansen (~$80)' },
   ],
   popularRestaurants: [
     { name: "Nishiki Market", cuisine: "Street Food / Market", rating: 4.4, reviewCount: 28400, priceRange: "$", neighborhood: "Nakagyo" },
@@ -382,6 +395,10 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Le Baratin", cuisine: "Natural Wine & Bistro", priceRange: "$$", mustOrder: "Boudin noir with apples and whatever terrine is listed on the chalkboard", neighborhood: "Belleville (20th)", localTip: "Cash only, Wednesday lunch specials are legendary. This is where Parisian chefs eat on their nights off — zero tourists." },
       { name: "Du Pain et des Idées", cuisine: "Artisan Bakery", priceRange: "$", mustOrder: "Escargot pistache-chocolat or the pain des amis loaf", neighborhood: "Canal Saint-Martin (10th)", localTip: "Closed weekends. Arrive before 9am or the best pastries sell out. The escargot is the best pastry in Paris, full stop." },
     ],
+    airports: [
+      { iata: 'CDG', name: 'Charles de Gaulle', city: 'Paris', transitToCity: '45 min by RER B', costModifier: 1.0, note: 'Main international hub' },
+      { iata: 'ORY', name: 'Orly', city: 'Paris', transitToCity: '35 min by Orly Val + metro', costModifier: 0.88, note: 'Budget carriers — check easyJet, Transavia' },
+    ],
     popularRestaurants: [
       { name: "Café de Flore", cuisine: "Café / Brasserie", rating: 4.2, reviewCount: 41200, priceRange: "$$", neighborhood: "Saint-Germain-des-Prés" },
       { name: "Les Deux Magots", cuisine: "Café / Brasserie", rating: 4.1, reviewCount: 38700, priceRange: "$$", neighborhood: "Saint-Germain-des-Prés" },
@@ -526,6 +543,10 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Gonpachi Nishi-Azabu", cuisine: "Izakaya (Japanese gastropub)", priceRange: "$$", mustOrder: "Soba noodles and the chicken yakitori skewers from the open charcoal grill", neighborhood: "Nishi-Azabu", localTip: "The Kill Bill swordfight scene was filmed here but locals still genuinely come for the food. Go Tuesday–Thursday to avoid the tourist rush." },
       { name: "Tsuta", cuisine: "Shoyu Ramen", priceRange: "$$", mustOrder: "Truffle shoyu soba (the original Michelin-starred ramen)", neighborhood: "Sugamo", localTip: "World's first Michelin-starred ramen shop. Reservations now available online — book the day before via their website. Cash only." },
     ],
+    airports: [
+      { iata: 'NRT', name: 'Narita International', city: 'Tokyo', transitToCity: '60 min by Narita Express', costModifier: 1.0, note: 'Most international routes land here' },
+      { iata: 'HND', name: 'Haneda', city: 'Tokyo', transitToCity: '30 min to city center', costModifier: 1.08, note: 'Closer to the city, growing international routes' },
+    ],
     popularRestaurants: [
       { name: "Ichiran Ramen Shibuya", cuisine: "Tonkotsu Ramen", rating: 4.3, reviewCount: 52400, priceRange: "$", neighborhood: "Shibuya" },
       { name: "Kura Sushi Akihabara", cuisine: "Conveyor Belt Sushi", rating: 4.1, reviewCount: 31800, priceRange: "$", neighborhood: "Akihabara" },
@@ -662,6 +683,10 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Ristorante Max", cuisine: "Refined Campanian", priceRange: "$$$", mustOrder: "Paccheri al ragù di cernia and buffalo mozzarella with local anchovies", neighborhood: "Positano (main piazza)", localTip: "Best sunset views in Positano. Book the terrace specifically (mention 'terrazza' in your reservation). The cheese cart is worth ordering just for the theatre." },
       { name: "Pizzeria Da Giovanna", cuisine: "Neapolitan Pizza", priceRange: "$", mustOrder: "Margherita DOC with San Marzano tomatoes and bufala mozzarella", neighborhood: "Atrani (3-minute walk from Amalfi town)", localTip: "Atrani is the village next door with zero tourists. This place has a wood-burning oven and costs 30% less than any pizza in Amalfi proper." },
       { name: "Il Buco", cuisine: "Cave Restaurant / Modern Italian", priceRange: "$$$", mustOrder: "Pasta with local sea urchin and the tasting menu paired with Furore wine", neighborhood: "Sorrento", localTip: "Literally carved into a 1,000-year-old cave. Book the 'stone table' in the deepest part of the cave for the most dramatic atmosphere. Reserve 2+ weeks ahead." },
+    ],
+    airports: [
+      { iata: 'NAP', name: 'Naples International', city: 'Naples', transitToCity: '90 min by ferry or bus', costModifier: 1.0, note: 'Closest airport, direct coastal access' },
+      { iata: 'FCO', name: 'Rome Fiumicino', city: 'Rome', transitToCity: '3.5hr drive or train to Salerno', costModifier: 1.10, note: 'More flights but significant transfer' },
     ],
     popularRestaurants: [
       { name: "Da Adolfo Positano", cuisine: "Casual Seafood", rating: 4.6, reviewCount: 9800, priceRange: "$$", neighborhood: "Laurito Beach (boat access)" },
@@ -807,6 +832,11 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Grampa's Pizzeria", cuisine: "New York-Style Pizza", priceRange: "$", mustOrder: "White pie with ricotta and the vodka sauce slice", neighborhood: "Willy Street (Williamson)", localTip: "UW students and locals swear this is the best pizza in town. Counter seating only, cash preferred. Closes when they sell out — usually by 9pm." },
       { name: "Merchant", cuisine: "Craft Cocktails & New American", priceRange: "$$", mustOrder: "Duck fat fries and whatever seasonal craft cocktail the bartender recommends", neighborhood: "State Street", localTip: "The kitchen stays open until midnight. After 10pm the duck poutine appears on the late-night menu — order it." },
     ],
+    airports: [
+      { iata: 'MSN', name: 'Dane County Regional', city: 'Madison', transitToCity: '15 min to downtown', costModifier: 1.0, note: 'Direct but limited routes' },
+      { iata: 'MKE', name: 'Milwaukee Mitchell', city: 'Milwaukee', transitToCity: '90 min drive', costModifier: 0.80, note: 'More airlines + routes, worth the drive' },
+      { iata: 'ORD', name: "Chicago O'Hare", city: 'Chicago', transitToCity: '3hr drive', costModifier: 0.70, note: 'Best prices, almost every airline flies here' },
+    ],
     popularRestaurants: [
       { name: "The Old Fashioned", cuisine: "Wisconsin Supper Club", rating: 4.4, reviewCount: 8900, priceRange: "$$", neighborhood: "Capitol Square" },
       { name: "Graze", cuisine: "Farm-to-Table", rating: 4.4, reviewCount: 6700, priceRange: "$$", neighborhood: "Capitol Square" },
@@ -951,6 +981,10 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
       { name: "Lucky's Souvlaki", cuisine: "Souvlaki / Greek Street Food", priceRange: "$", mustOrder: "Pork souvlaki wrap with extra tzatziki and tomato", neighborhood: "Fira town center", localTip: "The only place locals eat on a budget. €3.50 for the best souvlaki wrap on the island. Find it on the main road through Fira — queue of locals = good sign." },
       { name: "Selene", cuisine: "Modern Santorinian Fine Dining", priceRange: "$$$$", mustOrder: "Santorinian tomato fritters with smoked eggplant and the tasting menu", neighborhood: "Pyrgos village", localTip: "Pyrgos is Santorini's best-kept secret village — hilltop, authentic, no cruise ship crowds. Book 3+ weeks ahead. The sommelier's local wine pairing is non-negotiable." },
     ],
+    airports: [
+      { iata: 'JTR', name: 'Thira (Santorini)', city: 'Santorini', transitToCity: '20 min to Fira', costModifier: 1.0, note: 'Direct — limited international, mostly via Athens' },
+      { iata: 'ATH', name: 'Athens International', city: 'Athens', transitToCity: '45 min flight or 7hr ferry', costModifier: 0.78, note: 'Fly to Athens then connect — often cheaper overall' },
+    ],
     popularRestaurants: [
       { name: "Argo Restaurant Fira", cuisine: "Greek / Caldera Views", rating: 4.4, reviewCount: 12600, priceRange: "$$$", neighborhood: "Fira" },
       { name: "Metaxy Mas", cuisine: "Traditional Taverna", rating: 4.7, reviewCount: 9800, priceRange: "$$", neighborhood: "Exo Gonia" },
@@ -1048,8 +1082,19 @@ export default function Waves() {
   const [activeFoodCat, setActiveFoodCat] = useState(0);
   
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
-  // Reset food category tab whenever a new destination loads
-  useEffect(() => { setActiveFoodCat(0); }, [intelligence]);
+  const [selectedAirportIata, setSelectedAirportIata] = useState<string | null>(null);
+  const [homeAirportInput, setHomeAirportInput] = useState('');
+  const [homeAirport, setHomeAirport] = useState('');
+  const [customFlightCosts, setCustomFlightCosts] = useState<Record<string, number> | null>(null);
+  const [fetchingFlightCosts, setFetchingFlightCosts] = useState(false);
+  // Reset food category tab and airport state whenever a new destination loads
+  useEffect(() => {
+    setActiveFoodCat(0);
+    setSelectedAirportIata(null);
+    setHomeAirportInput('');
+    setHomeAirport('');
+    setCustomFlightCosts(null);
+  }, [intelligence]);
   const [activeMonthIndex, setActiveMonthIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -1243,6 +1288,7 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation) wi
   "events": [{ "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
   "insiderTips": [{ "tip": "HYPER-SPECIFIC tip with real venue names, actual prices, exact times — never generic. Example: 'Book Sukiyabashi Jiro (Ginza) 2 months ahead via hotel concierge only — they reject direct tourist bookings. Lunch omakase ¥55,000 vs dinner ¥110,000, same fish.'", "category": "money" }],
   "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
+  "airports": [{ "iata": "KIX", "name": "Airport Name", "city": "City", "transitToCity": "travel time and method to destination", "costModifier": 1.0, "note": "one line why this airport" }],
   "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }],
   "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
   "practicalInfo": {
@@ -1251,7 +1297,7 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation) wi
     "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
   }
 }
-Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12.
+Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. airports: 1-3 entries only where applicable (skip for landlocked cities with one obvious airport); costModifier is relative to the primary airport (1.0 = baseline).
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
@@ -1314,6 +1360,38 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
     
     if (!forTrip) setIsSearching(false);
     return data;
+  };
+
+  const fetchFlightEstimates = async (fromAirport: string, toAirport: string, dest: string) => {
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+    if (!apiKey) return;
+    setFetchingFlightCosts(true);
+    try {
+      const prompt = `Give me estimated round-trip flight costs in USD for each month of the year flying from ${fromAirport} to ${toAirport} (near ${dest}).
+Return ONLY a JSON object with 12 keys: JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC. Values are integers (USD round-trip).
+Consider seasonality, holidays, and typical demand. No markdown, no explanation.
+Example: {"JAN":650,"FEB":620,"MAR":750,"APR":950,"MAY":1100,"JUN":1300,"JUL":1500,"AUG":1450,"SEP":1100,"OCT":850,"NOV":700,"DEC":900}`;
+
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 200,
+          temperature: 0.3,
+        }),
+      });
+      const json = await res.json();
+      const text = json.choices?.[0]?.message?.content ?? '';
+      const parsed = JSON.parse(text.trim());
+      setCustomFlightCosts(parsed);
+      setHomeAirport(fromAirport);
+    } catch (e) {
+      // silently fail — keeps existing costs
+    } finally {
+      setFetchingFlightCosts(false);
+    }
   };
 
   const startCollaborativeSession = async () => {
@@ -1600,14 +1678,20 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
 
             {/* Best Value Month */}
             {(() => {
-              const minCost = Math.min(...data.monthlyData.map(m => m.flightCost));
-              const bestMonth = data.monthlyData.find(m => m.flightCost === minCost);
+              const selectedAp = data.airports?.find(a => a.iata === selectedAirportIata) ?? data.airports?.[0];
+              const sidebarCosts = data.monthlyData.map(m => {
+                if (customFlightCosts?.[m.month]) return customFlightCosts[m.month];
+                return Math.round(m.flightCost * (selectedAp?.costModifier ?? 1.0));
+              });
+              const minCost = Math.min(...sidebarCosts);
+              const bestIdx = sidebarCosts.indexOf(minCost);
+              const bestMonth = data.monthlyData[bestIdx];
               return bestMonth ? (
                 <div className="mt-6 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
                   <p className="text-[9px] uppercase tracking-widest text-emerald-400 font-bold mb-2">Best Value Month</p>
                   <div className="flex items-center justify-between">
                     <span className="text-white font-medium text-sm">{bestMonth.month}</span>
-                    <span className="text-emerald-400 font-bold">${bestMonth.flightCost}</span>
+                    <span className="text-emerald-400 font-bold">${minCost}</span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 font-light">{bestMonth.note}</p>
                 </div>
@@ -1708,113 +1792,214 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
 
           <div className="bg-[#0B1221]/50 border border-white/10 rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
-            
-            <div className="relative z-10">
-              <div className="flex items-end justify-between h-80 gap-1 md:gap-3">
-                {(() => {
-                  const maxCost = Math.max(...data.monthlyData.map(d => d.flightCost), 500);
-                  return data.monthlyData.map((item, i) => {
-                    const heightPercent = Math.max(15, (item.flightCost / maxCost) * 100);
-                    const isSelected = activeMonthIndex === i;
-                    
-                    return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-4 h-full">
-                        <div className="w-full relative flex flex-col items-center justify-end h-full">
-                          
-                          <button 
-                            onClick={() => {
-                              setActiveMonthIndex(i);
-                            }}
-                            className={`w-full max-w-[64px] rounded-t-2xl transition-all duration-500 relative group ${
-                              item.isIdeal 
-                                ? 'bg-gradient-to-t from-cyan-900/40 to-cyan-400/80' 
-                                : 'bg-white/5 hover:bg-white/10'
-                            } ${isSelected ? 'ring-2 ring-cyan-400 ring-offset-4 ring-offset-[#0B1221]' : ''}`}
-                            style={{ height: `${heightPercent}%` }}
-                          >
-                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#050B14] border border-white/10 rounded-xl px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-all z-30 shadow-2xl">
-                              <span className="text-white font-bold text-xs">${item.flightCost}</span>
-                            </div>
-                          </button>
-                        </div>
-                        
-                        <div className="flex flex-col items-center gap-1.5">
-                          {item.isIdeal && <Sparkles size={10} className="text-cyan-400" />}
-                          <span className={`text-[10px] font-black tracking-widest uppercase ${isSelected ? 'text-cyan-400' : 'text-slate-600'}`}>
-                            {item.month}
-                          </span>
-                          {/* Crowd dots */}
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(dot => (
-                              <div key={dot} className={`w-1 h-1 rounded-full transition-colors ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
 
-              {/* Month Deep-Dive Card */}
-              {(() => {
-                const item = data.monthlyData[activeMonthIndex];
-                const maxCost = Math.max(...data.monthlyData.map(d => d.flightCost));
-                const minCost = Math.min(...data.monthlyData.map(d => d.flightCost));
-                const savingsPct = maxCost > minCost ? Math.round(((maxCost - item.flightCost) / (maxCost - minCost)) * 100) : 0;
-                const monthEvents = (data.events || []).filter(e => e.month === item.month);
-                const crowdLabel = item.crowdLevel >= 8 ? 'Very Busy' : item.crowdLevel >= 6 ? 'Moderate' : item.crowdLevel >= 4 ? 'Manageable' : 'Quiet';
-                const crowdColor = item.crowdLevel >= 8 ? 'text-rose-400' : item.crowdLevel >= 6 ? 'text-amber-400' : 'text-emerald-400';
-                const weatherIcon = item.condition.includes('Sun') ? <Sun size={18} className="text-amber-400" /> : item.condition.includes('Rain') ? <CloudRain size={18} className="text-cyan-400" /> : item.condition.includes('Snow') ? <Snowflake size={18} className="text-teal-400" /> : <Cloud size={18} className="text-slate-400" />;
-                return (
-                  <motion.div
-                    key={activeMonthIndex}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-8 bg-[#050B14] border border-white/10 rounded-3xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6"
-                  >
-                    <div>
-                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Temperature</p>
-                      <div className="flex items-center gap-2">
-                        {weatherIcon}
-                        <span className="text-2xl text-white font-light">{item.temp}°F</span>
-                      </div>
-                      <p className="text-[10px] text-slate-500 mt-1">{item.condition}</p>
+            <div className="relative z-10">
+              {/* Airport Selector */}
+              {data.airports && data.airports.length > 0 && (
+                <div className="mb-10 space-y-5">
+                  {/* Destination airports */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-3 flex items-center gap-2">
+                      <Plane size={10} /> Fly into
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {data.airports.map(ap => {
+                        const isActive = selectedAirportIata === ap.iata || (!selectedAirportIata && ap === data.airports![0]);
+                        return (
+                          <button
+                            key={ap.iata}
+                            onClick={() => { setSelectedAirportIata(ap.iata); setCustomFlightCosts(null); }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all border ${
+                              isActive
+                                ? 'bg-teal-500/20 border-teal-500/40 text-teal-300'
+                                : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:text-white'
+                            }`}
+                          >
+                            <span className="font-mono font-bold text-[11px]">{ap.iata}</span>
+                            <span className="hidden sm:inline text-slate-400 font-light">{ap.name}</span>
+                            {ap.costModifier !== 1.0 && (
+                              <span className={`text-[10px] font-bold ${ap.costModifier < 1 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                {ap.costModifier < 1 ? `−${Math.round((1-ap.costModifier)*100)}%` : `+${Math.round((ap.costModifier-1)*100)}%`}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <div>
-                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Round-Trip Flight</p>
-                      <span className="text-2xl text-white font-light">${item.flightCost.toLocaleString()}</span>
-                      {savingsPct > 10 && (
-                        <p className="text-[10px] text-emerald-400 mt-1 font-bold">Save ~{savingsPct}% vs peak</p>
-                      )}
+                    {/* Transit info for selected airport */}
+                    {(() => {
+                      const ap = data.airports.find(a => a.iata === selectedAirportIata) ?? data.airports[0];
+                      return <p className="text-[10px] text-slate-600 mt-2">{ap.note} · {ap.transitToCity}</p>;
+                    })()}
+                  </div>
+
+                  {/* Home airport */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-3">Flying from (optional)</p>
+                    <div className="flex gap-2 max-w-sm">
+                      <input
+                        type="text"
+                        value={homeAirportInput}
+                        onChange={e => setHomeAirportInput(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && homeAirportInput.trim()) { fetchFlightEstimates(homeAirportInput.trim(), selectedAirportIata ?? data.airports![0].iata, destination); } }}
+                        placeholder="City or airport code (e.g. NYC, LAX)"
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-teal-500/50 transition-colors"
+                      />
+                      <button
+                        onClick={() => { if (homeAirportInput.trim()) fetchFlightEstimates(homeAirportInput.trim(), selectedAirportIata ?? data.airports![0].iata, destination); }}
+                        disabled={!homeAirportInput.trim() || fetchingFlightCosts}
+                        className="px-4 py-2 bg-teal-500/20 border border-teal-500/30 rounded-xl text-teal-400 text-xs font-bold uppercase tracking-widest hover:bg-teal-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {fetchingFlightCosts ? <RefreshCw size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                        {fetchingFlightCosts ? 'Estimating…' : 'Estimate'}
+                      </button>
                     </div>
-                    <div>
-                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Crowd Level</p>
-                      <div className="flex gap-1 mb-1">
-                        {[1,2,3,4,5].map(dot => (
-                          <div key={dot} className={`w-3 h-3 rounded-full ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
-                        ))}
-                      </div>
-                      <p className={`text-[10px] font-bold ${crowdColor}`}>{crowdLabel}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Local Vibe</p>
-                      <p className="text-xs text-slate-300 font-light leading-relaxed">{item.note}</p>
-                    </div>
-                    {monthEvents.length > 0 && (
-                      <div className="col-span-full border-t border-white/5 pt-4">
-                        <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-3 font-bold flex items-center gap-2">
-                          <Star size={10} className="text-amber-400" /> Events This Month
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {monthEvents.map((event, i) => (
-                            <span key={i} className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs text-amber-400 font-medium">{event.name}</span>
-                          ))}
-                        </div>
-                      </div>
+                    {homeAirport && customFlightCosts && (
+                      <p className="text-[10px] text-teal-400/70 mt-2">
+                        Showing AI estimates from {homeAirport} → {(data.airports.find(a => a.iata === selectedAirportIata) ?? data.airports[0]).iata}
+                        <button onClick={() => { setCustomFlightCosts(null); setHomeAirport(''); setHomeAirportInput(''); }} className="ml-2 text-slate-600 hover:text-slate-400">✕ clear</button>
+                      </p>
                     )}
-                  </motion.div>
+                  </div>
+
+                  {/* AI disclaimer */}
+                  <p className="text-[9px] text-slate-600 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-600 inline-block" />
+                    Flight costs are AI estimated · prices vary by origin ·
+                    <a href="https://www.google.com/flights" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:text-teal-400 transition-colors underline">verify on Google Flights</a>
+                  </p>
+                </div>
+              )}
+
+              {/* Chart */}
+              {(() => {
+                const selectedAp = data.airports?.find(a => a.iata === selectedAirportIata) ?? data.airports?.[0];
+                const displayCosts: number[] = data.monthlyData.map(m => {
+                  if (customFlightCosts?.[m.month]) return customFlightCosts[m.month];
+                  return Math.round(m.flightCost * (selectedAp?.costModifier ?? 1.0));
+                });
+                const maxCost = Math.max(...displayCosts, 500);
+                return (
+                  <>
+                    <div className="flex items-end justify-between h-80 gap-1 md:gap-3">
+                      {data.monthlyData.map((item, i) => {
+                        const heightPercent = Math.max(15, (displayCosts[i] / maxCost) * 100);
+                        const isSelected = activeMonthIndex === i;
+                        return (
+                          <div key={i} className="flex-1 flex flex-col items-center gap-4 h-full">
+                            <div className="w-full relative flex flex-col items-center justify-end h-full">
+                              <button
+                                onClick={() => { setActiveMonthIndex(i); }}
+                                className={`w-full max-w-[64px] rounded-t-2xl transition-all duration-500 relative group ${
+                                  item.isIdeal
+                                    ? 'bg-gradient-to-t from-cyan-900/40 to-cyan-400/80'
+                                    : 'bg-white/5 hover:bg-white/10'
+                                } ${isSelected ? 'ring-2 ring-cyan-400 ring-offset-4 ring-offset-[#0B1221]' : ''}`}
+                                style={{ height: `${heightPercent}%` }}
+                              >
+                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#050B14] border border-white/10 rounded-xl px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-all z-30 shadow-2xl">
+                                  <span className="text-white font-bold text-xs">${displayCosts[i]}</span>
+                                </div>
+                              </button>
+                            </div>
+                            <div className="flex flex-col items-center gap-1.5">
+                              {item.isIdeal && <Sparkles size={10} className="text-cyan-400" />}
+                              <span className={`text-[10px] font-black tracking-widest uppercase ${isSelected ? 'text-cyan-400' : 'text-slate-600'}`}>
+                                {item.month}
+                              </span>
+                              {/* Crowd dots */}
+                              <div className="flex gap-0.5">
+                                {[1,2,3,4,5].map(dot => (
+                                  <div key={dot} className={`w-1 h-1 rounded-full transition-colors ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Month Deep-Dive Card */}
+                    {(() => {
+                      const item = data.monthlyData[activeMonthIndex];
+                      const activeCost = displayCosts[activeMonthIndex];
+                      const maxDC = Math.max(...displayCosts);
+                      const minDC = Math.min(...displayCosts);
+                      const savingsPct = maxDC > minDC ? Math.round(((maxDC - activeCost) / (maxDC - minDC)) * 100) : 0;
+                      const bestValueMonth = data.monthlyData[displayCosts.indexOf(minDC)];
+                      const monthEvents = (data.events || []).filter(e => e.month === item.month);
+                      const crowdLabel = item.crowdLevel >= 8 ? 'Very Busy' : item.crowdLevel >= 6 ? 'Moderate' : item.crowdLevel >= 4 ? 'Manageable' : 'Quiet';
+                      const crowdColor = item.crowdLevel >= 8 ? 'text-rose-400' : item.crowdLevel >= 6 ? 'text-amber-400' : 'text-emerald-400';
+                      const weatherIcon = item.condition.includes('Sun') ? <Sun size={18} className="text-amber-400" /> : item.condition.includes('Rain') ? <CloudRain size={18} className="text-cyan-400" /> : item.condition.includes('Snow') ? <Snowflake size={18} className="text-teal-400" /> : <Cloud size={18} className="text-slate-400" />;
+                      return (
+                        <>
+                          <motion.div
+                            key={activeMonthIndex}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="mt-8 bg-[#050B14] border border-white/10 rounded-3xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6"
+                          >
+                            <div>
+                              <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Temperature</p>
+                              <div className="flex items-center gap-2">
+                                {weatherIcon}
+                                <span className="text-2xl text-white font-light">{item.temp}°F</span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 mt-1">{item.condition}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold flex items-center gap-1">
+                                Round-Trip Flight
+                                <span className="text-[8px] text-teal-500/70 font-normal ml-1">AI est.</span>
+                              </p>
+                              <span className="text-2xl text-white font-light">${activeCost.toLocaleString()}</span>
+                              {savingsPct > 10 && (
+                                <p className="text-[10px] text-emerald-400 mt-1 font-bold">Save ~{savingsPct}% vs peak</p>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Crowd Level</p>
+                              <div className="flex gap-1 mb-1">
+                                {[1,2,3,4,5].map(dot => (
+                                  <div key={dot} className={`w-3 h-3 rounded-full ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
+                                ))}
+                              </div>
+                              <p className={`text-[10px] font-bold ${crowdColor}`}>{crowdLabel}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Local Vibe</p>
+                              <p className="text-xs text-slate-300 font-light leading-relaxed">{item.note}</p>
+                            </div>
+                            {monthEvents.length > 0 && (
+                              <div className="col-span-full border-t border-white/5 pt-4">
+                                <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-3 font-bold flex items-center gap-2">
+                                  <Star size={10} className="text-amber-400" /> Events This Month
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {monthEvents.map((event, idx) => (
+                                    <span key={idx} className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs text-amber-400 font-medium">{event.name}</span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </motion.div>
+
+                          {/* Best Value Month */}
+                          {bestValueMonth && (
+                            <div className="mt-6 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+                              <p className="text-[9px] uppercase tracking-widest text-emerald-400 font-bold mb-2">Best Value Month</p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-white font-medium text-sm">{bestValueMonth.month}</span>
+                                <span className="text-emerald-400 font-bold">${minDC}</span>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-1 font-light">{bestValueMonth.note}</p>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </>
                 );
               })()}
             </div>

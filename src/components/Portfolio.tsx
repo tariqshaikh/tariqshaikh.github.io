@@ -185,7 +185,7 @@ export default function Portfolio() {
             </div>
 
             {/* Project 3 - Waves */}
-            <div className="bg-[#0B1A1F] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_32px_64px_-16px_rgba(6,182,212,0.15)] relative overflow-hidden rounded-2xl group">
+            <div className="md:col-span-2 md:max-w-lg md:mx-auto md:w-full bg-[#0B1A1F] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_32px_64px_-16px_rgba(6,182,212,0.15)] relative overflow-hidden rounded-2xl group">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
                 <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-cyan-700/20 text-cyan-400 border border-cyan-500/20 font-bold rounded-full">Coming Soon</span>
