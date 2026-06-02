@@ -6,7 +6,7 @@ import {
   ThermometerSun, CheckCircle2, RefreshCw, Sparkles, Plane,
   Bookmark, SlidersHorizontal, Clock, AlertCircle,
   Copy, Link2, Ghost, Crown, DollarSign,
-  Lightbulb, Map as MapIcon, Info, Star, Wallet, ChevronRight
+  Lightbulb, Map as MapIcon, Info, Star, Wallet, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { logVisit } from '../lib/analytics';
@@ -1758,17 +1758,34 @@ Return ONLY a JSON object, no markdown, no explanation:
                     </span>
                   )}
                 </span>
-                {!trendingLoading && trendingList.length > 0 && (
-                  <span className="flex gap-1">
-                    {Array.from({ length: Math.ceil(trendingList.length / ITEMS_PER_PAGE) }).map((_, i) => (
+                {!trendingLoading && trendingList.length > 0 && (() => {
+                  const pages = Math.ceil(trendingList.length / ITEMS_PER_PAGE);
+                  return (
+                    <span className="flex items-center gap-2">
                       <button
-                        key={i}
-                        onClick={() => setTrendingPage(i)}
-                        className={`h-1 rounded-full transition-all ${i === trendingPage ? 'bg-cyan-400 w-3' : 'w-1 bg-white/20 hover:bg-white/40'}`}
-                      />
-                    ))}
-                  </span>
-                )}
+                        onClick={() => setTrendingPage(p => (p - 1 + pages) % pages)}
+                        className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/20 transition-all"
+                      >
+                        <ChevronLeft size={12} />
+                      </button>
+                      <span className="flex gap-1">
+                        {Array.from({ length: pages }).map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setTrendingPage(i)}
+                            className={`h-1 rounded-full transition-all ${i === trendingPage ? 'bg-cyan-400 w-3' : 'w-1 bg-white/20 hover:bg-white/40'}`}
+                          />
+                        ))}
+                      </span>
+                      <button
+                        onClick={() => setTrendingPage(p => (p + 1) % pages)}
+                        className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/20 transition-all"
+                      >
+                        <ChevronRight size={12} />
+                      </button>
+                    </span>
+                  );
+                })()}
               </div>
 
               {trendingLoading ? (
