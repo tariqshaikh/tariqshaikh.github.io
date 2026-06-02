@@ -1130,32 +1130,40 @@ export default function Waves() {
   // Fetch Wikipedia page views for the last 6 months, cache for 24h
   useEffect(() => {
     const CACHE_KEY = 'waves_trending_v1';
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      try {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
         const { ts, data } = JSON.parse(cached);
         if (Date.now() - ts < 24 * 60 * 60 * 1000) {
           setTrendingList(data);
           setTrendingLoading(false);
           return;
         }
-      } catch {}
-    }
+      }
+    } catch {}
 
     const now = new Date();
-    const start = new Date(now);
-    start.setMonth(now.getMonth() - 6);
+    // Use start of current month as end — avoids requesting incomplete current-month data
+    const end = new Date(now.getFullYear(), now.getMonth(), 1);
+    const start = new Date(end.getFullYear(), end.getMonth() - 6, 1);
     const fmt = (d: Date) =>
       `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}0100`;
 
+    const fallback = WIKI_DESTINATIONS.map(d => ({ name: d.name, region: d.region, views: 0 }));
+
     Promise.allSettled(
       WIKI_DESTINATIONS.map(async (dest) => {
-        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${dest.article}/monthly/${fmt(start)}/${fmt(now)}`;
-        const r = await fetch(url, { headers: { 'Api-User-Agent': 'waves-travel-app/1.0' } });
-        if (!r.ok) return { name: dest.name, region: dest.region, views: 0 };
-        const json = await r.json();
-        const views = (json.items || []).reduce((s: number, i: any) => s + (i.views ?? 0), 0);
-        return { name: dest.name, region: dest.region, views };
+        // No custom headers — they trigger CORS preflight that Wikimedia rejects
+        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${dest.article}/monthly/${fmt(start)}/${fmt(end)}`;
+        try {
+          const r = await fetch(url);
+          if (!r.ok) return { name: dest.name, region: dest.region, views: 0 };
+          const json = await r.json();
+          const views = (json.items || []).reduce((s: number, i: any) => s + (i.views ?? 0), 0);
+          return { name: dest.name, region: dest.region, views };
+        } catch {
+          return { name: dest.name, region: dest.region, views: 0 };
+        }
       })
     ).then((results) => {
       const sorted = results
@@ -1163,8 +1171,12 @@ export default function Waves() {
           r.status === 'fulfilled' && r.value.views > 0)
         .map((r) => r.value)
         .sort((a, b) => b.views - a.views);
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: sorted }));
-      setTrendingList(sorted);
+      const final = sorted.length > 0 ? sorted : fallback;
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: final })); } catch {}
+      setTrendingList(final);
+      setTrendingLoading(false);
+    }).catch(() => {
+      setTrendingList(fallback);
       setTrendingLoading(false);
     });
   }, []);
@@ -1770,9 +1782,11 @@ Return ONLY a JSON object, no markdown, no explanation:
                         <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300 group-hover:text-cyan-400 transition-colors">
                           {name}
                         </span>
-                        <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
-                          {(views / 1_000_000).toFixed(1)}M views
-                        </span>
+                        {views > 0 && (
+                          <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
+                            {(views / 1_000_000).toFixed(1)}M views
+                          </span>
+                        )}
                       </button>
                     ))}
                   </motion.div>
