@@ -1,0 +1,9 @@
+name = "waves-restaurant-search"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# Optional: KV namespace for caching (create with: npx wrangler kv namespace create CACHE)
+# Uncomment after creating the namespace and pasting the ID below:
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"

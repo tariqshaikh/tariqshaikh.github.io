@@ -45,6 +45,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           VITE_GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          VITE_RESTAURANT_WORKER_URL: ${{ secrets.RESTAURANT_WORKER_URL }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

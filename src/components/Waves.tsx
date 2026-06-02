@@ -1458,6 +1458,29 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         }
 
         if (!forTrip) {
+          // Kick off real restaurant fetch in parallel (non-blocking)
+          const workerUrl = import.meta.env.VITE_RESTAURANT_WORKER_URL;
+          if (workerUrl) {
+            fetch(`${workerUrl}?destination=${encodeURIComponent(dest)}`)
+              .then(r => r.json())
+              .then((places: any[]) => {
+                if (Array.isArray(places) && places.length > 0) {
+                  setIntelligence(prev => prev ? {
+                    ...prev,
+                    popularRestaurants: places.map(p => ({
+                      name: p.name,
+                      cuisine: p.cuisine || 'Local Favorite',
+                      rating: p.rating || 0,
+                      reviewCount: p.reviewCount || 0,
+                      priceRange: p.priceRange || '$$',
+                      neighborhood: p.address || dest,
+                    })),
+                  } : prev);
+                }
+              })
+              .catch(() => {});
+          }
+
           setIntelligence(data);
           const currentMonthIdx = new Date().getMonth();
           const idealIdx = data.monthlyData.findIndex((m: any) => m.isIdeal);
