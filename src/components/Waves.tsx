@@ -1120,7 +1120,7 @@ export default function Waves() {
 
   // Fetch AI-curated trending destinations from Groq, cache for 7 days
   useEffect(() => {
-    const CACHE_KEY = 'waves_trending_ai_v1';
+    const CACHE_KEY = 'waves_trending_ai_v2';
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
@@ -1150,20 +1150,30 @@ export default function Waves() {
         model: 'llama-3.3-70b-versatile',
         messages: [{
           role: 'user',
-          content: `You are a travel industry analyst with knowledge of booking platform data, airline route expansions, and social media travel trends up to early 2026.
+          content: `You are a travel industry analyst. As of ${monthYear}, rank the top 24 trending travel destinations worldwide by actual traveler demand.
 
-As of ${monthYear}, what are the top 24 trending travel destinations worldwide? Base this on:
-- Booking platform surge data (Expedia, Kayak, Skyscanner annual trend reports)
-- New direct flight route launches in 2025-2026
-- Viral travel content (TikTok, Instagram Reels destination moments)
-- Emerging destinations gaining first-time visitors
-- Destinations recovering or booming post-2024
-- Upcoming major events driving travel (sports, festivals, cultural moments)
+MANDATORY — reason through each of these before answering:
+
+MAJOR GLOBAL EVENTS 2026 (huge booking drivers — host cities MUST appear):
+- FIFA World Cup 2026 (June–July 2026): hosted across USA, Canada, Mexico. Host cities include New York, Los Angeles, Miami, Dallas, San Francisco, Seattle, Boston, Atlanta, Kansas City, Houston, Philadelphia (USA); Toronto, Vancouver (Canada); Mexico City, Guadalajara, Monterrey (Mexico). Millions of international visitors.
+- Milano Cortina Winter Olympics 2026 (Feb 2026): Milan and Cortina d'Ampezzo, Italy — drove major European travel.
+- Commonwealth Games 2026 (July–Aug): Glasgow, Scotland.
+- Expo 2025 Osaka (through Oct 2025): lingering Japan tourism momentum.
+
+BOOKING PLATFORM SIGNALS:
+- Skyscanner, Kayak, Expedia 2026 trend reports
+- New direct international flight routes launched in 2025-2026
+- Visa-free policy expansions driving new visitor markets
+
+CULTURAL/SOCIAL SIGNALS:
+- Viral TikTok and Instagram travel moments
+- Emerging "off the beaten path" destinations gaining momentum
+- Destinations with strong food/wellness/adventure tourism growth
 
 Return ONLY a JSON array, no markdown, no explanation:
 [{"name":"City, Country","reason":"5 words max why it's hot"}]
 
-24 entries. Vary regions — don't cluster all in Europe. Include at least 3 emerging/surprising picks.`
+24 entries total. World Cup host cities should feature prominently given it's happening NOW. Vary regions globally.`
         }],
         max_tokens: 800,
         temperature: 0.4,
