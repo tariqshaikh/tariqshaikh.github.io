@@ -220,41 +220,7 @@ export default function Portfolio() {
               </div>
             </div>
 
-            {/* Project 4 - Jobverse */}
-            <div className="bg-[#140E22] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#D8B4FE]/50 hover:shadow-[0_32px_64px_-16px_rgba(216,180,254,0.15)] relative overflow-hidden rounded-2xl group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-indigo-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold rounded-full">In Progress</span>
-                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.004</span>
-              </div>
-              <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold italic text-white">Jobverse</span>
-              </h3>
-              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">PM Job Board — Aggregated Daily</p>
-
-              <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#D8B4FE]/30" />
-                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  635+ PM roles pulled daily from Ashby and Greenhouse across 200+ companies. Filter by experience level, salary, type, and location. Star dream companies to surface their roles first.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-10">
-                {['React / TypeScript', 'Ashby · Greenhouse', 'Refreshed Daily'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#D8B4FE]/10 text-[#D8B4FE]/80 border border-[#D8B4FE]/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <Link to="/jobverse" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-purple-600 to-[#D8B4FE] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(168,85,247,0.45)]">
-                  Explore Jobverse <ChevronRight size={14} />
-                </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => openModal('prd-4')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
-                  <button onClick={() => openModal('roadmap-4')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
-                </div>
-              </div>
-            </div>
+            {/* Project 4 - Jobverse (hidden) */}
           </div>
         </div>
       </section>

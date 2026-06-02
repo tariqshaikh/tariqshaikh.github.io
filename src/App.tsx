@@ -19,8 +19,6 @@ import Login from './components/Login';
 import Waves from './components/Waves';
 import CapitalDeployment from './components/CapitalDeployment';
 
-import JobverseApp from './components/Jobverse/JobverseApp';
-
 export default function App() {
   return (
     <Router>
@@ -32,7 +30,6 @@ export default function App() {
         <Route path="/homebase" element={<Homebase />} />
         <Route path="/orbit" element={<Orbit />} />
         <Route path="/waves" element={<Waves />} />
-        <Route path="/jobverse" element={<JobverseApp />} />
         <Route path="/waves/:tripId" element={<Waves />} />
         <Route path="/orbit/dashboard" element={<Orbit />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
