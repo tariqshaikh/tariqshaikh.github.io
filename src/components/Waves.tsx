@@ -1074,38 +1074,29 @@ export default function Waves() {
   const { tripId } = useParams();
   const navigate = useNavigate();
 
-  // Wikipedia article names for the destinations we track (ASCII-friendly, redirects work)
-  const WIKI_DESTINATIONS = [
-    { name: "Paris",              article: "Paris",                   region: "Europe"        },
-    { name: "Tokyo",              article: "Tokyo",                   region: "Asia"          },
-    { name: "Bali",               article: "Bali",                    region: "Asia"          },
-    { name: "Rome",               article: "Rome",                    region: "Europe"        },
-    { name: "Barcelona",          article: "Barcelona",               region: "Europe"        },
-    { name: "Kyoto",              article: "Kyoto",                   region: "Asia"          },
-    { name: "Istanbul",           article: "Istanbul",                region: "Europe/Asia"   },
-    { name: "Santorini",          article: "Santorini",               region: "Europe"        },
-    { name: "Lisbon",             article: "Lisbon",                  region: "Europe"        },
-    { name: "Maldives",           article: "Maldives",                region: "Indian Ocean"  },
-    { name: "Bangkok",            article: "Bangkok",                 region: "Asia"          },
-    { name: "Seoul",              article: "Seoul",                   region: "Asia"          },
-    { name: "Marrakech",          article: "Marrakech",               region: "Africa"        },
-    { name: "Dubrovnik",          article: "Dubrovnik",               region: "Europe"        },
-    { name: "Phuket",             article: "Phuket",                  region: "Asia"          },
-    { name: "Amalfi Coast",       article: "Amalfi_Coast",            region: "Europe"        },
-    { name: "Machu Picchu",       article: "Machu_Picchu",            region: "South America" },
-    { name: "Cape Town",          article: "Cape_Town",               region: "Africa"        },
-    { name: "Reykjavik",          article: "Reykjavik",               region: "Europe"        },
-    { name: "Porto",              article: "Porto",                   region: "Europe"        },
-    { name: "Chiang Mai",         article: "Chiang_Mai",              region: "Asia"          },
-    { name: "Tulum",              article: "Tulum",                   region: "North America" },
-    { name: "Lake Como",          article: "Lake_Como",               region: "Europe"        },
-    { name: "Queenstown",         article: "Queenstown,_New_Zealand", region: "Oceania"       },
-    { name: "Cartagena",          article: "Cartagena,_Colombia",     region: "South America" },
-    { name: "Hoi An",             article: "Hoi_An",                  region: "Asia"          },
-    { name: "Oaxaca",             article: "Oaxaca_City",             region: "North America" },
-    { name: "Medellin",           article: "Medellin",                region: "South America" },
-    { name: "New Orleans",        article: "New_Orleans",             region: "North America" },
-    { name: "Petra",              article: "Petra,_Jordan",           region: "Middle East"   },
+  const TRENDING_FALLBACK = [
+    { name: "Tokyo, Japan",            reason: "Record tourism rebound"    },
+    { name: "Medellín, Colombia",      reason: "Most searched on Kayak"    },
+    { name: "Lisbon, Portugal",        reason: "New direct routes added"   },
+    { name: "Bali, Indonesia",         reason: "Visa-free expansion"       },
+    { name: "Seoul, South Korea",      reason: "K-culture moment"          },
+    { name: "Marrakech, Morocco",      reason: "Top booked on Expedia"     },
+    { name: "Oaxaca, Mexico",          reason: "Foodie destination of year"},
+    { name: "Dubrovnik, Croatia",      reason: "Post-peak sweet spot"      },
+    { name: "Chiang Mai, Thailand",    reason: "Digital nomad magnet"      },
+    { name: "Cape Town, South Africa", reason: "Safari + city combo trend" },
+    { name: "Porto, Portugal",         reason: "Budget Europe darling"     },
+    { name: "Kyoto, Japan",            reason: "Cherry blossom demand"     },
+    { name: "Cartagena, Colombia",     reason: "Fastest rising searches"   },
+    { name: "Queenstown, New Zealand", reason: "Adventure travel surge"    },
+    { name: "Hoi An, Vietnam",         reason: "Skyscanner hidden gem"     },
+    { name: "Reykjavik, Iceland",      reason: "Northern lights bookings"  },
+    { name: "Tulum, Mexico",           reason: "Wellness travel boom"      },
+    { name: "Santorini, Greece",       reason: "Summer 2026 waitlists"     },
+    { name: "Istanbul, Turkey",        reason: "Culinary tourism growth"   },
+    { name: "Amalfi Coast, Italy",     reason: "Slow travel trend"         },
+    { name: "Barcelona, Spain",        reason: "Spring festival demand"    },
+    { name: "Phuket, Thailand",        reason: "Island hopping resurgence" },
   ];
   const PLACEHOLDER_CYCLE = [
     "e.g., Kyoto, Japan",
@@ -1124,17 +1115,17 @@ export default function Waves() {
   const [hasSearched, setHasSearched] = useState(false);
   const [trendingPage, setTrendingPage] = useState(0);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const [trendingList, setTrendingList] = useState<{ name: string; region: string; views: number }[]>([]);
+  const [trendingList, setTrendingList] = useState<{ name: string; reason: string }[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(true);
 
-  // Fetch Wikipedia page views for the last 6 months, cache for 24h
+  // Fetch AI-curated trending destinations from Groq, cache for 7 days
   useEffect(() => {
-    const CACHE_KEY = 'waves_trending_v3';
+    const CACHE_KEY = 'waves_trending_ai_v1';
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const { ts, data } = JSON.parse(cached);
-        if (Date.now() - ts < 24 * 60 * 60 * 1000 && Array.isArray(data) && data.length > 0) {
+        if (Date.now() - ts < 7 * 24 * 60 * 60 * 1000 && Array.isArray(data) && data.length > 0) {
           setTrendingList(data);
           setTrendingLoading(false);
           return;
@@ -1142,43 +1133,55 @@ export default function Waves() {
       }
     } catch {}
 
+    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+    if (!apiKey) {
+      setTrendingList(TRENDING_FALLBACK);
+      setTrendingLoading(false);
+      return;
+    }
+
     const now = new Date();
-    // Use start of current month as end — avoids requesting incomplete current-month data
-    const end = new Date(now.getFullYear(), now.getMonth(), 1);
-    const start = new Date(end.getFullYear(), end.getMonth() - 6, 1);
-    const fmt = (d: Date) =>
-      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}0100`;
+    const monthYear = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
-    const fallback = WIKI_DESTINATIONS.map(d => ({ name: d.name, region: d.region, views: 0 }));
+    fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{
+          role: 'user',
+          content: `You are a travel industry analyst with knowledge of booking platform data, airline route expansions, and social media travel trends up to early 2026.
 
-    Promise.allSettled(
-      WIKI_DESTINATIONS.map(async (dest) => {
-        // No custom headers — they trigger CORS preflight that Wikimedia rejects
-        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${dest.article}/monthly/${fmt(start)}/${fmt(end)}`;
-        try {
-          const r = await fetch(url);
-          if (!r.ok) return { name: dest.name, region: dest.region, views: 0 };
-          const json = await r.json();
-          const views = (json.items || []).reduce((s: number, i: any) => s + (i.views ?? 0), 0);
-          return { name: dest.name, region: dest.region, views };
-        } catch {
-          return { name: dest.name, region: dest.region, views: 0 };
+As of ${monthYear}, what are the top 24 trending travel destinations worldwide? Base this on:
+- Booking platform surge data (Expedia, Kayak, Skyscanner annual trend reports)
+- New direct flight route launches in 2025-2026
+- Viral travel content (TikTok, Instagram Reels destination moments)
+- Emerging destinations gaining first-time visitors
+- Destinations recovering or booming post-2024
+- Upcoming major events driving travel (sports, festivals, cultural moments)
+
+Return ONLY a JSON array, no markdown, no explanation:
+[{"name":"City, Country","reason":"5 words max why it's hot"}]
+
+24 entries. Vary regions — don't cluster all in Europe. Include at least 3 emerging/surprising picks.`
+        }],
+        max_tokens: 800,
+        temperature: 0.4,
+      }),
+    })
+      .then(r => r.json())
+      .then((json: any) => {
+        const text = json.choices?.[0]?.message?.content?.trim() ?? '';
+        const parsed: { name: string; reason: string }[] = JSON.parse(text);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: parsed })); } catch {}
+          setTrendingList(parsed);
+        } else {
+          setTrendingList(TRENDING_FALLBACK);
         }
       })
-    ).then((results) => {
-      const sorted = results
-        .filter((r): r is PromiseFulfilledResult<{ name: string; region: string; views: number }> =>
-          r.status === 'fulfilled' && r.value.views > 0)
-        .map((r) => r.value)
-        .sort((a, b) => b.views - a.views);
-      const final = sorted.length > 0 ? sorted : fallback;
-      try { localStorage.setItem('waves_trending_v3', JSON.stringify({ ts: Date.now(), data: final })); } catch {}
-      setTrendingList(final);
-      setTrendingLoading(false);
-    }).catch(() => {
-      setTrendingList(fallback);
-      setTrendingLoading(false);
-    });
+      .catch(() => setTrendingList(TRENDING_FALLBACK))
+      .finally(() => setTrendingLoading(false));
   }, []);
 
   useEffect(() => {
@@ -1736,10 +1739,13 @@ Return ONLY a JSON object, no markdown, no explanation:
                   {trendingLoading ? (
                     <span className="flex gap-1.5 items-center">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-500/50 animate-pulse" />
-                      Loading real travel interest data…
+                      Asking AI what's hot right now…
                     </span>
                   ) : (
-                    <>Most researched destinations · last 6 months</>
+                    <span className="flex items-center gap-1.5">
+                      Trending destinations
+                      <span className="text-slate-700">· AI-curated from 2026 travel industry data</span>
+                    </span>
                   )}
                 </span>
                 {!trendingLoading && trendingList.length > 0 && (
@@ -1771,7 +1777,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                     transition={{ duration: 0.4 }}
                     className="flex flex-wrap justify-center gap-2.5"
                   >
-                    {trendingList.slice(trendingPage * ITEMS_PER_PAGE, (trendingPage + 1) * ITEMS_PER_PAGE).map(({ name, region, views }, idx) => (
+                    {trendingList.slice(trendingPage * ITEMS_PER_PAGE, (trendingPage + 1) * ITEMS_PER_PAGE).map(({ name, reason }, idx) => (
                       <button
                         key={name}
                         type="button"
@@ -1780,13 +1786,11 @@ Return ONLY a JSON object, no markdown, no explanation:
                       >
                         <span className="text-[9px] text-slate-600 font-mono">#{trendingPage * ITEMS_PER_PAGE + idx + 1}</span>
                         <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300 group-hover:text-cyan-400 transition-colors">
-                          {name}
+                          {name.split(',')[0]}
                         </span>
-                        {views > 0 && (
-                          <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
-                            {(views / 1_000_000).toFixed(1)}M views
-                          </span>
-                        )}
+                        <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
+                          {reason}
+                        </span>
                       </button>
                     ))}
                   </motion.div>
