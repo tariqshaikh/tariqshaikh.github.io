@@ -1074,29 +1074,38 @@ export default function Waves() {
   const { tripId } = useParams();
   const navigate = useNavigate();
 
-  const TRENDING_2025 = [
-    { name: "Kyoto, Japan",           tag: "Cherry Blossom" },
-    { name: "Lisbon, Portugal",        tag: "Rising Star"    },
-    { name: "Medellín, Colombia",      tag: "City Comeback"  },
-    { name: "Bali, Indonesia",         tag: "Perennial Fave" },
-    { name: "Oaxaca, Mexico",          tag: "Food & Culture" },
-    { name: "Dubrovnik, Croatia",      tag: "Adriatic Coast" },
-    { name: "Chiang Mai, Thailand",    tag: "Temples & Jungle"},
-    { name: "Marrakech, Morocco",      tag: "Sensory Rush"   },
-    { name: "Porto, Portugal",         tag: "Wine & Tiles"   },
-    { name: "Seoul, South Korea",      tag: "Street Food"    },
-    { name: "Hoi An, Vietnam",         tag: "Ancient Town"   },
-    { name: "Lake Como, Italy",        tag: "Lakeside Luxury"},
-    { name: "Barcelona, Spain",        tag: "Architecture"   },
-    { name: "Reykjavik, Iceland",      tag: "Northern Lights"},
-    { name: "Queenstown, New Zealand", tag: "Adventure"      },
-    { name: "Cartagena, Colombia",     tag: "Colonial Charm" },
-    { name: "Tulum, Mexico",           tag: "Cenotes"        },
-    { name: "Amalfi Coast, Italy",     tag: "Mediterranean"  },
-    { name: "Santorini, Greece",       tag: "Island Escape"  },
-    { name: "Tokyo, Japan",            tag: "Neon & Ramen"   },
-    { name: "Patagonia, Argentina",    tag: "End of the World"},
-    { name: "Machu Picchu, Peru",      tag: "Ancient Wonder" },
+  // Wikipedia article names for the destinations we track (ASCII-friendly, redirects work)
+  const WIKI_DESTINATIONS = [
+    { name: "Paris",              article: "Paris",                   region: "Europe"        },
+    { name: "Tokyo",              article: "Tokyo",                   region: "Asia"          },
+    { name: "Bali",               article: "Bali",                    region: "Asia"          },
+    { name: "Rome",               article: "Rome",                    region: "Europe"        },
+    { name: "Barcelona",          article: "Barcelona",               region: "Europe"        },
+    { name: "Kyoto",              article: "Kyoto",                   region: "Asia"          },
+    { name: "Istanbul",           article: "Istanbul",                region: "Europe/Asia"   },
+    { name: "Santorini",          article: "Santorini",               region: "Europe"        },
+    { name: "Lisbon",             article: "Lisbon",                  region: "Europe"        },
+    { name: "Maldives",           article: "Maldives",                region: "Indian Ocean"  },
+    { name: "Bangkok",            article: "Bangkok",                 region: "Asia"          },
+    { name: "Seoul",              article: "Seoul",                   region: "Asia"          },
+    { name: "Marrakech",          article: "Marrakech",               region: "Africa"        },
+    { name: "Dubrovnik",          article: "Dubrovnik",               region: "Europe"        },
+    { name: "Phuket",             article: "Phuket",                  region: "Asia"          },
+    { name: "Amalfi Coast",       article: "Amalfi_Coast",            region: "Europe"        },
+    { name: "Machu Picchu",       article: "Machu_Picchu",            region: "South America" },
+    { name: "Cape Town",          article: "Cape_Town",               region: "Africa"        },
+    { name: "Reykjavik",          article: "Reykjavik",               region: "Europe"        },
+    { name: "Porto",              article: "Porto",                   region: "Europe"        },
+    { name: "Chiang Mai",         article: "Chiang_Mai",              region: "Asia"          },
+    { name: "Tulum",              article: "Tulum",                   region: "North America" },
+    { name: "Lake Como",          article: "Lake_Como",               region: "Europe"        },
+    { name: "Queenstown",         article: "Queenstown,_New_Zealand", region: "Oceania"       },
+    { name: "Cartagena",          article: "Cartagena,_Colombia",     region: "South America" },
+    { name: "Hoi An",             article: "Hoi_An",                  region: "Asia"          },
+    { name: "Oaxaca",             article: "Oaxaca_City",             region: "North America" },
+    { name: "Medellin",           article: "Medellin",                region: "South America" },
+    { name: "New Orleans",        article: "New_Orleans",             region: "North America" },
+    { name: "Petra",              article: "Petra,_Jordan",           region: "Middle East"   },
   ];
   const PLACEHOLDER_CYCLE = [
     "e.g., Kyoto, Japan",
@@ -1115,11 +1124,57 @@ export default function Waves() {
   const [hasSearched, setHasSearched] = useState(false);
   const [trendingPage, setTrendingPage] = useState(0);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [trendingList, setTrendingList] = useState<{ name: string; region: string; views: number }[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
+
+  // Fetch Wikipedia page views for the last 6 months, cache for 24h
+  useEffect(() => {
+    const CACHE_KEY = 'waves_trending_v1';
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const { ts, data } = JSON.parse(cached);
+        if (Date.now() - ts < 24 * 60 * 60 * 1000) {
+          setTrendingList(data);
+          setTrendingLoading(false);
+          return;
+        }
+      } catch {}
+    }
+
+    const now = new Date();
+    const start = new Date(now);
+    start.setMonth(now.getMonth() - 6);
+    const fmt = (d: Date) =>
+      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}0100`;
+
+    Promise.allSettled(
+      WIKI_DESTINATIONS.map(async (dest) => {
+        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${dest.article}/monthly/${fmt(start)}/${fmt(now)}`;
+        const r = await fetch(url, { headers: { 'Api-User-Agent': 'waves-travel-app/1.0' } });
+        if (!r.ok) return { name: dest.name, region: dest.region, views: 0 };
+        const json = await r.json();
+        const views = (json.items || []).reduce((s: number, i: any) => s + (i.views ?? 0), 0);
+        return { name: dest.name, region: dest.region, views };
+      })
+    ).then((results) => {
+      const sorted = results
+        .filter((r): r is PromiseFulfilledResult<{ name: string; region: string; views: number }> =>
+          r.status === 'fulfilled' && r.value.views > 0)
+        .map((r) => r.value)
+        .sort((a, b) => b.views - a.views);
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: sorted }));
+      setTrendingList(sorted);
+      setTrendingLoading(false);
+    });
+  }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setTrendingPage(p => (p + 1) % Math.ceil(TRENDING_2025.length / ITEMS_PER_PAGE)), 4000);
+    if (trendingList.length === 0) return;
+    const pages = Math.ceil(trendingList.length / ITEMS_PER_PAGE);
+    const t = setInterval(() => setTrendingPage(p => (p + 1) % pages), 7000);
     return () => clearInterval(t);
-  }, []);
+  }, [trendingList]);
 
   useEffect(() => {
     const t = setInterval(() => setPlaceholderIdx(i => (i + 1) % PLACEHOLDER_CYCLE.length), 3000);
@@ -1665,43 +1720,64 @@ Return ONLY a JSON object, no markdown, no explanation:
               className="w-full max-w-3xl mt-10"
             >
               <div className="flex items-center justify-center gap-3 mb-5">
-                <span className="text-[10px] uppercase tracking-widest text-slate-500">Trending in 2025</span>
-                <span className="flex gap-1">
-                  {Array.from({ length: Math.ceil(TRENDING_2025.length / ITEMS_PER_PAGE) }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setTrendingPage(i)}
-                      className={`w-1 h-1 rounded-full transition-all ${i === trendingPage ? 'bg-cyan-400 w-3' : 'bg-white/20 hover:bg-white/40'}`}
-                    />
-                  ))}
+                <span className="text-[10px] uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  {trendingLoading ? (
+                    <span className="flex gap-1.5 items-center">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500/50 animate-pulse" />
+                      Loading real travel interest data…
+                    </span>
+                  ) : (
+                    <>Most researched destinations · last 6 months</>
+                  )}
                 </span>
+                {!trendingLoading && trendingList.length > 0 && (
+                  <span className="flex gap-1">
+                    {Array.from({ length: Math.ceil(trendingList.length / ITEMS_PER_PAGE) }).map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setTrendingPage(i)}
+                        className={`h-1 rounded-full transition-all ${i === trendingPage ? 'bg-cyan-400 w-3' : 'w-1 bg-white/20 hover:bg-white/40'}`}
+                      />
+                    ))}
+                  </span>
+                )}
               </div>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={trendingPage}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.35 }}
-                  className="flex flex-wrap justify-center gap-2.5"
-                >
-                  {TRENDING_2025.slice(trendingPage * ITEMS_PER_PAGE, (trendingPage + 1) * ITEMS_PER_PAGE).map(({ name, tag }) => (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => { setDestination(name); fetchDestinationIntelligence(name); }}
-                      className="group flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-cyan-500/30 transition-all"
-                    >
-                      <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300 group-hover:text-cyan-400 transition-colors">
-                        {name.split(',')[0]}
-                      </span>
-                      <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
-                        {tag}
-                      </span>
-                    </button>
+
+              {trendingLoading ? (
+                <div className="flex flex-wrap justify-center gap-2.5">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="h-9 w-28 rounded-full bg-white/5 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
                   ))}
-                </motion.div>
-              </AnimatePresence>
+                </div>
+              ) : (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={trendingPage}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex flex-wrap justify-center gap-2.5"
+                  >
+                    {trendingList.slice(trendingPage * ITEMS_PER_PAGE, (trendingPage + 1) * ITEMS_PER_PAGE).map(({ name, region, views }, idx) => (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => { setDestination(name); fetchDestinationIntelligence(name); }}
+                        className="group flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-cyan-500/30 transition-all"
+                      >
+                        <span className="text-[9px] text-slate-600 font-mono">#{trendingPage * ITEMS_PER_PAGE + idx + 1}</span>
+                        <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300 group-hover:text-cyan-400 transition-colors">
+                          {name}
+                        </span>
+                        <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
+                          {(views / 1_000_000).toFixed(1)}M views
+                        </span>
+                      </button>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+              )}
             </motion.div>
           </motion.div>
         </main>
