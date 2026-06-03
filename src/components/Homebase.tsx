@@ -839,7 +839,7 @@ export default function Homebase() {
 
       {/* NJ SVG Map — decorative + interactive on landing */}
       {!showResults && heroVariant.startsWith('V') && (
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 z-[5] hidden lg:block pointer-events-auto select-none"
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-[5] hidden lg:block pointer-events-auto select-none"
           style={{ paddingTop: '60px' }}
         >
           <svg
