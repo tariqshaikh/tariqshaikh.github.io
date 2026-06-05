@@ -839,9 +839,7 @@ export default function Homebase() {
 
       {/* NJ SVG Map — decorative + interactive on landing */}
       {!showResults && heroVariant.startsWith('V') && (
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-[5] hidden lg:block pointer-events-auto select-none"
-          style={{ paddingTop: '60px' }}
-        >
+        <div className="absolute top-1/2 -translate-y-1/2 z-[5] hidden lg:block pointer-events-auto select-none" style={{ right: 'calc(50% - 30rem)', paddingTop: '60px' }}>
           <svg
             viewBox="-8 -8 280 520"
             width="300"
