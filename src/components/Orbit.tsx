@@ -347,6 +347,19 @@ interface FinanceProfile {
   hasSeededDefaults?: boolean;
 }
 
+interface SavedModel {
+  id: string;
+  name: string;
+  createdAt: any;
+  updatedAt: any;
+  profile: FinanceProfile;
+  expenses: RecurringExpense[];
+  startDate: string;
+  endDate: string;
+  monthlySurplus: number;
+  notes?: string;
+}
+
 
 // --- Components ---
 
@@ -618,6 +631,14 @@ function Orbit() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingFromModal, setIsDeletingFromModal] = useState(false);
+
+  // Saved Models state
+  const [savedModels, setSavedModels] = useState<SavedModel[]>([]);
+  const [activeModelId, setActiveModelId] = useState<string | null>(null);
+  const [showModelsPanel, setShowModelsPanel] = useState(false);
+  const [showSaveModelModal, setShowSaveModelModal] = useState(false);
+  const [saveModelName, setSaveModelName] = useState('');
+  const liveBackup = useRef<{ profile: FinanceProfile; expenses: RecurringExpense[]; startDate: string; endDate: string } | null>(null);
   const [selectedOrbitCategory, setSelectedOrbitCategory] = useState<string | null>(null);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
@@ -874,24 +895,35 @@ function Orbit() {
       setExpenses(exps);
     });
 
+    // Load saved models
+    const modelsRef = collection(db, 'users', user.uid, 'savedModels');
+    const unsubModels = onSnapshot(query(modelsRef, orderBy('updatedAt', 'desc')), snap => {
+      setSavedModels(snap.docs.map(d => ({ id: d.id, ...d.data() } as SavedModel)));
+    });
+
     return () => {
       unsubProfile();
       unsubExpenses();
+      unsubModels();
     };
   }, [user]);
 
-  // --- Auto-save Profile ---
+  // --- Auto-save Profile (or model snapshot) ---
   useEffect(() => {
     if (!user || user.uid === 'guest-user' || !isAuthReady || !isProfileLoaded.current) return;
 
     const timer = setTimeout(() => {
-      // Only save if profile has changed from what's on the server
-      // This is handled by the debounce and the deep equality check in onSnapshot
-      saveProfile(profile);
-    }, 2000); // Increased debounce to 2 seconds to reduce flashing
+      if (activeModelId) {
+        // In model editing mode — snapshot the full state to the model doc
+        updateModelDoc(activeModelId, Math.round(normalizedMonthlySurplus));
+      } else {
+        // Live mode — normal save to orbitProfile/main
+        saveProfile(profile);
+      }
+    }, 2000);
 
     return () => clearTimeout(timer);
-  }, [profile, user, isAuthReady]);
+  }, [profile, expenses, startDate, endDate, user, isAuthReady, activeModelId]);
 
   const saveProfile = async (newProfile: FinanceProfile) => {
     if (!user || user.uid === 'guest-user') return;
@@ -908,8 +940,84 @@ function Orbit() {
     }
   };
 
+  // --- Saved Model functions ---
+
+  const saveCurrentAsModel = async (name: string, monthlySurplus: number) => {
+    if (!user || user.uid === 'guest-user') return;
+    const id = `model_${Date.now()}`;
+    await setDoc(doc(db, 'users', user.uid, 'savedModels', id), {
+      id, name,
+      profile, expenses, startDate, endDate,
+      monthlySurplus,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const loadModel = (model: SavedModel) => {
+    liveBackup.current = { profile, expenses, startDate, endDate };
+    setProfile(model.profile);
+    setExpenses(model.expenses);
+    setStartDate(model.startDate);
+    setEndDate(model.endDate);
+    setActiveModelId(model.id);
+    setShowModelsPanel(false);
+  };
+
+  const returnToLive = () => {
+    if (liveBackup.current) {
+      setProfile(liveBackup.current.profile);
+      setExpenses(liveBackup.current.expenses);
+      setStartDate(liveBackup.current.startDate);
+      setEndDate(liveBackup.current.endDate);
+    }
+    setActiveModelId(null);
+    liveBackup.current = null;
+  };
+
+  const pushModelToLive = async () => {
+    if (!user || !activeModelId) return;
+    setIsSaving(true);
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'orbitProfile', 'main'), {
+        ...profile, updatedAt: serverTimestamp(),
+      });
+      const existingSnap = await getDocs(collection(db, 'users', user.uid, 'orbitExpenses'));
+      await Promise.all(existingSnap.docs.map(d => deleteDoc(d.ref)));
+      await Promise.all(expenses.map((exp, idx) =>
+        setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), { ...exp, sortOrder: idx })
+      ));
+      liveBackup.current = { profile, expenses, startDate, endDate };
+      setActiveModelId(null);
+    } catch (e) {
+      console.error('pushModelToLive error', e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const updateModelDoc = async (modelId: string, monthlySurplus: number) => {
+    if (!user || user.uid === 'guest-user') return;
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'savedModels', modelId), {
+        profile, expenses, startDate, endDate,
+        monthlySurplus,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+    } catch (e) {
+      console.error('updateModelDoc error', e);
+    }
+  };
+
+  const deleteModel = async (id: string) => {
+    if (!user) return;
+    await deleteDoc(doc(db, 'users', user.uid, 'savedModels', id));
+    if (activeModelId === id) returnToLive();
+  };
+
   const saveExpense = async (exp: RecurringExpense) => {
     if (!user || user.uid === 'guest-user') return;
+    if (activeModelId) return; // In model mode — full snapshot auto-saves, no individual writes
     try {
       await setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), {
         ...exp,
@@ -922,6 +1030,7 @@ function Orbit() {
 
   const saveExpensesOrder = async (newOrder: RecurringExpense[]) => {
     if (!user || user.uid === 'guest-user') return;
+    if (activeModelId) return;
     try {
       const batch = newOrder.map((exp, idx) => {
         return setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), {
@@ -937,6 +1046,7 @@ function Orbit() {
 
   const deleteExpenseFromDb = async (id: string) => {
     if (!user || user.uid === 'guest-user') return;
+    if (activeModelId) return;
     try {
       await deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id));
     } catch (error) {
@@ -1432,6 +1542,43 @@ function Orbit() {
           </motion.div>
         )}
 
+        {/* Model Editing Banner */}
+        {activeModelId && (() => {
+          const model = savedModels.find(m => m.id === activeModelId);
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-amber-900 font-serif">Editing Scenario: {model?.name}</p>
+                  <p className="text-xs text-amber-700 font-mono">Changes auto-save to this scenario — not your Live setup</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={pushModelToLive}
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#C5A059] text-white text-xs font-bold rounded-xl hover:bg-[#B38F48] transition-all disabled:opacity-50"
+                >
+                  <ArrowUpRight size={13} />
+                  Push to Live
+                </button>
+                <button
+                  onClick={returnToLive}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-white border border-amber-300 text-amber-900 text-xs font-bold rounded-xl hover:bg-amber-50 transition-all"
+                >
+                  <X size={13} />
+                  Back to Live
+                </button>
+              </div>
+            </motion.div>
+          );
+        })()}
+
         {/* Cash Flow Intelligence Header */}
         <div className="mb-12 w-full">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
@@ -1439,6 +1586,31 @@ function Orbit() {
               <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">Orbit: Cash Flow Intelligence</h2>
               <p className="text-[11px] font-mono uppercase tracking-widest text-[#C5A059] mt-2">Cash Flow Timeline: {monthsInRange} Months</p>
             </div>
+            {user && user.uid !== 'guest-user' && (
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Model selector */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowModelsPanel(!showModelsPanel)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E8E4D0] rounded-xl text-sm font-mono hover:border-[#C5A059] transition-all shadow-sm"
+                  >
+                    <Database size={14} className="text-[#C5A059]" />
+                    <span className="text-[#2C3338] font-bold">
+                      {activeModelId ? savedModels.find(m => m.id === activeModelId)?.name ?? 'Scenario' : 'Live'}
+                    </span>
+                    <ChevronDown size={12} className="text-[#8C8670]" />
+                  </button>
+                </div>
+                {/* Save scenario */}
+                <button
+                  onClick={() => { setSaveModelName(''); setShowSaveModelModal(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#C5A059] text-white rounded-xl text-xs font-bold hover:bg-[#B38F48] transition-all shadow-sm"
+                >
+                  <Save size={14} />
+                  Save Scenario
+                </button>
+              </div>
+            )}
           </div>
           
           <div className="py-8 border-y border-[#E8E4D0]/60 flex flex-col md:flex-row gap-12 items-start">
@@ -2745,6 +2917,144 @@ function Orbit() {
                   className="w-full mt-4 text-[10px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors"
                 >
                   Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Models Panel */}
+      <AnimatePresence>
+        {showModelsPanel && (
+          <div className="fixed inset-0 z-[80] flex items-start justify-end pt-24 pr-6" onClick={() => setShowModelsPanel(false)}>
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.97 }}
+              transition={{ duration: 0.15 }}
+              className="bg-white border border-[#E8E4D0] rounded-2xl shadow-2xl w-80 overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="px-5 pt-5 pb-3 border-b border-[#E8E4D0]">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-1">Scenarios</p>
+                <p className="text-xs text-[#8C8670]">Switch between saved cash flow models</p>
+              </div>
+
+              {/* Live option */}
+              <button
+                onClick={returnToLive}
+                className={`w-full flex items-center justify-between px-5 py-3.5 hover:bg-[#FAF9F6] transition-colors border-b border-[#E8E4D0]/60 ${!activeModelId ? 'bg-[#FAF9F6]' : ''}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${!activeModelId ? 'bg-emerald-500' : 'bg-[#E8E4D0]'}`} />
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-[#2C3338]">Live</p>
+                    <p className="text-[10px] font-mono text-[#8C8670]">Your active setup</p>
+                  </div>
+                </div>
+                {!activeModelId && <span className="text-[9px] font-mono uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Active</span>}
+              </button>
+
+              {/* Saved models */}
+              <div className="max-h-64 overflow-y-auto">
+                {savedModels.length === 0 ? (
+                  <p className="px-5 py-4 text-xs text-[#8C8670] font-mono italic">No saved scenarios yet</p>
+                ) : (
+                  savedModels.map(model => (
+                    <div
+                      key={model.id}
+                      className={`flex items-center justify-between px-5 py-3.5 hover:bg-[#FAF9F6] transition-colors border-b border-[#E8E4D0]/60 last:border-0 ${activeModelId === model.id ? 'bg-amber-50' : ''}`}
+                    >
+                      <button className="flex-1 flex items-center gap-3 text-left" onClick={() => loadModel(model)}>
+                        <div className={`w-2 h-2 rounded-full ${activeModelId === model.id ? 'bg-amber-500' : 'bg-[#E8E4D0]'}`} />
+                        <div>
+                          <p className="text-sm font-bold text-[#2C3338]">{model.name}</p>
+                          <p className="text-[10px] font-mono text-[#8C8670]">
+                            ${model.monthlySurplus.toLocaleString()}/mo surplus
+                          </p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => deleteModel(model.id)}
+                        className="p-1.5 rounded-lg hover:bg-red-50 text-[#8C8670] hover:text-red-500 transition-colors ml-2"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="p-3 border-t border-[#E8E4D0]">
+                <button
+                  onClick={() => { setShowModelsPanel(false); setSaveModelName(''); setShowSaveModelModal(true); }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#C5A059] text-white text-xs font-bold rounded-xl hover:bg-[#B38F48] transition-all"
+                >
+                  <Save size={13} />
+                  Save Current as New Scenario
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Save Model Modal */}
+      <AnimatePresence>
+        {showSaveModelModal && (
+          <div className="fixed inset-0 z-[90] flex items-center justify-center p-6" onClick={() => setShowSaveModelModal(false)}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8"
+              onClick={e => e.stopPropagation()}
+            >
+              <h3 className="text-2xl font-serif font-bold text-[#2C3338] mb-2">Save Scenario</h3>
+              <p className="text-sm text-[#8C8670] mb-6">
+                Snapshot your current income, expenses, and investments as a named scenario you can return to and compare.
+              </p>
+
+              <label className="block text-[10px] font-mono uppercase tracking-widest text-[#8C8670] mb-2">Scenario Name</label>
+              <input
+                type="text"
+                value={saveModelName}
+                onChange={e => setSaveModelName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && saveModelName.trim()) {
+                    saveCurrentAsModel(saveModelName.trim(), Math.round(normalizedMonthlySurplus));
+                    setShowSaveModelModal(false);
+                  }
+                }}
+                placeholder="e.g. Current 2026, New Job Scenario, Post-House..."
+                className="w-full px-4 py-3 border border-[#E8E4D0] rounded-xl font-mono text-sm text-[#2C3338] focus:outline-none focus:border-[#C5A059] mb-2"
+                autoFocus
+              />
+              <p className="text-[10px] font-mono text-[#8C8670] mb-6">
+                Monthly surplus at save time: <span className="text-[#C5A059] font-bold">${Math.round(normalizedMonthlySurplus).toLocaleString()}</span>
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowSaveModelModal(false)}
+                  className="flex-1 py-3 border border-[#E8E4D0] rounded-xl text-sm font-bold text-[#8C8670] hover:border-[#C5A059] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (!saveModelName.trim()) return;
+                    saveCurrentAsModel(saveModelName.trim(), Math.round(normalizedMonthlySurplus));
+                    setShowSaveModelModal(false);
+                  }}
+                  disabled={!saveModelName.trim()}
+                  className="flex-1 py-3 bg-[#C5A059] text-white rounded-xl text-sm font-bold hover:bg-[#B38F48] transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+                >
+                  <Save size={15} />
+                  Save Scenario
                 </button>
               </div>
             </motion.div>
