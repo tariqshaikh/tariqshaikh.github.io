@@ -1690,17 +1690,15 @@ function Orbit() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {/* 1 Month Income */}
           <div className="bg-[#FAF9F6]/50 border border-[#E8E4D0]/60 p-3 rounded-lg flex justify-between items-center shadow-sm">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">1-Month Snapshot</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Monthly Income</span>
             <span className="font-serif font-bold text-[#2C3338]">${Math.round(monthlyIncome).toLocaleString()}</span>
           </div>
-          {/* 1 Month Spend */}
           <div className="bg-[#FAF9F6]/50 border border-[#E8E4D0]/60 p-3 rounded-lg flex justify-between items-center shadow-sm">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">1-Month Snapshot</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Monthly Spend</span>
             <span className="font-serif font-bold text-[#2C3338]">${Math.round(normalizedMonthlySpend).toLocaleString()}</span>
           </div>
-          {/* 1 Month Surplus */}
           <div className="bg-[#FAF9F6]/50 border border-[#E8E4D0]/60 p-3 rounded-lg flex justify-between items-center shadow-sm border-b-2" style={{ borderBottomColor: profile.cardColors.surplus }}>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">1-Month Snapshot</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Monthly Surplus</span>
             <span className="font-serif font-bold text-[#2C3338]">${Math.round(normalizedMonthlySurplus).toLocaleString()}</span>
           </div>
         </div>
