@@ -188,7 +188,7 @@ export default function Portfolio() {
             <div className="md:col-span-2 md:max-w-2xl md:mx-auto md:w-full bg-[#0B1A1F] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_32px_64px_-16px_rgba(6,182,212,0.15)] relative overflow-hidden rounded-2xl group">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-cyan-700/20 text-cyan-400 border border-cyan-500/20 font-bold rounded-full">Coming Soon</span>
+                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold rounded-full">Live Product</span>
                 <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.003</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
@@ -1064,7 +1064,7 @@ export default function Portfolio() {
                         <span className="font-serif font-bold text-slate-900 italic">Waves</span>
                       </div>
                       <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Status: Coming Soon</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-400"></span> Status: Live</span>
                         <span>|</span>
                         <span>Author: TShaikh92</span>
                         <span>|</span>
