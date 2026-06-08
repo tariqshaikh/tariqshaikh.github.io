@@ -639,6 +639,10 @@ function Orbit() {
   const [showSaveModelModal, setShowSaveModelModal] = useState(false);
   const [saveModelName, setSaveModelName] = useState('');
   const liveBackup = useRef<{ profile: FinanceProfile; expenses: RecurringExpense[]; startDate: string; endDate: string } | null>(null);
+  // Financial Health data
+  const [liquidAssets, setLiquidAssets] = useState<number>(0);
+  const [debtItems, setDebtItems] = useState<{ id: string; name: string; value: number; interestRate: number | null; extraPayment: number }[]>([]);
+
   const [selectedOrbitCategory, setSelectedOrbitCategory] = useState<string | null>(null);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
@@ -895,6 +899,19 @@ function Orbit() {
       setExpenses(exps);
     });
 
+    // Load net worth items for Financial Health section
+    const nwRef = collection(db, 'users', user.uid, 'netWorthItems');
+    const unsubNW = onSnapshot(nwRef, snap => {
+      const items = snap.docs.map(d => ({ ...d.data(), id: d.id })) as { id: string; category: string; name: string; value: number; isAsset: boolean }[];
+      const liquid = items.filter(i => i.isAsset && ['accounts', 'individual-accounts'].includes(i.category));
+      setLiquidAssets(liquid.reduce((s, i) => s + (i.value || 0), 0));
+      const debts = items.filter(i => !i.isAsset);
+      setDebtItems(prev => debts.map(d => {
+        const existing = prev.find(p => p.id === d.id);
+        return { id: d.id, name: d.name, value: d.value || 0, interestRate: existing?.interestRate ?? null, extraPayment: existing?.extraPayment ?? 0 };
+      }));
+    });
+
     // Load saved models
     const modelsRef = collection(db, 'users', user.uid, 'savedModels');
     const unsubModels = onSnapshot(query(modelsRef, orderBy('updatedAt', 'desc')), snap => {
@@ -904,6 +921,7 @@ function Orbit() {
     return () => {
       unsubProfile();
       unsubExpenses();
+      unsubNW();
       unsubModels();
     };
   }, [user]);
@@ -1686,6 +1704,123 @@ function Orbit() {
             <span className="font-serif font-bold text-[#2C3338]">${Math.round(normalizedMonthlySurplus).toLocaleString()}</span>
           </div>
         </div>
+
+        {/* Financial Health */}
+        {user && user.uid !== 'guest-user' && (normalizedMonthlySpend > 0 || debtItems.length > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+
+            {/* Emergency Fund */}
+            {normalizedMonthlySpend > 0 && (() => {
+              const monthsCovered = liquidAssets / normalizedMonthlySpend;
+              const target = 6;
+              const pct = Math.min(100, (monthsCovered / target) * 100);
+              const status = monthsCovered >= 6 ? 'great' : monthsCovered >= 3 ? 'good' : 'low';
+              const statusColor = status === 'great' ? '#1E5C38' : status === 'good' ? '#C5A059' : '#B91C1C';
+              const statusLabel = status === 'great' ? 'Fully funded' : status === 'good' ? 'On track' : 'Below target';
+              return (
+                <div className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Emergency Fund</span>
+                    <span className="text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full font-bold" style={{ color: statusColor, background: statusColor + '18' }}>{statusLabel}</span>
+                  </div>
+                  <div className="flex items-end gap-2 mb-3">
+                    <span className="text-3xl font-serif font-bold text-[#2C3338]">{monthsCovered.toFixed(1)}</span>
+                    <span className="text-sm text-[#8C8670] mb-1 font-mono">/ 6 months</span>
+                  </div>
+                  <div className="w-full h-2.5 bg-[#E8E4D0] rounded-full mb-3 overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: statusColor }} />
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono text-[#8C8670]">
+                    <span>${liquidAssets.toLocaleString()} liquid</span>
+                    <span>Goal: ${Math.round(normalizedMonthlySpend * 6).toLocaleString()}</span>
+                  </div>
+                  {status === 'low' && normalizedMonthlySurplus > 0 && (
+                    <p className="mt-3 text-[10px] font-mono text-[#8C8670] border-t border-[#E8E4D0] pt-3">
+                      At your current ${Math.round(normalizedMonthlySurplus).toLocaleString()}/mo surplus, you'd hit 6 months in <span className="font-bold text-[#C5A059]">{Math.ceil((normalizedMonthlySpend * 6 - liquidAssets) / normalizedMonthlySurplus)} months</span>
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Debt Payoff */}
+            {debtItems.length > 0 && (
+              <div className="bg-[#FAF9F6] border border-[#E8E4D0] rounded-2xl p-6">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670] block mb-3">Debt Payoff</span>
+                <div className="space-y-4">
+                  {debtItems.slice(0, 4).map(debt => {
+                    const matchedPayment = profile.fixedExpenses.find(fe =>
+                      fe.label.toLowerCase().includes(debt.name.toLowerCase().split(' ')[0]) ||
+                      debt.name.toLowerCase().includes(fe.label.toLowerCase().split(' ')[0])
+                    );
+                    const monthly = matchedPayment ? matchedPayment.amount * (matchedPayment.paymentFrequency || 1) : 0;
+                    const totalMonthly = monthly + debt.extraPayment;
+
+                    let monthsLeft: number | null = null;
+                    if (totalMonthly > 0 && debt.value > 0) {
+                      if (debt.interestRate && debt.interestRate > 0) {
+                        const r = debt.interestRate / 100 / 12;
+                        monthsLeft = Math.ceil(-Math.log(1 - (debt.value * r) / totalMonthly) / Math.log(1 + r));
+                      } else {
+                        monthsLeft = Math.ceil(debt.value / totalMonthly);
+                      }
+                    }
+
+                    return (
+                      <div key={debt.id} className="pb-3 border-b border-[#E8E4D0] last:border-0 last:pb-0">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-sm font-bold text-[#2C3338]">{debt.name}</span>
+                          <span className="text-sm font-mono font-bold text-[#B91C1C]">${debt.value.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1.5 flex-1">
+                            <span className="text-[9px] font-mono text-[#8C8670] uppercase tracking-widest">Rate %</span>
+                            <input
+                              type="number"
+                              value={debt.interestRate ?? ''}
+                              onChange={e => setDebtItems(prev => prev.map(d => d.id === debt.id ? { ...d, interestRate: e.target.value ? parseFloat(e.target.value) : null } : d))}
+                              placeholder="0"
+                              className="w-14 px-2 py-1 text-xs font-mono border border-[#E8E4D0] rounded-lg bg-white text-[#2C3338] focus:outline-none focus:border-[#C5A059]"
+                            />
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-1">
+                            <span className="text-[9px] font-mono text-[#8C8670] uppercase tracking-widest">+$/mo</span>
+                            <input
+                              type="number"
+                              value={debt.extraPayment || ''}
+                              onChange={e => setDebtItems(prev => prev.map(d => d.id === debt.id ? { ...d, extraPayment: parseFloat(e.target.value) || 0 } : d))}
+                              placeholder="0"
+                              className="w-16 px-2 py-1 text-xs font-mono border border-[#E8E4D0] rounded-lg bg-white text-[#2C3338] focus:outline-none focus:border-[#C5A059]"
+                            />
+                          </div>
+                          {monthsLeft !== null && monthsLeft > 0 && monthsLeft < 999 ? (
+                            <span className="text-[10px] font-mono font-bold text-[#1E5C38] shrink-0">
+                              {monthsLeft > 12 ? `${(monthsLeft / 12).toFixed(1)}yr` : `${monthsLeft}mo`}
+                            </span>
+                          ) : totalMonthly === 0 ? (
+                            <span className="text-[9px] font-mono text-[#8C8670] shrink-0">no payment</span>
+                          ) : null}
+                        </div>
+                        {debt.extraPayment > 0 && monthly > 0 && monthsLeft !== null && (() => {
+                          const baseMonths = debt.interestRate && debt.interestRate > 0
+                            ? Math.ceil(-Math.log(1 - (debt.value * (debt.interestRate / 100 / 12)) / monthly) / Math.log(1 + debt.interestRate / 100 / 12))
+                            : Math.ceil(debt.value / monthly);
+                          const saved = baseMonths - monthsLeft;
+                          return saved > 0 ? (
+                            <p className="text-[9px] font-mono text-[#1E5C38] mt-1">↑ saves {saved} months vs. minimum</p>
+                          ) : null;
+                        })()}
+                      </div>
+                    );
+                  })}
+                </div>
+                {debtItems.length > 4 && (
+                  <p className="text-[10px] font-mono text-[#8C8670] mt-3">+{debtItems.length - 4} more in Balance Sheet</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Controls */}
