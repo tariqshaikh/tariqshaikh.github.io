@@ -433,8 +433,10 @@ export default function Homebase() {
       <motion.div
         layout
         transition={{ layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
-        className={`relative z-10 ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center justify-center px-6 py-20 max-w-4xl mx-auto w-full'}`}
+        className={`relative z-10 ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col lg:flex-row lg:items-center px-8 py-16 max-w-6xl mx-auto w-full gap-8 lg:gap-16'}`}
       >
+        {/* Left column: heading + search */}
+        <div className={!showResults ? 'flex-1 flex flex-col justify-center' : 'contents'}>
         <AnimatePresence mode="wait">
           {!showResults && (
             <motion.button
@@ -443,7 +445,7 @@ export default function Homebase() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               onClick={handleClearAll}
-              className="text-center mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
+              className="text-center lg:text-left mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
             >
               {heroVariant.startsWith('V') && (
                 <>
@@ -835,48 +837,51 @@ export default function Homebase() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
 
-      {/* NJ SVG Map — decorative + interactive on landing */}
-      {!showResults && heroVariant.startsWith('V') && (
-        <div className="absolute top-1/2 -translate-y-1/2 z-[5] hidden lg:block pointer-events-auto select-none" style={{ right: 'calc(50% - 30rem)', paddingTop: '60px' }}>
-          <svg
-            viewBox="-8 -8 280 520"
-            width="300"
-            height="557"
-            style={{ filter: 'drop-shadow(0 0 24px rgba(4,113,164,0.35)) drop-shadow(0 0 8px rgba(91,168,204,0.2))' }}
-          >
-            {NJ_COUNTY_PATHS.map(county => (
-              <path
-                key={county.id}
-                d={county.d}
-                fill={highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)'}
-                stroke={highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)'}
-                strokeWidth="1.2"
-                style={{ cursor: 'pointer', transition: 'fill 0.12s ease, stroke 0.12s ease, stroke-width 0.12s ease' }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.fill = 'rgba(4,113,164,0.45)';
-                  e.currentTarget.style.stroke = 'rgba(91,168,204,0.9)';
-                  e.currentTarget.style.strokeWidth = '2';
-                  setTooltip({ name: county.name, x: e.clientX, y: e.clientY });
-                }}
-                onMouseMove={e => setTooltip({ name: county.name, x: e.clientX, y: e.clientY })}
-                onMouseLeave={e => {
-                  e.currentTarget.style.fill = highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)';
-                  e.currentTarget.style.stroke = highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)';
-                  e.currentTarget.style.strokeWidth = '1.2';
-                  setTooltip(null);
-                }}
-                onClick={e => {
-                  e.stopPropagation();
-                  handleCountySelect(county.name);
-                }}
-              />
-            ))}
-          </svg>
-          <p className="text-center font-mono text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>click a county</p>
-        </div>
-      )}
+        {/* Right column: NJ SVG Map */}
+        {!showResults && heroVariant.startsWith('V') && (
+          <div className="hidden lg:flex items-center justify-center shrink-0 pointer-events-auto select-none">
+            <div className="flex flex-col items-center">
+              <svg
+                viewBox="-8 -8 280 520"
+                width="260"
+                height="483"
+                style={{ filter: 'drop-shadow(0 0 24px rgba(4,113,164,0.35)) drop-shadow(0 0 8px rgba(91,168,204,0.2))' }}
+              >
+                {NJ_COUNTY_PATHS.map(county => (
+                  <path
+                    key={county.id}
+                    d={county.d}
+                    fill={highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)'}
+                    stroke={highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)'}
+                    strokeWidth="1.2"
+                    style={{ cursor: 'pointer', transition: 'fill 0.12s ease, stroke 0.12s ease, stroke-width 0.12s ease' }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.fill = 'rgba(4,113,164,0.45)';
+                      e.currentTarget.style.stroke = 'rgba(91,168,204,0.9)';
+                      e.currentTarget.style.strokeWidth = '2';
+                      setTooltip({ name: county.name, x: e.clientX, y: e.clientY });
+                    }}
+                    onMouseMove={e => setTooltip({ name: county.name, x: e.clientX, y: e.clientY })}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.fill = highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)';
+                      e.currentTarget.style.stroke = highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)';
+                      e.currentTarget.style.strokeWidth = '1.2';
+                      setTooltip(null);
+                    }}
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleCountySelect(county.name);
+                    }}
+                  />
+                ))}
+              </svg>
+              <p className="font-mono text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>click a county</p>
+            </div>
+          </div>
+        )}
+        </div> {/* end left column wrapper */}
+      </motion.div>
 
         {tooltip && (
           <div className="fixed bg-slate-900 text-white px-3 py-1 rounded text-sm font-mono pointer-events-none z-[100]" style={{ left: tooltip.x + 12, top: tooltip.y - 28 }}>
