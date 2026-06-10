@@ -837,6 +837,7 @@ export default function Homebase() {
             </motion.div>
           )}
         </AnimatePresence>
+        </div> {/* end left column wrapper */}
 
         {/* Right column: NJ SVG Map */}
         {!showResults && heroVariant.startsWith('V') && (
@@ -880,7 +881,6 @@ export default function Homebase() {
             </div>
           </div>
         )}
-        </div> {/* end left column wrapper */}
       </motion.div>
 
         {tooltip && (
