@@ -433,10 +433,9 @@ export default function Homebase() {
       <motion.div
         layout
         transition={{ layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
-        className={`relative z-10 ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col lg:flex-row lg:items-center px-8 py-16 max-w-6xl mx-auto w-full gap-8 lg:gap-16'}`}
+        className={`relative z-10 ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center px-8 py-16 max-w-4xl mx-auto w-full'}`}
       >
-        {/* Left column: heading + search */}
-        <div className={!showResults ? 'flex-1 flex flex-col justify-center' : 'contents'}>
+        <div className={!showResults ? 'w-full flex flex-col' : 'contents'}>
         <AnimatePresence mode="wait">
           {!showResults && (
             <motion.button
@@ -445,7 +444,7 @@ export default function Homebase() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               onClick={handleClearAll}
-              className="text-center lg:text-left mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
+              className="text-center mb-10 hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0 w-full"
             >
               {heroVariant.startsWith('V') && (
                 <>
@@ -839,8 +838,8 @@ export default function Homebase() {
         </AnimatePresence>
         </div> {/* end left column wrapper */}
 
-        {/* Right column: NJ SVG Map */}
-        {!showResults && heroVariant.startsWith('V') && (
+        {/* NJ SVG Map — hidden until layout is stable */}
+        {false && !showResults && heroVariant.startsWith('V') && (
           <div className="hidden lg:flex items-center justify-center shrink-0 pointer-events-auto select-none">
             <div className="flex flex-col items-center">
               <svg
