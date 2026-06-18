@@ -433,7 +433,7 @@ export default function Homebase() {
       <motion.div
         layout
         transition={{ layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } }}
-        className={`relative z-10 ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center px-8 py-16 max-w-4xl mx-auto w-full'}`}
+        className={`relative z-10 ${showResults ? 'bg-white border-b border-slate-200 sticky top-0 z-40 py-4 px-6 shadow-sm' : 'flex-1 flex flex-col items-center justify-center px-8 py-16 max-w-4xl mx-auto w-full'}`}
       >
         <div className={!showResults ? 'w-full flex flex-col' : 'contents'}>
         <AnimatePresence mode="wait">
@@ -793,7 +793,7 @@ export default function Homebase() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-2xl space-y-6 mt-6"
+              className="w-full space-y-6 mt-6"
             >
               {selectedTowns.length > 0 && (
                 <div className="flex justify-center items-center gap-3 py-2">
@@ -812,13 +812,13 @@ export default function Homebase() {
                 </div>
               )}
 
-              <div className={`rounded-2xl p-4 text-center max-w-lg mx-auto border ${heroVariant.startsWith('V') ? 'bg-white/10 border-white/15' : 'bg-gradient-to-r from-[#0471A4]/5 to-[#5BA8CC]/5 border-[#0471A4]/15'}`}>
+              <div className={`rounded-2xl p-4 text-center w-full border ${heroVariant.startsWith('V') ? 'bg-white/10 border-white/15' : 'bg-gradient-to-r from-[#0471A4]/5 to-[#5BA8CC]/5 border-[#0471A4]/15'}`}>
                     <p className={`text-[13px] leading-relaxed ${heroVariant.startsWith('V') ? 'text-white/70' : 'text-slate-600'}`}>
                       <span className={`font-bold ${heroVariant.startsWith('V') ? 'text-white' : 'text-[#0471A4]'}`}>Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto">
+                  <div className="grid grid-cols-3 gap-3 w-full">
                     {[
                       { icon: '🏘️', stat: '300+', label: 'Towns Covered' },
                       { icon: '📊', stat: '11', label: 'Data Dimensions' },
