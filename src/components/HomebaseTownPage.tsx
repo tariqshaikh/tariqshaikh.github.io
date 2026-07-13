@@ -47,6 +47,7 @@ export default function HomebaseTownPage() {
   const [vibe, setVibe] = useState<string | null>(null);
   const [vibeLoading, setVibeLoading] = useState(false);
   const [estimates, setEstimates] = useState<{homeVal?: number; income?: number; saleToList?: number} | null>(null);
+  const [localScene, setLocalScene] = useState<string[]>([]);
 
   const townName = slugToName(townSlug || '');
   const data = NJ_ENRICHED[townName];
@@ -111,6 +112,40 @@ export default function HomebaseTownPage() {
         if (match) {
           const parsed = JSON.parse(match[0]);
           setEstimates(parsed);
+          localStorage.setItem(cacheKey, JSON.stringify(parsed));
+        }
+      })
+      .catch(() => {});
+  }, [townSlug, data]);
+
+  // Groq local scene — only fetch if not already in static data
+  useEffect(() => {
+    if (!data) return;
+    if (data.hottestThings && data.hottestThings.length > 0) { setLocalScene(data.hottestThings); return; }
+    if (!GROQ_API_KEY) return;
+    const cacheKey = `hb_scene_${townSlug}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { try { setLocalScene(JSON.parse(cached)); } catch {} return; }
+
+    fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: `List 6 specific popular spots, restaurants, parks, or local attractions in ${townName}, NJ that locals actually love. Be specific — real place names, not generic descriptions. Reply ONLY with a JSON array of strings, e.g. ["Place Name", ...]. No explanation.`
+        }]
+      })
+    })
+      .then(r => r.json())
+      .then(d => {
+        const text = d.choices?.[0]?.message?.content?.trim() || '';
+        const match = text.match(/\[[\s\S]*\]/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          setLocalScene(parsed);
           localStorage.setItem(cacheKey, JSON.stringify(parsed));
         }
       })
@@ -313,28 +348,35 @@ export default function HomebaseTownPage() {
           </Section>
 
           {/* Local Scene */}
-          {data?.hottestThings && data.hottestThings.length > 0 && (
-            <Section icon={<Coffee size={20} />} title="Local Scene" color="#0471A4">
-              <p className="text-sm text-slate-500 mb-4 font-mono">What's popular in {townName} right now</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {data.hottestThings.map((thing: string, i: number) => (
-                  <a
-                    key={i}
-                    href={`https://www.google.com/search?q=${encodeURIComponent(thing + ' ' + townName + ' NJ')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-[#0471A4]/30 hover:bg-blue-50 transition-all group"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-[#0471A4]/10 flex items-center justify-center shrink-0 text-xs font-bold text-[#0471A4] group-hover:bg-[#0471A4]/20 transition-colors">
-                      {i + 1}
-                    </div>
-                    <span className="text-sm font-medium text-slate-700 group-hover:text-[#0471A4] transition-colors">{thing}</span>
-                    <ChevronRight size={14} className="ml-auto text-slate-300 group-hover:text-[#0471A4] transition-colors" />
-                  </a>
-                ))}
+          <Section icon={<Coffee size={20} />} title="Local Scene" color="#0471A4">
+            {localScene.length === 0 ? (
+              <div className="flex items-center gap-2 text-slate-400 text-sm font-mono animate-pulse py-4">
+                <Zap size={12} className="text-[#0471A4]" />
+                Finding local spots...
               </div>
-            </Section>
-          )}
+            ) : (
+              <>
+                <p className="text-sm text-slate-500 mb-4 font-mono">What's popular in {townName} right now</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {localScene.map((thing: string, i: number) => (
+                    <a
+                      key={i}
+                      href={`https://www.google.com/search?q=${encodeURIComponent(thing + ' ' + townName + ' NJ')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-[#0471A4]/30 hover:bg-blue-50 transition-all group"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-[#0471A4]/10 flex items-center justify-center shrink-0 text-xs font-bold text-[#0471A4] group-hover:bg-[#0471A4]/20 transition-colors">
+                        {i + 1}
+                      </div>
+                      <span className="text-sm font-medium text-slate-700 group-hover:text-[#0471A4] transition-colors">{thing}</span>
+                      <ChevronRight size={14} className="ml-auto text-slate-300 group-hover:text-[#0471A4] transition-colors" />
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
+          </Section>
 
           {/* Market Pulse */}
           <Section icon={<TrendingUp size={20} />} title="Market Pulse" color="#0471A4">
