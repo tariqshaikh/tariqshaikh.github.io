@@ -835,12 +835,6 @@ export default function Homebase() {
                 </div>
               )}
 
-              <div className={`rounded-2xl p-4 text-center w-full border ${heroVariant.startsWith('V') ? 'bg-white/10 border-white/15' : 'bg-gradient-to-r from-[#0471A4]/5 to-[#5BA8CC]/5 border-[#0471A4]/15'}`}>
-                    <p className={`text-[13px] leading-relaxed ${heroVariant.startsWith('V') ? 'text-white/70' : 'text-slate-600'}`}>
-                      <span className={`font-bold ${heroVariant.startsWith('V') ? 'text-white' : 'text-[#0471A4]'}`}>Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
-                    </p>
-                  </div>
-
                   {/* Compare mode card */}
                   <div
                     onClick={() => setCompareMode(m => !m)}
@@ -884,6 +878,12 @@ export default function Homebase() {
                         ))}
                       </div>
                     </div>
+                  </div>
+
+                  <div className={`rounded-2xl p-4 text-center w-full border ${heroVariant.startsWith('V') ? 'bg-white/10 border-white/15' : 'bg-gradient-to-r from-[#0471A4]/5 to-[#5BA8CC]/5 border-[#0471A4]/15'}`}>
+                    <p className={`text-[13px] leading-relaxed ${heroVariant.startsWith('V') ? 'text-white/70' : 'text-slate-600'}`}>
+                      <span className={`font-bold ${heroVariant.startsWith('V') ? 'text-white' : 'text-[#0471A4]'}`}>Data Coverage:</span> We've enriched 300+ major towns across NJ with deep metrics including schools, safety, and walkability.
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3 w-full">
