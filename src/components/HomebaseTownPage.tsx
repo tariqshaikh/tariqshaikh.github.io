@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap, X, GitCompare } from 'lucide-react';
 import { NJ_ENRICHED, NJ_COUNTIES } from '../constants';
 import { logVisit } from '../lib/analytics';
+import TownMap from './TownMap';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -47,6 +48,7 @@ export default function HomebaseTownPage() {
   const [vibe, setVibe] = useState<string | null>(null);
   const [vibeLoading, setVibeLoading] = useState(false);
   const [localScene, setLocalScene] = useState<string[]>([]);
+  const [groqData, setGroqData] = useState<Record<string, any> | null>(null);
 
   const townName = slugToName(townSlug || '');
   const data = NJ_ENRICHED[townName];
@@ -58,7 +60,8 @@ export default function HomebaseTownPage() {
   }, [townName, townSlug]);
 
   useEffect(() => {
-    if (!data || !GROQ_API_KEY) return;
+    if ((!data && !groqData) || !GROQ_API_KEY) return;
+    const merged = data || groqData || {};
     const cacheKey = `hb_vibe_${townSlug}`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) { setVibe(cached); return; }
@@ -72,23 +75,22 @@ export default function HomebaseTownPage() {
         max_tokens: 180,
         messages: [{
           role: 'user',
-          content: `Write 2-3 sentences capturing the real character and vibe of ${townName}, NJ as a place to live. Be specific and honest — mention who typically lives here, what the streets feel like, and what makes it distinct from neighboring towns. Context: median home $${Math.round((data.homeVal || 0) / 1000)}K, school rating ${data.schoolLabel}, walkability ${data.walkScore}/100, median income $${Math.round((data.income || 0) / 1000)}K, population ${(data.pop || 0).toLocaleString()}. No fluff, no generic phrases.`
+          content: `Write 2-3 sentences capturing the real character and vibe of ${townName}, NJ as a place to live. Be specific and honest — mention who typically lives here, what the streets feel like, and what makes it distinct from neighboring towns. Context: median home $${Math.round((merged.homeVal || 0) / 1000)}K, school rating ${merged.schoolLabel}, walkability ${merged.walkScore}/100, median income $${Math.round((merged.income || 0) / 1000)}K, population ${(merged.pop || 0).toLocaleString()}. No fluff, no generic phrases.`
         }]
       })
     })
       .then(r => r.json())
-      .then(d => {
-        const text = d.choices?.[0]?.message?.content?.trim() || '';
+      .then(res => {
+        const text = res.choices?.[0]?.message?.content?.trim() || '';
         if (text) { setVibe(text); localStorage.setItem(cacheKey, text); }
       })
       .catch(() => {})
       .finally(() => setVibeLoading(false));
-  }, [townSlug, data]);
+  }, [townSlug, data, groqData]);
 
   // Groq local scene — only fetch if not already in static data
   useEffect(() => {
-    if (!data) return;
-    if (data.hottestThings && data.hottestThings.length > 0) { setLocalScene(data.hottestThings); return; }
+    if (data?.hottestThings && data.hottestThings.length > 0) { setLocalScene(data.hottestThings); return; }
     if (!GROQ_API_KEY) return;
     const cacheKey = `hb_scene_${townSlug}`;
     const cached = localStorage.getItem(cacheKey);
@@ -119,6 +121,40 @@ export default function HomebaseTownPage() {
       .catch(() => {});
   }, [townSlug, data]);
 
+  // Groq fallback — generate core metrics for towns not in NJ_ENRICHED
+  useEffect(() => {
+    if (data || !county || !GROQ_API_KEY) return;
+    const cacheKey = `hb_data_${townSlug}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { try { setGroqData(JSON.parse(cached)); } catch {} return; }
+
+    fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 250,
+        messages: [{
+          role: 'user',
+          content: `Estimate realistic 2024 data for ${townName}, ${county} County, NJ. Reply ONLY with valid JSON:
+{"homeVal":number,"income":number,"commute":number,"pop":number,"schoolLabel":"A+"|"A"|"A-"|"B+"|"B"|"B-"|"C+"|"C"|"D","schoolRating":number,"safetyScore":number,"safetyLabel":"Very Safe"|"Safe"|"Average"|"Below Avg","walkScore":number,"walkLabel":string,"taxRate":number,"avgTax":number,"eduPct":number,"saleToList":number}
+Use realistic NJ data. No explanation.`
+        }]
+      })
+    })
+      .then(r => r.json())
+      .then(d => {
+        const text = d.choices?.[0]?.message?.content?.trim() || '';
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          setGroqData(parsed);
+          localStorage.setItem(cacheKey, JSON.stringify(parsed));
+        }
+      })
+      .catch(() => {});
+  }, [townSlug, data, county]);
+
   if (!data && !county) {
     return (
       <div className="min-h-screen bg-[#090f1a] flex flex-col items-center justify-center text-white">
@@ -132,10 +168,14 @@ export default function HomebaseTownPage() {
     );
   }
 
-  const schoolScore = data?.schoolRating || 50;
-  const safetyScore = data?.safetyScore || 50;
-  const walkScore = data?.walkScore || 50;
-  const marketHeat = data?.saleToList || 100;
+  // Merge static data with Groq fallback for missing towns
+  const d = data || groqData || {};
+  const isGroqFallback = !data && !!groqData;
+
+  const schoolScore = d?.schoolRating || 50;
+  const safetyScore = d?.safetyScore || 50;
+  const walkScore = d?.walkScore || 50;
+  const marketHeat = d?.saleToList || 100;
 
   return (
     <div className="min-h-screen bg-[#090f1a] font-sans">
@@ -190,12 +230,12 @@ export default function HomebaseTownPage() {
               {/* Key stat pills */}
               <div className="flex flex-wrap gap-3">
                 {[
-                  { label: 'Schools', value: data?.schoolLabel || 'N/A', score: schoolScore },
-                  { label: 'Safety', value: data?.safetyLabel || 'N/A', score: safetyScore },
-                  { label: 'Walk Score', value: `${data?.walkScore ?? 'N/A'}/100`, score: walkScore },
-                  { label: 'Median Home', value: fmtDollar(data?.homeVal), score: 60 },
-                  { label: 'Tax Rate', value: data?.taxRate ? `${data.taxRate}%` : 'N/A', score: 60 },
-                  { label: 'Commute NYC', value: data?.commute ? `${data.commute} min` : 'N/A', score: 60 },
+                  { label: 'Schools', value: d?.schoolLabel || 'N/A', score: schoolScore },
+                  { label: 'Safety', value: d?.safetyLabel || 'N/A', score: safetyScore },
+                  { label: 'Walk Score', value: `${d?.walkScore ?? 'N/A'}/100`, score: walkScore },
+                  { label: 'Median Home', value: fmtDollar(d?.homeVal), score: 60 },
+                  { label: 'Tax Rate', value: d?.taxRate ? `${d.taxRate}%` : 'N/A', score: 60 },
+                  { label: 'Commute NYC', value: d?.commute ? `${d.commute} min` : 'N/A', score: 60 },
                 ].map(p => (
                   <div key={p.label} className={`px-3 py-1.5 rounded-full border text-xs font-mono ${tagBg(p.score)}`}>
                     <span className="opacity-60">{p.label}: </span>
@@ -205,20 +245,13 @@ export default function HomebaseTownPage() {
               </div>
             </div>
 
-            {/* Right: Map embed */}
-            <div className="lg:w-[420px] shrink-0">
-              <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl" style={{ height: '300px' }}>
-                <iframe
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(townName + ', NJ')}&output=embed`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  title={`Map of ${townName}, NJ`}
-                />
-              </div>
+            {/* Right: Map */}
+            <div className="lg:w-[460px] shrink-0">
+              {county && (
+                <TownMap townName={townName} county={county} localScene={localScene} />
+              )}
               <p className="text-center text-white/20 text-[10px] font-mono mt-2">
-                {townName}, {county} County, NJ
+                {townName}, {county} County, NJ · {localScene.length > 0 ? `${Math.min(localScene.length, 4)} local spots marked` : 'loading spots...'}
               </p>
             </div>
           </div>
@@ -232,10 +265,10 @@ export default function HomebaseTownPage() {
           {/* Schools */}
           <Section icon={<School size={20} />} title="Schools" color="#0471A4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard label="District Rating" value={data?.schoolLabel || 'N/A'} sub="Niche.com rating" highlight={schoolScore >= 80} />
-              <StatCard label="Score" value={`${data?.schoolRating ?? 'N/A'}/100`} sub="Composite score" />
-              <StatCard label="Degree Holders" value={data?.eduPct ? `${data.eduPct}%` : 'N/A'} sub="Bachelor's+" />
-              <StatCard label="Population" value={data?.pop ? data.pop.toLocaleString() : 'N/A'} sub="Residents" />
+              <StatCard label="District Rating" value={d?.schoolLabel || 'N/A'} sub="Niche.com rating" highlight={schoolScore >= 80} />
+              <StatCard label="Score" value={`${d?.schoolRating ?? 'N/A'}/100`} sub="Composite score" />
+              <StatCard label="Degree Holders" value={d?.eduPct ? `${d.eduPct}%` : 'N/A'} sub="Bachelor's+" />
+              <StatCard label="Population" value={d?.pop ? d.pop.toLocaleString() : 'N/A'} sub="Residents" />
             </div>
             <ScoreBar value={schoolScore} label="School Quality" />
           </Section>
@@ -243,21 +276,21 @@ export default function HomebaseTownPage() {
           {/* Housing Market */}
           <Section icon={<Home size={20} />} title="Housing Market" color="#0471A4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard label="Median Home" value={fmtDollar(data?.homeVal)} sub="Estimated value" highlight />
-              <StatCard label="Sale-to-List" value={data?.saleToList ? `${data.saleToList}%` : 'N/A'} sub="Market heat" />
-              <StatCard label="Avg Property Tax" value={data?.avgTax ? `$${data.avgTax.toLocaleString()}/yr` : 'N/A'} sub={data?.taxRate ? `${data.taxRate}% rate` : ''} />
-              <StatCard label="Median Income" value={fmtDollar(data?.income)} sub="Household/yr" />
+              <StatCard label="Median Home" value={fmtDollar(d?.homeVal)} sub="Estimated value" highlight />
+              <StatCard label="Sale-to-List" value={d?.saleToList ? `${d.saleToList}%` : 'N/A'} sub="Market heat" />
+              <StatCard label="Avg Property Tax" value={d?.avgTax ? `$${d.avgTax.toLocaleString()}/yr` : 'N/A'} sub={d?.taxRate ? `${d.taxRate}% rate` : ''} />
+              <StatCard label="Median Income" value={fmtDollar(d?.income)} sub="Household/yr" />
             </div>
-            {data?.saleToList && (() => {
-              const base = data.saleToList;
-              const history = data.marketHistory || {
+            {d?.saleToList && (() => {
+              const base = d.saleToList;
+              const history = d.marketHistory || {
                 '90d': base,
                 '6m': Math.round((base - 1) * 10) / 10,
                 '1y': Math.round((base - 2) * 10) / 10,
                 '3y': Math.round((base - 4) * 10) / 10,
                 '5y': Math.round((base - 6) * 10) / 10,
               };
-              const isDerived = !data.marketHistory;
+              const isDerived = !d.marketHistory;
               return (
                 <div className="mt-6">
                   <div className="flex items-center gap-2 mb-3">
@@ -284,19 +317,19 @@ export default function HomebaseTownPage() {
           {/* Getting Around */}
           <Section icon={<Train size={20} />} title="Getting Around" color="#0471A4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <StatCard label="Avg Commute" value={data?.commute ? `${data.commute} min` : 'N/A'} sub="To NYC (transit)" highlight />
-              <StatCard label="Walk Score" value={`${data?.walkScore ?? 'N/A'}/100`} sub={data?.walkLabel || ''} />
-              <StatCard label="Regional Access" value={`${data?.highway ?? 'N/A'}/100`} sub="Highway/transit score" />
+              <StatCard label="Avg Commute" value={d?.commute ? `${d.commute} min` : 'N/A'} sub="To NYC (transit)" highlight />
+              <StatCard label="Walk Score" value={`${d?.walkScore ?? 'N/A'}/100`} sub={d?.walkLabel || ''} />
+              <StatCard label="Regional Access" value={`${d?.highway ?? 'N/A'}/100`} sub="Highway/transit score" />
             </div>
-            <ScoreBar value={data?.walkScore || 0} label="Walkability" />
+            <ScoreBar value={d?.walkScore || 0} label="Walkability" />
           </Section>
 
           {/* Safety */}
           <Section icon={<Shield size={20} />} title="Safety" color="#0471A4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <StatCard label="Safety Rating" value={data?.safetyLabel || 'N/A'} sub="Composite score" highlight={safetyScore >= 80} />
-              <StatCard label="Safety Score" value={`${data?.safetyScore ?? 'N/A'}/100`} sub="vs NJ average" />
-              <StatCard label="Town Size" value={data?.pop ? data.pop.toLocaleString() : 'N/A'} sub="Population" />
+              <StatCard label="Safety Rating" value={d?.safetyLabel || 'N/A'} sub="Composite score" highlight={safetyScore >= 80} />
+              <StatCard label="Safety Score" value={`${d?.safetyScore ?? 'N/A'}/100`} sub="vs NJ average" />
+              <StatCard label="Town Size" value={d?.pop ? d.pop.toLocaleString() : 'N/A'} sub="Population" />
             </div>
             <ScoreBar value={safetyScore} label="Safety" />
           </Section>
@@ -341,18 +374,18 @@ export default function HomebaseTownPage() {
                 sub={`${marketHeat}% sale-to-list`}
                 highlight={marketHeat >= 105}
               />
-              <StatCard label="Avg Tax/yr" value={data?.avgTax ? `$${data.avgTax.toLocaleString()}` : 'N/A'} sub={`${data?.taxRate ?? 'N/A'}% tax rate`} />
-              <StatCard label="Income vs Home" value={data?.income && data?.homeVal ? `${(data.homeVal / data.income).toFixed(1)}x` : 'N/A'} sub="Price-to-income ratio" />
+              <StatCard label="Avg Tax/yr" value={d?.avgTax ? `$${d.avgTax.toLocaleString()}` : 'N/A'} sub={`${d?.taxRate ?? 'N/A'}% tax rate`} />
+              <StatCard label="Income vs Home" value={d?.income && d?.homeVal ? `${(d.homeVal / d.income).toFixed(1)}x` : 'N/A'} sub="Price-to-income ratio" />
             </div>
           </Section>
 
           {/* Who Lives Here */}
           <Section icon={<Users size={20} />} title="Who Lives Here" color="#0471A4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard label="Median Income" value={fmtDollar(data?.income)} sub="Household/yr" highlight />
-              <StatCard label="Education" value={data?.eduPct ? `${data?.eduPct}%` : 'N/A'} sub="Bachelor's degree+" />
-              <StatCard label="Population" value={data?.pop ? data.pop.toLocaleString() : 'N/A'} sub="Residents" />
-              <StatCard label="Commute" value={data?.commute ? `${data.commute} min` : 'N/A'} sub="Avg travel time" />
+              <StatCard label="Median Income" value={fmtDollar(d?.income)} sub="Household/yr" highlight />
+              <StatCard label="Education" value={d?.eduPct ? `${d.eduPct}%` : 'N/A'} sub="Bachelor's degree+" />
+              <StatCard label="Population" value={d?.pop ? d.pop.toLocaleString() : 'N/A'} sub="Residents" />
+              <StatCard label="Commute" value={d?.commute ? `${d.commute} min` : 'N/A'} sub="Avg travel time" />
             </div>
           </Section>
 
