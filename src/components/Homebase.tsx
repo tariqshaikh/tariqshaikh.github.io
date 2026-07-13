@@ -1090,7 +1090,11 @@ export default function Homebase() {
                   <div className={`flex justify-between items-start ${isPerfectMatch ? 'mt-2' : ''}`}>
                     <div>
                       <div className="flex items-center gap-2">
-                        <div className="font-display font-bold text-xl leading-tight tracking-tight">{d.name}</div>
+                        <div
+                          className="font-display font-bold text-xl leading-tight tracking-tight hover:underline underline-offset-2 cursor-pointer"
+                          onClick={e => { e.stopPropagation(); navigate(`/homebase/${nameToSlug(d.name)}`); }}
+                          title={`View ${d.name} page`}
+                        >{d.name}</div>
                         {d.isLive && (
                           <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" title="Live Data Active"></div>
                         )}
