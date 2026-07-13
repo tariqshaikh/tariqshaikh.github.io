@@ -1,34 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON, ZoomControl, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
 
 const townIcon = L.divIcon({
   className: '',
   html: `<div style="
-    width:14px;height:14px;border-radius:50%;
-    background:#3B82F6;border:3px solid #93C5FD;
-    box-shadow:0 0 14px rgba(59,130,246,0.9);
+    width:18px;height:18px;border-radius:50%;
+    background:#1D4ED8;border:3px solid white;
+    box-shadow:0 2px 8px rgba(29,78,216,0.7), 0 0 0 4px rgba(29,78,216,0.2);
   "></div>`,
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
 });
 
-const placeIcon = L.divIcon({
+const numberedIcon = (n: number) => L.divIcon({
   className: '',
   html: `<div style="
-    width:9px;height:9px;border-radius:50%;
-    background:#34D399;border:2px solid rgba(255,255,255,0.7);
-    box-shadow:0 0 7px rgba(52,211,153,0.7);
-  "></div>`,
-  iconSize: [9, 9],
-  iconAnchor: [4, 4],
+    width:24px;height:24px;border-radius:50%;
+    background:#059669;border:2.5px solid white;
+    display:flex;align-items:center;justify-content:center;
+    font-family:monospace;font-size:11px;font-weight:800;color:white;
+    box-shadow:0 2px 6px rgba(0,0,0,0.35);
+  ">${n}</div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 function FitBounds({ geojson }: { geojson: any }) {
@@ -38,7 +35,7 @@ function FitBounds({ geojson }: { geojson: any }) {
     try {
       const layer = L.geoJSON(geojson);
       const bounds = layer.getBounds();
-      if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
+      if (bounds.isValid()) map.fitBounds(bounds, { padding: [28, 28] });
     } catch {}
   }, [geojson]);
   return null;
@@ -104,7 +101,7 @@ async function geocodePlace(query: string): Promise<Coords | null> {
 export default function TownMap({ townName, county, localScene }: TownMapProps) {
   const [center, setCenter] = useState<Coords | null>(null);
   const [boundary, setBoundary] = useState<any>(null);
-  const [placeCoords, setPlaceCoords] = useState<{ name: string; coords: Coords }[]>([]);
+  const [placeCoords, setPlaceCoords] = useState<{ name: string; coords: Coords; index: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const NJ_CENTER: Coords = { lat: 40.0583, lng: -74.4057 };
@@ -122,11 +119,11 @@ export default function TownMap({ townName, county, localScene }: TownMapProps) 
     const places = localScene.slice(0, 4);
     let cancelled = false;
     (async () => {
-      const results: { name: string; coords: Coords }[] = [];
-      for (const place of places) {
+      const results: { name: string; coords: Coords; index: number }[] = [];
+      for (let i = 0; i < places.length; i++) {
         if (cancelled) break;
-        const coords = await geocodePlace(`${place}, ${townName}, NJ`);
-        if (coords) results.push({ name: place, coords });
+        const coords = await geocodePlace(`${places[i]}, ${townName}, NJ`);
+        if (coords) results.push({ name: places[i], coords, index: i + 1 });
         await new Promise(r => setTimeout(r, 1100));
       }
       if (!cancelled) setPlaceCoords(results);
@@ -136,55 +133,65 @@ export default function TownMap({ townName, county, localScene }: TownMapProps) 
 
   if (loading) {
     return (
-      <div className="w-full rounded-2xl overflow-hidden border border-white/10 bg-slate-100 flex items-center justify-center" style={{ height: 320 }}>
-        <div className="text-slate-400 text-xs font-mono animate-pulse">Locating {townName}...</div>
+      <div className="w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center" style={{ height: 360 }}>
+        <div className="text-slate-400 text-xs font-mono animate-pulse">Mapping {townName}...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl" style={{ height: 320 }}>
+    <div className="w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200" style={{ height: 360 }}>
       <MapContainer
         center={[center!.lat, center!.lng]}
         zoom={14}
-        style={{ height: 320, width: '100%' }}
+        style={{ height: 360, width: '100%' }}
         zoomControl={false}
         scrollWheelZoom={false}
         attributionControl={false}
       >
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png" />
+        {/* Esri World Street Map — streets, parks, neighborhoods all labeled */}
+        <TileLayer
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+          attribution="Tiles © Esri"
+        />
+
+        <ZoomControl position="bottomright" />
 
         {boundary ? <FitBounds geojson={boundary} /> : <Recenter lat={center!.lat} lng={center!.lng} />}
 
-        {/* Town boundary polygon */}
+        {/* Town boundary */}
         {boundary && (
           <GeoJSON
             key={townName}
             data={boundary}
             style={{
-              color: '#2563EB',
+              color: '#1D4ED8',
               weight: 3,
               fillColor: '#3B82F6',
-              fillOpacity: 0.1,
-              opacity: 0.85,
+              fillOpacity: 0.08,
+              opacity: 1,
+              dashArray: '6 4',
             }}
           />
         )}
 
-        {/* Town center */}
+        {/* Town center pin */}
         <Marker position={[center!.lat, center!.lng]} icon={townIcon}>
           <Popup>
-            <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 'bold', color: '#2563EB' }}>
-              {townName}, NJ
-            </span>
+            <div style={{ fontFamily: 'monospace', fontSize: 12 }}>
+              <strong style={{ color: '#1D4ED8' }}>{townName}</strong><br />
+              <span style={{ color: '#64748b' }}>{county} County, NJ</span>
+            </div>
           </Popup>
         </Marker>
 
-        {/* Local spots */}
-        {placeCoords.map(({ name, coords }) => (
-          <Marker key={name} position={[coords.lat, coords.lng]} icon={placeIcon}>
+        {/* Numbered local spots */}
+        {placeCoords.map(({ name, coords, index }) => (
+          <Marker key={name} position={[coords.lat, coords.lng]} icon={numberedIcon(index)}>
             <Popup>
-              <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{name}</span>
+              <div style={{ fontFamily: 'monospace', fontSize: 11 }}>
+                <strong style={{ color: '#059669' }}>#{index}</strong> {name}
+              </div>
             </Popup>
           </Marker>
         ))}
