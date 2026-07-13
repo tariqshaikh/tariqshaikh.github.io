@@ -286,37 +286,18 @@ Use realistic NJ data. No explanation.`
               <StatCard label="Avg Property Tax" value={d?.avgTax ? `$${d.avgTax.toLocaleString()}/yr` : 'N/A'} sub={d?.taxRate ? `${d.taxRate}% rate` : ''} />
               <StatCard label="Median Income" value={fmtDollar(d?.income)} sub="Household/yr" />
             </div>
-            {d?.saleToList && (() => {
-              const base = d.saleToList;
-              const history = d.marketHistory || {
-                '90d': base,
-                '6m': Math.round((base - 1) * 10) / 10,
-                '1y': Math.round((base - 2) * 10) / 10,
-                '3y': Math.round((base - 4) * 10) / 10,
-                '5y': Math.round((base - 6) * 10) / 10,
-              };
-              const isDerived = !d.marketHistory;
-              return (
-                <div className="mt-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <p className="text-xs font-mono text-slate-400 uppercase tracking-wider">Sale-to-List History</p>
-                    {isDerived && <span className="text-[9px] font-mono text-slate-300 bg-slate-100 px-1.5 py-0.5 rounded">est.</span>}
-                  </div>
-                  <div className="flex items-end gap-3 h-20">
-                    {Object.entries(history).map(([period, val]: [string, any]) => {
-                      const pct = Math.max(0, Math.min(100, ((val - 95) / 20) * 100));
-                      return (
-                        <div key={period} className="flex flex-col items-center gap-1 flex-1">
-                          <span className="text-[10px] font-mono text-slate-500">{val}%</span>
-                          <div className="w-full rounded-t-sm bg-[#0471A4]/80 transition-all" style={{ height: `${Math.max(8, pct * 0.6)}px` }} />
-                          <span className="text-[9px] font-mono text-slate-400 uppercase">{period}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
+            {d?.saleToList && (
+              <SaleToListChart
+                history={d.marketHistory || {
+                  '90d': d.saleToList,
+                  '6m': Math.round((d.saleToList - 1) * 10) / 10,
+                  '1y': Math.round((d.saleToList - 2) * 10) / 10,
+                  '3y': Math.round((d.saleToList - 4) * 10) / 10,
+                  '5y': Math.round((d.saleToList - 6) * 10) / 10,
+                }}
+                isDerived={!d.marketHistory}
+              />
+            )}
           </Section>
 
           {/* Getting Around */}
@@ -565,6 +546,130 @@ function ComparePanel({ currentTownName, currentCounty, variant }: {
     <div ref={ref} className="relative">
       {button}
       {panel}
+    </div>
+  );
+}
+
+function SaleToListChart({ history, isDerived }: { history: Record<string, number>; isDerived: boolean }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  const entries = Object.entries(history) as [string, number][];
+  const MIN = 92, MAX = 116, CHART_H = 120;
+
+  const barStyle = (val: number) => {
+    if (val >= 106) return { bg: '#dc2626', glow: 'rgba(220,38,38,0.4)', label: 'Very Hot' };
+    if (val >= 103) return { bg: '#ea580c', glow: 'rgba(234,88,12,0.4)', label: 'Hot' };
+    if (val >= 100) return { bg: '#0471A4', glow: 'rgba(4,113,164,0.4)', label: 'Balanced' };
+    return { bg: '#94a3b8', glow: 'rgba(148,163,184,0.3)', label: "Buyer's Mkt" };
+  };
+
+  const interp = (val: number) => {
+    if (val >= 106) return 'Homes selling well above asking — strong seller advantage';
+    if (val >= 103) return 'Buyers frequently going over list price';
+    if (val >= 100) return 'Homes selling near list — balanced market';
+    if (val >= 98) return 'Sellers accepting slight discounts';
+    return 'Buyers have real negotiating room';
+  };
+
+  const refLineTop = CHART_H - ((100 - MIN) / (MAX - MIN)) * CHART_H;
+  const latest = entries[0]?.[1] ?? 0;
+  const oldest = entries[entries.length - 1]?.[1] ?? 0;
+  const trend = Math.round((latest - oldest) * 10) / 10;
+  const hoveredEntry = hovered ? entries.find(([p]) => p === hovered) : null;
+
+  return (
+    <div className="mt-6 bg-slate-50 rounded-2xl p-5 border border-slate-100">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-5 gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Sale-to-List Ratio</p>
+            {isDerived && <span className="text-[9px] font-mono text-slate-400 bg-slate-200 px-1.5 py-0.5 rounded">est.</span>}
+          </div>
+          <p className="text-[12px] font-mono text-slate-500 leading-snug">
+            {hoveredEntry
+              ? <><span className="font-bold text-slate-700">{hoveredEntry[0]}:</span> {hoveredEntry[1]}% — {interp(hoveredEntry[1])}</>
+              : 'Hover a bar to see market interpretation'}
+          </p>
+        </div>
+        <div className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold font-mono ${
+          trend > 0 ? 'bg-red-50 text-red-600' : trend < 0 ? 'bg-sky-50 text-sky-600' : 'bg-slate-100 text-slate-500'
+        }`}>
+          {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend)}%
+          <span className="font-normal opacity-60 ml-0.5">{trend > 0 ? 'heating' : trend < 0 ? 'cooling' : 'stable'}</span>
+        </div>
+      </div>
+
+      {/* Chart area */}
+      <div className="relative" style={{ height: CHART_H + 28 }}>
+        {/* 100% reference line */}
+        <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: refLineTop }}>
+          <div className="border-t border-dashed border-slate-300 relative">
+            <span className="absolute right-0 -top-3 text-[9px] font-mono text-slate-400 bg-slate-50 px-1 rounded">100%</span>
+          </div>
+        </div>
+
+        {/* Bars */}
+        <div className="absolute left-0 right-0 bottom-7 flex items-end gap-2" style={{ height: CHART_H }}>
+          {entries.map(([period, val]) => {
+            const h = Math.max(6, ((val - MIN) / (MAX - MIN)) * CHART_H);
+            const c = barStyle(val);
+            const isHov = hovered === period;
+            return (
+              <div
+                key={period}
+                className="flex-1 flex flex-col justify-end cursor-crosshair"
+                style={{ height: CHART_H }}
+                onMouseEnter={() => setHovered(period)}
+                onMouseLeave={() => setHovered(null)}
+              >
+                {/* Floating value */}
+                <div className={`text-center text-[10px] font-mono font-bold mb-1 transition-all duration-150 ${isHov ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ color: c.bg }}>
+                  {val}%
+                </div>
+                {/* Bar */}
+                <div
+                  className="w-full rounded-t-xl transition-all duration-200"
+                  style={{
+                    height: h,
+                    background: isHov
+                      ? `linear-gradient(to top, ${c.bg}, ${c.bg}bb)`
+                      : `linear-gradient(to top, ${c.bg}70, ${c.bg}99)`,
+                    boxShadow: isHov ? `0 -4px 16px ${c.glow}` : 'none',
+                    transform: isHov ? 'scaleX(0.92)' : 'scaleX(1)',
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Period labels */}
+        <div className="absolute bottom-0 left-0 right-0 flex gap-2">
+          {entries.map(([period]) => (
+            <div key={period} className="flex-1 text-center">
+              <span className={`text-[9px] font-mono uppercase tracking-wider transition-colors ${hovered === period ? 'text-slate-700 font-bold' : 'text-slate-400'}`}>
+                {period}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-slate-100">
+        {[
+          { bg: '#dc2626', label: 'Very Hot  >106%' },
+          { bg: '#ea580c', label: 'Hot  103–106%' },
+          { bg: '#0471A4', label: 'Balanced  100–103%' },
+          { bg: '#94a3b8', label: "Buyer's Mkt  <100%" },
+        ].map(l => (
+          <div key={l.label} className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: l.bg }} />
+            <span className="text-[10px] font-mono text-slate-400">{l.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
