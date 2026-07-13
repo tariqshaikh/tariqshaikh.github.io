@@ -46,7 +46,7 @@ export default function HomebaseTownPage() {
   const navigate = useNavigate();
   const [vibe, setVibe] = useState<string | null>(null);
   const [vibeLoading, setVibeLoading] = useState(false);
-  const [estimates, setEstimates] = useState<{homeVal?: number; income?: number; saleToList?: number} | null>(null);
+  const [estimates, setEstimates] = useState<{homeVal?: number; income?: number} | null>(null);
   const [localScene, setLocalScene] = useState<string[]>([]);
 
   const townName = slugToName(townSlug || '');
@@ -101,7 +101,7 @@ export default function HomebaseTownPage() {
         max_tokens: 120,
         messages: [{
           role: 'user',
-          content: `Given 2023 baseline data for ${townName}, NJ — median home $${Math.round((data.homeVal || 0) / 1000)}K, household income $${Math.round((data.income || 0) / 1000)}K, sale-to-list ratio ${data.saleToList}% — estimate current mid-2026 figures based on NJ real estate trends and this town's trajectory. Reply ONLY with valid JSON: {"homeVal": number, "income": number, "saleToList": number}. No explanation.`
+          content: `Given 2023 baseline data for ${townName}, NJ — median home $${Math.round((data.homeVal || 0) / 1000)}K, household income $${Math.round((data.income || 0) / 1000)}K — estimate current mid-2026 figures based on NJ real estate trends and this town's trajectory. Reply ONLY with valid JSON: {"homeVal": number, "income": number}. No explanation.`
         }]
       })
     })
@@ -285,7 +285,6 @@ export default function HomebaseTownPage() {
                 <span className="text-[10px] font-mono text-[#0471A4] uppercase tracking-wider font-bold self-center">AI 2026 Est.</span>
                 {estimates.homeVal && <span className="text-xs font-mono bg-white px-2 py-1 rounded-lg border border-[#0471A4]/10 text-slate-700">Home: <strong>{fmtDollar(estimates.homeVal)}</strong></span>}
                 {estimates.income && <span className="text-xs font-mono bg-white px-2 py-1 rounded-lg border border-[#0471A4]/10 text-slate-700">Income: <strong>{fmtDollar(estimates.income)}</strong></span>}
-                {estimates.saleToList && <span className="text-xs font-mono bg-white px-2 py-1 rounded-lg border border-[#0471A4]/10 text-slate-700">Sale-to-List: <strong>{estimates.saleToList}%</strong></span>}
               </div>
             )}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
