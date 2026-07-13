@@ -841,38 +841,50 @@ export default function Homebase() {
                     </p>
                   </div>
 
-                  {/* Compare mode — prominent card */}
-                  <button
+                  {/* Compare mode card */}
+                  <div
                     onClick={() => setCompareMode(m => !m)}
-                    className={`w-full rounded-2xl border-2 p-5 text-left transition-all group ${
-                      compareMode
-                        ? 'bg-[#0471A4] border-[#0471A4] shadow-lg shadow-[#0471A4]/30'
-                        : 'bg-white border-[#0471A4]/25 hover:border-[#0471A4] hover:shadow-md'
-                    }`}
+                    className="w-full rounded-2xl cursor-pointer group relative overflow-hidden"
+                    style={{ background: 'linear-gradient(160deg, #071526 0%, #0c2240 60%, #0d3460 100%)' }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                          compareMode ? 'bg-white/20' : 'bg-[#0471A4]/10 group-hover:bg-[#0471A4]/20'
-                        }`}>
-                          <GitCompare size={20} className={compareMode ? 'text-white' : 'text-[#0471A4]'} />
+                    {/* subtle top accent line */}
+                    <div className={`h-[3px] w-full transition-all duration-300 ${compareMode ? 'bg-emerald-400' : 'bg-[#0471A4]'}`} />
+                    <div className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <p className="text-[10px] font-mono text-white/35 uppercase tracking-widest mb-1.5">
+                            {compareMode ? '✓ Active' : 'Tool'}
+                          </p>
+                          <h3 className="text-white font-bold text-[17px] leading-snug mb-1">
+                            Compare NJ Towns
+                          </h3>
+                          <p className="text-white/45 text-[12px] font-mono leading-relaxed">
+                            Pick any towns — see schools, housing,<br />commute & safety side-by-side.
+                          </p>
                         </div>
-                        <div>
-                          <div className={`font-bold text-[15px] leading-tight ${compareMode ? 'text-white' : 'text-slate-900'}`}>
-                            {compareMode ? 'Compare Mode On' : 'Compare Towns Side-by-Side'}
-                          </div>
-                          <div className={`text-[12px] font-mono mt-0.5 ${compareMode ? 'text-white/70' : 'text-slate-400'}`}>
-                            {compareMode ? 'Select towns to add them to comparison' : 'Schools, housing, commute & more'}
-                          </div>
+                        <div className={`mt-1 shrink-0 px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${
+                          compareMode
+                            ? 'bg-emerald-400 text-emerald-950'
+                            : 'bg-[#0471A4] text-white group-hover:bg-[#0587c4]'
+                        }`}>
+                          {compareMode ? 'On' : 'Enable'}
                         </div>
                       </div>
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                        compareMode ? 'bg-white border-white' : 'border-[#0471A4]/40 group-hover:border-[#0471A4]'
-                      }`}>
-                        {compareMode && <div className="w-2.5 h-2.5 rounded-full bg-[#0471A4]" />}
+
+                      {/* Town pills row */}
+                      <div className="flex items-center gap-2 mt-4 flex-wrap">
+                        {['Montclair', 'Summit', 'Hoboken', '+ add'].map((t, i) => (
+                          <div key={t} className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border transition-all ${
+                            i < 3
+                              ? 'bg-white/8 border-white/15 text-white/60'
+                              : 'border-dashed border-white/20 text-white/30'
+                          }`}>
+                            {t}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </button>
+                  </div>
 
                   <div className="grid grid-cols-3 gap-3 w-full">
                     {[
