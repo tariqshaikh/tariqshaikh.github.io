@@ -865,18 +865,9 @@ export default function Homebase() {
                         </div>
                       </div>
 
-                      {/* Town pills row */}
-                      <div className="flex items-center gap-2 mt-4 flex-wrap">
-                        {['Montclair', 'Summit', 'Hoboken', '+ add'].map((t, i) => (
-                          <div key={t} className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-medium border transition-all ${
-                            i < 3
-                              ? 'bg-white/8 border-white/15 text-white/60'
-                              : 'border-dashed border-white/20 text-white/30'
-                          }`}>
-                            {t}
-                          </div>
-                        ))}
-                      </div>
+                      <p className="mt-4 text-[11px] font-mono text-white/25 italic">
+                        e.g. Montclair · Summit · Hoboken · Madison
+                      </p>
                     </div>
                   </div>
 
