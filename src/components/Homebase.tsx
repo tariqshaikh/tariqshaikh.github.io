@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Info, ChevronRight, GripVertical, Zap, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { Info, ChevronRight, GripVertical, Zap, LogIn, LogOut, User as UserIcon, GitCompare } from 'lucide-react';
 import { NJ_COUNTIES, NJ_ENRICHED, DIMS, COLORS } from '../constants';
 import { getCachedTownData, setCachedTownData } from '../services/townCache';
 import { fetchLiveTownData } from '../services/geminiService';
@@ -841,6 +841,39 @@ export default function Homebase() {
                     </p>
                   </div>
 
+                  {/* Compare mode — prominent card */}
+                  <button
+                    onClick={() => setCompareMode(m => !m)}
+                    className={`w-full rounded-2xl border-2 p-5 text-left transition-all group ${
+                      compareMode
+                        ? 'bg-[#0471A4] border-[#0471A4] shadow-lg shadow-[#0471A4]/30'
+                        : 'bg-white border-[#0471A4]/25 hover:border-[#0471A4] hover:shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                          compareMode ? 'bg-white/20' : 'bg-[#0471A4]/10 group-hover:bg-[#0471A4]/20'
+                        }`}>
+                          <GitCompare size={20} className={compareMode ? 'text-white' : 'text-[#0471A4]'} />
+                        </div>
+                        <div>
+                          <div className={`font-bold text-[15px] leading-tight ${compareMode ? 'text-white' : 'text-slate-900'}`}>
+                            {compareMode ? 'Compare Mode On' : 'Compare Towns Side-by-Side'}
+                          </div>
+                          <div className={`text-[12px] font-mono mt-0.5 ${compareMode ? 'text-white/70' : 'text-slate-400'}`}>
+                            {compareMode ? 'Select towns to add them to comparison' : 'Schools, housing, commute & more'}
+                          </div>
+                        </div>
+                      </div>
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                        compareMode ? 'bg-white border-white' : 'border-[#0471A4]/40 group-hover:border-[#0471A4]'
+                      }`}>
+                        {compareMode && <div className="w-2.5 h-2.5 rounded-full bg-[#0471A4]" />}
+                      </div>
+                    </div>
+                  </button>
+
                   <div className="grid grid-cols-3 gap-3 w-full">
                     {[
                       { icon: '🏘️', stat: '300+', label: 'Towns Covered' },
@@ -853,20 +886,6 @@ export default function Homebase() {
                         <div className="text-[11px] text-slate-400 font-mono mt-0.5 uppercase tracking-wider">{f.label}</div>
                       </div>
                     ))}
-                  </div>
-
-                  {/* Compare mode toggle */}
-                  <div className="flex justify-center pt-2">
-                    <button
-                      onClick={() => setCompareMode(m => !m)}
-                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
-                        compareMode
-                          ? 'bg-[#0471A4] text-white border-[#0471A4] shadow-md'
-                          : 'bg-white/10 text-white/70 border-white/20 hover:bg-white/20 hover:text-white'
-                      }`}
-                    >
-                      {compareMode ? '✓ Compare Mode On — select towns' : 'Compare Towns Side-by-Side'}
-                    </button>
                   </div>
             </motion.div>
           )}
