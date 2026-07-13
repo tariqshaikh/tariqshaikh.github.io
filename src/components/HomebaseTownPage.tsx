@@ -218,23 +218,37 @@ export default function HomebaseTownPage() {
               <StatCard label="Avg Property Tax" value={data?.avgTax ? `$${data.avgTax.toLocaleString()}/yr` : 'N/A'} sub={data?.taxRate ? `${data.taxRate}% rate` : ''} />
               <StatCard label="Median Income" value={fmtDollar(data?.income)} sub="Household/yr" />
             </div>
-            {data?.marketHistory && (
-              <div className="mt-6">
-                <p className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">Sale-to-List History</p>
-                <div className="flex items-end gap-3 h-20">
-                  {Object.entries(data.marketHistory).map(([period, val]: [string, any]) => {
-                    const pct = Math.max(0, Math.min(100, ((val - 95) / 20) * 100));
-                    return (
-                      <div key={period} className="flex flex-col items-center gap-1 flex-1">
-                        <span className="text-[10px] font-mono text-slate-500">{val}%</span>
-                        <div className="w-full rounded-t-sm bg-[#0471A4]/80 transition-all" style={{ height: `${Math.max(8, pct * 0.6)}px` }} />
-                        <span className="text-[9px] font-mono text-slate-400 uppercase">{period}</span>
-                      </div>
-                    );
-                  })}
+            {data?.saleToList && (() => {
+              const base = data.saleToList;
+              const history = data.marketHistory || {
+                '90d': base,
+                '6m': Math.round((base - 1) * 10) / 10,
+                '1y': Math.round((base - 2) * 10) / 10,
+                '3y': Math.round((base - 4) * 10) / 10,
+                '5y': Math.round((base - 6) * 10) / 10,
+              };
+              const isDerived = !data.marketHistory;
+              return (
+                <div className="mt-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <p className="text-xs font-mono text-slate-400 uppercase tracking-wider">Sale-to-List History</p>
+                    {isDerived && <span className="text-[9px] font-mono text-slate-300 bg-slate-100 px-1.5 py-0.5 rounded">est.</span>}
+                  </div>
+                  <div className="flex items-end gap-3 h-20">
+                    {Object.entries(history).map(([period, val]: [string, any]) => {
+                      const pct = Math.max(0, Math.min(100, ((val - 95) / 20) * 100));
+                      return (
+                        <div key={period} className="flex flex-col items-center gap-1 flex-1">
+                          <span className="text-[10px] font-mono text-slate-500">{val}%</span>
+                          <div className="w-full rounded-t-sm bg-[#0471A4]/80 transition-all" style={{ height: `${Math.max(8, pct * 0.6)}px` }} />
+                          <span className="text-[9px] font-mono text-slate-400 uppercase">{period}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </Section>
 
           {/* Getting Around */}
