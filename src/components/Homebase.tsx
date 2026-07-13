@@ -164,18 +164,29 @@ export default function Homebase() {
     }
   };
 
-  // Pre-load town from ?compare=slug URL param
+  // Pre-load towns from ?towns=slug1,slug2 or ?compare=slug URL params
   useEffect(() => {
-    const slug = searchParams.get('compare');
-    if (!slug) return;
-    const name = slugToName(slug);
-    const county = Object.entries(NJ_COUNTIES).find(([, d]) =>
-      (d as any).towns.some((t: string) => t.toLowerCase() === name.toLowerCase())
-    )?.[0];
-    if (name && county && !selectedTowns.some(t => t.name === name)) {
-      setSelectedTowns([{ name, county }]);
-      setActiveCounties([county]);
-      fetchTownLive(name, county);
+    const townsParam = searchParams.get('towns');
+    const compareParam = searchParams.get('compare');
+    const slugs = townsParam ? townsParam.split(',') : compareParam ? [compareParam] : [];
+    if (!slugs.length) return;
+
+    const resolved = slugs.flatMap(slug => {
+      const name = slugToName(slug);
+      const county = Object.entries(NJ_COUNTIES).find(([, d]) =>
+        (d as any).towns.some((t: string) => t.toLowerCase() === name.toLowerCase())
+      )?.[0];
+      return county ? [{ name, county }] : [];
+    });
+
+    if (resolved.length) {
+      setSelectedTowns(resolved);
+      setActiveCounties([...new Set(resolved.map(t => t.county))]);
+      resolved.forEach(t => fetchTownLive(t.name, t.county));
+      if (resolved.length >= 2) {
+        setCompareMode(true);
+        setShowResults(true);
+      }
     }
   }, []);
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap, X, GitCompare } from 'lucide-react';
 import { NJ_ENRICHED, NJ_COUNTIES } from '../constants';
 import { logVisit } from '../lib/analytics';
 
@@ -150,12 +150,7 @@ export default function HomebaseTownPage() {
           Homebase NJ
         </button>
         <div className="flex items-center gap-3">
-          <Link
-            to={`/homebase?compare=${townSlug}`}
-            className="px-4 py-1.5 border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-xl text-xs font-mono uppercase tracking-wider transition-all"
-          >
-            + Compare Towns
-          </Link>
+          {county && <ComparePanel currentTownName={townName} currentCounty={county} variant="top" />}
         </div>
       </nav>
 
@@ -362,20 +357,176 @@ export default function HomebaseTownPage() {
           </Section>
 
           {/* CTA */}
-          <div className="bg-gradient-to-r from-[#090f1a] to-[#0d1f36] rounded-2xl p-8 text-center">
-            <h3 className="font-serif font-bold text-2xl text-white mb-2">Considering {townName}?</h3>
-            <p className="text-white/50 text-sm mb-6 font-mono">Compare it side-by-side with other NJ towns to find your best fit.</p>
-            <Link
-              to="/homebase"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#0471A4] text-white rounded-xl text-sm font-bold hover:bg-[#035480] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-            >
-              Compare Towns
-              <ChevronRight size={16} />
-            </Link>
+          <div className="rounded-2xl overflow-visible">
+            <div className="bg-gradient-to-r from-[#090f1a] to-[#0d1f36] rounded-2xl p-8 text-center">
+              <h3 className="font-serif font-bold text-2xl text-white mb-2">Considering {townName}?</h3>
+              <p className="text-white/50 text-sm mb-6 font-mono">Compare it side-by-side with other NJ towns to find your best fit.</p>
+              {county && <ComparePanel currentTownName={townName} currentCounty={county} variant="bottom" />}
+            </div>
           </div>
 
         </div>
       </div>
+    </div>
+  );
+}
+
+function ComparePanel({ currentTownName, currentCounty, variant }: {
+  currentTownName: string;
+  currentCounty: string;
+  variant: 'top' | 'bottom';
+}) {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<{name: string; county: string}[]>([
+    { name: currentTownName, county: currentCounty }
+  ]);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const allTowns = useMemo(() =>
+    Object.entries(NJ_COUNTIES).flatMap(([county, data]) =>
+      (data as any).towns.map((town: string) => ({ name: town, county }))
+    ), []
+  );
+
+  const filtered = useMemo(() => {
+    if (search.length < 2) return [];
+    return allTowns
+      .filter(t => t.name.toLowerCase().includes(search.toLowerCase()) && !selected.some(s => s.name === t.name))
+      .slice(0, 10);
+  }, [search, selected, allTowns]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleCompare = () => {
+    const slugs = selected.map(t => nameToSlug(t.name)).join(',');
+    navigate(`/homebase?towns=${slugs}`);
+  };
+
+  const button = variant === 'top' ? (
+    <button
+      onClick={() => setOpen(o => !o)}
+      className="flex items-center gap-2 px-4 py-1.5 border border-white/20 text-white/70 hover:text-white hover:border-white/40 rounded-xl text-xs font-mono uppercase tracking-wider transition-all"
+    >
+      <GitCompare size={12} />
+      Compare Towns
+    </button>
+  ) : (
+    <button
+      onClick={() => setOpen(o => !o)}
+      className="inline-flex items-center gap-2 px-6 py-3 bg-[#0471A4] text-white rounded-xl text-sm font-bold hover:bg-[#035480] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+    >
+      Compare Towns
+      <ChevronRight size={16} />
+    </button>
+  );
+
+  const panel = open && (
+    variant === 'top' ? (
+      // Compact dark panel — top variant
+      <div className="absolute right-0 top-full mt-2 w-[420px] bg-[#0d1a26] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+        <div className="p-4 border-b border-white/10">
+          <p className="text-white/50 text-xs font-mono mb-3 uppercase tracking-wider">Add towns to compare</p>
+          <div className="relative flex flex-wrap gap-2 min-h-[44px] bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-[#0471A4]/60 transition-all">
+            {selected.map(t => (
+              <span key={t.name} className="flex items-center gap-1.5 px-2 py-0.5 bg-[#0471A4]/30 text-[#8ECAE6] rounded-lg text-xs font-mono font-bold">
+                {t.name}
+                {t.name !== currentTownName && (
+                  <button onClick={() => setSelected(s => s.filter(x => x.name !== t.name))} className="hover:text-white transition-colors"><X size={10} /></button>
+                )}
+              </span>
+            ))}
+            <input
+              autoFocus
+              className="flex-1 min-w-[120px] bg-transparent text-white text-sm outline-none placeholder-white/20"
+              placeholder="Search a town..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          {filtered.length > 0 && (
+            <div className="mt-2 bg-[#0a1520] border border-white/10 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+              {filtered.map(t => (
+                <button key={t.name} onClick={() => { setSelected(s => [...s, t]); setSearch(''); }}
+                  className="w-full px-4 py-2.5 text-left text-sm text-white/80 hover:bg-white/5 hover:text-white flex justify-between items-center transition-colors">
+                  <span>{t.name}</span>
+                  <span className="text-white/30 text-xs font-mono">{t.county}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="p-4 flex items-center justify-between">
+          <span className="text-white/40 text-xs font-mono">{selected.length}/8 towns</span>
+          <button
+            onClick={handleCompare}
+            disabled={selected.length < 2}
+            className="px-4 py-2 bg-[#0471A4] text-white text-xs font-bold rounded-xl hover:bg-[#035480] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            Compare {selected.length} Towns →
+          </button>
+        </div>
+      </div>
+    ) : (
+      // Spacious homepage-style panel — bottom variant
+      <div className="mt-6 bg-[#090f1a] rounded-2xl overflow-hidden border border-white/10">
+        <div className="p-6 border-b border-white/10" style={{ background: 'radial-gradient(ellipse 80% 60% at 60% 0%, rgba(4,113,164,0.3) 0%, transparent 70%)' }}>
+          <h4 className="font-serif font-bold text-2xl text-white mb-1">Compare Towns</h4>
+          <p className="text-white/40 text-sm font-mono mb-5">Search and add NJ towns to compare side-by-side</p>
+          <div className="flex flex-wrap gap-2 min-h-[52px] bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#0471A4]/60 transition-all items-center">
+            {selected.map(t => (
+              <span key={t.name} className="flex items-center gap-1.5 px-3 py-1 bg-[#0471A4]/30 text-[#8ECAE6] rounded-xl text-sm font-mono font-bold">
+                {t.name}
+                {t.name !== currentTownName && (
+                  <button onClick={() => setSelected(s => s.filter(x => x.name !== t.name))} className="hover:text-white transition-colors ml-1"><X size={12} /></button>
+                )}
+              </span>
+            ))}
+            <input
+              autoFocus
+              className="flex-1 min-w-[180px] bg-transparent text-white text-base outline-none placeholder-white/20"
+              placeholder="Search for a town (e.g. Summit, Montclair)..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          {filtered.length > 0 && (
+            <div className="mt-3 bg-white border border-slate-100 rounded-xl overflow-hidden max-h-56 overflow-y-auto shadow-xl">
+              {filtered.map(t => (
+                <button key={t.name} onClick={() => { setSelected(s => [...s, t]); setSearch(''); }}
+                  className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-[#0471A4] flex justify-between items-center transition-colors border-b border-slate-50 last:border-0">
+                  <span className="font-medium">{t.name}</span>
+                  <span className="text-slate-400 text-xs font-mono">{t.county} County {NJ_ENRICHED[t.name] ? '· ✓ data' : ''}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="px-6 py-4 flex items-center justify-between">
+          <span className="text-white/30 text-xs font-mono">{selected.length} of 8 towns selected</span>
+          <button
+            onClick={handleCompare}
+            disabled={selected.length < 2}
+            className="px-5 py-2.5 bg-[#0471A4] text-white text-sm font-bold rounded-xl hover:bg-[#035480] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
+          >
+            View Comparison →
+          </button>
+        </div>
+      </div>
+    )
+  );
+
+  return (
+    <div ref={ref} className="relative">
+      {button}
+      {panel}
     </div>
   );
 }
