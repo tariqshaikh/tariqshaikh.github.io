@@ -34,7 +34,7 @@ const placeIcon = L.divIcon({
 
 function Recenter({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
-  useEffect(() => { map.setView([lat, lng], 13); }, [lat, lng]);
+  useEffect(() => { map.setView([lat, lng], 14); }, [lat, lng]);
   return null;
 }
 
@@ -113,14 +113,13 @@ export default function TownMap({ townName, county, localScene }: TownMapProps) 
     <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl" style={{ height: 320 }}>
       <MapContainer
         center={[center!.lat, center!.lng]}
-        zoom={13}
+        zoom={14}
         style={{ height: 320, width: '100%' }}
         zoomControl={false}
         scrollWheelZoom={false}
         attributionControl={false}
       >
-        {/* CartoDB Dark Matter — no {r} suffix to avoid version issues */}
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png" />
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png" />
         <Recenter lat={center!.lat} lng={center!.lng} />
 
         <Marker position={[center!.lat, center!.lng]} icon={townIcon}>
