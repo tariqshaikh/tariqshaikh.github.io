@@ -13,7 +13,8 @@ import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { logVisit } from '../lib/analytics';
 import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { nameToSlug } from './HomebaseTownPage';
 
 // Regional Data
 const REGIONS = [
@@ -71,6 +72,7 @@ const fmtNum = (n: number | null) => { if (!n || n < 0) return 'N/A'; if (n >= 1
 const fmtDollar = (n: number | null) => (n && n > 0) ? '$' + fmtNum(n) : 'N/A';
 
 export default function Homebase() {
+  const navigate = useNavigate();
   const [selectedTowns, setSelectedTowns] = useState<{name: string, county: string}[]>([]);
   const [activeCounties, setActiveCounties] = useState<string[]>([]);
   const [countySearch, setCountySearch] = useState('');
@@ -144,19 +146,7 @@ export default function Homebase() {
   };
 
   const handleTownSelect = (t: {name: string, county: string}) => {
-    if (selectedTowns.length < 8) {
-      setSelectedTowns([...selectedTowns, t]);
-      if (!activeCounties.includes(t.county)) {
-        setActiveCounties([...activeCounties, t.county]);
-      }
-      setCountySearch('');
-      setShowCountyDropdown(false);
-      // Focus town search after a short delay to allow adding more from the same county
-      setTimeout(() => townInputRef.current?.focus(), 100);
-
-      // Always fetch live data for the new town
-      fetchTownLive(t.name, t.county);
-    }
+    navigate(`/homebase/${nameToSlug(t.name)}`);
   };
 
   const fetchTownLive = async (name: string, county: string) => {
@@ -472,11 +462,7 @@ export default function Homebase() {
                           onMouseLeave={() => { setTickerPaused(false); setHoveredTickerIdx(null); }}
                           onClick={e => {
                             e.stopPropagation();
-                            const town = allTowns.find(a => a.name === t);
-                            if (town) {
-                              handleTownSelect(town);
-                              runComparison();
-                            }
+                            navigate(`/homebase/${nameToSlug(t)}`);
                           }}
                           className="font-mono text-[13px] tracking-widest bg-transparent border-none cursor-pointer transition-all duration-150 px-1"
                           style={{
@@ -720,11 +706,7 @@ export default function Homebase() {
                               key={`${t.name}-${t.county}`}
                               className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-50 flex justify-between items-center border-b last:border-0 border-slate-100 group"
                               onClick={() => {
-                                if (selectedTowns.length < 8) {
-                                  setSelectedTowns([...selectedTowns, t]);
-                                  setTownSearch('');
-                                  setShowTownDropdown(false);
-                                }
+                                navigate(`/homebase/${nameToSlug(t.name)}`);
                               }}
                             >
                               <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">

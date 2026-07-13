@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 import Portfolio from './components/Portfolio';
 import Homebase from './components/Homebase';
+import HomebaseTownPage from './components/HomebaseTownPage';
 import Orbit from './components/Orbit';
 import NetWorth from './components/NetWorth';
 import OrbitHome from './components/OrbitHome';
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/login" element={<Login />} />
         <Route path="/homebase" element={<Homebase />} />
+        <Route path="/homebase/:townSlug" element={<HomebaseTownPage />} />
         <Route path="/orbit" element={<Orbit />} />
         <Route path="/waves" element={<Waves />} />
         <Route path="/waves/:tripId" element={<Waves />} />
