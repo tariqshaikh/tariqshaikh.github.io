@@ -13,8 +13,8 @@ import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { logVisit } from '../lib/analytics';
 import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { Link, useNavigate } from 'react-router-dom';
-import { nameToSlug } from './HomebaseTownPage';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { nameToSlug, slugToName } from './HomebaseTownPage';
 
 // Regional Data
 const REGIONS = [
@@ -73,6 +73,8 @@ const fmtDollar = (n: number | null) => (n && n > 0) ? '$' + fmtNum(n) : 'N/A';
 
 export default function Homebase() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [compareMode, setCompareMode] = useState(() => !!searchParams.get('compare'));
   const [selectedTowns, setSelectedTowns] = useState<{name: string, county: string}[]>([]);
   const [activeCounties, setActiveCounties] = useState<string[]>([]);
   const [countySearch, setCountySearch] = useState('');
@@ -146,8 +148,36 @@ export default function Homebase() {
   };
 
   const handleTownSelect = (t: {name: string, county: string}) => {
-    navigate(`/homebase/${nameToSlug(t.name)}`);
+    if (!compareMode) {
+      navigate(`/homebase/${nameToSlug(t.name)}`);
+      return;
+    }
+    if (selectedTowns.length < 8 && !selectedTowns.some(s => s.name === t.name)) {
+      setSelectedTowns(prev => [...prev, t]);
+      if (!activeCounties.includes(t.county)) {
+        setActiveCounties(prev => [...prev, t.county]);
+      }
+      setCountySearch('');
+      setShowCountyDropdown(false);
+      setTimeout(() => townInputRef.current?.focus(), 100);
+      fetchTownLive(t.name, t.county);
+    }
   };
+
+  // Pre-load town from ?compare=slug URL param
+  useEffect(() => {
+    const slug = searchParams.get('compare');
+    if (!slug) return;
+    const name = slugToName(slug);
+    const county = Object.entries(NJ_COUNTIES).find(([, d]) =>
+      (d as any).towns.some((t: string) => t.toLowerCase() === name.toLowerCase())
+    )?.[0];
+    if (name && county && !selectedTowns.some(t => t.name === name)) {
+      setSelectedTowns([{ name, county }]);
+      setActiveCounties([county]);
+      fetchTownLive(name, county);
+    }
+  }, []);
 
   const fetchTownLive = async (name: string, county: string) => {
     // Cache hit — serve instantly, no loading state needed
@@ -462,7 +492,9 @@ export default function Homebase() {
                           onMouseLeave={() => { setTickerPaused(false); setHoveredTickerIdx(null); }}
                           onClick={e => {
                             e.stopPropagation();
-                            navigate(`/homebase/${nameToSlug(t)}`);
+                            if (!compareMode) { navigate(`/homebase/${nameToSlug(t)}`); return; }
+                            const town = allTowns.find(a => a.name === t);
+                            if (town) { handleTownSelect(town); runComparison(); }
                           }}
                           className="font-mono text-[13px] tracking-widest bg-transparent border-none cursor-pointer transition-all duration-150 px-1"
                           style={{
@@ -705,9 +737,7 @@ export default function Homebase() {
                             <div 
                               key={`${t.name}-${t.county}`}
                               className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-50 flex justify-between items-center border-b last:border-0 border-slate-100 group"
-                              onClick={() => {
-                                navigate(`/homebase/${nameToSlug(t.name)}`);
-                              }}
+                              onClick={() => handleTownSelect(t)}
                             >
                               <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
                                 <span className="font-medium group-hover:text-[#0471A4] transition-colors truncate">{t.name}</span>
@@ -814,7 +844,19 @@ export default function Homebase() {
                     ))}
                   </div>
 
-                  {/* Vibe region buttons — hidden, revisit later */}
+                  {/* Compare mode toggle */}
+                  <div className="flex justify-center pt-2">
+                    <button
+                      onClick={() => setCompareMode(m => !m)}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+                        compareMode
+                          ? 'bg-[#0471A4] text-white border-[#0471A4] shadow-md'
+                          : 'bg-white/10 text-white/70 border-white/20 hover:bg-white/20 hover:text-white'
+                      }`}
+                    >
+                      {compareMode ? '✓ Compare Mode On — select towns' : 'Compare Towns Side-by-Side'}
+                    </button>
+                  </div>
             </motion.div>
           )}
         </AnimatePresence>
