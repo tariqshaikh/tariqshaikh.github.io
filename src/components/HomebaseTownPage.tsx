@@ -46,7 +46,6 @@ export default function HomebaseTownPage() {
   const navigate = useNavigate();
   const [vibe, setVibe] = useState<string | null>(null);
   const [vibeLoading, setVibeLoading] = useState(false);
-  const [estimates, setEstimates] = useState<{homeVal?: number; income?: number} | null>(null);
   const [localScene, setLocalScene] = useState<string[]>([]);
 
   const townName = slugToName(townSlug || '');
@@ -84,38 +83,6 @@ export default function HomebaseTownPage() {
       })
       .catch(() => {})
       .finally(() => setVibeLoading(false));
-  }, [townSlug, data]);
-
-  // Groq current market estimates
-  useEffect(() => {
-    if (!data || !GROQ_API_KEY) return;
-    const cacheKey = `hb_est_${townSlug}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) { try { setEstimates(JSON.parse(cached)); } catch {} return; }
-
-    fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 120,
-        messages: [{
-          role: 'user',
-          content: `Given 2023 baseline data for ${townName}, NJ — median home $${Math.round((data.homeVal || 0) / 1000)}K, household income $${Math.round((data.income || 0) / 1000)}K — estimate current mid-2026 figures based on NJ real estate trends and this town's trajectory. Reply ONLY with valid JSON: {"homeVal": number, "income": number}. No explanation.`
-        }]
-      })
-    })
-      .then(r => r.json())
-      .then(d => {
-        const text = d.choices?.[0]?.message?.content?.trim() || '';
-        const match = text.match(/\{[\s\S]*\}/);
-        if (match) {
-          const parsed = JSON.parse(match[0]);
-          setEstimates(parsed);
-          localStorage.setItem(cacheKey, JSON.stringify(parsed));
-        }
-      })
-      .catch(() => {});
   }, [townSlug, data]);
 
   // Groq local scene — only fetch if not already in static data
@@ -280,18 +247,11 @@ export default function HomebaseTownPage() {
 
           {/* Housing Market */}
           <Section icon={<Home size={20} />} title="Housing Market" color="#0471A4">
-            {estimates && (
-              <div className="mb-4 flex flex-wrap gap-3 p-3 bg-blue-50 border border-[#0471A4]/15 rounded-xl">
-                <span className="text-[10px] font-mono text-[#0471A4] uppercase tracking-wider font-bold self-center">AI 2026 Est.</span>
-                {estimates.homeVal && <span className="text-xs font-mono bg-white px-2 py-1 rounded-lg border border-[#0471A4]/10 text-slate-700">Home: <strong>{fmtDollar(estimates.homeVal)}</strong></span>}
-                {estimates.income && <span className="text-xs font-mono bg-white px-2 py-1 rounded-lg border border-[#0471A4]/10 text-slate-700">Income: <strong>{fmtDollar(estimates.income)}</strong></span>}
-              </div>
-            )}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard label="Median Home" value={fmtDollar(data?.homeVal)} sub="2023 baseline" highlight />
+              <StatCard label="Median Home" value={fmtDollar(data?.homeVal)} sub="Estimated value" highlight />
               <StatCard label="Sale-to-List" value={data?.saleToList ? `${data.saleToList}%` : 'N/A'} sub="Market heat" />
               <StatCard label="Avg Property Tax" value={data?.avgTax ? `$${data.avgTax.toLocaleString()}/yr` : 'N/A'} sub={data?.taxRate ? `${data.taxRate}% rate` : ''} />
-              <StatCard label="Median Income" value={fmtDollar(data?.income)} sub="2023 baseline" />
+              <StatCard label="Median Income" value={fmtDollar(data?.income)} sub="Household/yr" />
             </div>
             {data?.saleToList && (() => {
               const base = data.saleToList;
