@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap, X, GitCompare } from 'lucide-react';
 import { NJ_ENRICHED, NJ_COUNTIES } from '../constants';
 import { logVisit } from '../lib/analytics';
-import TownMap from './TownMap';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -248,7 +247,13 @@ Use realistic NJ data. No explanation.`
             {/* Right: Map */}
             <div className="lg:w-[460px] shrink-0">
               {county && (
-                <TownMap townName={townName} county={county} localScene={localScene} />
+                <iframe
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(townName + ', ' + county + ' County, NJ')}&output=embed&z=14`}
+                  className="w-full rounded-2xl"
+                  style={{ height: 360, border: 'none' }}
+                  loading="lazy"
+                  allowFullScreen
+                />
               )}
               <p className="text-center text-white/20 text-[10px] font-mono mt-2">
                 {townName}, {county} County, NJ · {localScene.length > 0 ? `${Math.min(localScene.length, 4)} local spots marked` : 'loading spots...'}
