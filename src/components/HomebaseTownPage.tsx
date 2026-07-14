@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap, X, GitCompare } from 'lucide-react';
 import { NJ_ENRICHED, NJ_COUNTIES } from '../constants';
 import { logVisit } from '../lib/analytics';
+import TownMap from './TownMap';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -51,7 +52,6 @@ export default function HomebaseTownPage() {
   const [groqData, setGroqData] = useState<Record<string, any> | null>(null);
   const [roadDetail, setRoadDetail] = useState<string | null>(null);
   const [roadDetailLoading, setRoadDetailLoading] = useState(false);
-  const [mapType, setMapType] = useState<'m' | 'k' | 'p'>('m');
 
   const townName = slugToName(townSlug || '');
   const data = NJ_ENRICHED[townName];
@@ -280,43 +280,7 @@ Use realistic NJ data. No explanation.`
 
             {/* Right: Map */}
             <div className="lg:w-[500px] shrink-0">
-              {county && (
-                <>
-                  {/* Map type toggle */}
-                  <div className="flex items-center gap-1.5 mb-2">
-                    {([['m', 'Map'], ['k', 'Satellite'], ['p', 'Terrain']] as const).map(([type, label]) => (
-                      <button
-                        key={type}
-                        onClick={() => setMapType(type)}
-                        className={`px-3 py-1 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all ${
-                          mapType === type
-                            ? 'bg-white text-[#0471A4]'
-                            : 'bg-white/10 text-white/50 hover:bg-white/20 hover:text-white'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                    <a
-                      href={`https://www.google.com/maps/search/${encodeURIComponent(townName + ', ' + county + ' County, NJ')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-auto px-3 py-1 rounded-lg text-[10px] font-mono text-white/40 hover:text-white/70 transition-colors"
-                    >
-                      Open ↗
-                    </a>
-                  </div>
-
-                  <iframe
-                    key={mapType}
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(townName + ', ' + county + ' County, NJ')}&output=embed&z=14&t=${mapType}`}
-                    className="w-full rounded-2xl"
-                    style={{ height: 440, border: 'none' }}
-                    loading="lazy"
-                    allowFullScreen
-                  />
-                </>
-              )}
+              {county && <TownMap townName={townName} county={county} />}
             </div>
           </div>
         </div>
