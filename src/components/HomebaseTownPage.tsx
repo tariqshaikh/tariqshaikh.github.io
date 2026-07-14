@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap, X, GitCompare } from 'lucide-react';
 import { NJ_ENRICHED, NJ_COUNTIES } from '../constants';
@@ -447,10 +448,8 @@ function ComparePanel({ currentTownName, currentCounty, variant }: {
     </button>
   );
 
-  const panel = open && (
-    variant === 'top' ? (
-      // Compact dark panel — top variant
-      <div className="absolute right-0 top-full mt-2 w-[420px] bg-[#0d1a26] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+  const topPanel = open && variant === 'top' && (
+    <div className="absolute right-0 top-full mt-2 w-[420px] bg-[#0d1a26] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
         <div className="p-4 border-b border-white/10">
           <p className="text-white/50 text-xs font-mono mb-3 uppercase tracking-wider">Add towns to compare</p>
           <div className="relative flex flex-wrap gap-2 min-h-[44px] bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus-within:border-[#0471A4]/60 transition-all">
@@ -493,59 +492,72 @@ function ComparePanel({ currentTownName, currentCounty, variant }: {
           </button>
         </div>
       </div>
-    ) : (
-      // Spacious homepage-style panel — bottom variant
-      <div className="mt-6 bg-[#090f1a] rounded-2xl overflow-hidden border border-white/10">
-        <div className="p-6 border-b border-white/10" style={{ background: 'radial-gradient(ellipse 80% 60% at 60% 0%, rgba(4,113,164,0.3) 0%, transparent 70%)' }}>
-          <h4 className="font-serif font-bold text-2xl text-white mb-1">Compare Towns</h4>
-          <p className="text-white/40 text-sm font-mono mb-5">Search and add NJ towns to compare side-by-side</p>
-          <div className="flex flex-wrap gap-2 min-h-[52px] bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#0471A4]/60 transition-all items-center">
-            {selected.map(t => (
-              <span key={t.name} className="flex items-center gap-1.5 px-3 py-1 bg-[#0471A4]/30 text-[#8ECAE6] rounded-xl text-sm font-mono font-bold">
-                {t.name}
-                {t.name !== currentTownName && (
-                  <button onClick={() => setSelected(s => s.filter(x => x.name !== t.name))} className="hover:text-white transition-colors ml-1"><X size={12} /></button>
-                )}
-              </span>
-            ))}
-            <input
-              autoFocus
-              className="flex-1 min-w-[180px] bg-transparent text-white text-base outline-none placeholder-white/20"
-              placeholder="Search for a town (e.g. Summit, Montclair)..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          {filtered.length > 0 && (
-            <div className="mt-3 bg-white border border-slate-100 rounded-xl overflow-hidden max-h-56 overflow-y-auto shadow-xl">
-              {filtered.map(t => (
-                <button key={t.name} onClick={() => { setSelected(s => [...s, t]); setSearch(''); }}
-                  className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-[#0471A4] flex justify-between items-center transition-colors border-b border-slate-50 last:border-0">
-                  <span className="font-medium">{t.name}</span>
-                  <span className="text-slate-400 text-xs font-mono">{t.county} County {NJ_ENRICHED[t.name] ? '· ✓ data' : ''}</span>
-                </button>
+  );
+
+  const bottomPanel = (
+    <AnimatePresence>
+      {open && variant === 'bottom' && (
+        <motion.div
+          key="bottom-panel"
+          initial={{ opacity: 0, y: -12, scaleY: 0.95 }}
+          animate={{ opacity: 1, y: 0, scaleY: 1 }}
+          exit={{ opacity: 0, y: -8, scaleY: 0.97 }}
+          transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{ transformOrigin: 'top' }}
+          className="mt-6 bg-[#090f1a] rounded-2xl overflow-hidden border border-white/10"
+        >
+          <div className="p-6 border-b border-white/10" style={{ background: 'radial-gradient(ellipse 80% 60% at 60% 0%, rgba(4,113,164,0.3) 0%, transparent 70%)' }}>
+            <h4 className="font-serif font-bold text-2xl text-white mb-1">Compare Towns</h4>
+            <p className="text-white/40 text-sm font-mono mb-5">Search and add NJ towns to compare side-by-side</p>
+            <div className="flex flex-wrap gap-2 min-h-[52px] bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-[#0471A4]/60 transition-all items-center">
+              {selected.map(t => (
+                <span key={t.name} className="flex items-center gap-1.5 px-3 py-1 bg-[#0471A4]/30 text-[#8ECAE6] rounded-xl text-sm font-mono font-bold">
+                  {t.name}
+                  {t.name !== currentTownName && (
+                    <button onClick={() => setSelected(s => s.filter(x => x.name !== t.name))} className="hover:text-white transition-colors ml-1"><X size={12} /></button>
+                  )}
+                </span>
               ))}
+              <input
+                autoFocus
+                className="flex-1 min-w-[180px] bg-transparent text-white text-base outline-none placeholder-white/20"
+                placeholder="Search for a town (e.g. Summit, Montclair)..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
             </div>
-          )}
-        </div>
-        <div className="px-6 py-4 flex items-center justify-between">
-          <span className="text-white/30 text-xs font-mono">{selected.length} of 8 towns selected</span>
-          <button
-            onClick={handleCompare}
-            disabled={selected.length < 2}
-            className="px-5 py-2.5 bg-[#0471A4] text-white text-sm font-bold rounded-xl hover:bg-[#035480] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
-          >
-            View Comparison →
-          </button>
-        </div>
-      </div>
-    )
+            {filtered.length > 0 && (
+              <div className="mt-3 bg-white border border-slate-100 rounded-xl overflow-hidden max-h-56 overflow-y-auto shadow-xl">
+                {filtered.map(t => (
+                  <button key={t.name} onClick={() => { setSelected(s => [...s, t]); setSearch(''); }}
+                    className="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-[#0471A4] flex justify-between items-center transition-colors border-b border-slate-50 last:border-0">
+                    <span className="font-medium">{t.name}</span>
+                    <span className="text-slate-400 text-xs font-mono">{t.county} County {NJ_ENRICHED[t.name] ? '· ✓ data' : ''}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="px-6 py-4 flex items-center justify-between">
+            <span className="text-white/30 text-xs font-mono">{selected.length} of 8 towns selected</span>
+            <button
+              onClick={handleCompare}
+              disabled={selected.length < 2}
+              className="px-5 py-2.5 bg-[#0471A4] text-white text-sm font-bold rounded-xl hover:bg-[#035480] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md"
+            >
+              View Comparison →
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
   return (
     <div ref={ref} className="relative">
       {button}
-      {panel}
+      {topPanel}
+      {bottomPanel}
     </div>
   );
 }
