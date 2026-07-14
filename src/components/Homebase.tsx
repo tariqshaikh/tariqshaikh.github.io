@@ -88,6 +88,7 @@ export default function Homebase() {
   const [showPrioritySettings, setShowPrioritySettings] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [tooltip, setTooltip] = useState<{ name: string, x: number, y: number } | null>(null);
+  const [showMap, setShowMap] = useState(false);
   const [tickerPaused, setTickerPaused] = useState(false);
   const [hoveredTickerIdx, setHoveredTickerIdx] = useState<number | null>(null);
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
@@ -483,7 +484,17 @@ export default function Homebase() {
                     <span className="font-serif font-bold text-white drop-shadow-sm">Homebase</span>
                     <span className="font-display font-black ml-3" style={{ color: '#8ECAE6' }}>NJ</span>
                   </h1>
-                  <p className="font-display text-base font-medium tracking-[0.25em] uppercase mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>Find your perfect New Jersey town</p>
+                  <p className="font-display text-base font-medium tracking-[0.25em] uppercase mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>Find your perfect New Jersey town</p>
+                  <div className="flex justify-center mb-8">
+                    <button
+                      onClick={e => { e.stopPropagation(); setShowMap(true); }}
+                      className="flex items-center gap-2 px-5 py-2 rounded-full font-mono text-[13px] tracking-widest uppercase transition-all hover:brightness-110 active:scale-95"
+                      style={{ background: 'rgba(4,113,164,0.25)', border: '1px solid rgba(91,168,204,0.45)', color: '#8ECAE6' }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+                      View Map
+                    </button>
+                  </div>
                   <div className="relative overflow-hidden w-full py-2.5 border-y" style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
                     <div
                       className="flex gap-10 animate-marquee whitespace-nowrap"
@@ -944,6 +955,76 @@ export default function Homebase() {
             {tooltip.name} County
           </div>
         )}
+
+        {/* NJ Map Modal */}
+        <AnimatePresence>
+          {showMap && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[200] flex items-center justify-center"
+              style={{ background: 'rgba(4,10,20,0.88)', backdropFilter: 'blur(10px)' }}
+              onClick={() => setShowMap(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                onClick={e => e.stopPropagation()}
+                className="relative flex flex-col items-center select-none"
+              >
+                <button
+                  onClick={() => setShowMap(false)}
+                  className="absolute -top-10 right-0 font-mono text-[11px] tracking-widest uppercase transition-colors"
+                  style={{ color: 'rgba(255,255,255,0.35)' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.35)')}
+                >
+                  close ✕
+                </button>
+                <svg
+                  viewBox="-8 -8 280 520"
+                  width="260"
+                  height="483"
+                  style={{ filter: 'drop-shadow(0 0 32px rgba(4,113,164,0.4)) drop-shadow(0 0 10px rgba(91,168,204,0.25))' }}
+                >
+                  {NJ_COUNTY_PATHS.map(county => (
+                    <path
+                      key={county.id}
+                      d={county.d}
+                      fill={highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)'}
+                      stroke={highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)'}
+                      strokeWidth="1.2"
+                      style={{ cursor: 'pointer', transition: 'fill 0.12s ease, stroke 0.12s ease, stroke-width 0.12s ease' }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.fill = 'rgba(4,113,164,0.45)';
+                        e.currentTarget.style.stroke = 'rgba(91,168,204,0.9)';
+                        e.currentTarget.style.strokeWidth = '2';
+                        setTooltip({ name: county.name, x: e.clientX, y: e.clientY });
+                      }}
+                      onMouseMove={e => setTooltip({ name: county.name, x: e.clientX, y: e.clientY })}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.fill = highlightedCounties.includes(county.name) ? 'rgba(4,113,164,0.5)' : 'rgba(4,113,164,0.1)';
+                        e.currentTarget.style.stroke = highlightedCounties.includes(county.name) ? 'rgba(91,168,204,0.9)' : 'rgba(91,168,204,0.3)';
+                        e.currentTarget.style.strokeWidth = '1.2';
+                        setTooltip(null);
+                      }}
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleCountySelect(county.name);
+                        setShowMap(false);
+                      }}
+                    />
+                  ))}
+                </svg>
+                <p className="font-mono text-[10px] mt-3" style={{ color: 'rgba(255,255,255,0.25)' }}>click a county to filter · click outside to close</p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       <div ref={resultsRef} className={`px-4 md:px-10 pt-8 pb-20 w-full ${showResults ? 'block' : 'hidden'}`}>
         {isLoading ? (

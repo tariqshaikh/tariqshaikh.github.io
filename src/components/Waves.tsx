@@ -1021,8 +1021,8 @@ const DEMO_DATA: Record<string, TripIntelligence> = {
 
 
 // --- Sleek Modern Logo ---
-const WavesLogo = () => (
-  <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+const WavesLogo = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 20C4 20 10 12 16 20C22 28 28 20 28 20" stroke="url(#logo_grad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M8 14C8 14 12 8 16 14C20 20 24 14 24 14" stroke="url(#logo_grad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
     <defs>
@@ -1346,6 +1346,7 @@ Return ONLY a JSON array, no markdown, no explanation:
     logVisit('/waves');
   }, []);
 
+
   const fetchDestinationIntelligence = async (dest: string, forTrip: boolean = false) => {
     // Check for Demo Data first to bypass API
     const demoMatch = Object.keys(DEMO_DATA).find(key => 
@@ -1368,6 +1369,30 @@ Return ONLY a JSON array, no markdown, no explanation:
         }, 800);
       }
     } else {
+      // Check localStorage cache (24h TTL)
+      const cacheKey = `waves_v1_${dest.toLowerCase().trim()}`;
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const { ts, payload } = JSON.parse(cached);
+          if (Date.now() - ts < 86_400_000) {
+            if (!forTrip) setIsSearching(true);
+            data = payload;
+            if (!forTrip) {
+              setTimeout(() => {
+                setIntelligence(data);
+                const currentMonthIdx = new Date().getMonth();
+                const idealIdx = data.monthlyData.findIndex((m: any) => m.isIdeal);
+                setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
+                setHasSearched(true);
+                setIsSearching(false);
+              }, 400);
+            }
+            if (!forTrip) return data;
+          }
+        }
+      } catch { /* ignore parse errors */ }
+
       if (!forTrip) setIsSearching(true);
       setError(null);
 
@@ -1392,6 +1417,11 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation) wi
   "whenToVisit": "2-3 sentences on best times and crowds",
   "averageDailySpend": 150,
   "seasons": { "high": "months", "low": "months", "shoulder": "months" },
+  "practicalInfo": {
+    "visa": "string", "currency": "string", "language": "string",
+    "tipping": "string", "safety": "string", "bestTransport": "string",
+    "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
+  },
   "weatherCard": { "condition": "Sunny", "tempHigh": 75, "tempLow": 55, "note": "string", "month": "October" },
   "monthlyData": [
     { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "Local insight", "isIdeal": false, "crowdLevel": 4 },
@@ -1417,12 +1447,7 @@ flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use G
   "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
   "airports": [{ "iata": "KIX", "name": "Airport Name", "city": "City", "transitToCity": "travel time and method to destination", "costModifier": 1.0, "note": "one line why this airport" }],
   "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }],
-  "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
-  "practicalInfo": {
-    "visa": "string", "currency": "string", "language": "string",
-    "tipping": "string", "safety": "string", "bestTransport": "string",
-    "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
-  }
+  "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }]
 }
 Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. airports: 1-3 entries, include ALL major airports that serve the destination — e.g. New York needs JFK + LGA + EWR, London needs LHR + LGW + STN, Paris needs CDG + ORY, Chicago needs ORD + MDW, Los Angeles needs LAX + BUR + LGB. Skip only if destination has a single obvious airport. costModifier is relative to the primary airport (1.0 = baseline).
 Valid event types: festival, cultural, sporting, food, music, market.
@@ -1439,7 +1464,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             messages: [{ role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
             temperature: 0.7,
-            max_tokens: 4000,
+            max_tokens: 7000,
           }),
         });
 
@@ -1451,6 +1476,11 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         const result = await res.json();
         const text = result.choices?.[0]?.message?.content || '{}';
         data = JSON.parse(text);
+
+        // Cache successful response for 24h
+        try {
+          localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: data }));
+        } catch { /* storage full — skip */ }
 
         // Ensure required arrays exist (defensive merge)
         if (!Array.isArray(data.monthlyData) || data.monthlyData.length !== 12) {
@@ -1495,12 +1525,12 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         const isKey = errStatus === 401 || errStatus === 403 || errMsg.toLowerCase().includes('invalid api key');
         const isJson = err instanceof SyntaxError || errMsg.includes('JSON') || errMsg.includes('Unexpected token');
         const msg = isQuota
-          ? "Rate limit reached — please wait a moment and try again."
+          ? "Too many searches — wait a moment then try again."
           : isKey
           ? "Invalid API key. Check your GROQ_API_KEY in .env."
           : isJson
-          ? "AI returned an unexpected format. Please try again."
-          : `Could not analyze "${dest}". Please try again.`;
+          ? "Unexpected response format — please try again."
+          : `Couldn't load "${dest}". Please try again.`;
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
@@ -1621,18 +1651,18 @@ Return ONLY a JSON object, no markdown, no explanation:
 
   if (isSearching && !hasSearched) {
     return (
-      <div className="min-h-screen bg-[#050B14] flex flex-col items-center justify-center gap-12 relative overflow-hidden">
+      <div className="min-h-screen bg-[#FDFAF5] flex flex-col items-center justify-center gap-12 relative overflow-hidden">
         {/* Background glow */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[120px]" />
+          <div className="w-[600px] h-[600px] rounded-full bg-[#0891B2]/[0.06] blur-[120px]" />
         </div>
         {/* Animated wave loader */}
         <div className="relative flex flex-col items-center gap-10">
           <svg width="220" height="90" viewBox="0 0 220 90" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="wl_g" x1="0" y1="0" x2="220" y2="0" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#38BDF8" />
-                <stop offset="1" stopColor="#818CF8" />
+                <stop stopColor="#00C4CC" />
+                <stop offset="1" stopColor="#0891B2" />
               </linearGradient>
             </defs>
             {/* Wave 1 */}
@@ -1661,7 +1691,7 @@ Return ONLY a JSON object, no markdown, no explanation:
             />
           </svg>
           <div className="text-center">
-            <p className="text-white font-serif text-2xl mb-3 tracking-tight">Charting the waves</p>
+            <p className="text-[#0A1A2E] font-serif text-2xl mb-3 tracking-tight">Charting the waves</p>
             <p className="text-slate-500 text-sm tracking-widest uppercase">{destination}</p>
           </div>
         </div>
@@ -1670,7 +1700,7 @@ Return ONLY a JSON object, no markdown, no explanation:
           {[0, 0.2, 0.4].map((delay, i) => (
             <motion.span
               key={i}
-              className="w-1.5 h-1.5 rounded-full bg-cyan-500/50"
+              className="w-1.5 h-1.5 rounded-full bg-[#0891B2]/30"
               animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
               transition={{ duration: 1.2, repeat: Infinity, delay, ease: "easeInOut" }}
             />
@@ -1682,12 +1712,12 @@ Return ONLY a JSON object, no markdown, no explanation:
 
   if (!hasSearched) {
     return (
-      <div className="min-h-screen bg-[#050B14] text-slate-300 font-sans selection:bg-cyan-500/30 flex flex-col">
-        <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#050B14]/80 backdrop-blur-xl">
+      <div className="min-h-screen bg-[#FDFAF5] text-slate-700 font-sans selection:bg-[#0891B2]/15 flex flex-col">
+        <nav className="fixed top-0 w-full z-50 border-b border-black/[0.09] bg-[#FDFAF5]/80 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
               <WavesLogo />
-              <span className="text-white font-medium tracking-widest text-sm uppercase group-hover:text-cyan-400 transition-colors">Waves</span>
+              <span className="text-[#0A1A2E] font-medium tracking-widest text-sm uppercase group-hover:text-[#0891B2] transition-colors">Waves</span>
             </Link>
           </div>
         </nav>
@@ -1699,18 +1729,18 @@ Return ONLY a JSON object, no markdown, no explanation:
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="w-full max-w-3xl"
           >
-            <h1 className="text-4xl md:text-6xl font-light tracking-tight text-white mb-8 text-center font-serif">
-              Where will the <span className="italic text-cyan-400">waves</span> take you?
+            <h1 className="text-4xl md:text-6xl font-light tracking-tight text-[#0A1A2E] mb-8 text-center font-serif">
+              Where will the <span className="italic text-[#0891B2]">waves</span> take you?
             </h1>
             
             <form onSubmit={handleSearch} className="relative group mb-12">
-              <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/20 via-cyan-500/20 to-teal-400/10 rounded-[2rem] blur-lg opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-[#0B1221]/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-4 flex flex-col md:flex-row items-center gap-4 shadow-2xl">
+              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400/20 via-sky-400/15 to-cyan-300/10 rounded-[2rem] blur-lg opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-[#F7F2E8]/80 backdrop-blur-xl border border-black/[0.13] rounded-[2rem] p-4 flex flex-col md:flex-row items-center gap-4 shadow-2xl">
                 
-                <div className="flex-1 flex items-center w-full bg-white/5 rounded-2xl px-6 py-4 border border-white/5 hover:border-white/10 transition-colors">
-                  <Sparkles size={24} className="text-cyan-400 mr-4" />
+                <div className="flex-1 flex items-center w-full bg-white rounded-2xl px-6 py-4 border border-black/[0.09] hover:border-black/[0.13] transition-colors">
+                  <Sparkles size={24} className="text-[#0891B2] mr-4" />
                   <div className="flex-1 relative">
-                    <label className="block text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-1">Dream Location</label>
+                    <label className="block text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-1">Dream Location</label>
                     <input 
                       type="text" 
                       value={destination}
@@ -1720,13 +1750,13 @@ Return ONLY a JSON object, no markdown, no explanation:
                       }}
                       onFocus={() => setShowSuggestions(true)}
                       onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                      className="w-full bg-transparent border-none outline-none font-light text-lg md:text-xl text-white placeholder:text-slate-600 tracking-wide"
+                      className="w-full bg-transparent border-none outline-none font-light text-lg md:text-xl text-[#0A1A2E] placeholder:text-slate-400 tracking-wide"
                       placeholder={PLACEHOLDER_CYCLE[placeholderIdx]}
                     />
                     
                     {/* Autocomplete Dropdown */}
                     {showSuggestions && destination.trim() && suggestions.length > 0 && (
-                      <div className="absolute top-full left-0 w-full mt-4 bg-[#0B1221]/95 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl">
+                      <div className="absolute top-full left-0 w-full mt-4 bg-[#F7F2E8]/95 backdrop-blur-xl border border-black/[0.13] rounded-2xl overflow-hidden z-50 shadow-2xl">
                         {suggestions.map((dest) => (
                           <button
                             key={dest}
@@ -1735,7 +1765,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                               setDestination(dest);
                               setShowSuggestions(false);
                             }}
-                            className="w-full text-left px-6 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-0"
+                            className="w-full text-left px-6 py-4 text-sm text-slate-700 hover:bg-white hover:text-[#0A1A2E] transition-colors border-b border-black/[0.09] last:border-0"
                           >
                             {dest}
                           </button>
@@ -1748,14 +1778,14 @@ Return ONLY a JSON object, no markdown, no explanation:
                 <button 
                   type="submit"
                   disabled={isSearching || !destination.trim()}
-                  className="w-full md:w-auto h-full min-h-[72px] px-10 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-2xl text-white text-[11px] uppercase tracking-[0.2em] font-medium hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="w-full md:w-auto h-full min-h-[72px] px-10 bg-gradient-to-r from-[#0BAED4] to-[#0369A1] rounded-2xl text-[#0A1A2E] text-[11px] uppercase tracking-[0.2em] font-medium hover:shadow-[0_0_20px_rgba(8,145,178,0.35)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                 >
                   {isSearching ? <RefreshCw size={18} className="animate-spin" /> : <Search size={18} />}
                   <span className="md:hidden">Analyze Trip</span>
                 </button>
               </div>
               {error && (
-                <div className="absolute -bottom-12 left-0 w-full text-center text-rose-400 text-sm">
+                <div className="absolute -bottom-12 left-0 w-full text-center text-rose-600 text-sm">
                   {error}
                 </div>
               )}
@@ -1771,7 +1801,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                 <span className="text-[10px] uppercase tracking-widest text-slate-500 flex items-center gap-2">
                   {trendingLoading ? (
                     <span className="flex gap-1.5 items-center">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500/50 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0891B2]/30 animate-pulse" />
                       Asking AI what's hot right now…
                     </span>
                   ) : (
@@ -1787,7 +1817,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                     <span className="flex items-center gap-2">
                       <button
                         onClick={() => setTrendingPage(p => (p - 1 + pages) % pages)}
-                        className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/20 transition-all"
+                        className="w-6 h-6 rounded-full bg-white border border-black/[0.13] flex items-center justify-center text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.13] transition-all"
                       >
                         <ChevronLeft size={12} />
                       </button>
@@ -1796,13 +1826,13 @@ Return ONLY a JSON object, no markdown, no explanation:
                           <button
                             key={i}
                             onClick={() => setTrendingPage(i)}
-                            className={`h-1 rounded-full transition-all ${i === trendingPage ? 'bg-cyan-400 w-3' : 'w-1 bg-white/20 hover:bg-white/40'}`}
+                            className={`h-1 rounded-full transition-all ${i === trendingPage ? 'bg-[#0891B2] w-3' : 'w-1 bg-black/[0.1] hover:bg-black/[0.25]'}`}
                           />
                         ))}
                       </span>
                       <button
                         onClick={() => setTrendingPage(p => (p + 1) % pages)}
-                        className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:border-white/20 transition-all"
+                        className="w-6 h-6 rounded-full bg-white border border-black/[0.13] flex items-center justify-center text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.13] transition-all"
                       >
                         <ChevronRight size={12} />
                       </button>
@@ -1814,7 +1844,7 @@ Return ONLY a JSON object, no markdown, no explanation:
               {trendingLoading ? (
                 <div className="flex flex-wrap justify-center gap-2.5">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-9 w-28 rounded-full bg-white/5 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                    <div key={i} className="h-9 w-28 rounded-full bg-white animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
                   ))}
                 </div>
               ) : (
@@ -1832,10 +1862,10 @@ Return ONLY a JSON object, no markdown, no explanation:
                         key={name}
                         type="button"
                         onClick={() => { setDestination(name); fetchDestinationIntelligence(name); }}
-                        className="group flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-cyan-500/30 transition-all"
+                        className="group flex items-center gap-2 px-4 py-2 bg-white border border-black/[0.13] rounded-full hover:bg-white/80 hover:border-[#0891B2]/25 transition-all"
                       >
                         <span className="text-[9px] text-slate-600 font-mono">#{trendingPage * ITEMS_PER_PAGE + idx + 1}</span>
-                        <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300 group-hover:text-cyan-400 transition-colors">
+                        <span className="text-[10px] uppercase tracking-widest font-bold text-slate-700 group-hover:text-[#0891B2] transition-colors">
                           {name.split(',')[0]}
                         </span>
                         <span className="text-[9px] text-slate-600 group-hover:text-slate-500 transition-colors hidden sm:inline">
@@ -1856,28 +1886,28 @@ Return ONLY a JSON object, no markdown, no explanation:
   const data = intelligence || fallbackIntelligence;
 
   return (
-    <div className="min-h-screen bg-[#050B14] text-slate-300 font-sans selection:bg-cyan-500/30 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#FDFAF5] text-slate-700 font-sans selection:bg-[#0891B2]/15 flex flex-col lg:flex-row">
       
       {/* SIDEBAR */}
-      <aside className="w-full lg:w-[380px] bg-[#0B1221] border-r border-white/5 flex flex-col shrink-0 lg:h-screen lg:sticky lg:top-0 overflow-y-auto">
+      <aside className="w-full lg:w-[380px] bg-[#F7F2E8] border-r border-black/[0.09] flex flex-col shrink-0 lg:h-screen lg:sticky lg:top-0 overflow-y-auto">
         <div className="p-8 pb-4">
-          <Link to="/" className="flex items-center gap-3 group mb-12">
-            <WavesLogo />
-            <span className="text-white font-medium tracking-widest text-sm uppercase group-hover:text-cyan-400 transition-colors">Waves</span>
+          <Link to="/" className="flex flex-col gap-3 group mb-10">
+            <WavesLogo size={56} />
+            <span className="text-[#0A1A2E] font-serif text-4xl leading-none tracking-tight group-hover:text-[#0891B2] transition-colors">Waves</span>
           </Link>
 
           <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-4">Trip Overview</p>
-          <h2 className="text-4xl text-white font-serif leading-tight mb-12">
+          <h2 className="text-4xl text-[#0A1A2E] font-serif leading-tight mb-12">
             {data.title} <br/>
-            <span className="italic text-cyan-400">{data.subtitle}.</span>
+            <span className="italic text-[#0891B2]">{data.subtitle}.</span>
           </h2>
 
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)] animate-pulse"></span>
-              <span className="text-xs uppercase tracking-widest text-cyan-400 font-medium">Optimal Window Found</span>
+              <span className="w-2 h-2 rounded-full bg-[#0891B2] shadow-[0_0_8px_rgba(8,145,178,0.5)] animate-pulse"></span>
+              <span className="text-xs uppercase tracking-widest text-[#0891B2] font-medium">Optimal Window Found</span>
             </div>
-            <p className="text-sm text-slate-400 font-light leading-relaxed mb-8">
+            <p className="text-sm text-slate-500 font-light leading-relaxed mb-8">
               {data.summary}
             </p>
 
@@ -1885,15 +1915,15 @@ Return ONLY a JSON object, no markdown, no explanation:
             <div className="space-y-3">
               <p className="text-[9px] uppercase tracking-[0.2em] text-slate-600 font-bold mb-3">Season Guide</p>
               <div className="flex items-start gap-3">
-                <span className="px-2.5 py-1 bg-rose-500/10 border border-rose-500/20 rounded-full text-[9px] uppercase tracking-widest text-rose-400 font-bold shrink-0">Peak</span>
+                <span className="px-2.5 py-1 bg-rose-100 border border-rose-400/50 rounded-full text-[9px] uppercase tracking-widest text-rose-600 font-bold shrink-0">Peak</span>
                 <span className="text-xs text-slate-500 font-light leading-relaxed">{data.seasons.high}</span>
               </div>
               <div className="flex items-start gap-3">
-                <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[9px] uppercase tracking-widest text-amber-400 font-bold shrink-0">Shoulder</span>
+                <span className="px-2.5 py-1 bg-amber-100 border border-amber-400/50 rounded-full text-[9px] uppercase tracking-widest text-amber-700 font-bold shrink-0">Shoulder</span>
                 <span className="text-xs text-slate-500 font-light leading-relaxed">{data.seasons.shoulder}</span>
               </div>
               <div className="flex items-start gap-3">
-                <span className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[9px] uppercase tracking-widest text-emerald-400 font-bold shrink-0">Low Season</span>
+                <span className="px-2.5 py-1 bg-emerald-100 border border-emerald-400/60 rounded-full text-[9px] uppercase tracking-widest text-emerald-700 font-bold shrink-0">Low Season</span>
                 <span className="text-xs text-slate-500 font-light leading-relaxed">{data.seasons.low}</span>
               </div>
             </div>
@@ -1909,11 +1939,11 @@ Return ONLY a JSON object, no markdown, no explanation:
               const bestIdx = sidebarCosts.indexOf(minCost);
               const bestMonth = data.monthlyData[bestIdx];
               return bestMonth ? (
-                <div className="mt-6 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
-                  <p className="text-[9px] uppercase tracking-widest text-emerald-400 font-bold mb-2">Best Value Month</p>
+                <div className="mt-6 p-4 bg-emerald-500/[0.1] border border-emerald-400/60 rounded-2xl">
+                  <p className="text-[9px] uppercase tracking-widest text-emerald-700 font-bold mb-2">Best Value Month</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-white font-medium text-sm">{bestMonth.month}</span>
-                    <span className="text-emerald-400 font-bold">${minCost}</span>
+                    <span className="text-[#0A1A2E] font-medium text-sm">{bestMonth.month}</span>
+                    <span className="text-emerald-700 font-bold">${minCost}</span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 font-light">{bestMonth.note}</p>
                 </div>
@@ -1922,16 +1952,16 @@ Return ONLY a JSON object, no markdown, no explanation:
           </div>
         </div>
 
-        <div className="mt-auto p-8 border-t border-white/5">
+        <div className="mt-auto p-8 border-t border-black/[0.09]">
           <form onSubmit={handleSearch} className="relative">
             <input 
               type="text" 
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               placeholder="Change Destination..."
-              className="w-full bg-transparent border border-white/10 rounded-full py-3 px-5 text-sm text-white placeholder:text-slate-600 focus:border-cyan-500/50 outline-none transition-colors"
+              className="w-full bg-transparent border border-black/[0.13] rounded-full py-3 px-5 text-sm text-[#0A1A2E] placeholder:text-slate-400 focus:border-[#0891B2]/40 outline-none transition-colors"
             />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-cyan-400 transition-colors">
+            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-[#0891B2] transition-colors">
               {isSearching ? <RefreshCw size={14} className="animate-spin" /> : <SlidersHorizontal size={14} />}
             </button>
           </form>
@@ -1943,30 +1973,62 @@ Return ONLY a JSON object, no markdown, no explanation:
         
         {/* Top Nav */}
         <header className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-6 text-xs uppercase tracking-widest text-slate-400 font-medium">
+          <div className="flex items-center gap-6 text-xs uppercase tracking-widest text-slate-500 font-medium">
             <button 
               onClick={() => setHasSearched(false)}
-              className="flex items-center gap-2 hover:text-white transition-colors text-cyan-400"
+              className="flex items-center gap-2 hover:text-[#0A1A2E] transition-colors text-[#0891B2]"
             >
               <ArrowRight size={14} className="rotate-180" /> Back to Search
             </button>
-            <span className="w-1 h-1 rounded-full bg-slate-700"></span>
-            <button className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
-              <MapPin size={14} /> Region View
-            </button>
           </div>
           <div className="flex items-center gap-3">
-            <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-white/20 transition-all">
+            <button className="w-10 h-10 rounded-full bg-white border border-black/[0.13] flex items-center justify-center text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.13] transition-all">
               <Bookmark size={16} />
             </button>
-            <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-white/20 transition-all">
+            <button className="w-10 h-10 rounded-full bg-white border border-black/[0.13] flex items-center justify-center text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.13] transition-all">
               <Share2 size={16} />
             </button>
           </div>
         </header>
 
+        {/* Section Nav */}
+        {(() => {
+          const navItems: {id: string; label: string}[] = [
+            { id: 'flights', label: 'Flights' },
+            { id: 'overview', label: 'Overview' },
+            { id: 'dining', label: 'Dining' },
+            ...(data.topRestaurants && data.topRestaurants.length > 0 ? [{ id: 'restaurants', label: 'Restaurants' }] : []),
+            { id: 'activities', label: 'Activities' },
+            { id: 'seasonal', label: 'Seasonal' },
+            ...(data.events && data.events.length > 0 ? [{ id: 'events', label: 'Events' }] : []),
+            ...(data.insiderTips && data.insiderTips.length > 0 ? [{ id: 'insider', label: 'Insider' }] : []),
+            ...(data.neighborhoods && data.neighborhoods.length > 0 ? [{ id: 'neighborhoods', label: 'Neighborhoods' }] : []),
+            { id: 'trip-intel', label: 'Trip Intel' },
+          ];
+          return (
+            <div className="flex justify-center mb-10">
+              <div className="flex items-center bg-white rounded-full shadow-md border border-black/[0.07] px-3 py-2 overflow-x-auto max-w-full">
+                {navItems.map((item, i) => (
+                  <React.Fragment key={item.id}>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById(item.id);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className="px-5 py-1.5 rounded-full text-[10px] font-semibold tracking-widest uppercase text-slate-500 hover:bg-[#0891B2]/[0.08] hover:text-[#0891B2] transition-all whitespace-nowrap"
+                    >
+                      {item.label}
+                    </button>
+                    {i < navItems.length - 1 && <span className="w-px h-3.5 bg-slate-200 flex-shrink-0" />}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Destination Hero */}
-        <section className="mb-20 relative rounded-[2.5rem] overflow-hidden h-72 md:h-96 border border-white/5">
+        <section className="mb-20 relative rounded-[2.5rem] overflow-hidden h-72 md:h-96 border border-black/[0.09]">
           <WikiImg
             keyword={destination}
             alt={destination}
@@ -1977,14 +2039,14 @@ Return ONLY a JSON object, no markdown, no explanation:
           <div className="absolute inset-0 bg-gradient-to-t from-[#050B14]/80 via-transparent to-transparent" />
           {/* Content */}
           <div className="absolute inset-0 p-10 md:p-14 flex flex-col justify-end">
-            <p className="text-[9px] uppercase tracking-[0.3em] text-teal-400 font-bold mb-3 flex items-center gap-2">
+            <p className="text-[9px] uppercase tracking-[0.3em] text-[#00E5D3] font-bold mb-3 flex items-center gap-2">
               <MapPin size={10} />
               Currently Exploring
             </p>
             <h1 className="text-5xl md:text-7xl text-white font-serif tracking-tight leading-none mb-4">
               {destination}
             </h1>
-            <p className="text-slate-400 text-sm font-light italic max-w-md">{data.subtitle}</p>
+            <p className="text-white/60 text-sm font-light italic max-w-md">{data.subtitle}</p>
           </div>
           {/* Top-right watermark */}
           <div className="absolute top-8 right-8 opacity-20">
@@ -1993,26 +2055,26 @@ Return ONLY a JSON object, no markdown, no explanation:
         </section>
 
         {/* Year-Round Flights & Climate - COLLABORATIVE WORKSPACE */}
-        <section className="mb-24">
+        <section id="flights" className="mb-24 scroll-mt-16">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+              <div className="w-12 h-12 rounded-2xl bg-[#0891B2]/10 flex items-center justify-center text-[#0891B2]">
                 <Calendar size={24} />
               </div>
               <div>
-                <h2 className="text-3xl text-white font-serif tracking-tight">Trip Pulse</h2>
+                <h2 className="text-3xl text-[#0A1A2E] font-serif tracking-tight">Trip Pulse</h2>
                 <p className="text-slate-500 text-xs">A 12-month seasonality and cost breakdown.</p>
               </div>
             </div>
             <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest font-bold">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></span>
-                <span className="text-slate-300">Ideal Window</span>
+                <span className="w-2 h-2 rounded-full bg-[#0891B2] shadow-[0_0_10px_rgba(8,145,178,0.4)]"></span>
+                <span className="text-slate-700">Ideal Window</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#0B1221]/50 border border-white/10 rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
+          <div className="bg-[#F7F2E8]/50 border border-black/[0.13] rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
 
             <div className="relative z-10">
@@ -2033,14 +2095,14 @@ Return ONLY a JSON object, no markdown, no explanation:
                             onClick={() => { setSelectedAirportIata(ap.iata); setCustomFlightCosts(null); }}
                             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all border ${
                               isActive
-                                ? 'bg-teal-500/20 border-teal-500/40 text-teal-300'
-                                : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:text-white'
+                                ? 'bg-[#0891B2]/10 border-[#0891B2]/30 text-[#0891B2]'
+                                : 'bg-white border-black/[0.13] text-slate-500 hover:border-black/[0.13] hover:text-[#0A1A2E]'
                             }`}
                           >
                             <span className="font-mono font-bold text-[11px]">{ap.iata}</span>
-                            <span className="hidden sm:inline text-slate-400 font-light">{ap.name}</span>
+                            <span className="hidden sm:inline text-slate-500 font-light">{ap.name}</span>
                             {ap.costModifier !== 1.0 && (
-                              <span className={`text-[10px] font-bold ${ap.costModifier < 1 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                              <span className={`text-[10px] font-bold ${ap.costModifier < 1 ? 'text-emerald-700' : 'text-amber-700'}`}>
                                 {ap.costModifier < 1 ? `−${Math.round((1-ap.costModifier)*100)}%` : `+${Math.round((ap.costModifier-1)*100)}%`}
                               </span>
                             )}
@@ -2065,21 +2127,21 @@ Return ONLY a JSON object, no markdown, no explanation:
                         onChange={e => setHomeAirportInput(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter' && homeAirportInput.trim()) { fetchFlightEstimates(homeAirportInput.trim(), selectedAirportIata ?? data.airports![0].iata, destination); } }}
                         placeholder="City or airport code (e.g. NYC, LAX)"
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-teal-500/50 transition-colors"
+                        className="flex-1 bg-white border border-black/[0.13] rounded-xl px-4 py-2 text-sm text-[#0A1A2E] placeholder:text-slate-400 focus:outline-none focus:border-teal-500/50 transition-colors"
                       />
                       <button
                         onClick={() => { if (homeAirportInput.trim()) fetchFlightEstimates(homeAirportInput.trim(), selectedAirportIata ?? data.airports![0].iata, destination); }}
                         disabled={!homeAirportInput.trim() || fetchingFlightCosts}
-                        className="px-4 py-2 bg-teal-500/20 border border-teal-500/30 rounded-xl text-teal-400 text-xs font-bold uppercase tracking-widest hover:bg-teal-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-4 py-2 bg-[#0891B2]/10 border border-[#0891B2]/25 rounded-xl text-[#0891B2] text-xs font-bold uppercase tracking-widest hover:bg-[#0891B2]/15 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         {fetchingFlightCosts ? <RefreshCw size={12} className="animate-spin" /> : <Sparkles size={12} />}
                         {fetchingFlightCosts ? 'Estimating…' : 'Estimate'}
                       </button>
                     </div>
                     {homeAirport && customFlightCosts && (
-                      <p className="text-[10px] text-teal-400/70 mt-2">
+                      <p className="text-[10px] text-[#0891B2]/70 mt-2">
                         Showing AI estimates from {homeAirport} → {(data.airports.find(a => a.iata === selectedAirportIata) ?? data.airports[0]).iata}
-                        <button onClick={() => { setCustomFlightCosts(null); setHomeAirport(''); setHomeAirportInput(''); }} className="ml-2 text-slate-600 hover:text-slate-400">✕ clear</button>
+                        <button onClick={() => { setCustomFlightCosts(null); setHomeAirport(''); setHomeAirportInput(''); }} className="ml-2 text-slate-600 hover:text-slate-500">✕ clear</button>
                       </p>
                     )}
                   </div>
@@ -2088,7 +2150,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                   <p className="text-[9px] text-slate-600 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-600 inline-block" />
                     Flight costs are AI estimated · prices vary by origin ·
-                    <a href="https://www.google.com/flights" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:text-teal-400 transition-colors underline">verify on Google Flights</a>
+                    <a href="https://www.google.com/flights" target="_blank" rel="noopener noreferrer" className="text-[#0369A1] hover:text-[#0891B2] transition-colors underline">verify on Google Flights</a>
                   </p>
                 </div>
               )}
@@ -2114,25 +2176,25 @@ Return ONLY a JSON object, no markdown, no explanation:
                                 onClick={() => { setActiveMonthIndex(i); }}
                                 className={`w-full max-w-[64px] rounded-t-2xl transition-all duration-500 relative group ${
                                   item.isIdeal
-                                    ? 'bg-gradient-to-t from-cyan-900/40 to-cyan-400/80'
-                                    : 'bg-white/5 hover:bg-white/10'
-                                } ${isSelected ? 'ring-2 ring-cyan-400 ring-offset-4 ring-offset-[#0B1221]' : ''}`}
+                                    ? 'bg-gradient-to-t from-[#0369A1]/50 to-[#00C4CC]/80'
+                                    : 'bg-[#0891B2]/[0.08] hover:bg-[#0891B2]/[0.16]'
+                                } ${isSelected ? 'ring-2 ring-[#0891B2] ring-offset-4 ring-offset-[#FDFAF5]' : ''}`}
                                 style={{ height: `${heightPercent}%` }}
                               >
-                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#050B14] border border-white/10 rounded-xl px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-all z-30 shadow-2xl">
-                                  <span className="text-white font-bold text-xs">${displayCosts[i]}</span>
+                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#FDFAF5] border border-black/[0.13] rounded-xl px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-all z-30 shadow-2xl">
+                                  <span className="text-[#0A1A2E] font-bold text-xs">${displayCosts[i]}</span>
                                 </div>
                               </button>
                             </div>
                             <div className="flex flex-col items-center gap-1.5">
-                              {item.isIdeal && <Sparkles size={10} className="text-cyan-400" />}
-                              <span className={`text-[10px] font-black tracking-widest uppercase ${isSelected ? 'text-cyan-400' : 'text-slate-600'}`}>
+                              {item.isIdeal && <Sparkles size={10} className="text-[#0891B2]" />}
+                              <span className={`text-[10px] font-black tracking-widest uppercase ${isSelected ? 'text-[#0891B2]' : 'text-slate-600'}`}>
                                 {item.month}
                               </span>
                               {/* Crowd dots */}
                               <div className="flex gap-0.5">
                                 {[1,2,3,4,5].map(dot => (
-                                  <div key={dot} className={`w-1 h-1 rounded-full transition-colors ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
+                                  <div key={dot} className={`w-1 h-1 rounded-full transition-colors ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-slate-200'}`} />
                                 ))}
                               </div>
                             </div>
@@ -2151,8 +2213,8 @@ Return ONLY a JSON object, no markdown, no explanation:
                       const bestValueMonth = data.monthlyData[displayCosts.indexOf(minDC)];
                       const monthEvents = (data.events || []).filter(e => e.month === item.month);
                       const crowdLabel = item.crowdLevel >= 8 ? 'Very Busy' : item.crowdLevel >= 6 ? 'Moderate' : item.crowdLevel >= 4 ? 'Manageable' : 'Quiet';
-                      const crowdColor = item.crowdLevel >= 8 ? 'text-rose-400' : item.crowdLevel >= 6 ? 'text-amber-400' : 'text-emerald-400';
-                      const weatherIcon = item.condition.includes('Sun') ? <Sun size={18} className="text-amber-400" /> : item.condition.includes('Rain') ? <CloudRain size={18} className="text-cyan-400" /> : item.condition.includes('Snow') ? <Snowflake size={18} className="text-teal-400" /> : <Cloud size={18} className="text-slate-400" />;
+                      const crowdColor = item.crowdLevel >= 8 ? 'text-rose-600' : item.crowdLevel >= 6 ? 'text-amber-700' : 'text-emerald-700';
+                      const weatherIcon = item.condition.includes('Sun') ? <Sun size={18} className="text-amber-700" /> : item.condition.includes('Rain') ? <CloudRain size={18} className="text-[#0891B2]" /> : item.condition.includes('Snow') ? <Snowflake size={18} className="text-[#0891B2]" /> : <Cloud size={18} className="text-slate-500" />;
                       return (
                         <>
                           <motion.div
@@ -2160,13 +2222,13 @@ Return ONLY a JSON object, no markdown, no explanation:
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="mt-8 bg-[#050B14] border border-white/10 rounded-3xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6"
+                            className="mt-8 bg-[#FDFAF5] border border-black/[0.13] rounded-3xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6"
                           >
                             <div>
                               <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Temperature</p>
                               <div className="flex items-center gap-2">
                                 {weatherIcon}
-                                <span className="text-2xl text-white font-light">{item.temp}°F</span>
+                                <span className="text-2xl text-[#0A1A2E] font-light">{item.temp}°F</span>
                               </div>
                               <p className="text-[10px] text-slate-500 mt-1">{item.condition}</p>
                             </div>
@@ -2175,32 +2237,32 @@ Return ONLY a JSON object, no markdown, no explanation:
                                 Round-Trip Flight
                                 <span className="text-[8px] text-teal-500/70 font-normal ml-1">{homeAirport ? `from ${homeAirport}` : 'from US hub · AI est.'}</span>
                               </p>
-                              <span className="text-2xl text-white font-light">${activeCost.toLocaleString()}</span>
+                              <span className="text-2xl text-[#0A1A2E] font-light">${activeCost.toLocaleString()}</span>
                               {savingsPct > 10 && (
-                                <p className="text-[10px] text-emerald-400 mt-1 font-bold">Save ~{savingsPct}% vs peak</p>
+                                <p className="text-[10px] text-emerald-700 mt-1 font-bold">Save ~{savingsPct}% vs peak</p>
                               )}
                             </div>
                             <div>
                               <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Crowd Level</p>
                               <div className="flex gap-1 mb-1">
                                 {[1,2,3,4,5].map(dot => (
-                                  <div key={dot} className={`w-3 h-3 rounded-full ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-white/10'}`} />
+                                  <div key={dot} className={`w-3 h-3 rounded-full ${Math.round(item.crowdLevel / 2) >= dot ? (item.crowdLevel >= 8 ? 'bg-rose-400' : item.crowdLevel >= 5 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-slate-200'}`} />
                                 ))}
                               </div>
                               <p className={`text-[10px] font-bold ${crowdColor}`}>{crowdLabel}</p>
                             </div>
                             <div>
                               <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Local Vibe</p>
-                              <p className="text-xs text-slate-300 font-light leading-relaxed">{item.note}</p>
+                              <p className="text-xs text-slate-700 font-light leading-relaxed">{item.note}</p>
                             </div>
                             {monthEvents.length > 0 && (
-                              <div className="col-span-full border-t border-white/5 pt-4">
+                              <div className="col-span-full border-t border-black/[0.09] pt-4">
                                 <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-3 font-bold flex items-center gap-2">
-                                  <Star size={10} className="text-amber-400" /> Events This Month
+                                  <Star size={10} className="text-amber-700" /> Events This Month
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                   {monthEvents.map((event, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs text-amber-400 font-medium">{event.name}</span>
+                                    <span key={idx} className="px-3 py-1 bg-amber-100 border border-amber-400/50 rounded-full text-xs text-amber-700 font-medium">{event.name}</span>
                                   ))}
                                 </div>
                               </div>
@@ -2209,11 +2271,11 @@ Return ONLY a JSON object, no markdown, no explanation:
 
                           {/* Best Value Month */}
                           {bestValueMonth && (
-                            <div className="mt-6 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
-                              <p className="text-[9px] uppercase tracking-widest text-emerald-400 font-bold mb-2">Best Value Month</p>
+                            <div className="mt-6 p-4 bg-emerald-500/[0.1] border border-emerald-400/60 rounded-2xl">
+                              <p className="text-[9px] uppercase tracking-widest text-emerald-700 font-bold mb-2">Best Value Month</p>
                               <div className="flex items-center justify-between">
-                                <span className="text-white font-medium text-sm">{bestValueMonth.month}</span>
-                                <span className="text-emerald-400 font-bold">${minDC}</span>
+                                <span className="text-[#0A1A2E] font-medium text-sm">{bestValueMonth.month}</span>
+                                <span className="text-emerald-700 font-bold">${minDC}</span>
                               </div>
                               <p className="text-xs text-slate-500 mt-1 font-light">{bestValueMonth.note}</p>
                             </div>
@@ -2229,45 +2291,45 @@ Return ONLY a JSON object, no markdown, no explanation:
         </section>
 
         {/* The Draw: Why & When - WITH BUDGET INSIGHTS */}
-        <section className="mb-20 grid grid-cols-1 xl:grid-cols-3 gap-12">
+        <section id="overview" className="mb-20 grid grid-cols-1 xl:grid-cols-3 gap-12 scroll-mt-16">
           <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                <div className="w-10 h-10 rounded-xl bg-[#0891B2]/10 flex items-center justify-center text-[#0891B2]">
                   <Sparkles size={20} />
                 </div>
-                <h3 className="text-2xl text-white font-serif">The Draw</h3>
+                <h3 className="text-2xl text-[#0A1A2E] font-serif">The Draw</h3>
               </div>
-              <p className="text-slate-400 font-light leading-relaxed">
+              <p className="text-slate-500 font-light leading-relaxed">
                 {data.whyVisit}
               </p>
             </div>
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-[#0891B2]">
                   <Calendar size={20} />
                 </div>
-                <h3 className="text-2xl text-white font-serif">When to Go</h3>
+                <h3 className="text-2xl text-[#0A1A2E] font-serif">When to Go</h3>
               </div>
-              <p className="text-slate-400 font-light leading-relaxed">
+              <p className="text-slate-500 font-light leading-relaxed">
                 {data.whenToVisit}
               </p>
             </div>
             
             {/* Budget Insight */}
             {data.averageDailySpend && (
-              <div className="md:col-span-2 p-8 bg-[#0B1221] border border-white/5 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 border-l-cyan-500/50 border-l-4">
+              <div className="md:col-span-2 p-8 bg-[#F7F2E8] border border-black/[0.09] rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 border-l-cyan-500/50 border-l-4">
                 <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                  <div className="w-14 h-14 rounded-2xl bg-[#0891B2]/10 flex items-center justify-center text-[#0891B2]">
                     <DollarSign size={28} />
                   </div>
                   <div>
-                    <h4 className="text-white font-medium mb-1">Estimated Daily Spend</h4>
+                    <h4 className="text-[#0A1A2E] font-medium mb-1">Estimated Daily Spend</h4>
                     <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">Mid-range comfort level</p>
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl text-white font-light tracking-tight">${data.averageDailySpend}</span>
+                  <span className="text-5xl text-[#0A1A2E] font-light tracking-tight">${data.averageDailySpend}</span>
                   <span className="text-slate-500 text-sm">/ day</span>
                 </div>
               </div>
@@ -2275,30 +2337,30 @@ Return ONLY a JSON object, no markdown, no explanation:
           </div>
           
           {/* Weather Card - REFINED */}
-          <div className="bg-[#0B1221] border border-white/10 rounded-3xl p-8 flex flex-col shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-cyan-500/10 transition-colors"></div>
+          <div className="bg-[#F7F2E8] border border-black/[0.13] rounded-3xl p-8 flex flex-col shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#0891B2]/[0.06] rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#0891B2]/10 transition-colors"></div>
             
             <div className="flex items-center justify-between mb-8 relative z-10">
-              <span className="text-[10px] uppercase tracking-widest text-cyan-400 font-black px-3 py-1 bg-cyan-400/10 rounded-full">Climate Pulse</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#0891B2] font-black px-3 py-1 bg-[#0891B2]/10 rounded-full">Climate Pulse</span>
               {(() => {
                 const monthData = data.monthlyData[activeMonthIndex];
                 const cond = monthData?.condition || "Sunny";
-                if (cond.includes('Sun')) return <Sun size={24} className="text-amber-400" />;
-                if (cond.includes('Rain')) return <CloudRain size={24} className="text-cyan-400" />;
-                if (cond.includes('Snow')) return <Snowflake size={24} className="text-teal-400" />;
-                return <Cloud size={24} className="text-slate-400" />;
+                if (cond.includes('Sun')) return <Sun size={24} className="text-amber-700" />;
+                if (cond.includes('Rain')) return <CloudRain size={24} className="text-[#0891B2]" />;
+                if (cond.includes('Snow')) return <Snowflake size={24} className="text-[#0891B2]" />;
+                return <Cloud size={24} className="text-slate-500" />;
               })()}
             </div>
 
-            <div className="flex items-center justify-between gap-1 mb-10 bg-white/5 p-1 rounded-2xl relative z-10">
+            <div className="flex items-center justify-between gap-1 mb-10 bg-white p-1 rounded-2xl relative z-10">
               {data.monthlyData.map((m, idx) => (
                 <button
                   key={m.month}
                   onClick={() => setActiveMonthIndex(idx)}
                   className={`flex-1 text-[9px] py-2 rounded-xl transition-all font-black uppercase ${
                     activeMonthIndex === idx 
-                      ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' 
-                      : 'text-slate-600 hover:text-slate-400'
+                      ? 'bg-cyan-500 text-[#0A1A2E] shadow-lg shadow-cyan-500/20' 
+                      : 'text-slate-600 hover:text-slate-500'
                   }`}
                 >
                   {m.month.substring(0, 1)}
@@ -2307,23 +2369,23 @@ Return ONLY a JSON object, no markdown, no explanation:
             </div>
             
             <div className="flex items-baseline gap-2 mb-4 relative z-10">
-              <span className="text-7xl text-white font-light tracking-tighter">{data.monthlyData[activeMonthIndex]?.temp || 0}°</span>
+              <span className="text-7xl text-[#0A1A2E] font-light tracking-tighter">{data.monthlyData[activeMonthIndex]?.temp || 0}°</span>
               <span className="text-2xl text-slate-500 font-serif">F</span>
             </div>
             
-            <p className="text-sm text-slate-300 font-light leading-relaxed relative z-10">
+            <p className="text-sm text-slate-700 font-light leading-relaxed relative z-10">
               {data.monthlyData[activeMonthIndex]?.note || "Select a month to see local weather context."}
             </p>
           </div>
         </section>
 
         {/* Food & Culture Section - Editorial Redesign */}
-        <section className="mb-32">
+        <section id="dining" className="mb-32 scroll-mt-16">
           <div className="flex items-center gap-4 mb-16">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
-              <Sparkles size={28} className="text-cyan-400" />
+            <div className="w-12 h-12 rounded-2xl bg-[#0891B2]/10 flex items-center justify-center">
+              <Sparkles size={28} className="text-[#0891B2]" />
             </div>
-            <h2 className="text-4xl md:text-6xl text-white font-serif tracking-tight">The Culinary Journey</h2>
+            <h2 className="text-4xl md:text-6xl text-[#0A1A2E] font-serif tracking-tight">The Culinary Journey</h2>
           </div>
 
           {/* Category Tab Bar */}
@@ -2334,8 +2396,8 @@ Return ONLY a JSON object, no markdown, no explanation:
                 onClick={() => setActiveFoodCat(idx)}
                 className={`px-5 py-2.5 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all ${
                   activeFoodCat === idx
-                    ? 'bg-cyan-500 text-white shadow-[0_0_16px_rgba(6,182,212,0.4)]'
-                    : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                    ? 'bg-cyan-500 text-[#0A1A2E] shadow-[0_0_16px_rgba(6,182,212,0.4)]'
+                    : 'bg-white border border-black/[0.13] text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.13]'
                 }`}
               >
                 {cat.title}
@@ -2355,7 +2417,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16"
               >
                 {data.foodAndCulture.categories[activeFoodCat].items.map((item, i) => (
-                  <div key={i} className="group flex gap-4 bg-white/5 border border-white/10 rounded-3xl p-5 hover:border-cyan-500/20 transition-all">
+                  <div key={i} className="group flex gap-4 bg-white border border-black/[0.13] rounded-3xl p-5 hover:border-cyan-500/20 transition-all">
                     <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                       <WikiImg
                         keyword={item.imageKeyword}
@@ -2364,7 +2426,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                       />
                     </div>
                     <div className="flex flex-col justify-center min-w-0">
-                      <h4 className="text-sm text-white font-serif mb-1 group-hover:text-cyan-400 transition-colors leading-snug">{item.name}</h4>
+                      <h4 className="text-sm text-[#0A1A2E] font-serif mb-1 group-hover:text-[#0891B2] transition-colors leading-snug">{item.name}</h4>
                       <p className="text-xs text-slate-500 font-light leading-relaxed line-clamp-2">{item.description}</p>
                     </div>
                   </div>
@@ -2375,33 +2437,33 @@ Return ONLY a JSON object, no markdown, no explanation:
 
           {/* Must-Haves + Etiquette: side by side below the tabs */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-[#0B1221] border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden">
+            <div className="bg-[#F7F2E8] border border-black/[0.13] rounded-[2.5rem] p-8 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-6 opacity-5">
                 <CheckCircle2 size={100} />
               </div>
-              <h4 className="text-white font-serif text-xl mb-8">The Must-Haves</h4>
+              <h4 className="text-[#0A1A2E] font-serif text-xl mb-8">The Must-Haves</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {data.foodAndCulture.mustTry.map((item, i) => (
                   <div key={i} className="flex items-center gap-3 group">
-                    <div className="w-7 h-7 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-[10px] font-bold shrink-0 transition-all group-hover:bg-cyan-500 group-hover:text-white">
+                    <div className="w-7 h-7 rounded-full bg-[#0891B2]/10 border border-cyan-500/20 flex items-center justify-center text-[#0891B2] text-[10px] font-bold shrink-0 transition-all group-hover:bg-cyan-500 group-hover:text-[#0A1A2E]">
                       {i + 1}
                     </div>
-                    <span className="text-sm text-slate-300 group-hover:text-white transition-colors">{item}</span>
+                    <span className="text-sm text-slate-700 group-hover:text-[#0A1A2E] transition-colors">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-teal-500/10 to-cyan-500/5 border border-white/10 rounded-[2.5rem] p-8">
-              <h4 className="text-white font-serif text-xl mb-8 flex items-center gap-3">
-                <Users size={18} className="text-teal-400" />
+            <div className="bg-gradient-to-br from-teal-500/10 to-cyan-500/5 border border-black/[0.13] rounded-[2.5rem] p-8">
+              <h4 className="text-[#0A1A2E] font-serif text-xl mb-8 flex items-center gap-3">
+                <Users size={18} className="text-[#0891B2]" />
                 Local Etiquette
               </h4>
               <div className="space-y-6">
                 {data.foodAndCulture.culturalEtiquette.map((item, i) => (
-                  <div key={i} className="relative pl-5 border-l-2 border-teal-500/20 hover:border-teal-500 transition-colors">
-                    <h5 className="text-[10px] uppercase tracking-[0.2em] text-teal-400 font-bold mb-1">{item.title}</h5>
-                    <p className="text-xs text-slate-400 font-light leading-relaxed">"{item.description}"</p>
+                  <div key={i} className="relative pl-5 border-l-2 border-teal-400/50 hover:border-teal-500 transition-colors">
+                    <h5 className="text-[10px] uppercase tracking-[0.2em] text-[#0891B2] font-bold mb-1">{item.title}</h5>
+                    <p className="text-xs text-slate-500 font-light leading-relaxed">"{item.description}"</p>
                   </div>
                 ))}
               </div>
@@ -2411,41 +2473,41 @@ Return ONLY a JSON object, no markdown, no explanation:
 
         {/* Top Restaurants */}
         {data.topRestaurants && data.topRestaurants.length > 0 && (
-          <section className="mb-24">
+          <section id="restaurants" className="mb-24 scroll-mt-16">
             <div className="flex items-center gap-4 mb-12">
-              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-400">
+              <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
                 <DollarSign size={24} />
               </div>
               <div>
-                <h2 className="text-3xl md:text-4xl text-white font-serif">Where to Eat</h2>
+                <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Where to Eat</h2>
                 <p className="text-slate-500 text-xs mt-1">Specific picks — not a generic list</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {data.topRestaurants.map((r, i) => (
-                <div key={i} className="group bg-[#0B1221]/60 border border-white/10 rounded-[2.5rem] p-8 hover:border-orange-500/20 transition-all flex flex-col gap-5">
+                <div key={i} className="group bg-[#F7F2E8]/60 border border-black/[0.13] rounded-[2.5rem] p-8 hover:border-orange-400/50 transition-all flex flex-col gap-5">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="text-xl text-white font-serif group-hover:text-orange-400 transition-colors mb-1">{r.name}</h4>
+                      <h4 className="text-xl text-[#0A1A2E] font-serif group-hover:text-orange-600 transition-colors mb-1">{r.name}</h4>
                       <p className="text-xs text-slate-500 uppercase tracking-widest">{r.cuisine}</p>
                     </div>
-                    <span className="text-base font-bold text-orange-400 shrink-0 ml-4">{r.priceRange}</span>
+                    <span className="text-base font-bold text-orange-600 shrink-0 ml-4">{r.priceRange}</span>
                   </div>
-                  <div className="pb-5 border-b border-white/5">
+                  <div className="pb-5 border-b border-black/[0.09]">
                     <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-1.5">Must Order</p>
-                    <p className="text-sm text-teal-400 font-medium">{r.mustOrder}</p>
+                    <p className="text-sm text-[#0891B2] font-medium">{r.mustOrder}</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <MapPin size={12} className="text-slate-600 shrink-0 mt-0.5" />
                     <span className="text-xs text-slate-500">{r.neighborhood}</span>
                   </div>
-                  <div className="flex items-start gap-3 bg-white/5 rounded-2xl p-4">
-                    <Lightbulb size={14} className="text-yellow-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-slate-300 font-light leading-relaxed">{r.localTip}</p>
+                  <div className="flex items-start gap-3 bg-white rounded-2xl p-4">
+                    <Lightbulb size={14} className="text-yellow-700 shrink-0 mt-0.5" />
+                    <p className="text-xs text-slate-700 font-light leading-relaxed">{r.localTip}</p>
                   </div>
                   <button
                     onClick={() => setReviewRestaurant({ name: r.name, cuisine: r.cuisine, priceRange: r.priceRange, mustOrder: r.mustOrder, neighborhood: r.neighborhood, localTip: r.localTip })}
-                    className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest text-slate-400 hover:text-white hover:border-orange-500/30 hover:bg-orange-500/5 transition-all w-full cursor-pointer"
+                    className="mt-auto flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-white border border-black/[0.13] text-[10px] uppercase tracking-widest text-slate-500 hover:text-[#0A1A2E] hover:border-orange-500/30 hover:bg-orange-500/5 transition-all w-full cursor-pointer"
                   >
                     <Star size={12} />
                     Google Reviews
@@ -2458,13 +2520,13 @@ Return ONLY a JSON object, no markdown, no explanation:
 
         {/* Most Reviewed */}
         {data.popularRestaurants && data.popularRestaurants.length > 0 && (
-          <section className="mb-24">
+          <section id="most-reviewed" className="mb-24 scroll-mt-16">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-400">
+              <div className="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center text-yellow-700">
                 <Star size={22} />
               </div>
               <div>
-                <h2 className="text-3xl md:text-4xl text-white font-serif">Most Reviewed</h2>
+                <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Most Reviewed</h2>
                 <p className="text-slate-500 text-xs mt-1">Sorted by real-world Google review volume</p>
               </div>
             </div>
@@ -2476,16 +2538,16 @@ Return ONLY a JSON object, no markdown, no explanation:
                   href={`https://www.google.com/maps/search/${encodeURIComponent(r.name + ' ' + destination)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-5 p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-yellow-500/30 hover:bg-yellow-500/5 transition-all"
+                  className="group flex items-center gap-5 p-5 bg-white border border-black/[0.13] rounded-2xl hover:border-yellow-500/30 hover:bg-yellow-50 transition-all"
                 >
                   {/* Rank */}
-                  <span className="text-2xl font-serif text-white/10 group-hover:text-yellow-500/30 transition-colors w-8 shrink-0 text-center leading-none">
+                  <span className="text-2xl font-serif text-[#0A1A2E]/10 group-hover:text-yellow-500/30 transition-colors w-8 shrink-0 text-center leading-none">
                     {i + 1}
                   </span>
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm text-white font-medium group-hover:text-yellow-300 transition-colors">{r.name}</span>
+                      <span className="text-sm text-[#0A1A2E] font-medium group-hover:text-yellow-700 transition-colors">{r.name}</span>
                       <span className="text-[10px] text-slate-500 uppercase tracking-widest">{r.cuisine}</span>
                     </div>
                     <p className="text-xs text-slate-600 mt-0.5">{r.neighborhood}</p>
@@ -2494,13 +2556,13 @@ Return ONLY a JSON object, no markdown, no explanation:
                   <div className="flex items-center gap-4 shrink-0">
                     <div className="text-right hidden sm:block">
                       <div className="flex items-center gap-1 justify-end">
-                        <Star size={10} className="text-yellow-400 fill-yellow-400" />
-                        <span className="text-sm text-white font-medium">{r.rating.toFixed(1)}</span>
+                        <Star size={10} className="text-yellow-700 fill-yellow-400" />
+                        <span className="text-sm text-[#0A1A2E] font-medium">{r.rating.toFixed(1)}</span>
                       </div>
                       <span className="text-[10px] text-slate-500">{r.reviewCount.toLocaleString()} reviews</span>
                     </div>
                     <span className="text-xs text-slate-500 font-medium">{r.priceRange}</span>
-                    <ChevronRight size={14} className="text-slate-600 group-hover:text-yellow-400 transition-colors" />
+                    <ChevronRight size={14} className="text-slate-600 group-hover:text-yellow-700 transition-colors" />
                   </div>
                 </a>
               ))}
@@ -2509,19 +2571,19 @@ Return ONLY a JSON object, no markdown, no explanation:
         )}
 
         {/* Top Activities */}
-        <section className="mb-24">
+        <section id="activities" className="mb-24 scroll-mt-16">
           <div className="flex items-center gap-3 mb-12">
-            <MapPin size={24} className="text-cyan-400" />
-            <h2 className="text-3xl md:text-4xl text-white font-serif">Top Activities</h2>
+            <MapPin size={24} className="text-[#0891B2]" />
+            <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Top Activities</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.topActivities.map((act, i) => (
-              <div key={i} className="group flex gap-5 p-6 bg-white/5 border border-white/10 rounded-3xl hover:border-cyan-500/30 hover:bg-white/[0.07] transition-all">
-                <span className="text-3xl font-serif text-white/10 group-hover:text-cyan-500/30 transition-colors leading-none shrink-0 select-none">
+              <div key={i} className="group flex gap-5 p-6 bg-white border border-black/[0.13] rounded-3xl hover:border-[#0891B2]/25 hover:bg-white transition-all">
+                <span className="text-3xl font-serif text-[#0A1A2E]/10 group-hover:text-cyan-500/30 transition-colors leading-none shrink-0 select-none">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div className="min-w-0">
-                  <h4 className="text-base text-white font-serif mb-1.5 group-hover:text-cyan-400 transition-colors leading-snug">{act.title}</h4>
+                  <h4 className="text-base text-[#0A1A2E] font-serif mb-1.5 group-hover:text-[#0891B2] transition-colors leading-snug">{act.title}</h4>
                   <p className="text-xs text-slate-500 font-light leading-relaxed">{act.description}</p>
                 </div>
               </div>
@@ -2530,10 +2592,10 @@ Return ONLY a JSON object, no markdown, no explanation:
         </section>
 
         {/* Niche Experiences */}
-        <section className="mb-24">
+        <section id="niche" className="mb-24 scroll-mt-16">
           <div className="flex items-center gap-3 mb-12">
-            <Sparkles size={24} className="text-cyan-400" />
-            <h2 className="text-3xl md:text-4xl text-white font-serif">Niche Experiences</h2>
+            <Sparkles size={24} className="text-[#0891B2]" />
+            <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Niche Experiences</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.nicheActivities.map((act, i) => (
@@ -2542,15 +2604,15 @@ Return ONLY a JSON object, no markdown, no explanation:
                 href={`https://www.google.com/search?q=${encodeURIComponent(act.title + ' ' + destination)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex gap-5 p-7 bg-white/5 border border-white/10 rounded-[2.5rem] hover:border-cyan-500/30 hover:bg-white/[0.07] transition-all"
+                className="group flex gap-5 p-7 bg-white border border-black/[0.13] rounded-[2.5rem] hover:border-[#0891B2]/25 hover:bg-white transition-all"
               >
-                <span className="text-4xl font-serif text-white/8 group-hover:text-cyan-500/25 transition-colors leading-none shrink-0 select-none mt-0.5">
+                <span className="text-4xl font-serif text-[#0A1A2E]/8 group-hover:text-cyan-500/25 transition-colors leading-none shrink-0 select-none mt-0.5">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div className="flex flex-col justify-center min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h4 className="text-lg text-white font-serif group-hover:text-cyan-400 transition-colors leading-snug">{act.title}</h4>
-                    <ChevronRight size={14} className="text-slate-600 group-hover:text-cyan-400 transition-colors shrink-0" />
+                    <h4 className="text-lg text-[#0A1A2E] font-serif group-hover:text-[#0891B2] transition-colors leading-snug">{act.title}</h4>
+                    <ChevronRight size={14} className="text-slate-600 group-hover:text-[#0891B2] transition-colors shrink-0" />
                   </div>
                   <p className="text-sm text-slate-500 font-light leading-relaxed">{act.description}</p>
                 </div>
@@ -2560,23 +2622,23 @@ Return ONLY a JSON object, no markdown, no explanation:
         </section>
 
         {/* Seasonal Highlights & Timeline */}
-        <section className="mb-24">
+        <section id="seasonal" className="mb-24 scroll-mt-16">
           <div className="flex items-center gap-3 mb-12">
-            <Calendar size={24} className="text-cyan-400" />
-            <h2 className="text-3xl md:text-4xl text-white font-serif">Seasonal Highlights</h2>
+            <Calendar size={24} className="text-[#0891B2]" />
+            <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Seasonal Highlights</h2>
           </div>
           <div className="space-y-6">
             {data.seasonalHighlights.map((hl, i) => (
-              <div key={i} className="relative pl-12 pb-12 border-l border-white/10 last:border-0 last:pb-0">
-                <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-all">
+              <div key={i} className="relative pl-12 pb-12 border-l border-black/[0.13] last:border-0 last:pb-0">
+                <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(8,145,178,0.4)]"></div>
+                <div className="bg-white border border-black/[0.13] rounded-3xl p-8 hover:bg-white/80 transition-all">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                    <h4 className="text-xl text-white font-serif">{hl.title}</h4>
-                    <span className="px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-[10px] uppercase tracking-widest text-cyan-400 font-bold">
+                    <h4 className="text-xl text-[#0A1A2E] font-serif">{hl.title}</h4>
+                    <span className="px-4 py-1.5 bg-[#0891B2]/10 border border-cyan-500/20 rounded-full text-[10px] uppercase tracking-widest text-[#0891B2] font-bold">
                       {hl.timeOfYear}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-400 font-light leading-relaxed">
+                  <p className="text-sm text-slate-500 font-light leading-relaxed">
                     {hl.description}
                   </p>
                 </div>
@@ -2584,11 +2646,11 @@ Return ONLY a JSON object, no markdown, no explanation:
             ))}
           </div>
 
-          <div className="mt-12 p-6 bg-white/5 border border-white/10 rounded-2xl flex gap-4">
-            <AlertCircle size={20} className="text-cyan-400 shrink-0" />
+          <div className="mt-12 p-6 bg-white border border-black/[0.13] rounded-2xl flex gap-4">
+            <AlertCircle size={20} className="text-[#0891B2] shrink-0" />
             <div>
-              <h5 className="text-sm text-white font-medium mb-1">System Confidence: 94%</h5>
-              <p className="text-xs text-slate-400 font-light leading-relaxed">
+              <h5 className="text-sm text-[#0A1A2E] font-medium mb-1">System Confidence: 94%</h5>
+              <p className="text-xs text-slate-500 font-light leading-relaxed">
                 Predictive model based on aggregated hospitality data, satellite weather history spanning 1990-2023.
               </p>
             </div>
@@ -2597,37 +2659,37 @@ Return ONLY a JSON object, no markdown, no explanation:
 
         {/* Events & Festivals */}
         {data.events && data.events.length > 0 && (
-          <section className="mb-24">
+          <section id="events" className="mb-24 scroll-mt-16">
             <div className="flex items-center gap-4 mb-12">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700">
                 <Star size={24} />
               </div>
               <div>
-                <h2 className="text-3xl md:text-4xl text-white font-serif">Events & Festivals</h2>
+                <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Events & Festivals</h2>
                 <p className="text-slate-500 text-xs mt-1">What's happening when you're there</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {data.events.map((event, i) => {
                 const typeStyles: Record<string, string> = {
-                  festival: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                  cultural: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-                  sporting: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                  food: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-                  music: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
-                  market: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                  festival: 'text-purple-700 bg-purple-100 border-purple-400/50',
+                  cultural: 'text-[#0891B2] bg-[#0891B2]/10 border-cyan-500/20',
+                  sporting: 'text-emerald-700 bg-emerald-100 border-emerald-400/60',
+                  food: 'text-orange-600 bg-orange-100 border-orange-400/50',
+                  music: 'text-pink-600 bg-pink-500/10 border-pink-500/20',
+                  market: 'text-amber-700 bg-amber-100 border-amber-400/50',
                 };
                 const style = typeStyles[event.type] || typeStyles.cultural;
                 return (
-                  <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-7 hover:border-amber-500/20 transition-all group">
+                  <div key={i} className="bg-white border border-black/[0.13] rounded-3xl p-7 hover:border-amber-400/50 transition-all group">
                     <div className="flex items-start justify-between mb-5">
                       <span className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-widest font-bold border ${style}`}>
                         {event.type}
                       </span>
-                      <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold bg-white/5 px-2.5 py-1 rounded-full">{event.month}</span>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold bg-white px-2.5 py-1 rounded-full">{event.month}</span>
                     </div>
-                    <h4 className="text-lg text-white font-serif mb-3 group-hover:text-amber-400 transition-colors">{event.name}</h4>
-                    <p className="text-sm text-slate-400 font-light leading-relaxed">{event.description}</p>
+                    <h4 className="text-lg text-[#0A1A2E] font-serif mb-3 group-hover:text-amber-700 transition-colors">{event.name}</h4>
+                    <p className="text-sm text-slate-500 font-light leading-relaxed">{event.description}</p>
                   </div>
                 );
               })}
@@ -2637,41 +2699,41 @@ Return ONLY a JSON object, no markdown, no explanation:
 
         {/* Insider Knowledge */}
         {data.insiderTips && data.insiderTips.length > 0 && (
-          <section className="mb-24">
-            <div className="bg-[#0B1221]/80 border border-white/10 rounded-[3rem] p-10 md:p-14 relative overflow-hidden">
+          <section id="insider" className="mb-24 scroll-mt-16">
+            <div className="bg-[#F7F2E8]/80 border border-black/[0.13] rounded-[3rem] p-10 md:p-14 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
                 <Lightbulb size={200} />
               </div>
               <div className="flex items-center gap-4 mb-12 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-400">
+                <div className="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center text-yellow-700">
                   <Lightbulb size={24} />
                 </div>
                 <div>
-                  <h2 className="text-3xl text-white font-serif">Insider Knowledge</h2>
+                  <h2 className="text-3xl text-[#0A1A2E] font-serif">Insider Knowledge</h2>
                   <p className="text-slate-500 text-xs mt-1">Things only locals know</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 {data.insiderTips.map((tip, i) => {
                   const catConfig: Record<string, { style: string; icon: React.ReactNode; label: string }> = {
-                    money: { style: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: <Wallet size={14} />, label: 'Save Money' },
-                    transport: { style: 'text-teal-400 bg-teal-500/10 border-teal-500/20', icon: <Plane size={14} />, label: 'Getting Around' },
-                    food: { style: 'text-orange-400 bg-orange-500/10 border-orange-500/20', icon: <DollarSign size={14} />, label: 'Food & Drink' },
-                    culture: { style: 'text-purple-400 bg-purple-500/10 border-purple-500/20', icon: <Info size={14} />, label: 'Local Culture' },
-                    safety: { style: 'text-rose-400 bg-rose-500/10 border-rose-500/20', icon: <AlertCircle size={14} />, label: 'Stay Safe' },
+                    money: { style: 'text-emerald-700 bg-emerald-100 border-emerald-400/60', icon: <Wallet size={14} />, label: 'Save Money' },
+                    transport: { style: 'text-[#0891B2] bg-teal-500/10 border-teal-400/50', icon: <Plane size={14} />, label: 'Getting Around' },
+                    food: { style: 'text-orange-600 bg-orange-100 border-orange-400/50', icon: <DollarSign size={14} />, label: 'Food & Drink' },
+                    culture: { style: 'text-purple-700 bg-purple-100 border-purple-400/50', icon: <Info size={14} />, label: 'Local Culture' },
+                    safety: { style: 'text-rose-600 bg-rose-100 border-rose-400/50', icon: <AlertCircle size={14} />, label: 'Stay Safe' },
                   };
                   const cat = catConfig[tip.category] || catConfig.culture;
                   return (
-                    <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-7 hover:border-yellow-500/20 transition-all group flex flex-col gap-4">
+                    <div key={i} className="bg-white border border-black/[0.13] rounded-3xl p-7 hover:border-yellow-400/50 transition-all group flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] uppercase tracking-widest font-bold border ${cat.style}`}>
                           {cat.icon}{cat.label}
                         </span>
-                        <span className="w-7 h-7 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold text-xs group-hover:bg-yellow-500 group-hover:text-white transition-all">
+                        <span className="w-7 h-7 rounded-full bg-yellow-100 border border-yellow-400/50 flex items-center justify-center text-yellow-700 font-bold text-xs group-hover:bg-yellow-500 group-hover:text-[#0A1A2E] transition-all">
                           {i + 1}
                         </span>
                       </div>
-                      <p className="text-slate-200 font-light leading-relaxed text-sm">{tip.tip}</p>
+                      <p className="text-slate-700 font-light leading-relaxed text-sm">{tip.tip}</p>
                     </div>
                   );
                 })}
@@ -2682,31 +2744,31 @@ Return ONLY a JSON object, no markdown, no explanation:
 
         {/* Neighborhood Guide */}
         {data.neighborhoods && data.neighborhoods.length > 0 && (
-          <section className="mb-24">
+          <section id="neighborhoods" className="mb-24 scroll-mt-16">
             <div className="flex items-center gap-4 mb-12">
-              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-400">
+              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center text-[#0891B2]">
                 <MapIcon size={24} />
               </div>
               <div>
-                <h2 className="text-3xl md:text-4xl text-white font-serif">Neighborhood Guide</h2>
+                <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Neighborhood Guide</h2>
                 <p className="text-slate-500 text-xs mt-1">Where to base yourself and what to expect</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {data.neighborhoods.map((hood, i) => (
-                <div key={i} className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 hover:border-teal-500/30 transition-all group">
+                <div key={i} className="bg-white border border-black/[0.13] rounded-[2.5rem] p-8 hover:border-[#0891B2]/25 transition-all group">
                   <div className="flex items-start justify-between mb-6">
-                    <h4 className="text-2xl text-white font-serif group-hover:text-teal-400 transition-colors">{hood.name}</h4>
-                    <span className="px-3 py-1 bg-teal-500/10 border border-teal-500/20 rounded-full text-[9px] uppercase tracking-widest text-teal-400 font-bold shrink-0">{hood.vibe}</span>
+                    <h4 className="text-2xl text-[#0A1A2E] font-serif group-hover:text-[#0891B2] transition-colors">{hood.name}</h4>
+                    <span className="px-3 py-1 bg-teal-500/10 border border-teal-400/50 rounded-full text-[9px] uppercase tracking-widest text-[#0891B2] font-bold shrink-0">{hood.vibe}</span>
                   </div>
                   <div className="space-y-4">
                     <div>
                       <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1.5">Best For</p>
-                      <p className="text-sm text-slate-300 font-light leading-relaxed">{hood.bestFor}</p>
+                      <p className="text-sm text-slate-700 font-light leading-relaxed">{hood.bestFor}</p>
                     </div>
-                    <div className="border-t border-white/5 pt-4">
+                    <div className="border-t border-black/[0.09] pt-4">
                       <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1.5 flex items-center gap-1.5"><ChevronRight size={10} /> Don't Miss</p>
-                      <p className="text-sm text-slate-300 font-light leading-relaxed">{hood.mustSee}</p>
+                      <p className="text-sm text-slate-700 font-light leading-relaxed">{hood.mustSee}</p>
                     </div>
                   </div>
                 </div>
@@ -2717,13 +2779,13 @@ Return ONLY a JSON object, no markdown, no explanation:
 
         {/* Practical Trip Intelligence */}
         {data.practicalInfo && (
-          <section className="mb-24">
+          <section id="trip-intel" className="mb-24 scroll-mt-16">
             <div className="flex items-center gap-4 mb-12">
-              <div className="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-400">
+              <div className="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-500">
                 <Info size={24} />
               </div>
               <div>
-                <h2 className="text-3xl text-white font-serif">Trip Intelligence</h2>
+                <h2 className="text-3xl text-[#0A1A2E] font-serif">Trip Intelligence</h2>
                 <p className="text-slate-500 text-xs mt-1">Everything you need to know before you go</p>
               </div>
             </div>
@@ -2737,19 +2799,19 @@ Return ONLY a JSON object, no markdown, no explanation:
                   { label: 'Safety', value: data.practicalInfo.safety, icon: CheckCircle2 },
                   { label: 'Best Transport', value: data.practicalInfo.bestTransport, icon: Plane },
                 ] as { label: string; value: string; icon: React.ElementType }[]).map(({ label, value, icon: Icon }) => (
-                  <div key={label} className="flex items-start gap-4 p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-white/20 transition-all">
-                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 shrink-0">
+                  <div key={label} className="flex items-start gap-4 p-5 bg-white border border-black/[0.13] rounded-2xl hover:border-black/[0.13] transition-all">
+                    <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-slate-500 shrink-0">
                       <Icon size={16} />
                     </div>
                     <div>
                       <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">{label}</p>
-                      <p className="text-sm text-slate-300 font-light leading-relaxed">{value}</p>
+                      <p className="text-sm text-slate-700 font-light leading-relaxed">{value}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="bg-[#0B1221] border border-white/10 rounded-[2.5rem] p-8 flex flex-col">
-                <h4 className="text-white font-serif text-xl mb-2">Budget Breakdown</h4>
+              <div className="bg-[#F7F2E8] border border-black/[0.13] rounded-[2.5rem] p-8 flex flex-col">
+                <h4 className="text-[#0A1A2E] font-serif text-xl mb-2">Budget Breakdown</h4>
                 <p className="text-xs text-slate-500 mb-4 font-light">Estimated all-in daily spend per person</p>
                 <div className="flex flex-wrap gap-2 mb-8">
                   {[
@@ -2758,20 +2820,20 @@ Return ONLY a JSON object, no markdown, no explanation:
                     { icon: '🚌', label: 'Local transport' },
                     { icon: '🎭', label: '1–2 activities' },
                   ].map(({ icon, label }) => (
-                    <span key={label} className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white/5 border border-white/10 rounded-full px-3 py-1">
+                    <span key={label} className="flex items-center gap-1.5 text-[10px] text-slate-500 bg-white border border-black/[0.13] rounded-full px-3 py-1">
                       <span>{icon}</span>{label}
                     </span>
                   ))}
                 </div>
                 <div className="space-y-3 flex-1">
                   {([
-                    { tier: 'Budget', price: data.practicalInfo.budgetBreakdown.budget, color: 'text-emerald-400', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20' },
-                    { tier: 'Mid-Range', price: data.practicalInfo.budgetBreakdown.midRange, color: 'text-cyan-400', bg: 'bg-cyan-500/5', border: 'border-cyan-500/20' },
-                    { tier: 'Luxury', price: data.practicalInfo.budgetBreakdown.luxury, color: 'text-purple-400', bg: 'bg-purple-500/5', border: 'border-purple-500/20' },
+                    { tier: 'Budget', price: data.practicalInfo.budgetBreakdown.budget, color: 'text-emerald-700', bg: 'bg-emerald-500/[0.1]', border: 'border-emerald-400/60' },
+                    { tier: 'Mid-Range', price: data.practicalInfo.budgetBreakdown.midRange, color: 'text-[#0891B2]', bg: 'bg-[#0891B2]/[0.06]', border: 'border-cyan-500/20' },
+                    { tier: 'Luxury', price: data.practicalInfo.budgetBreakdown.luxury, color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-400/50' },
                   ]).map(({ tier, price, color, bg, border }) => (
                     <div key={tier} className={`flex items-start justify-between p-5 ${bg} border ${border} rounded-2xl gap-4`}>
                       <span className={`text-[10px] uppercase tracking-widest font-bold ${color} shrink-0 mt-0.5`}>{tier}</span>
-                      <span className="text-slate-300 text-sm font-light text-right leading-relaxed">{price}</span>
+                      <span className="text-slate-700 text-sm font-light text-right leading-relaxed">{price}</span>
                     </div>
                   ))}
                 </div>
@@ -2813,13 +2875,13 @@ Return ONLY a JSON object, no markdown, no explanation:
                 minimumFractionDigits: convTo === 'JPY' || convTo === 'KRW' ? 0 : 2,
               }).format(converted);
               return (
-                <div className="mt-6 bg-[#0B1221] border border-white/10 rounded-[2.5rem] p-8">
+                <div className="mt-6 bg-[#F7F2E8] border border-black/[0.13] rounded-[2.5rem] p-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-2xl bg-teal-500/10 flex items-center justify-center text-teal-400">
+                    <div className="w-10 h-10 rounded-2xl bg-teal-500/10 flex items-center justify-center text-[#0891B2]">
                       <DollarSign size={18} />
                     </div>
                     <div>
-                      <h4 className="text-white font-serif text-xl leading-none">Currency Converter</h4>
+                      <h4 className="text-[#0A1A2E] font-serif text-xl leading-none">Currency Converter</h4>
                       <p className="text-[10px] text-slate-500 mt-0.5">Live rates · tap to convert</p>
                     </div>
                   </div>
@@ -2829,7 +2891,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                       type="number"
                       value={convAmount}
                       onChange={e => setConvAmount(e.target.value)}
-                      className="w-full sm:w-36 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-teal-500/50 transition-colors"
+                      className="w-full sm:w-36 bg-white border border-black/[0.13] rounded-2xl px-4 py-3 text-[#0A1A2E] text-sm font-mono focus:outline-none focus:border-teal-500/50 transition-colors"
                       placeholder="Amount"
                       min="0"
                     />
@@ -2837,16 +2899,16 @@ Return ONLY a JSON object, no markdown, no explanation:
                     <select
                       value={convFrom}
                       onChange={e => setConvFrom(e.target.value)}
-                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 transition-colors appearance-none cursor-pointer"
+                      className="flex-1 bg-white border border-black/[0.13] rounded-2xl px-4 py-3 text-[#0A1A2E] text-sm focus:outline-none focus:border-teal-500/50 transition-colors appearance-none cursor-pointer"
                     >
                       {CURRENCIES.map(c => (
-                        <option key={c.code} value={c.code} className="bg-[#0B1221]">{c.code} — {c.label}</option>
+                        <option key={c.code} value={c.code} className="bg-[#F7F2E8]">{c.code} — {c.label}</option>
                       ))}
                     </select>
                     {/* Swap */}
                     <button
                       onClick={() => { const tmp = convFrom; setConvFrom(convTo); setConvTo(tmp); }}
-                      className="w-10 h-10 mx-auto sm:mx-0 shrink-0 self-center rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 hover:bg-teal-500/20 transition-colors"
+                      className="w-10 h-10 mx-auto sm:mx-0 shrink-0 self-center rounded-full bg-teal-500/10 border border-teal-400/50 flex items-center justify-center text-[#0891B2] hover:bg-[#0891B2]/10 transition-colors"
                     >
                       <RefreshCw size={14} />
                     </button>
@@ -2854,17 +2916,17 @@ Return ONLY a JSON object, no markdown, no explanation:
                     <select
                       value={convTo}
                       onChange={e => setConvTo(e.target.value)}
-                      className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-teal-500/50 transition-colors appearance-none cursor-pointer"
+                      className="flex-1 bg-white border border-black/[0.13] rounded-2xl px-4 py-3 text-[#0A1A2E] text-sm focus:outline-none focus:border-teal-500/50 transition-colors appearance-none cursor-pointer"
                     >
                       {CURRENCIES.map(c => (
-                        <option key={c.code} value={c.code} className="bg-[#0B1221]">{c.code} — {c.label}</option>
+                        <option key={c.code} value={c.code} className="bg-[#F7F2E8]">{c.code} — {c.label}</option>
                       ))}
                     </select>
                   </div>
                   {/* Result */}
-                  <div className="mt-4 p-5 bg-teal-500/5 border border-teal-500/20 rounded-2xl flex items-center justify-between gap-4">
-                    <span className="text-slate-400 text-sm">{convAmount || '0'} {convFrom} =</span>
-                    <span className="text-teal-300 text-2xl font-serif tracking-tight">{formatted} <span className="text-base text-teal-400/70">{convTo}</span></span>
+                  <div className="mt-4 p-5 bg-teal-50 border border-teal-400/50 rounded-2xl flex items-center justify-between gap-4">
+                    <span className="text-slate-500 text-sm">{convAmount || '0'} {convFrom} =</span>
+                    <span className="text-[#0891B2] text-2xl font-serif tracking-tight">{formatted} <span className="text-base text-[#0891B2]/70">{convTo}</span></span>
                   </div>
                   <p className="text-[9px] text-slate-600 mt-3 text-right">Rates from exchangerate-api.com · indicative only</p>
                 </div>
@@ -2908,41 +2970,41 @@ function ReviewsModal({ name, cuisine, priceRange, mustOrder, neighborhood, loca
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
-      <div className="absolute inset-0 bg-[#050B14]/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#FDFAF5]/80 backdrop-blur-md" onClick={onClose} />
       <motion.div
         initial={{ y: 60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="relative bg-[#0B1221] border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden"
+        className="relative bg-[#F7F2E8] border border-black/[0.13] rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-start justify-between px-8 pt-8 pb-5">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
-              <h3 className="text-2xl text-white font-serif leading-tight truncate">{name}</h3>
-              <span className="text-base font-bold text-orange-400 shrink-0">{priceRange}</span>
+              <h3 className="text-2xl text-[#0A1A2E] font-serif leading-tight truncate">{name}</h3>
+              <span className="text-base font-bold text-orange-600 shrink-0">{priceRange}</span>
             </div>
             <p className="text-xs text-slate-500 flex items-center gap-1.5">
               <MapPin size={10} className="shrink-0" />{neighborhood} · <span className="text-slate-600">{cuisine}</span>
             </p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors shrink-0 ml-4">
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-500 hover:text-[#0A1A2E] hover:bg-white/80 transition-colors shrink-0 ml-4">
             ✕
           </button>
         </div>
 
         <div className="px-8 pb-8 space-y-5">
           {/* Must Order */}
-          <div className="p-5 bg-teal-500/5 border border-teal-500/15 rounded-2xl">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-teal-400 font-bold mb-1.5">Must Order</p>
-            <p className="text-sm text-white font-medium">{mustOrder}</p>
+          <div className="p-5 bg-teal-50 border border-teal-400/40 rounded-2xl">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-[#0891B2] font-bold mb-1.5">Must Order</p>
+            <p className="text-sm text-[#0A1A2E] font-medium">{mustOrder}</p>
           </div>
 
           {/* Local Tip */}
-          <div className="flex items-start gap-3 p-5 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl">
-            <Lightbulb size={14} className="text-yellow-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-300 font-light leading-relaxed">{localTip}</p>
+          <div className="flex items-start gap-3 p-5 bg-yellow-50 border border-yellow-500/10 rounded-2xl">
+            <Lightbulb size={14} className="text-yellow-700 shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-700 font-light leading-relaxed">{localTip}</p>
           </div>
 
           {/* Google Reviews CTA */}
@@ -2950,13 +3012,13 @@ function ReviewsModal({ name, cuisine, priceRange, mustOrder, neighborhood, loca
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between w-full p-5 bg-white/5 border border-white/10 rounded-2xl hover:border-orange-500/30 hover:bg-orange-500/5 transition-all group"
+            className="flex items-center justify-between w-full p-5 bg-white border border-black/[0.13] rounded-2xl hover:border-orange-500/30 hover:bg-orange-500/5 transition-all group"
           >
             <div>
-              <p className="text-xs font-semibold text-white group-hover:text-orange-300 transition-colors">See Reviews on Google Maps</p>
+              <p className="text-xs font-semibold text-[#0A1A2E] group-hover:text-orange-300 transition-colors">See Reviews on Google Maps</p>
               <p className="text-[10px] text-slate-500 mt-0.5">Opens ratings, photos & reviews</p>
             </div>
-            <ChevronRight size={16} className="text-slate-500 group-hover:text-orange-400 transition-colors shrink-0" />
+            <ChevronRight size={16} className="text-slate-500 group-hover:text-orange-600 transition-colors shrink-0" />
           </a>
         </div>
       </motion.div>
@@ -2978,31 +3040,31 @@ function InviteModal({ show, onClose, tripId }: { show: boolean, onClose: () => 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 pb-32">
-      <div className="absolute inset-0 bg-[#050B14]/80 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#FDFAF5]/80 backdrop-blur-md" onClick={onClose} />
       <motion.div 
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="relative bg-[#0B1221] border border-white/10 rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl"
+        className="relative bg-[#F7F2E8] border border-black/[0.13] rounded-[2.5rem] w-full max-w-md p-10 shadow-2xl"
       >
-        <div className="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center text-cyan-400 mb-6 mx-auto">
+        <div className="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center text-[#0891B2] mb-6 mx-auto">
           <Users size={32} />
         </div>
-        <h3 className="text-3xl font-serif font-black text-white text-center mb-2 tracking-tight">The Crew is Ready</h3>
-        <p className="text-slate-400 text-center mb-8">Share this link with your trip partners to start voting and planning in sync.</p>
+        <h3 className="text-3xl font-serif font-black text-[#0A1A2E] text-center mb-2 tracking-tight">The Crew is Ready</h3>
+        <p className="text-slate-500 text-center mb-8">Share this link with your trip partners to start voting and planning in sync.</p>
         
         <div className="space-y-4">
-          <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
+          <div className="p-4 bg-white border border-black/[0.09] rounded-2xl flex items-center justify-between">
             <span className="text-xs text-slate-500 font-mono truncate mr-4">{link}</span>
             <button 
               onClick={copy}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-cyan-400"
+              className="p-2 hover:bg-white/80 rounded-lg transition-colors text-[#0891B2]"
             >
               {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
             </button>
           </div>
           <button 
             onClick={onClose}
-            className="w-full py-5 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-2xl text-white text-[11px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-cyan-500/20"
+            className="w-full py-5 bg-gradient-to-r from-[#0BAED4] to-[#0369A1] rounded-2xl text-[#0A1A2E] text-[11px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-cyan-500/20"
           >
             Enter Workspace
           </button>

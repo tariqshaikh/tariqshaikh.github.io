@@ -18,6 +18,7 @@ import RetirementPlanner from './components/RetirementPlanner';
 import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
 import Waves from './components/Waves';
+import WavesThemePreview from './components/WavesThemePreview';
 import CapitalDeployment from './components/CapitalDeployment';
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/orbit" element={<Orbit />} />
         <Route path="/waves" element={<Waves />} />
         <Route path="/waves/:tripId" element={<Waves />} />
+        <Route path="/waves-preview" element={<WavesThemePreview />} />
         <Route path="/orbit/dashboard" element={<Orbit />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />
