@@ -6,7 +6,7 @@ import {
   ThermometerSun, CheckCircle2, RefreshCw, Sparkles, Plane,
   Bookmark, SlidersHorizontal, Clock, AlertCircle,
   Copy, Link2, Ghost, Crown, DollarSign,
-  Lightbulb, Map as MapIcon, Info, Star, Wallet, ChevronRight, ChevronLeft
+  Lightbulb, Map as MapIcon, Info, Star, Wallet, ChevronRight, ChevronLeft, Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { logVisit } from '../lib/analytics';
@@ -1070,6 +1070,39 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
   return <img src={src} alt={alt} className={className} onError={() => setSrc('')} />;
 };
 
+const DARK_STYLE = `
+  .waves-dark [class~="bg-[#FDFAF5]"] { background-color: #050B14 !important; }
+  .waves-dark [class~="bg-[#F7F2E8]"] { background-color: #0B1221 !important; }
+  .waves-dark [class~="bg-white"] { background-color: #0D1B2E !important; }
+  .waves-dark [class~="bg-white/80"] { background-color: rgba(13,27,46,0.8) !important; }
+  .waves-dark [class~="bg-[#F7F2E8]/80"] { background-color: rgba(11,18,33,0.8) !important; }
+  .waves-dark [class~="bg-[#FDFAF5]/80"] { background-color: rgba(5,11,20,0.8) !important; }
+  .waves-dark [class~="bg-[#FDFAF5]/95"] { background-color: rgba(5,11,20,0.95) !important; }
+  .waves-dark [class~="text-[#0A1A2E]"] { color: #f1f5f9 !important; }
+  .waves-dark [class~="text-slate-700"] { color: #cbd5e1 !important; }
+  .waves-dark [class~="text-slate-600"] { color: #94a3b8 !important; }
+  .waves-dark [class~="text-slate-500"] { color: #64748b !important; }
+  .waves-dark [class~="text-slate-400"] { color: #475569 !important; }
+  .waves-dark [class~="border-black/[0.06]"] { border-color: rgba(255,255,255,0.06) !important; }
+  .waves-dark [class~="border-black/[0.07]"] { border-color: rgba(255,255,255,0.07) !important; }
+  .waves-dark [class~="border-black/[0.08]"] { border-color: rgba(255,255,255,0.08) !important; }
+  .waves-dark [class~="border-black/[0.09]"] { border-color: rgba(255,255,255,0.09) !important; }
+  .waves-dark [class~="border-black/[0.13]"] { border-color: rgba(255,255,255,0.13) !important; }
+  .waves-dark [class~="ring-offset-[#FDFAF5]"] { --tw-ring-offset-color: #050B14 !important; }
+  .waves-dark [class~="bg-emerald-100"] { background-color: rgba(16,185,129,0.12) !important; }
+  .waves-dark [class~="bg-amber-100"] { background-color: rgba(245,158,11,0.12) !important; }
+  .waves-dark [class~="bg-orange-100"] { background-color: rgba(249,115,22,0.12) !important; }
+  .waves-dark [class~="bg-rose-100"] { background-color: rgba(244,63,94,0.12) !important; }
+  .waves-dark [class~="bg-purple-100"] { background-color: rgba(168,85,247,0.12) !important; }
+  .waves-dark [class~="bg-slate-100"] { background-color: rgba(100,116,139,0.12) !important; }
+  .waves-dark [class~="text-emerald-700"] { color: #34d399 !important; }
+  .waves-dark [class~="text-amber-700"] { color: #fbbf24 !important; }
+  .waves-dark [class~="text-orange-600"] { color: #fb923c !important; }
+  .waves-dark [class~="text-rose-600"] { color: #fb7185 !important; }
+  .waves-dark [class~="text-purple-700"] { color: #c084fc !important; }
+  .waves-dark [class~="text-yellow-700"] { color: #fde047 !important; }
+`;
+
 export default function Waves() {
   const { tripId } = useParams();
   const navigate = useNavigate();
@@ -1223,6 +1256,8 @@ Return ONLY a JSON array, no markdown, no explanation:
   }, [intelligence]);
   const [activeMonthIndex, setActiveMonthIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('waves-theme') === 'dark');
+  const toggleTheme = () => setIsDark(d => { const n = !d; localStorage.setItem('waves-theme', n ? 'dark' : 'light'); return n; });
 
   // Currency Converter State
   const [convAmount, setConvAmount] = useState('100');
@@ -1713,13 +1748,17 @@ Return ONLY a JSON object, no markdown, no explanation:
 
   if (!hasSearched) {
     return (
-      <div className="min-h-screen bg-[#FDFAF5] text-slate-700 font-sans selection:bg-[#0891B2]/15 flex flex-col">
+      <div className={`min-h-screen bg-[#FDFAF5] text-slate-700 font-sans selection:bg-[#0891B2]/15 flex flex-col${isDark ? ' waves-dark' : ''}`}>
+        {isDark && <style>{DARK_STYLE}</style>}
         <nav className="fixed top-0 w-full z-50 border-b border-black/[0.09] bg-[#FDFAF5]/80 backdrop-blur-xl">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
               <WavesLogo />
               <span className="text-[#0A1A2E] font-medium tracking-widest text-sm uppercase group-hover:text-[#0891B2] transition-colors">Waves</span>
             </Link>
+            <button onClick={toggleTheme} className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-[#0891B2] hover:bg-black/[0.04] transition-all" title={isDark ? 'Light mode' : 'Night mode'}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
           </div>
         </nav>
 
@@ -1887,8 +1926,9 @@ Return ONLY a JSON object, no markdown, no explanation:
   const data = intelligence || fallbackIntelligence;
 
   return (
-    <div className="min-h-screen bg-[#FDFAF5] text-slate-700 font-sans selection:bg-[#0891B2]/15 flex flex-col lg:flex-row">
-      
+    <div className={`min-h-screen bg-[#FDFAF5] text-slate-700 font-sans selection:bg-[#0891B2]/15 flex flex-col lg:flex-row${isDark ? ' waves-dark' : ''}`}>
+      {isDark && <style>{DARK_STYLE}</style>}
+
       {/* SIDEBAR */}
       <aside className="w-full lg:w-[380px] bg-[#F7F2E8] border-r border-black/[0.09] flex flex-col shrink-0 lg:h-screen lg:sticky lg:top-0 overflow-y-auto">
         <div className="p-8 pb-4">
@@ -1983,6 +2023,9 @@ Return ONLY a JSON object, no markdown, no explanation:
             </button>
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={toggleTheme} className="w-10 h-10 rounded-full bg-white border border-black/[0.13] flex items-center justify-center text-slate-500 hover:text-[#0891B2] hover:border-[#0891B2]/30 transition-all" title={isDark ? 'Light mode' : 'Night mode'}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <button className="w-10 h-10 rounded-full bg-white border border-black/[0.13] flex items-center justify-center text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.13] transition-all">
               <Bookmark size={16} />
             </button>
@@ -1998,33 +2041,32 @@ Return ONLY a JSON object, no markdown, no explanation:
             { id: 'flights', label: 'Flights' },
             { id: 'overview', label: 'Overview' },
             { id: 'dining', label: 'Dining' },
-            ...(data.topRestaurants && data.topRestaurants.length > 0 ? [{ id: 'restaurants', label: 'Restaurants' }] : []),
+            ...(data.topRestaurants && data.topRestaurants.length > 0 ? [{ id: 'restaurants', label: 'Eats' }] : []),
             { id: 'activities', label: 'Activities' },
             { id: 'seasonal', label: 'Seasonal' },
             ...(data.events && data.events.length > 0 ? [{ id: 'events', label: 'Events' }] : []),
             ...(data.insiderTips && data.insiderTips.length > 0 ? [{ id: 'insider', label: 'Insider' }] : []),
-            ...(data.neighborhoods && data.neighborhoods.length > 0 ? [{ id: 'neighborhoods', label: 'Neighborhoods' }] : []),
-            { id: 'trip-intel', label: 'Trip Intel' },
+            ...(data.neighborhoods && data.neighborhoods.length > 0 ? [{ id: 'neighborhoods', label: 'Areas' }] : []),
+            { id: 'trip-intel', label: 'Intel' },
           ];
+          const scrollTo = (id: string) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
           return (
-            <div className="mb-10 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              <div className="flex justify-center min-w-max mx-auto">
-                <div className="flex items-center bg-white rounded-full shadow-md border border-black/[0.07] px-3 py-2">
-                  {navItems.map((item, i) => (
-                    <React.Fragment key={item.id}>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById(item.id);
-                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }}
-                        className="px-5 py-1.5 rounded-full text-[10px] font-semibold tracking-widest uppercase text-slate-500 hover:bg-[#0891B2]/[0.08] hover:text-[#0891B2] transition-all whitespace-nowrap"
-                      >
-                        {item.label}
-                      </button>
-                      {i < navItems.length - 1 && <span className="w-px h-3.5 bg-slate-200 flex-shrink-0" />}
-                    </React.Fragment>
-                  ))}
-                </div>
+            <div className="-mx-6 lg:-mx-12 px-6 lg:px-12 mb-10 border-b border-black/[0.07] sticky top-0 z-40 bg-[#FDFAF5]">
+              <div className="flex items-center justify-between">
+                {navItems.map((item, i) => (
+                  <React.Fragment key={item.id}>
+                    <button
+                      onClick={() => scrollTo(item.id)}
+                      className="py-3 text-[10px] font-semibold tracking-widest uppercase text-slate-400 hover:text-[#0891B2] transition-colors whitespace-nowrap flex-1 text-center"
+                    >
+                      {item.label}
+                    </button>
+                    {i < navItems.length - 1 && <span className="w-px h-3 bg-black/[0.07] flex-shrink-0" />}
+                  </React.Fragment>
+                ))}
               </div>
             </div>
           );
