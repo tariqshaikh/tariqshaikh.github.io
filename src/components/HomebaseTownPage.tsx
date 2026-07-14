@@ -372,7 +372,7 @@ Use realistic NJ data. No explanation.`
                       href={`https://www.google.com/search?q=${encodeURIComponent(thing + ' ' + townName + ' NJ')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-[#0471A4]/30 hover:bg-blue-50 transition-all group"
+                      className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[#0471A4]/15 border-l-[3px] border-l-[#0471A4]/40 hover:border-[#0471A4]/35 hover:border-l-[#0471A4] hover:bg-blue-50/50 transition-all group shadow-sm"
                     >
                       <div className="w-6 h-6 rounded-full bg-[#0471A4]/10 flex items-center justify-center shrink-0 text-xs font-bold text-[#0471A4] group-hover:bg-[#0471A4]/20 transition-colors">
                         {i + 1}
@@ -751,12 +751,15 @@ function ExpandableStatCard({ label, value, sub, highlight, onExpand, expandedCo
       onClick={handleClick}
     >
       <div className="p-4">
-        <div className="flex items-center justify-between mb-1">
-          <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{label}</div>
-          <div className={`text-[9px] font-mono transition-transform duration-200 ${open ? 'rotate-180' : ''} text-slate-300`}>▼</div>
-        </div>
+        <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{label}</div>
         <div className={`text-xl font-bold ${highlight ? 'text-[#0471A4]' : 'text-slate-900'}`}>{value}</div>
         {sub && <div className="text-[11px] text-slate-400 font-mono mt-0.5">{sub}</div>}
+        <div className={`inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold transition-all ${
+          open ? 'bg-[#0471A4]/10 text-[#0471A4]' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+        }`}>
+          <span>{open ? 'Hide' : 'See details'}</span>
+          <ChevronRight size={11} className={`transition-transform duration-200 ${open ? 'rotate-90' : ''}`} />
+        </div>
       </div>
       <AnimatePresence initial={false}>
         {open && (
