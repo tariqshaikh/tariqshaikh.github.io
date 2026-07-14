@@ -2141,15 +2141,7 @@ function Orbit() {
                   Orbiting Expenses
                 </h3>
                 <div className="flex items-center gap-4">
-                  <button 
-                    onClick={analyzeMerges}
-                    className="text-[10px] font-mono uppercase tracking-widest text-[#8B0000] hover:text-[#FF4444] transition-colors flex items-center gap-1 italic mr-2"
-                    title="Find and merge duplicate entries"
-                  >
-                    <Activity size={12} className="animate-pulse" />
-                    Merge Duplicates
-                  </button>
-                  <button 
+                  <button
                     onClick={() => setShowAddExpense(true)}
                     className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] hover:text-[#2C3338] transition-colors flex items-center gap-1"
                   >
