@@ -1645,6 +1645,7 @@ Return ONLY a JSON object, no markdown, no explanation:
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (destination.trim()) {
+      setError(null);
       fetchDestinationIntelligence(destination);
     }
   };
@@ -2006,22 +2007,24 @@ Return ONLY a JSON object, no markdown, no explanation:
             { id: 'trip-intel', label: 'Trip Intel' },
           ];
           return (
-            <div className="flex justify-center mb-10">
-              <div className="flex items-center bg-white rounded-full shadow-md border border-black/[0.07] px-3 py-2 overflow-x-auto max-w-full">
-                {navItems.map((item, i) => (
-                  <React.Fragment key={item.id}>
-                    <button
-                      onClick={() => {
-                        const el = document.getElementById(item.id);
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }}
-                      className="px-5 py-1.5 rounded-full text-[10px] font-semibold tracking-widest uppercase text-slate-500 hover:bg-[#0891B2]/[0.08] hover:text-[#0891B2] transition-all whitespace-nowrap"
-                    >
-                      {item.label}
-                    </button>
-                    {i < navItems.length - 1 && <span className="w-px h-3.5 bg-slate-200 flex-shrink-0" />}
-                  </React.Fragment>
-                ))}
+            <div className="mb-10 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex justify-center min-w-max mx-auto">
+                <div className="flex items-center bg-white rounded-full shadow-md border border-black/[0.07] px-3 py-2">
+                  {navItems.map((item, i) => (
+                    <React.Fragment key={item.id}>
+                      <button
+                        onClick={() => {
+                          const el = document.getElementById(item.id);
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }}
+                        className="px-5 py-1.5 rounded-full text-[10px] font-semibold tracking-widest uppercase text-slate-500 hover:bg-[#0891B2]/[0.08] hover:text-[#0891B2] transition-all whitespace-nowrap"
+                      >
+                        {item.label}
+                      </button>
+                      {i < navItems.length - 1 && <span className="w-px h-3.5 bg-slate-200 flex-shrink-0" />}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
             </div>
           );
