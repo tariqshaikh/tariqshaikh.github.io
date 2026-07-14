@@ -49,10 +49,42 @@ export default function HomebaseTownPage() {
   const [vibeLoading, setVibeLoading] = useState(false);
   const [localScene, setLocalScene] = useState<string[]>([]);
   const [groqData, setGroqData] = useState<Record<string, any> | null>(null);
+  const [roadDetail, setRoadDetail] = useState<string | null>(null);
+  const [roadDetailLoading, setRoadDetailLoading] = useState(false);
 
   const townName = slugToName(townSlug || '');
   const data = NJ_ENRICHED[townName];
   const county = findTownCounty(townName);
+
+  const fetchRoadDetail = () => {
+    if (roadDetail || roadDetailLoading || !county || !GROQ_API_KEY) return;
+    const cacheKey = `hb_roads_${townSlug}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { setRoadDetail(cached); return; }
+    setRoadDetailLoading(true);
+    fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 120,
+        messages: [{ role: 'user', content: `List 3–5 specific highways, routes, and NJ Transit rail or bus lines that directly serve ${townName}, ${county} County, NJ. Be specific to this exact town. Reply ONLY as a JSON array of strings, e.g. ["Route 287", "Garden State Pkwy", "NJ Transit Morris & Essex Line"]. No explanation.` }]
+      })
+    })
+      .then(r => r.json())
+      .then(res => {
+        const text = res.choices?.[0]?.message?.content?.trim() || '';
+        const match = text.match(/\[[\s\S]*\]/);
+        if (match) {
+          const parsed: string[] = JSON.parse(match[0]);
+          const joined = parsed.join(' · ');
+          setRoadDetail(joined);
+          localStorage.setItem(cacheKey, joined);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setRoadDetailLoading(false));
+  };
 
   useEffect(() => {
     document.title = `${townName}, NJ — Homebase`;
@@ -306,7 +338,19 @@ Use realistic NJ data. No explanation.`
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <StatCard label="Avg Commute" value={d?.commute ? `${d.commute} min` : 'N/A'} sub="To NYC (transit)" highlight />
               <StatCard label="Walk Score" value={`${d?.walkScore ?? 'N/A'}/100`} sub={d?.walkLabel || ''} />
-              <StatCard label="Regional Access" value={`${d?.highway ?? 'N/A'}/100`} sub="Highway/transit score" />
+              <ExpandableStatCard
+                label="Regional Access"
+                value={`${d?.highway ?? 'N/A'}/100`}
+                sub="Tap to see roads & transit"
+                onExpand={fetchRoadDetail}
+                expandedContent={
+                  roadDetailLoading
+                    ? <span className="animate-pulse">Looking up roads...</span>
+                    : roadDetail
+                    ? roadDetail
+                    : 'Tap to load'
+                }
+              />
             </div>
             <ScoreBar value={d?.walkScore || 0} label="Walkability" />
           </Section>
@@ -495,16 +539,17 @@ function ComparePanel({ currentTownName, currentCounty, variant }: {
   );
 
   const bottomPanel = (
-    <AnimatePresence>
+    <AnimatePresence initial={false}>
       {open && variant === 'bottom' && (
         <motion.div
           key="bottom-panel"
-          initial={{ opacity: 0, y: -12, scaleY: 0.95 }}
-          animate={{ opacity: 1, y: 0, scaleY: 1 }}
-          exit={{ opacity: 0, y: -8, scaleY: 0.97 }}
-          transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{ transformOrigin: 'top' }}
-          className="mt-6 bg-[#090f1a] rounded-2xl overflow-hidden border border-white/10"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+          className="overflow-hidden mt-6"
+        >
+        <div className="bg-[#090f1a] rounded-2xl overflow-hidden border border-white/10"
         >
           <div className="p-6 border-b border-white/10" style={{ background: 'radial-gradient(ellipse 80% 60% at 60% 0%, rgba(4,113,164,0.3) 0%, transparent 70%)' }}>
             <h4 className="font-serif font-bold text-2xl text-white mb-1">Compare Towns</h4>
@@ -548,6 +593,7 @@ function ComparePanel({ currentTownName, currentCounty, variant }: {
               View Comparison →
             </button>
           </div>
+        </div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -693,6 +739,51 @@ function StatCard({ label, value, sub, highlight }: { label: string; value: stri
       <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{label}</div>
       <div className={`text-xl font-bold ${highlight ? 'text-[#0471A4]' : 'text-slate-900'}`}>{value}</div>
       {sub && <div className="text-[11px] text-slate-400 font-mono mt-0.5">{sub}</div>}
+    </div>
+  );
+}
+
+function ExpandableStatCard({ label, value, sub, highlight, onExpand, expandedContent }: {
+  label: string; value: string; sub?: string; highlight?: boolean;
+  onExpand?: () => void;
+  expandedContent?: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const handleClick = () => {
+    if (!open && onExpand) onExpand();
+    setOpen(o => !o);
+  };
+
+  return (
+    <div
+      className={`rounded-xl border transition-all cursor-pointer select-none ${highlight ? 'bg-blue-50 border-[#0471A4]/20' : 'bg-slate-50 border-slate-100'} ${open ? 'shadow-sm' : 'hover:shadow-sm'}`}
+      onClick={handleClick}
+    >
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-1">
+          <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{label}</div>
+          <div className={`text-[9px] font-mono transition-transform duration-200 ${open ? 'rotate-180' : ''} text-slate-300`}>▼</div>
+        </div>
+        <div className={`text-xl font-bold ${highlight ? 'text-[#0471A4]' : 'text-slate-900'}`}>{value}</div>
+        {sub && <div className="text-[11px] text-slate-400 font-mono mt-0.5">{sub}</div>}
+      </div>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="detail"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-0 text-[11px] font-mono text-slate-500 border-t border-slate-100 pt-3">
+              {expandedContent}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
