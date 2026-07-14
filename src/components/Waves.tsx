@@ -1071,36 +1071,40 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 };
 
 const DARK_STYLE = `
-  .waves-dark [class~="bg-[#FDFAF5]"] { background-color: #050B14 !important; }
-  .waves-dark [class~="bg-[#F7F2E8]"] { background-color: #0B1221 !important; }
-  .waves-dark [class~="bg-white"] { background-color: #0D1B2E !important; }
-  .waves-dark [class~="bg-white/80"] { background-color: rgba(13,27,46,0.8) !important; }
-  .waves-dark [class~="bg-[#F7F2E8]/80"] { background-color: rgba(11,18,33,0.8) !important; }
-  .waves-dark [class~="bg-[#FDFAF5]/80"] { background-color: rgba(5,11,20,0.8) !important; }
-  .waves-dark [class~="bg-[#FDFAF5]/95"] { background-color: rgba(5,11,20,0.95) !important; }
-  .waves-dark [class~="text-[#0A1A2E]"] { color: #f1f5f9 !important; }
-  .waves-dark [class~="text-slate-700"] { color: #cbd5e1 !important; }
-  .waves-dark [class~="text-slate-600"] { color: #94a3b8 !important; }
-  .waves-dark [class~="text-slate-500"] { color: #64748b !important; }
-  .waves-dark [class~="text-slate-400"] { color: #475569 !important; }
-  .waves-dark [class~="border-black/[0.06]"] { border-color: rgba(255,255,255,0.06) !important; }
-  .waves-dark [class~="border-black/[0.07]"] { border-color: rgba(255,255,255,0.07) !important; }
-  .waves-dark [class~="border-black/[0.08]"] { border-color: rgba(255,255,255,0.08) !important; }
-  .waves-dark [class~="border-black/[0.09]"] { border-color: rgba(255,255,255,0.09) !important; }
-  .waves-dark [class~="border-black/[0.13]"] { border-color: rgba(255,255,255,0.13) !important; }
-  .waves-dark [class~="ring-offset-[#FDFAF5]"] { --tw-ring-offset-color: #050B14 !important; }
-  .waves-dark [class~="bg-emerald-100"] { background-color: rgba(16,185,129,0.12) !important; }
-  .waves-dark [class~="bg-amber-100"] { background-color: rgba(245,158,11,0.12) !important; }
-  .waves-dark [class~="bg-orange-100"] { background-color: rgba(249,115,22,0.12) !important; }
-  .waves-dark [class~="bg-rose-100"] { background-color: rgba(244,63,94,0.12) !important; }
-  .waves-dark [class~="bg-purple-100"] { background-color: rgba(168,85,247,0.12) !important; }
-  .waves-dark [class~="bg-slate-100"] { background-color: rgba(100,116,139,0.12) !important; }
-  .waves-dark [class~="text-emerald-700"] { color: #34d399 !important; }
-  .waves-dark [class~="text-amber-700"] { color: #fbbf24 !important; }
-  .waves-dark [class~="text-orange-600"] { color: #fb923c !important; }
-  .waves-dark [class~="text-rose-600"] { color: #fb7185 !important; }
-  .waves-dark [class~="text-purple-700"] { color: #c084fc !important; }
-  .waves-dark [class~="text-yellow-700"] { color: #fde047 !important; }
+  .waves-dark { background-color: #050B14 !important; }
+  .waves-dark .bg-\\[\\#FDFAF5\\] { background-color: #050B14 !important; }
+  .waves-dark .bg-\\[\\#FDFAF5\\]\\/80 { background-color: rgba(5,11,20,0.8) !important; }
+  .waves-dark .bg-\\[\\#FDFAF5\\]\\/95 { background-color: rgba(5,11,20,0.95) !important; }
+  .waves-dark .bg-\\[\\#F7F2E8\\] { background-color: #0B1221 !important; }
+  .waves-dark .bg-\\[\\#F7F2E8\\]\\/80 { background-color: rgba(11,18,33,0.8) !important; }
+  .waves-dark .bg-\\[\\#F7F2E8\\]\\/95 { background-color: rgba(11,18,33,0.95) !important; }
+  .waves-dark .bg-white { background-color: #0D1B2E !important; }
+  .waves-dark .bg-white\\/80 { background-color: rgba(13,27,46,0.8) !important; }
+  .waves-dark .text-\\[\\#0A1A2E\\] { color: #f1f5f9 !important; }
+  .waves-dark .text-slate-700 { color: #cbd5e1 !important; }
+  .waves-dark .text-slate-600 { color: #94a3b8 !important; }
+  .waves-dark .text-slate-500 { color: #64748b !important; }
+  .waves-dark .text-slate-400 { color: #475569 !important; }
+  .waves-dark .border-black\\/\\[0\\.06\\] { border-color: rgba(255,255,255,0.06) !important; }
+  .waves-dark .border-black\\/\\[0\\.07\\] { border-color: rgba(255,255,255,0.07) !important; }
+  .waves-dark .border-black\\/\\[0\\.08\\] { border-color: rgba(255,255,255,0.08) !important; }
+  .waves-dark .border-black\\/\\[0\\.09\\] { border-color: rgba(255,255,255,0.09) !important; }
+  .waves-dark .border-black\\/\\[0\\.13\\] { border-color: rgba(255,255,255,0.13) !important; }
+  .waves-dark .bg-emerald-100 { background-color: rgba(16,185,129,0.12) !important; }
+  .waves-dark .bg-amber-100  { background-color: rgba(245,158,11,0.12) !important; }
+  .waves-dark .bg-orange-100 { background-color: rgba(249,115,22,0.12) !important; }
+  .waves-dark .bg-rose-100   { background-color: rgba(244,63,94,0.12) !important; }
+  .waves-dark .bg-purple-100 { background-color: rgba(168,85,247,0.12) !important; }
+  .waves-dark .bg-slate-100  { background-color: rgba(100,116,139,0.12) !important; }
+  .waves-dark .text-emerald-700 { color: #34d399 !important; }
+  .waves-dark .text-amber-700   { color: #fbbf24 !important; }
+  .waves-dark .text-orange-600  { color: #fb923c !important; }
+  .waves-dark .text-rose-600    { color: #fb7185 !important; }
+  .waves-dark .text-purple-700  { color: #c084fc !important; }
+  .waves-dark .text-yellow-700  { color: #fde047 !important; }
+  .waves-dark .shadow-md  { box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important; }
+  .waves-dark .shadow-2xl { box-shadow: 0 25px 60px rgba(0,0,0,0.8) !important; }
+  .waves-dark .shadow-sm  { box-shadow: 0 1px 4px rgba(0,0,0,0.4) !important; }
 `;
 
 export default function Waves() {
