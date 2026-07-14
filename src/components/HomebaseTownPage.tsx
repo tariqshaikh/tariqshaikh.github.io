@@ -554,19 +554,12 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
   const [hovered, setHovered] = useState<string | null>(null);
 
   const entries = Object.entries(history) as [string, number][];
-  const MIN = 92, MAX = 116, CHART_H = 120;
-
-  const barStyle = (val: number) => {
-    if (val >= 106) return { bg: '#dc2626', glow: 'rgba(220,38,38,0.4)', label: 'Very Hot' };
-    if (val >= 103) return { bg: '#ea580c', glow: 'rgba(234,88,12,0.4)', label: 'Hot' };
-    if (val >= 100) return { bg: '#0471A4', glow: 'rgba(4,113,164,0.4)', label: 'Balanced' };
-    return { bg: '#94a3b8', glow: 'rgba(148,163,184,0.3)', label: "Buyer's Mkt" };
-  };
+  const MIN = 92, MAX = 116, CHART_H = 128;
 
   const interp = (val: number) => {
-    if (val >= 106) return 'Homes selling well above asking — strong seller advantage';
-    if (val >= 103) return 'Buyers frequently going over list price';
-    if (val >= 100) return 'Homes selling near list — balanced market';
+    if (val >= 106) return 'Homes consistently selling above asking';
+    if (val >= 103) return 'Buyers often going over list price';
+    if (val >= 100) return 'Market near list — competitive but balanced';
     if (val >= 98) return 'Sellers accepting slight discounts';
     return 'Buyers have real negotiating room';
   };
@@ -578,97 +571,88 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
   const hoveredEntry = hovered ? entries.find(([p]) => p === hovered) : null;
 
   return (
-    <div className="mt-6 bg-slate-50 rounded-2xl p-5 border border-slate-100">
+    <div className="mt-6 rounded-2xl border border-slate-100 overflow-hidden">
       {/* Header */}
-      <div className="flex items-start justify-between mb-5 gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <p className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Sale-to-List Ratio</p>
-            {isDerived && <span className="text-[9px] font-mono text-slate-400 bg-slate-200 px-1.5 py-0.5 rounded">est.</span>}
-          </div>
-          <p className="text-[12px] font-mono text-slate-500 leading-snug">
-            {hoveredEntry
-              ? <><span className="font-bold text-slate-700">{hoveredEntry[0]}:</span> {hoveredEntry[1]}% — {interp(hoveredEntry[1])}</>
-              : 'Hover a bar to see market interpretation'}
-          </p>
+      <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-semibold">Sale-to-List History</p>
+          {isDerived && <span className="text-[9px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">est.</span>}
         </div>
-        <div className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold font-mono ${
-          trend > 0 ? 'bg-red-50 text-red-600' : trend < 0 ? 'bg-sky-50 text-sky-600' : 'bg-slate-100 text-slate-500'
+        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono ${
+          trend > 0 ? 'bg-emerald-50 text-emerald-700' : trend < 0 ? 'bg-slate-100 text-slate-500' : 'bg-slate-100 text-slate-500'
         }`}>
           {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend)}%
-          <span className="font-normal opacity-60 ml-0.5">{trend > 0 ? 'heating' : trend < 0 ? 'cooling' : 'stable'}</span>
+          <span className="font-normal opacity-70 ml-0.5">{trend > 0 ? 'vs 5y ago' : trend < 0 ? 'vs 5y ago' : 'stable'}</span>
         </div>
       </div>
 
-      {/* Chart area */}
-      <div className="relative" style={{ height: CHART_H + 28 }}>
-        {/* 100% reference line */}
-        <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: refLineTop }}>
-          <div className="border-t border-dashed border-slate-300 relative">
-            <span className="absolute right-0 -top-3 text-[9px] font-mono text-slate-400 bg-slate-50 px-1 rounded">100%</span>
-          </div>
-        </div>
+      {/* Tooltip bar */}
+      <div className="px-5 py-2.5 bg-slate-50 min-h-[36px] flex items-center border-b border-slate-100">
+        <p className="text-[12px] font-mono text-slate-500">
+          {hoveredEntry
+            ? <><span className="font-bold text-slate-800">{hoveredEntry[1]}%</span> <span className="text-slate-400 mx-1">·</span> {interp(hoveredEntry[1])}</>
+            : <span className="text-slate-400 italic">Hover a bar for details</span>}
+        </p>
+      </div>
 
-        {/* Bars */}
-        <div className="absolute left-0 right-0 bottom-7 flex items-end gap-2" style={{ height: CHART_H }}>
-          {entries.map(([period, val]) => {
-            const h = Math.max(6, ((val - MIN) / (MAX - MIN)) * CHART_H);
-            const c = barStyle(val);
-            const isHov = hovered === period;
-            return (
-              <div
-                key={period}
-                className="flex-1 flex flex-col justify-end cursor-crosshair"
-                style={{ height: CHART_H }}
-                onMouseEnter={() => setHovered(period)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                {/* Floating value */}
-                <div className={`text-center text-[10px] font-mono font-bold mb-1 transition-all duration-150 ${isHov ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ color: c.bg }}>
-                  {val}%
-                </div>
-                {/* Bar */}
-                <div
-                  className="w-full rounded-t-xl transition-all duration-200"
-                  style={{
-                    height: h,
-                    background: isHov
-                      ? `linear-gradient(to top, ${c.bg}, ${c.bg}bb)`
-                      : `linear-gradient(to top, ${c.bg}70, ${c.bg}99)`,
-                    boxShadow: isHov ? `0 -4px 16px ${c.glow}` : 'none',
-                    transform: isHov ? 'scaleX(0.92)' : 'scaleX(1)',
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Period labels */}
-        <div className="absolute bottom-0 left-0 right-0 flex gap-2">
-          {entries.map(([period]) => (
-            <div key={period} className="flex-1 text-center">
-              <span className={`text-[9px] font-mono uppercase tracking-wider transition-colors ${hovered === period ? 'text-slate-700 font-bold' : 'text-slate-400'}`}>
-                {period}
-              </span>
+      {/* Chart */}
+      <div className="px-5 pt-4 pb-1 bg-white">
+        <div className="relative" style={{ height: CHART_H + 32 }}>
+          {/* 100% reference line */}
+          <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: refLineTop }}>
+            <div className="border-t border-dashed border-slate-200 relative">
+              <span className="absolute -right-1 -top-3.5 text-[9px] font-mono text-slate-300 bg-white px-1">100%</span>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-slate-100">
-        {[
-          { bg: '#dc2626', label: 'Very Hot  >106%' },
-          { bg: '#ea580c', label: 'Hot  103–106%' },
-          { bg: '#0471A4', label: 'Balanced  100–103%' },
-          { bg: '#94a3b8', label: "Buyer's Mkt  <100%" },
-        ].map(l => (
-          <div key={l.label} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: l.bg }} />
-            <span className="text-[10px] font-mono text-slate-400">{l.label}</span>
           </div>
-        ))}
+
+          {/* Bars */}
+          <div className="absolute left-0 right-0 bottom-8 flex items-end gap-2.5" style={{ height: CHART_H }}>
+            {entries.map(([period, val]) => {
+              const h = Math.max(8, ((val - MIN) / (MAX - MIN)) * CHART_H);
+              const isHov = hovered === period;
+              return (
+                <div
+                  key={period}
+                  className="flex-1 flex flex-col justify-end cursor-default group"
+                  style={{ height: CHART_H }}
+                  onMouseEnter={() => setHovered(period)}
+                  onMouseLeave={() => setHovered(null)}
+                >
+                  {/* Value — always visible */}
+                  <div className={`text-center text-[10px] font-mono font-bold mb-1.5 transition-colors duration-150 ${
+                    isHov ? 'text-[#0471A4]' : 'text-slate-400'
+                  }`}>
+                    {val}%
+                  </div>
+                  {/* Bar */}
+                  <div
+                    className="w-full rounded-t-lg transition-all duration-200"
+                    style={{
+                      height: h,
+                      background: isHov
+                        ? 'linear-gradient(to top, #0471A4, #3B9AC4)'
+                        : 'linear-gradient(to top, #cbd5e1, #e2e8f0)',
+                      boxShadow: isHov ? '0 -3px 12px rgba(4,113,164,0.25)' : 'none',
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Period labels */}
+          <div className="absolute bottom-0 left-0 right-0 flex gap-2.5">
+            {entries.map(([period]) => (
+              <div key={period} className="flex-1 text-center">
+                <span className={`text-[9px] font-mono uppercase tracking-wider transition-colors ${
+                  hovered === period ? 'text-[#0471A4] font-bold' : 'text-slate-300'
+                }`}>
+                  {period}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
