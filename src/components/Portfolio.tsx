@@ -148,48 +148,12 @@ export default function Portfolio() {
               </div>
             </div>
 
-            {/* Project 2 - Orbit */}
-            <div className="bg-[#1A1C1E] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#C5A059]/50 hover:shadow-[0_32px_64px_-16px_rgba(197,160,89,0.15)] relative overflow-hidden rounded-2xl group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.002</span>
-              </div>
-              <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold italic text-white">Orbit</span>
-              </h3>
-              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Financial Simulation & Strategy</p>
-
-              <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
-                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  A financial trajectory simulator designed to map annual cash flow and sinking funds.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-10">
-                {['Fintech', 'Simulation', 'Strategy'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-              
-              <div className="flex flex-col gap-3">
-                <Link to="/orbit" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(197,160,89,0.45)]">
-                  Launch Application <ChevronRight size={14} />
-                </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => openModal('prd-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
-                  <button onClick={() => openModal('roadmap-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
-                </div>
-              </div>
-            </div>
-
-            {/* Project 3 - Waves */}
-            <div className="md:col-span-2 md:max-w-2xl md:mx-auto md:w-full bg-[#0B1A1F] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_32px_64px_-16px_rgba(6,182,212,0.15)] relative overflow-hidden rounded-2xl group">
+            {/* Project 2 - Waves */}
+            <div className="bg-[#0B1A1F] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_32px_64px_-16px_rgba(6,182,212,0.15)] relative overflow-hidden rounded-2xl group">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center justify-between mb-10">
                 <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.003</span>
+                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.002</span>
               </div>
               <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
                 <span className="font-serif font-bold italic text-white">Waves</span>
@@ -208,14 +172,50 @@ export default function Portfolio() {
                   <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-cyan-500/10 text-cyan-300/80 border border-cyan-500/20 tracking-widest uppercase font-bold">{tag}</span>
                 ))}
               </div>
-              
+
               <div className="flex flex-col gap-3">
                 <Link to="/waves" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-cyan-600 to-teal-300 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(6,182,212,0.5)]">
-                  View Prototype <ChevronRight size={14} />
+                  Launch Application <ChevronRight size={14} />
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => openModal('prd-3')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
                   <button onClick={() => openModal('roadmap-3')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Project 3 - Orbit */}
+            <div className="md:col-span-2 md:max-w-2xl md:mx-auto md:w-full bg-[#1A1C1E] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#C5A059]/50 hover:shadow-[0_32px_64px_-16px_rgba(197,160,89,0.15)] relative overflow-hidden rounded-2xl group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between mb-10">
+                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
+                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.003</span>
+              </div>
+              <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
+                <span className="font-serif font-bold italic text-white">Orbit</span>
+              </h3>
+              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Financial Simulation & Strategy</p>
+
+              <div className="relative mb-10">
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
+                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
+                  A financial trajectory simulator designed to map annual cash flow and sinking funds.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-10">
+                {['Fintech', 'Simulation', 'Strategy'].map(tag => (
+                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{tag}</span>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Link to="/orbit" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(197,160,89,0.45)]">
+                  Launch Application <ChevronRight size={14} />
+                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => openModal('prd-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
+                  <button onClick={() => openModal('roadmap-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
                 </div>
               </div>
             </div>
