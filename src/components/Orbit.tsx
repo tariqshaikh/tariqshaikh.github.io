@@ -363,140 +363,6 @@ interface SavedModel {
 
 // --- Components ---
 
-const ExpenseTrendGraph = ({ merchantName, parentBrand, userId }: { merchantName: string, parentBrand?: string | null, userId: string }) => {
-  const [data, setData] = useState<{ date: Date, amount: number }[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!merchantName || !userId || userId === 'guest-user') return;
-    setLoading(true);
-    
-    const intelRef = collection(db, 'users', userId, 'expenseIntelligence');
-    const unsubscribe = onSnapshot(intelRef, (snapshot) => {
-      const hits: { date: Date, amount: number }[] = [];
-      const normalizedTarget = merchantName.trim().toLowerCase();
-      const normalizedParent = parentBrand?.trim().toLowerCase() || '';
-      
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const pName = d.merchantName?.trim().toLowerCase() || '';
-        const pParent = d.parentMerchant?.trim().toLowerCase() || '';
-        
-        const isMatch = (pName && (pName.includes(normalizedTarget) || normalizedTarget.includes(pName))) ||
-                        (normalizedParent && pParent && (pParent === normalizedParent || pParent.includes(normalizedParent) || normalizedParent.includes(pParent)));
-
-        if (isMatch) {
-          let hitDate: Date;
-          if (d.date?.toDate) {
-            hitDate = d.date.toDate();
-          } else if (d.date instanceof Date) {
-            hitDate = d.date;
-          } else if (typeof d.date === 'string' || typeof d.date === 'number') {
-            hitDate = new Date(d.date);
-          } else {
-            hitDate = new Date();
-          }
-
-          hits.push({
-            date: hitDate,
-            amount: d.amount
-          });
-        }
-      });
-
-      // Sort by date ascending
-      hits.sort((a, b) => a.date.getTime() - b.date.getTime());
-      
-      // Deduplicate/Group by date to avoid multiple points on same exact MS
-      const uniqueHits: { date: Date, amount: number }[] = [];
-      const seenKeys = new Set<string>();
-      
-      hits.forEach(hit => {
-        const dateKey = hit.date.toISOString().split('T')[0];
-        const compositeKey = `${dateKey}_${hit.amount}`;
-        
-        if (!seenKeys.has(compositeKey)) {
-          seenKeys.add(compositeKey);
-          uniqueHits.push(hit);
-        }
-      });
-
-      setData(uniqueHits);
-      setLoading(false);
-    }, (err) => {
-      console.error("Failed to sync trend data", err);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [merchantName, userId]);
-
-  if (loading && data.length === 0) return <div className="text-[10px] text-[#8C8670] mt-4 flex items-center gap-2"><Loader2 size={12} className="animate-spin" /> Analyzing historical trends...</div>;
-  if (data.length < 2) {
-    return (
-      <div className="mt-8 pt-6 border-t border-[#E8E4D0]">
-        <div className="flex justify-between items-center mb-4">
-           <h4 className="text-xs font-mono uppercase tracking-widest text-[#8C8670] flex items-center gap-1">
-             <Activity size={12} className="text-[#C5A059]" />
-             Historical Trend
-           </h4>
-        </div>
-        <div className="bg-[#FAF9F6] border border-[#E8E4D0] border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center">
-            <Activity size={24} className="text-[#8C8670] mb-2 opacity-30" />
-            <p className="text-[10px] font-mono uppercase tracking-widest text-[#8C8670]">Not Enough Data</p>
-            <p className="text-[10px] text-[#8C8670] max-w-[200px] mt-1 opacity-70">Import more statements containing this merchant to see price fluctuations.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const firstAmt = data[0].amount;
-  const lastAmt = data[data.length - 1].amount;
-  const pctChange = ((lastAmt - firstAmt) / firstAmt) * 100;
-
-  const chartData = data.map((d, i) => ({
-    name: d.date.toLocaleDateString(undefined, { month: 'short', year: '2-digit' }),
-    amount: d.amount,
-  }));
-
-  return (
-    <div className="mt-8 pt-6 border-t border-[#E8E4D0]">
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="text-xs font-mono uppercase tracking-widest text-[#8C8670] flex items-center gap-1">
-          <Activity size={12} className="text-[#C5A059]" />
-          Historical Trend
-        </h4>
-        <div className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${pctChange > 0 ? 'bg-red-100 text-red-700' : pctChange < 0 ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
-          {pctChange > 0 ? <TrendingUp size={10} /> : pctChange < 0 ? <TrendingUp size={10} className="rotate-180" /> : null}
-          {Math.abs(pctChange).toFixed(1)}% {pctChange > 0 ? 'Increase' : pctChange < 0 ? 'Decrease' : 'Stable'}
-        </div>
-      </div>
-      <div className="h-32 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-             <defs>
-              <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#C5A059" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#C5A059" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E8E4D0" />
-            <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} stroke="#8C8670" />
-            <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#2C3338', border: 'none', borderRadius: '8px', color: '#FAF9F6', fontSize: '12px' }}
-              itemStyle={{ color: '#C5A059' }}
-              formatter={(val: number) => [`$${val.toFixed(2)}`, 'Amount']}
-            />
-            <Area type="monotone" dataKey="amount" stroke="#C5A059" fillOpacity={1} fill="url(#colorAmount)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
-
-
 const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
   const colors = [
@@ -623,9 +489,6 @@ function Orbit() {
   const [endDate, setEndDate] = useState<string>(`${new Date().getFullYear()}-12-31`);
 
   const [expenses, setExpenses] = useState<RecurringExpense[]>(DEFAULT_EXPENSES);
-  const [pendingMerges, setPendingMerges] = useState<{ source: RecurringExpense, target: RecurringExpense }[]>([]);
-  const [showMergeReview, setShowMergeReview] = useState(false);
-  const [isMerging, setIsMerging] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
 
@@ -1210,100 +1073,6 @@ function Orbit() {
   const normalizedMonthlySpend = monthlyFixedExpenses + normalizedMonthlyOrbit;
   const normalizedMonthlySurplus = monthlyIncome - normalizedMonthlySpend;
 
-  // --- Merge Helpers ---
-  const getSignificantWords = (name: string) => {
-    if (!name) return [];
-    return name.toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .map(w => w.trim())
-      .filter(w => w.length > 2)
-      .filter(w => !['the', 'and', 'annual', 'membership', 'fee', 'subscription', 'service', 'payment', 'bill', 'com', 'monthly', 'yearly', 'inc', 'llc'].includes(w));
-  };
-
-  const unifyTrendData = async (sourceName: string, targetName: string) => {
-    if (!user) return;
-    const intelQuery = query(
-      collection(db, 'users', user.uid, 'expenseIntelligence'), 
-      where('merchantName', '==', sourceName)
-    );
-    const snap = await getDocs(intelQuery);
-    const intelPromises = snap.docs.map(d => updateDoc(d.ref, { merchantName: targetName }));
-    await Promise.all(intelPromises);
-  };
-
-  const analyzeMerges = () => {
-    const defaultIds = DEFAULT_EXPENSES.map(e => e.id);
-    const merges: { source: RecurringExpense, target: RecurringExpense }[] = [];
-    const processedIds = new Set<string>();
-    const seenNormalized = new Map<string, RecurringExpense>();
-
-    // Sort to keep default entities or older entities as targets
-    const sorted = [...expenses].sort((a, b) => {
-      const aDef = defaultIds.includes(a.id);
-      const bDef = defaultIds.includes(b.id);
-      if (aDef && !bDef) return -1;
-      if (!aDef && bDef) return 1;
-      return a.id.localeCompare(b.id);
-    });
-
-    sorted.forEach(exp => {
-      if (!exp.name || processedIds.has(exp.id)) return;
-      const words = getSignificantWords(exp.name);
-      if (words.length === 0) words.push(exp.name.toLowerCase().replace(/[^a-z0-9]/g, '').trim());
-
-      let match: RecurringExpense | null = null;
-      for (const [normWordsStr, existing] of seenNormalized.entries()) {
-        const normWords = JSON.parse(normWordsStr) as string[];
-        const overlap = words.filter(w => normWords.includes(w)).length;
-        const isSubset = (words.length > 0 && overlap === words.length) || (normWords.length > 0 && overlap === normWords.length);
-        
-        // Exact string match fallback just in case
-        const exactMatch = exp.name.toLowerCase().trim() === existing.name.toLowerCase().trim();
-
-        if (exactMatch || (overlap > 0 && isSubset) || (overlap >= 2)) {
-          match = existing;
-          break;
-        }
-      }
-
-      if (match) {
-        // Target should be the one that already has more data / is older, which is handled by sorting
-        merges.push({ source: exp, target: match });
-        processedIds.add(exp.id);
-      } else {
-        seenNormalized.set(JSON.stringify(words), exp);
-      }
-    });
-
-    if (merges.length > 0) {
-      setPendingMerges(merges);
-      setShowMergeReview(true);
-    } else {
-      alert("No obvious duplicates found in your Orbit.");
-    }
-  };
-
-  const handleApplyMerges = async () => {
-    if (!user) return;
-    setIsMerging(true);
-    try {
-      for (const merge of pendingMerges) {
-        try {
-          await unifyTrendData(merge.source.name, merge.target.name);
-          await removeExpense(merge.source.id);
-        } catch (e) {
-          console.error(`Failed to merge ${merge.source.name}`, e);
-        }
-      }
-      setShowMergeReview(false);
-      setPendingMerges([]);
-    } catch (err) {
-      console.error("Cleanup failed", err);
-    } finally {
-      setIsMerging(false);
-    }
-  };
-
   const handleAddExpense = async () => {
     if (newExpense.name && newExpense.amount) {
       const finalCategory = newExpense.category === 'other' ? (newExpense.customCategory || 'other') : newExpense.category;
@@ -1844,38 +1613,6 @@ function Orbit() {
               </div>
             </section>
 
-            {/* Emergency Fund */}
-            {user && user.uid !== 'guest-user' && normalizedMonthlySpend > 0 && (() => {
-              const monthsCovered = liquidAssets / normalizedMonthlySpend;
-              const pct = Math.min(100, (monthsCovered / 6) * 100);
-              const status = monthsCovered >= 6 ? 'great' : monthsCovered >= 3 ? 'good' : 'low';
-              const statusColor = status === 'great' ? '#1E5C38' : status === 'good' ? '#C5A059' : '#B91C1C';
-              const statusLabel = status === 'great' ? 'Fully funded' : status === 'good' ? 'On track' : 'Below target';
-              return (
-                <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670]">Emergency Fund</h3>
-                    <span className="text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full font-bold" style={{ color: statusColor, background: statusColor + '18' }}>{statusLabel}</span>
-                  </div>
-                  <div className="flex items-end gap-2 mb-3">
-                    <span className="text-3xl font-serif font-bold text-[#2C3338]">{monthsCovered.toFixed(1)}</span>
-                    <span className="text-sm text-[#8C8670] mb-1 font-mono">/ 6 months</span>
-                  </div>
-                  <div className="w-full h-2 bg-[#E8E4D0] rounded-full mb-3 overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: statusColor }} />
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono text-[#8C8670]">
-                    <span>${liquidAssets.toLocaleString()} liquid</span>
-                    <span>Goal: ${Math.round(normalizedMonthlySpend * 6).toLocaleString()}</span>
-                  </div>
-                  {status !== 'great' && normalizedMonthlySurplus > 0 && (
-                    <p className="mt-3 text-[10px] font-mono text-[#8C8670] border-t border-[#E8E4D0] pt-3">
-                      At ${Math.round(normalizedMonthlySurplus).toLocaleString()}/mo surplus → <span className="font-bold text-[#C5A059]">{Math.ceil(Math.max(0, normalizedMonthlySpend * 6 - liquidAssets) / normalizedMonthlySurplus)}mo to goal</span>
-                    </p>
-                  )}
-                </section>
-              );
-            })()}
           </div>
 
           <div className="lg:col-span-8 space-y-8">
@@ -2369,12 +2106,6 @@ function Orbit() {
                         <p className="text-[10px] text-slate-400 mt-2 italic leading-relaxed">Bundles this expense under a single brand for smarter drill-down analysis.</p>
                       </div>
                       
-                      {user && newExpense.name && newExpense.name.length > 2 && (
-                        <div className="mt-2">
-                          <ExpenseTrendGraph merchantName={newExpense.name} parentBrand={newExpense.merchant} userId={user.uid} />
-                        </div>
-                      )}
-
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Amount ($)</label>
@@ -2838,15 +2569,7 @@ function Orbit() {
                     />
                   </div>
 
-                  {user && editingFixedExpense.label && editingFixedExpense.label.length > 2 && (
-                    <ExpenseTrendGraph 
-                      merchantName={editingFixedExpense.label} 
-                      parentBrand={editingFixedExpense.merchant} 
-                      userId={user.uid} 
-                    />
-                  )}
-
-                  <button 
+                  <button
                     onClick={() => {
                       if (editingFixedExpense) {
                         const updatedFixedExpenses = profile.fixedExpenses.map(fe => 
@@ -2863,103 +2586,6 @@ function Orbit() {
                     Save Orbit Details
                   </button>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Merge Review Modal */}
-      <AnimatePresence>
-        {showMergeReview && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-[#2C3338]/60 backdrop-blur-md"
-              onClick={() => setShowMergeReview(false)}
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#FAF9F6] border border-[#E8E4D0] w-full max-w-2xl rounded-2xl shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"
-            >
-              <div className="p-8 border-b border-[#E8E4D0] bg-white">
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="font-serif text-3xl font-bold text-[#2C3338] italic">Consolidate Duplicates</h2>
-                  <button onClick={() => setShowMergeReview(false)} className="p-2 hover:bg-[#FAF9F6] rounded-full transition-colors text-[#8C8670]">
-                    <X size={20} />
-                  </button>
-                </div>
-                <p className="text-sm text-[#8C8670] italic">The system detected these near-duplicates. Review and merge to unify your trend data into a single master orbit.</p>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
-                {pendingMerges.length === 0 ? (
-                  <div className="text-center py-12">
-                     <ShieldCheck size={48} className="mx-auto text-[#1E5C38] mb-4 opacity-20" />
-                    <p className="font-mono text-xs uppercase tracking-widest text-[#8C8670]">All orbits are completely unique!</p>
-                  </div>
-                ) : (
-                  pendingMerges.map((merge, idx) => (
-                    <div key={idx} className="bg-white border border-[#E8E4D0] p-6 rounded-2xl relative group">
-                      <div className="grid grid-cols-11 items-center gap-4">
-                        <div className="col-span-11 sm:col-span-5">
-                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#8B0000] font-bold mb-1">Source (Will Delete)</div>
-                          <div className="p-4 bg-red-50/50 border border-red-100 rounded-xl relative overflow-hidden">
-                            <div className="absolute inset-0 bg-red-500/5 mix-blend-multiply" />
-                            <div className="text-sm font-bold text-[#2C3338] truncate relative z-10">{merge.source.name}</div>
-                            <div className="text-[10px] font-mono text-[#8B0000] mt-1 relative z-10">${merge.source.amount.toLocaleString()} • {merge.source.frequency}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="col-span-11 sm:col-span-1 flex justify-center py-2 sm:py-0">
-                          <ChevronRight size={24} className="text-[#C5A059] opacity-40 rotate-90 sm:rotate-0" />
-                        </div>
-
-                        <div className="col-span-11 sm:col-span-5">
-                          <div className="text-[10px] font-mono uppercase tracking-widest text-[#1E5C38] font-bold mb-1">Target (Will Keep)</div>
-                          <div className="p-4 bg-green-50/50 border border-green-100 rounded-xl relative overflow-hidden">
-                            <div className="absolute inset-0 bg-green-500/5 mix-blend-multiply" />
-                            <div className="text-sm font-bold text-[#2C3338] truncate relative z-10">{merge.target.name}</div>
-                            <div className="text-[10px] font-mono text-[#1E5C38] mt-1 relative z-10">${merge.target.amount.toLocaleString()} • {merge.target.frequency}</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <button 
-                        onClick={() => {
-                          setPendingMerges(pendingMerges.filter((_, i) => i !== idx));
-                        }}
-                        className="absolute -top-2 -right-2 w-6 h-6 bg-white border border-[#E8E4D0] rounded-full flex items-center justify-center text-[#8C8670] hover:bg-[#8B0000] hover:text-white transition-all shadow-sm"
-                        title="Don't merge these"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="p-8 bg-white border-t border-[#E8E4D0]">
-                {pendingMerges.length > 0 && (
-                  <button 
-                    onClick={handleApplyMerges}
-                    disabled={isMerging}
-                    className="w-full bg-[#C5A059] text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-[#B38F48] transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
-                  >
-                    {isMerging ? <Loader2 size={16} className="animate-spin" /> : <Database size={16} />}
-                    Merge {pendingMerges.length} {pendingMerges.length === 1 ? 'Duplicate' : 'Duplicates'}
-                  </button>
-                )}
-                <button 
-                  onClick={() => setShowMergeReview(false)}
-                  className="w-full mt-4 text-[10px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors"
-                >
-                  Cancel
-                </button>
               </div>
             </motion.div>
           </div>
