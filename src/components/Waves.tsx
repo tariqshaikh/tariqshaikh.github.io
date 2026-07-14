@@ -1503,7 +1503,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             messages: [{ role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
             temperature: 0.7,
-            max_tokens: 7000,
+            max_tokens: 3800,
           }),
         });
 
@@ -1564,7 +1564,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         const isKey = errStatus === 401 || errStatus === 403 || errMsg.toLowerCase().includes('invalid api key');
         const isJson = err instanceof SyntaxError || errMsg.includes('JSON') || errMsg.includes('Unexpected token');
         const msg = isQuota
-          ? "Too many searches — wait a moment then try again."
+          ? "API limit reached — searches will work again tomorrow. Use the demo destinations for now."
           : isKey
           ? "Invalid API key. Check your GROQ_API_KEY in .env."
           : isJson
