@@ -610,17 +610,21 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
             {entries.map(([period, val]) => {
               const h = Math.max(8, ((val - MIN) / (MAX - MIN)) * CHART_H);
               const isHov = hovered === period;
+              const intensity = Math.min(1, Math.max(0, (val - MIN) / (MAX - MIN)));
+              const barBg = isHov
+                ? 'linear-gradient(to top, #0471A4, #3B9AC4)'
+                : `linear-gradient(to top, hsl(${205 - intensity * 15}, ${40 + intensity * 30}%, ${55 - intensity * 15}%), hsl(${205 - intensity * 15}, ${35 + intensity * 25}%, ${65 - intensity * 12}%))`;
               return (
                 <div
                   key={period}
-                  className="flex-1 flex flex-col justify-end cursor-default group"
+                  className="flex-1 flex flex-col justify-end cursor-default"
                   style={{ height: CHART_H }}
                   onMouseEnter={() => setHovered(period)}
                   onMouseLeave={() => setHovered(null)}
                 >
-                  {/* Value — always visible */}
-                  <div className={`text-center text-[10px] font-mono font-bold mb-1.5 transition-colors duration-150 ${
-                    isHov ? 'text-[#0471A4]' : 'text-slate-400'
+                  {/* Value — always visible, bigger */}
+                  <div className={`text-center text-[13px] font-mono font-bold mb-2 transition-colors duration-150 ${
+                    isHov ? 'text-[#0471A4]' : 'text-slate-600'
                   }`}>
                     {val}%
                   </div>
@@ -629,10 +633,9 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
                     className="w-full rounded-t-lg transition-all duration-200"
                     style={{
                       height: h,
-                      background: isHov
-                        ? 'linear-gradient(to top, #0471A4, #3B9AC4)'
-                        : 'linear-gradient(to top, #cbd5e1, #e2e8f0)',
-                      boxShadow: isHov ? '0 -3px 12px rgba(4,113,164,0.25)' : 'none',
+                      background: barBg,
+                      boxShadow: isHov ? '0 -3px 14px rgba(4,113,164,0.3)' : 'none',
+                      transform: isHov ? 'scaleX(0.9)' : 'scaleX(1)',
                     }}
                   />
                 </div>
@@ -644,8 +647,8 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
           <div className="absolute bottom-0 left-0 right-0 flex gap-2.5">
             {entries.map(([period]) => (
               <div key={period} className="flex-1 text-center">
-                <span className={`text-[9px] font-mono uppercase tracking-wider transition-colors ${
-                  hovered === period ? 'text-[#0471A4] font-bold' : 'text-slate-300'
+                <span className={`text-[10px] font-mono uppercase tracking-wider transition-colors ${
+                  hovered === period ? 'text-[#0471A4] font-bold' : 'text-slate-400'
                 }`}>
                   {period}
                 </span>
