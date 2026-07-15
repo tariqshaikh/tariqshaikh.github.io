@@ -1400,9 +1400,7 @@ Return ONLY a JSON array, no markdown, no explanation:
       if (!forTrip) {
         setTimeout(() => {
           setIntelligence(data);
-          const currentMonthIdx = new Date().getMonth();
-          const idealIdx = data.monthlyData.findIndex(m => m.isIdeal);
-          setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
+          setActiveMonthIndex(new Date().getMonth());
           setHasSearched(true);
           setIsSearching(false);
         }, 800);
@@ -1420,9 +1418,7 @@ Return ONLY a JSON array, no markdown, no explanation:
             if (!forTrip) {
               setTimeout(() => {
                 setIntelligence(data);
-                const currentMonthIdx = new Date().getMonth();
-                const idealIdx = data.monthlyData.findIndex((m: any) => m.isIdeal);
-                setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
+                setActiveMonthIndex(new Date().getMonth());
                 setHasSearched(true);
                 setIsSearching(false);
               }, 400);
@@ -1551,9 +1547,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
           }
 
           setIntelligence(data);
-          const currentMonthIdx = new Date().getMonth();
-          const idealIdx = data.monthlyData.findIndex((m: any) => m.isIdeal);
-          setActiveMonthIndex(idealIdx !== -1 ? idealIdx : currentMonthIdx);
+          setActiveMonthIndex(new Date().getMonth());
           setHasSearched(true);
         }
       } catch (err: any) {
