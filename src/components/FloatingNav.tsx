@@ -78,10 +78,10 @@ function MagneticIcon({ item, i, hovered, setHovered, onClick }: {
               initial={{ opacity: 0, y: 10, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.9 }}
-              className="absolute -top-12 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-mono tracking-widest uppercase rounded-lg border border-slate-700 whitespace-nowrap pointer-events-none shadow-2xl"
+              className="absolute right-14 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-mono tracking-widest uppercase rounded-lg border border-slate-700 whitespace-nowrap pointer-events-none shadow-2xl"
             >
               {item.name}
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-slate-700 rotate-45" />
+              <div className="absolute top-1/2 -translate-y-1/2 -right-1 w-2 h-2 bg-slate-900 border-t border-r border-slate-700 rotate-45" />
             </motion.span>
           )}
         </AnimatePresence>
@@ -95,12 +95,12 @@ export default function FloatingNav() {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] w-max">
+    <div className="fixed right-5 top-1/2 -translate-y-1/2 z-[100] w-max">
       <motion.div
-        initial={{ y: 80, opacity: 0, scale: 0.9 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
+        initial={{ x: 80, opacity: 0, scale: 0.9 }}
+        animate={{ x: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-        className="flex items-center gap-2 px-3 py-3 bg-white/60 backdrop-blur-2xl border border-slate-200/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[32px] ring-1 ring-slate-900/5"
+        className="flex flex-col items-center gap-2 px-3 py-3 bg-white/60 backdrop-blur-2xl border border-slate-200/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[32px] ring-1 ring-slate-900/5"
       >
         {navItems.map((item, i) => (
           <MagneticIcon
