@@ -54,174 +54,208 @@ export default function Portfolio() {
       <FloatingNav />
 
       {/* Hero - Inspired by 'OBSCURED' */}
-      <section className="relative min-h-[80vh] bg-[#F5F5F3] overflow-hidden flex flex-col pt-20 md:pt-24 pb-20 px-12">
-        {/* Minimal Header Bar */}
-        <div className="flex justify-between items-start font-mono text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-12 md:mb-16">
-          <div>
-            003+<br />Projects
-          </div>
-          <div className="text-slate-900">
-            Portfolio
-          </div>
-          <div>
-            EN
-          </div>
-        </div>
+      {/* Bento Hero + Projects */}
+      <section id="projects" className="bg-[#F5F5F3] px-4 md:px-5 pt-8 md:pt-10 pb-4 md:pb-5">
 
-        {/* Massive Bold Heading - Centered */}
-        <div className="relative w-full flex-1 flex flex-col">
-          <div className="flex-1 flex items-center justify-center">
+        {/* Desktop Bento Grid */}
+        <div
+          className="hidden md:grid gap-4"
+          style={{ gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr', minHeight: 'calc(100vh - 3.5rem)' }}
+        >
+          {/* Cell: Identity (spans both rows) */}
+          <div className="row-span-2 bg-white rounded-2xl p-10 flex flex-col justify-between border border-slate-200/40">
+            <div className="flex justify-between items-start font-mono text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+              <div>003+<br />Projects</div>
+              <div className="text-slate-900">Portfolio</div>
+              <div>EN</div>
+            </div>
             <motion.h1
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-              className="text-[clamp(36px,9.5vw,168px)] font-black text-slate-900 tracking-[-0.05em] leading-[0.8] flex flex-col items-center select-none"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: 'easeOut' }}
+              className="text-[clamp(44px,4.8vw,82px)] font-black text-slate-900 tracking-[-0.05em] leading-[0.85]"
+              style={{ fontFamily: "'BakersLocal', serif" }}
             >
-              <span style={{ fontFamily: "'BakersLocal', serif" }} className="normal-case inline-block whitespace-nowrap transform scale-y-110 border-b-4 border-slate-900/5 pb-2">Tariq Shaikh</span>
+              Tariq<br />Shaikh
             </motion.h1>
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-slate-900 font-black mb-1">Product Manager</div>
+              <p className="font-mono text-[10px] uppercase text-slate-400 leading-relaxed mb-6">Bridging data, strategy, and product.</p>
+              <div className="flex items-center gap-4">
+                <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Github size={16} /></a>
+                <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Linkedin size={16} /></a>
+                <a href="mailto:tshaikh92@gmail.com" className="text-slate-400 hover:text-slate-900 transition-colors"><Mail size={16} /></a>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between items-end">
-            <div className="max-w-xs font-mono text-[10px] uppercase leading-relaxed text-slate-500">
-              <span className="text-[18px] text-slate-900 font-black block mb-2 tracking-tight">Product Manager</span>
-              Bridging data, strategy, and product.
+
+          {/* Cell: Homebase NJ */}
+          <div className="bg-[#090E1A] border border-white/5 rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_24px_48px_-12px_rgba(59,130,246,0.15)] relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-full">Live Product</span>
+                <span className="font-mono text-[9px] text-slate-500 font-bold">P.001</span>
+              </div>
+              <h3 className="text-[22px] leading-tight mb-1 text-white">
+                <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-400 ml-1">NJ</span>
+              </h3>
+              <p className="font-serif italic text-slate-500 text-[10px] mb-4 uppercase tracking-wider">Product Design & Data Strategy</p>
+              <div className="relative mb-4">
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-500/30" />
+                <p className="text-[13px] leading-relaxed text-slate-300 pl-5">I collapsed 6 browser tabs into one weighted comparison tool for real-world real estate decisions.</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
+                  <span key={tag} className="font-mono text-[8px] px-2 py-0.5 bg-blue-500/10 text-blue-300/80 border border-blue-500/20 tracking-widest uppercase font-bold">{tag}</span>
+                ))}
+              </div>
             </div>
-            <div className="font-mono text-[10px] uppercase tracking-widest text-slate-900 font-black">
-              Scroll <br />
-              to explore
+            <div className="flex flex-col gap-2">
+              <Link to="/homebase" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-shadow">
+                Launch Application <ChevronRight size={12} />
+              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => openModal('prd-1')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
+                <button onClick={() => openModal('roadmap-1')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
+              </div>
             </div>
+          </div>
+
+          {/* Cell: Waves */}
+          <div className="bg-[#0B1A1F] border border-white/5 rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_24px_48px_-12px_rgba(6,182,212,0.15)] relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold rounded-full">Live Product</span>
+                <span className="font-mono text-[9px] text-slate-500 font-bold">P.002</span>
+              </div>
+              <h3 className="text-[22px] leading-tight mb-1 text-white">
+                <span className="font-serif font-bold italic">Waves</span>
+              </h3>
+              <p className="font-serif italic text-slate-500 text-[10px] mb-4 uppercase tracking-wider">Destination intelligence</p>
+              <div className="relative mb-4">
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-cyan-500/30" />
+                <p className="text-[13px] leading-relaxed text-slate-300 pl-5">Destination intelligence for dream trips. Visualizing when to go and what to see.</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {['Travel', 'Data Viz', 'AI'].map(tag => (
+                  <span key={tag} className="font-mono text-[8px] px-2 py-0.5 bg-cyan-500/10 text-cyan-300/80 border border-cyan-500/20 tracking-widest uppercase font-bold">{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Link to="/waves" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-br from-cyan-600 to-teal-300 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-shadow">
+                Launch Application <ChevronRight size={12} />
+              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => openModal('prd-3')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
+                <button onClick={() => openModal('roadmap-3')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Cell: Orbit */}
+          <div className="bg-[#1A1C1E] border border-white/5 rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-[#C5A059]/50 hover:shadow-[0_24px_48px_-12px_rgba(197,160,89,0.15)] relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
+                <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
+              </div>
+              <h3 className="text-[22px] leading-tight mb-1 text-white">
+                <span className="font-serif font-bold italic">Orbit</span>
+              </h3>
+              <p className="font-serif italic text-slate-500 text-[10px] mb-4 uppercase tracking-wider">Cash Flow Intelligence</p>
+              <div className="relative mb-4">
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
+                <p className="text-[13px] leading-relaxed text-slate-300 pl-5">Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {['Fintech', 'Cash Flow', 'Strategy'].map(tag => (
+                  <span key={tag} className="font-mono text-[8px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(197,160,89,0.4)] transition-shadow">
+                Launch Application <ChevronRight size={12} />
+              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => openModal('prd-2')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
+                <button onClick={() => openModal('roadmap-2')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Cell: Connect */}
+          <div className="bg-white rounded-2xl p-8 flex flex-col justify-between border border-slate-200/40">
+            <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-400 font-bold">Get in touch</div>
+            <div>
+              <div className="text-[32px] font-black text-slate-900 leading-[0.85] tracking-tight mb-3" style={{ fontFamily: "'BakersLocal', serif" }}>Let's<br />Connect.</div>
+              <p className="text-[12px] text-slate-400 leading-relaxed mb-6">Open to PM opportunities, product reviews, and building things that matter.</p>
+              <div className="flex flex-col gap-3">
+                <a href="mailto:tshaikh92@gmail.com" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
+                  <Mail size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest font-bold">Email</span>
+                </a>
+                <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
+                  <Linkedin size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest font-bold">LinkedIn</span>
+                </a>
+                <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
+                  <Github size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest font-bold">GitHub</span>
+                </a>
+              </div>
+            </div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-300 font-bold">NJ · 2026</div>
           </div>
         </div>
-      </section>
 
-      {/* Projects */}
-      <section id="projects" className="px-6 md:px-12 py-32 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20 px-4">
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">01</span>
-              </div>
-              <h2 className="font-display text-[clamp(40px,6.5vw,72px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter">
-                What I am <br />
-                <span className="text-slate-300">Building...</span>
-              </h2>
+        {/* Mobile: stacked cards */}
+        <div className="md:hidden flex flex-col gap-4">
+          <div className="bg-white rounded-2xl p-8 border border-slate-200/40">
+            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-4">Portfolio</div>
+            <div className="text-[42px] font-black text-slate-900 tracking-[-0.05em] leading-[0.85] mb-4" style={{ fontFamily: "'BakersLocal', serif" }}>Tariq<br />Shaikh</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-slate-900 font-black mb-1">Product Manager</div>
+            <p className="font-mono text-[10px] uppercase text-slate-400 mb-6">Bridging data, strategy, and product.</p>
+            <div className="flex items-center gap-4">
+              <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Github size={17} /></a>
+              <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Linkedin size={17} /></a>
+              <a href="mailto:tshaikh92@gmail.com" className="text-slate-400 hover:text-slate-900 transition-colors"><Mail size={17} /></a>
             </div>
-            <p className="text-slate-500 font-sans text-lg max-w-sm leading-relaxed pb-2">
-              A curated selection of applications designed to solve genuine needs through a product-driven approach.
-            </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {/* Project 1 - Homebase NJ */}
-            <div className="bg-[#090E1A] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-blue-500/50 hover:shadow-[0_32px_64px_-16px_rgba(59,130,246,0.15)] relative overflow-hidden rounded-2xl group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.001</span>
+          {([
+            { bg: 'bg-[#090E1A]', border: 'hover:border-blue-500/40', bar: 'from-blue-600 to-cyan-400', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20', label: 'P.001', titleEl: <><span className="font-serif font-bold">Homebase</span><span className="font-sans font-black text-blue-400 ml-1.5">NJ</span></>, sub: 'Product Design & Data Strategy', desc: 'I collapsed 6 browser tabs into one weighted comparison tool for real estate decisions.', tags: ['Consumer', 'Real Estate', 'Data Product'], tagCls: 'bg-blue-500/10 text-blue-300/80 border-blue-500/20', btn: 'from-blue-600 to-cyan-400', btnText: 'text-white', href: '/homebase', prd: 'prd-1', rm: 'roadmap-1' },
+            { bg: 'bg-[#0B1A1F]', border: 'hover:border-cyan-500/40', bar: 'from-cyan-600 to-teal-400', badge: 'bg-teal-500/10 text-teal-400 border-teal-500/20', label: 'P.002', titleEl: <span className="font-serif font-bold italic">Waves</span>, sub: 'Destination intelligence', desc: 'Destination intelligence for dream trips. Visualizing when to go and what to see.', tags: ['Travel', 'Data Viz', 'AI'], tagCls: 'bg-cyan-500/10 text-cyan-300/80 border-cyan-500/20', btn: 'from-cyan-600 to-teal-300', btnText: 'text-white', href: '/waves', prd: 'prd-3', rm: 'roadmap-3' },
+            { bg: 'bg-[#1A1C1E]', border: 'hover:border-[#C5A059]/40', bar: 'from-[#C5A059] to-[#E5C079]', badge: 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20', label: 'P.003', titleEl: <span className="font-serif font-bold italic">Orbit</span>, sub: 'Cash Flow Intelligence', desc: 'Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.', tags: ['Fintech', 'Cash Flow', 'Strategy'], tagCls: 'bg-[#C5A059]/10 text-[#D4B470] border-[#C5A059]/20', btn: 'from-[#C5A059] to-[#F0D585]', btnText: 'text-black', href: '/orbit', prd: 'prd-2', rm: 'roadmap-2' },
+          ] as const).map((p, i) => (
+            <div key={i} className={`${p.bg} border border-white/5 rounded-2xl p-8 flex flex-col gap-4 ${p.border} transition-all group relative overflow-hidden`}>
+              <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${p.bar} opacity-0 group-hover:opacity-100 transition-opacity`} />
+              <div className="flex items-center justify-between">
+                <span className={`font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest ${p.badge} border font-bold rounded-full`}>Live Product</span>
+                <span className="font-mono text-[9px] text-slate-500 font-bold">{p.label}</span>
               </div>
-              <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold text-white">Homebase</span> <span className="font-sans font-black text-blue-400 ml-1">NJ</span>
-              </h3>
-              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Product Design & Data Strategy</p>
-
-              <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-500/30" />
-                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  I collapsed 6 browser tabs into one weighted comparison tool built for real-world real estate decisions.
-                </p>
+              <div>
+                <h3 className="text-[24px] text-white mb-1">{p.titleEl}</h3>
+                <p className="font-serif italic text-slate-500 text-[10px] mb-3 uppercase tracking-wider">{p.sub}</p>
+                <p className="text-[13px] leading-relaxed text-slate-300 mb-3">{p.desc}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {p.tags.map(t => <span key={t} className={`font-mono text-[8px] px-2 py-0.5 ${p.tagCls} border tracking-widest uppercase font-bold`}>{t}</span>)}
+                </div>
               </div>
-
-              <div className="flex flex-wrap gap-2 mb-10">
-                {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-300/80 border border-blue-500/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-              
-              <div className="flex flex-col gap-3">
-                <Link to="/homebase" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(59,130,246,0.5)]">
-                  Launch Application <ChevronRight size={14} />
+              <div className="flex flex-col gap-2">
+                <Link to={p.href} className={`inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-br ${p.btn} ${p.btnText} text-[9px] font-black uppercase tracking-[0.2em]`}>
+                  Launch Application <ChevronRight size={12} />
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => openModal('prd-1')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
-                  <button onClick={() => openModal('roadmap-1')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
+                  <button onClick={() => openModal(p.prd)} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
+                  <button onClick={() => openModal(p.rm)} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
                 </div>
               </div>
             </div>
-
-            {/* Project 2 - Waves */}
-            <div className="bg-[#0B1A1F] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_32px_64px_-16px_rgba(6,182,212,0.15)] relative overflow-hidden rounded-2xl group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.002</span>
-              </div>
-              <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold italic text-white">Waves</span>
-              </h3>
-              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Dream trip planner & destination intelligence</p>
-
-              <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-cyan-500/30" />
-                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  Destination intelligence for dream trips. Visualizing when to go and what to see.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-10">
-                {['Travel', 'Data Viz', 'Collaboration'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-cyan-500/10 text-cyan-300/80 border border-cyan-500/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <Link to="/waves" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-cyan-600 to-teal-300 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(6,182,212,0.5)]">
-                  Launch Application <ChevronRight size={14} />
-                </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => openModal('prd-3')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
-                  <button onClick={() => openModal('roadmap-3')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
-                </div>
-              </div>
-            </div>
-
-            {/* Project 3 - Orbit */}
-            <div className="md:col-span-2 md:max-w-2xl md:mx-auto md:w-full bg-[#1A1C1E] border border-white/5 p-8 md:p-10 transition-all duration-500 hover:border-[#C5A059]/50 hover:shadow-[0_32px_64px_-16px_rgba(197,160,89,0.15)] relative overflow-hidden rounded-2xl group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-center justify-between mb-10">
-                <span className="font-mono text-[9px] px-3 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[10px] text-slate-400 font-bold tracking-tighter">P.003</span>
-              </div>
-              <h3 className="text-[28px] md:text-[32px] leading-tight mb-2 text-white">
-                <span className="font-serif font-bold italic text-white">Orbit</span>
-              </h3>
-              <p className="font-serif italic text-slate-400 text-xs mb-6 uppercase tracking-wider">Financial Simulation & Strategy</p>
-
-              <div className="relative mb-10">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
-                <p className="text-[14px] leading-[1.6] text-slate-300 pl-6 font-sans">
-                  A financial trajectory simulator designed to map annual cash flow and sinking funds.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-10">
-                {['Fintech', 'Simulation', 'Strategy'].map(tag => (
-                  <span key={tag} className="font-mono text-[9px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <Link to="/orbit" className="btn-gradient-animated inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_24px_rgba(197,160,89,0.45)]">
-                  Launch Application <ChevronRight size={14} />
-                </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => openModal('prd-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">PRD</button>
-                  <button onClick={() => openModal('roadmap-2')} className="px-4 py-2.5 bg-white/5 text-[9px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-none">Roadmap</button>
-                </div>
-              </div>
-            </div>
-
-            {/* Project 4 - Jobverse (hidden) */}
-          </div>
+          ))}
         </div>
       </section>
 
@@ -275,7 +309,7 @@ export default function Portfolio() {
             </div>
             <div className="lg:col-span-7 flex flex-col justify-end gap-12">
               <p className="text-[28px] leading-[1.2] text-slate-900 font-sans tracking-tight max-w-xl">
-                I am a <strong className="font-black">Senior Data Strategist at Indeed</strong> with a decade of experience operating at the convergence of high-scale data and product.
+                I am a <strong className="font-black">Product Manager</strong> with a decade of experience operating at the convergence of high-scale data and product.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-12 border-t border-slate-100">
                 <div>
