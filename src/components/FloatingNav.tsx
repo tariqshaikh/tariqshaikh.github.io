@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Waves, BarChart3, User, Mail } from 'lucide-react';
@@ -92,32 +92,44 @@ function MagneticIcon({ item, i, hovered, setHovered, onClick }: {
 
 export default function FloatingNav() {
   const [hovered, setHovered] = useState<number | null>(null);
+  const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.6);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <div className="fixed right-5 top-1/2 -translate-y-1/2 z-[100] w-max">
-      <motion.div
-        initial={{ x: 80, opacity: 0, scale: 0.9 }}
-        animate={{ x: 0, opacity: 1, scale: 1 }}
-        transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-        className="flex flex-col items-center gap-2 px-3 py-3 bg-white/60 backdrop-blur-2xl border border-slate-200/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[32px] ring-1 ring-slate-900/5"
-      >
-        {navItems.map((item, i) => (
-          <MagneticIcon
-            key={item.name}
-            item={item}
-            i={i}
-            hovered={hovered}
-            setHovered={setHovered}
-            onClick={(e) => {
-              if (item.href.startsWith('/')) {
-                e.preventDefault();
-                navigate(item.href);
-              }
-            }}
-          />
-        ))}
-      </motion.div>
-    </div>
+    <AnimatePresence>
+      {visible && (
+        <div className="fixed right-5 top-1/2 -translate-y-1/2 z-[100] w-max">
+          <motion.div
+            initial={{ x: 60, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 60, opacity: 0 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 120 }}
+            className="flex flex-col items-center gap-2 px-3 py-3 bg-white/60 backdrop-blur-2xl border border-slate-200/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[32px] ring-1 ring-slate-900/5"
+          >
+            {navItems.map((item, i) => (
+              <MagneticIcon
+                key={item.name}
+                item={item}
+                i={i}
+                hovered={hovered}
+                setHovered={setHovered}
+                onClick={(e) => {
+                  if (item.href.startsWith('/')) {
+                    e.preventDefault();
+                    navigate(item.href);
+                  }
+                }}
+              />
+            ))}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
