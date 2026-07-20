@@ -19,6 +19,8 @@ import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
 import Waves from './components/Waves';
 import WavesThemePreview from './components/WavesThemePreview';
+import PortfolioV2 from './components/PortfolioV2';
+import PortfolioV3 from './components/PortfolioV3';
 import CapitalDeployment from './components/CapitalDeployment';
 
 export default function App() {
@@ -35,6 +37,8 @@ export default function App() {
         <Route path="/waves" element={<Waves />} />
         <Route path="/waves/:tripId" element={<Waves />} />
         <Route path="/waves-preview" element={<WavesThemePreview />} />
+        <Route path="/portfolio-v2" element={<PortfolioV2 />} />
+        <Route path="/portfolio-v3" element={<PortfolioV3 />} />
         <Route path="/orbit/dashboard" element={<Orbit />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />
