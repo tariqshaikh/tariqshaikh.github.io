@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
-import { Home, Briefcase, Wrench, User, Mail } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, Waves, BarChart3, User, Mail } from 'lucide-react';
 
 interface NavItem {
   name: string;
@@ -9,27 +10,23 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Home', href: '#', icon: Home },
-  { name: 'Work', href: '#projects', icon: Briefcase },
-  { name: 'Process', href: '#process', icon: Wrench },
+  { name: 'Homebase NJ', href: '/homebase', icon: MapPin },
+  { name: 'Waves', href: '/waves', icon: Waves },
+  { name: 'Orbit', href: '/orbit', icon: BarChart3 },
   { name: 'About', href: '#about', icon: User },
   { name: 'Contact', href: 'mailto:tshaikh92@gmail.com', icon: Mail },
 ];
 
-interface MagneticIconProps {
-  key?: React.Key;
+function MagneticIcon({ item, i, hovered, setHovered, onClick }: {
   item: NavItem;
   i: number;
   hovered: number | null;
   setHovered: (i: number | null) => void;
-}
-
-function MagneticIcon({ item, i, hovered, setHovered }: MagneticIconProps) {
+  onClick: (e: React.MouseEvent) => void;
+}) {
   const ref = useRef<HTMLAnchorElement>(null);
-  
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-
   const springConfig = { damping: 15, stiffness: 150 };
   const x = useSpring(mouseX, springConfig);
   const y = useSpring(mouseY, springConfig);
@@ -37,15 +34,8 @@ function MagneticIcon({ item, i, hovered, setHovered }: MagneticIconProps) {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!ref.current) return;
     const { left, top, width, height } = ref.current.getBoundingClientRect();
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    const distanceX = e.clientX - centerX;
-    const distanceY = e.clientY - centerY;
-    
-    // Magnetic pull distance
-    const pull = 0.4;
-    mouseX.set(distanceX * pull);
-    mouseY.set(distanceY * pull);
+    mouseX.set((e.clientX - (left + width / 2)) * 0.4);
+    mouseY.set((e.clientY - (top + height / 2)) * 0.4);
     setHovered(i);
   };
 
@@ -59,6 +49,7 @@ function MagneticIcon({ item, i, hovered, setHovered }: MagneticIconProps) {
     <motion.a
       ref={ref}
       href={item.href}
+      onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x, y }}
@@ -76,13 +67,11 @@ function MagneticIcon({ item, i, hovered, setHovered }: MagneticIconProps) {
           />
         )}
       </AnimatePresence>
-      
       <div className="relative z-10 flex flex-col items-center">
-        <item.icon 
-          size={22} 
-          className={`transition-colors duration-300 ${hovered === i ? 'text-white' : 'text-slate-500'}`} 
+        <item.icon
+          size={22}
+          className={`transition-colors duration-300 ${hovered === i ? 'text-white' : 'text-slate-500'}`}
         />
-        
         <AnimatePresence>
           {hovered === i && (
             <motion.span
@@ -103,22 +92,29 @@ function MagneticIcon({ item, i, hovered, setHovered }: MagneticIconProps) {
 
 export default function FloatingNav() {
   const [hovered, setHovered] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   return (
     <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] w-max">
-      <motion.div 
+      <motion.div
         initial={{ y: 80, opacity: 0, scale: 0.9 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 100 }}
         className="flex items-center gap-2 px-3 py-3 bg-white/60 backdrop-blur-2xl border border-slate-200/50 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[32px] ring-1 ring-slate-900/5"
       >
         {navItems.map((item, i) => (
-          <MagneticIcon 
-            key={item.name} 
-            item={item} 
-            i={i} 
-            hovered={hovered} 
-            setHovered={setHovered} 
+          <MagneticIcon
+            key={item.name}
+            item={item}
+            i={i}
+            hovered={hovered}
+            setHovered={setHovered}
+            onClick={(e) => {
+              if (item.href.startsWith('/')) {
+                e.preventDefault();
+                navigate(item.href);
+              }
+            }}
           />
         ))}
       </motion.div>
