@@ -176,7 +176,7 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
                   )}
                   <div
                     className="absolute left-1/2 -translate-x-1/2 font-bold text-slate-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-sm"
-                    style={{ bottom: barH + 4 }}
+                    style={{ bottom: isBuyer ? barH + 18 : barH + 4 }}
                   >
                     {val ?? '—'}
                   </div>
