@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, ExternalLink, ChevronRight, Menu, X, Terminal, Layers, Globe, Phone, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
+import { Github, Linkedin, Mail, ExternalLink, ChevronRight, ChevronDown, Menu, X, Terminal, Layers, Globe, Phone, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import FloatingNav from './FloatingNav';
 import { auth } from '../firebase';
@@ -16,6 +16,8 @@ export default function Portfolio() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [methodOpen, setMethodOpen] = useState(false);
+  const [builderOpen, setBuilderOpen] = useState(false);
 
   useEffect(() => {
     document.title = "Tariq Shaikh's Portfolio";
@@ -265,82 +267,114 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section id="process" className="px-12 py-32 bg-slate-50 border-y border-slate-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">02 — Operating Model</span>
-              </div>
-              <h2 className="font-display text-[clamp(40px,7vw,96px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter">
-                The <br />
-                <span className="text-slate-300">Method</span>
-              </h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200">
-            {[
-              { num: '01', title: 'Definition', desc: 'Identify a user problem that can be articulated in a single sentence. Logic over ego.' },
-              { num: '02', title: 'Specifications', desc: 'Write the PRD. Define metrics, constraints, and non-goals before opening the IDE.' },
-              { num: '03', title: 'Execution', desc: 'Build the functional core. Ship a V1 that solves the primary friction point immediately.' },
-              { num: '04', title: 'Refinement', desc: 'Synthesize feedback and performance data to inform the roadmap for V2 and beyond.' },
-            ].map((step, i) => (
-              <div key={i} className="p-12 bg-white group hover:bg-slate-50 transition-colors">
-                <div className="font-display text-[48px] font-black text-slate-100 leading-none mb-8 group-hover:text-blue-100 transition-colors">{step.num}</div>
-                <div className="font-display text-lg font-black mb-4 text-slate-900 uppercase tracking-tight">{step.title}</div>
-                <p className="text-base leading-relaxed text-slate-500">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Method + Builder — touching accordion */}
+      <div className="px-6 md:px-14 py-4 bg-[#F5F5F3]">
+        <div className="border border-slate-200 rounded-2xl overflow-hidden">
 
-      {/* About */}
-      <section id="about" className="px-12 py-32 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
-            <div className="lg:col-span-5">
-              <div className="flex items-center gap-3 mb-12">
-                <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-400 font-bold">03 — About</span>
-              </div>
-              <h2 className="font-display text-[clamp(40px,7vw,96px)] font-black leading-[0.85] text-slate-900 uppercase tracking-tighter mb-12">
-                The<br />
-                <span className="text-slate-300">Builder</span>
-              </h2>
-              <div className="bg-slate-50 p-8 border-l-2 border-slate-900">
-                <p className="text-lg leading-relaxed text-slate-600 italic">
-                  "I specialize in bridging the gap between deep technical implementation and boardroom-level product decisions."
-                </p>
-              </div>
+        {/* Method */}
+        <div className="bg-white">
+          <button
+            onClick={() => setMethodOpen(o => !o)}
+            className="w-full flex items-center justify-between px-8 py-5 hover:bg-slate-50 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-6">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-400 font-bold">02 — Operating Model</span>
+              <span className="font-display text-lg font-black text-slate-900 uppercase tracking-tight">The Method</span>
             </div>
-            <div className="lg:col-span-7 flex flex-col justify-end gap-12">
-              <p className="text-[28px] leading-[1.2] text-slate-900 font-sans tracking-tight max-w-xl">
-                I am a <strong className="font-black">Product Manager</strong> with a decade of experience operating at the convergence of high-scale data and product.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-12 border-t border-slate-100">
-                <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-6">Expertise — Product</div>
-                  <ul className="text-sm font-black text-slate-900 uppercase tracking-tight flex flex-col gap-4">
-                    <li>Roadmap Ownership</li>
-                    <li>A/B Experimentation</li>
-                    <li>User Research</li>
-                    <li>0→1 Launches</li>
-                  </ul>
+            <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${methodOpen ? 'rotate-180' : ''}`} />
+          </button>
+          <AnimatePresence initial={false}>
+            {methodOpen && (
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-100 border-t border-slate-100">
+                  {[
+                    { num: '01', title: 'Definition', desc: 'Identify a user problem that can be articulated in a single sentence. Logic over ego.' },
+                    { num: '02', title: 'Specifications', desc: 'Write the PRD. Define metrics, constraints, and non-goals before opening the IDE.' },
+                    { num: '03', title: 'Execution', desc: 'Build the functional core. Ship a V1 that solves the primary friction point immediately.' },
+                    { num: '04', title: 'Refinement', desc: 'Synthesize feedback and performance data to inform the roadmap for V2 and beyond.' },
+                  ].map((step, i) => (
+                    <div key={i} className="p-10 bg-white">
+                      <div className="font-display text-[40px] font-black text-slate-100 leading-none mb-6">{step.num}</div>
+                      <div className="font-display text-base font-black mb-3 text-slate-900 uppercase tracking-tight">{step.title}</div>
+                      <p className="text-sm leading-relaxed text-slate-500">{step.desc}</p>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-6">Expertise — Technical</div>
-                  <ul className="text-sm font-black text-slate-900 uppercase tracking-tight flex flex-col gap-4">
-                    <li>React / TypeScript</li>
-                    <li>SQL & Data Viz</li>
-                    <li>Data Automation</li>
-                    <li>Product Arch.</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </section>
+
+        {/* Builder */}
+        <div className="bg-slate-50 border-t border-slate-200">
+          <button
+            onClick={() => setBuilderOpen(o => !o)}
+            className="w-full flex items-center justify-between px-8 py-5 hover:bg-slate-100 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-6">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-400 font-bold">03 — About</span>
+              <span className="font-display text-lg font-black text-slate-900 uppercase tracking-tight">The Builder</span>
+            </div>
+            <ChevronDown size={16} className={`text-slate-400 transition-transform duration-300 ${builderOpen ? 'rotate-180' : ''}`} />
+          </button>
+          <AnimatePresence initial={false}>
+            {builderOpen && (
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="border-t border-slate-100 px-8 py-10">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    <div className="lg:col-span-5">
+                      <div className="bg-slate-50 p-6 border-l-2 border-slate-900">
+                        <p className="text-base leading-relaxed text-slate-600 italic">
+                          "I specialize in bridging the gap between deep technical implementation and boardroom-level product decisions."
+                        </p>
+                      </div>
+                    </div>
+                    <div className="lg:col-span-7 flex flex-col gap-8">
+                      <p className="text-xl leading-snug text-slate-900 font-sans tracking-tight">
+                        I am a <strong className="font-black">Product Manager</strong> with a decade of experience operating at the convergence of high-scale data and product.
+                      </p>
+                      <div className="grid grid-cols-2 gap-8 pt-8 border-t border-slate-100">
+                        <div>
+                          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-4">Expertise — Product</div>
+                          <ul className="text-sm font-black text-slate-900 uppercase tracking-tight flex flex-col gap-3">
+                            <li>Roadmap Ownership</li>
+                            <li>A/B Experimentation</li>
+                            <li>User Research</li>
+                            <li>0→1 Launches</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-4">Expertise — Technical</div>
+                          <ul className="text-sm font-black text-slate-900 uppercase tracking-tight flex flex-col gap-3">
+                            <li>React / TypeScript</li>
+                            <li>SQL & Data Viz</li>
+                            <li>Data Automation</li>
+                            <li>Product Arch.</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        </div>
+      </div>
 
       <footer className="px-12 py-24 border-t border-slate-100 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-16">
