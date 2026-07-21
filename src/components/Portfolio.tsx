@@ -55,15 +55,13 @@ export default function Portfolio() {
 
       {/* Hero - Inspired by 'OBSCURED' */}
       {/* Bento Hero + Projects */}
-      <section id="projects" className="bg-[#F5F5F3] px-4 md:px-5 pt-8 md:pt-10 pb-4 md:pb-5">
+      <section id="projects" className="bg-[#F5F5F3] px-6 md:px-14 pt-10 md:pt-14 pb-10 md:pb-14">
 
-        {/* Desktop Bento Grid */}
-        <div
-          className="hidden md:grid gap-4"
-          style={{ gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr', minHeight: 'calc(100vh - 3.5rem)' }}
-        >
-          {/* Cell: Identity (spans both rows) */}
-          <div className="row-span-2 bg-white rounded-2xl p-10 flex flex-col justify-between border border-slate-200/40">
+        {/* Desktop: identity card left + 2x2 square tray right */}
+        <div className="hidden md:flex gap-5 items-stretch w-full">
+
+          {/* Identity card — stretches to match tray height */}
+          <div className="flex-1 bg-white rounded-2xl p-10 flex flex-col justify-between border border-slate-200/40">
             <div className="flex justify-between items-start font-mono text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
               <div>003+<br />Projects</div>
               <div className="text-slate-900">Portfolio</div>
@@ -89,128 +87,136 @@ export default function Portfolio() {
             </div>
           </div>
 
-          {/* Cell: Homebase NJ */}
-          <div className="bg-[#090E1A] border border-white/5 rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_24px_48px_-12px_rgba(59,130,246,0.15)] relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div>
-              <div className="flex items-center justify-between mb-5">
-                <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[9px] text-slate-500 font-bold">P.001</span>
+          {/* Project tray — background with 2×2 squares */}
+          <div className="flex-1 min-w-0 bg-[#E2E2DF] rounded-2xl p-3 border border-slate-300/40">
+            <div className="grid grid-cols-2 gap-3">
+
+              {/* Homebase NJ */}
+              <div className="aspect-square bg-[#090E1A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_16px_40px_-8px_rgba(59,130,246,0.2)] relative overflow-hidden group border border-white/5">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-full">Live Product</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.001</span>
+                  </div>
+                  <h3 className="text-[20px] leading-tight mb-1 text-white">
+                    <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-400 ml-1">NJ</span>
+                  </h3>
+                  <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Product Design & Data Strategy</p>
+                  <div className="relative mb-3">
+                    <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-500/30" />
+                    <p className="text-xs leading-relaxed text-slate-300 pl-4">6 browser tabs collapsed into one weighted real estate comparison tool.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {['Consumer', 'Real Estate', 'Data'].map(tag => (
+                      <span key={tag} className="font-mono text-[7px] px-1.5 py-0.5 bg-blue-500/10 text-blue-300/80 border border-blue-500/20 tracking-widest uppercase font-bold">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Link to="/homebase" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(59,130,246,0.4)] transition-shadow">
+                    Launch <ChevronRight size={10} />
+                  </Link>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button onClick={() => openModal('prd-1')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
+                    <button onClick={() => openModal('roadmap-1')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">Roadmap</button>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-[22px] leading-tight mb-1 text-white">
-                <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-400 ml-1">NJ</span>
-              </h3>
-              <p className="font-serif italic text-slate-500 text-[10px] mb-4 uppercase tracking-wider">Product Design & Data Strategy</p>
-              <div className="relative mb-4">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-blue-500/30" />
-                <p className="text-[13px] leading-relaxed text-slate-300 pl-5">I collapsed 6 browser tabs into one weighted comparison tool for real-world real estate decisions.</p>
+
+              {/* Waves */}
+              <div className="aspect-square bg-[#0B1A1F] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_16px_40px_-8px_rgba(6,182,212,0.2)] relative overflow-hidden group border border-white/5">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold rounded-full">Live Product</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.002</span>
+                  </div>
+                  <h3 className="text-[20px] leading-tight mb-1 text-white">
+                    <span className="font-serif font-bold italic">Waves</span>
+                  </h3>
+                  <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Destination intelligence</p>
+                  <div className="relative mb-3">
+                    <div className="absolute left-0 top-0 bottom-0 w-px bg-cyan-500/30" />
+                    <p className="text-xs leading-relaxed text-slate-300 pl-4">Visualizing when to go and what to see for dream trips.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {['Travel', 'Data Viz', 'AI'].map(tag => (
+                      <span key={tag} className="font-mono text-[7px] px-1.5 py-0.5 bg-cyan-500/10 text-cyan-300/80 border border-cyan-500/20 tracking-widest uppercase font-bold">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Link to="/waves" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-cyan-600 to-teal-300 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(6,182,212,0.4)] transition-shadow">
+                    Launch <ChevronRight size={10} />
+                  </Link>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button onClick={() => openModal('prd-3')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
+                    <button onClick={() => openModal('roadmap-3')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">Roadmap</button>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {['Consumer', 'Real Estate', 'Data Product'].map(tag => (
-                  <span key={tag} className="font-mono text-[8px] px-2 py-0.5 bg-blue-500/10 text-blue-300/80 border border-blue-500/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
+
+              {/* Orbit */}
+              <div className="aspect-square bg-[#1A1C1E] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-[#C5A059]/50 hover:shadow-[0_16px_40px_-8px_rgba(197,160,89,0.2)] relative overflow-hidden group border border-white/5">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
+                  </div>
+                  <h3 className="text-[20px] leading-tight mb-1 text-white">
+                    <span className="font-serif font-bold italic">Orbit</span>
+                  </h3>
+                  <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Cash Flow Intelligence</p>
+                  <div className="relative mb-3">
+                    <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
+                    <p className="text-xs leading-relaxed text-slate-300 pl-4">Map every dollar across 12 months so irregular expenses never catch you off guard.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {['Fintech', 'Cash Flow', 'Strategy'].map(tag => (
+                      <span key={tag} className="font-mono text-[7px] px-1.5 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Link to="/orbit" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(197,160,89,0.4)] transition-shadow">
+                    Launch <ChevronRight size={10} />
+                  </Link>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button onClick={() => openModal('prd-2')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
+                    <button onClick={() => openModal('roadmap-2')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">Roadmap</button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Link to="/homebase" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-shadow">
-                Launch Application <ChevronRight size={12} />
-              </Link>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => openModal('prd-1')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
-                <button onClick={() => openModal('roadmap-1')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
+
+              {/* Connect */}
+              <div className="aspect-square bg-white rounded-xl p-5 flex flex-col justify-between border border-slate-200/60">
+                <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-400 font-bold">Get in touch</div>
+                <div>
+                  <div className="text-[28px] font-black text-slate-900 leading-[0.85] tracking-tight mb-3" style={{ fontFamily: "'BakersLocal', serif" }}>Let's<br />Connect.</div>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-4">Open to PM opportunities, product reviews, and building things that matter.</p>
+                  <div className="flex flex-col gap-2.5">
+                    <a href="mailto:tshaikh92@gmail.com" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
+                      <Mail size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
+                      <span className="font-mono text-[10px] uppercase tracking-widest font-bold">Email</span>
+                    </a>
+                    <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
+                      <Linkedin size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
+                      <span className="font-mono text-[10px] uppercase tracking-widest font-bold">LinkedIn</span>
+                    </a>
+                    <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
+                      <Github size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
+                      <span className="font-mono text-[10px] uppercase tracking-widest font-bold">GitHub</span>
+                    </a>
+                  </div>
+                </div>
+                <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-300 font-bold">NJ · 2026</div>
               </div>
+
             </div>
           </div>
 
-          {/* Cell: Waves */}
-          <div className="bg-[#0B1A1F] border border-white/5 rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_24px_48px_-12px_rgba(6,182,212,0.15)] relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div>
-              <div className="flex items-center justify-between mb-5">
-                <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[9px] text-slate-500 font-bold">P.002</span>
-              </div>
-              <h3 className="text-[22px] leading-tight mb-1 text-white">
-                <span className="font-serif font-bold italic">Waves</span>
-              </h3>
-              <p className="font-serif italic text-slate-500 text-[10px] mb-4 uppercase tracking-wider">Destination intelligence</p>
-              <div className="relative mb-4">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-cyan-500/30" />
-                <p className="text-[13px] leading-relaxed text-slate-300 pl-5">Destination intelligence for dream trips. Visualizing when to go and what to see.</p>
-              </div>
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {['Travel', 'Data Viz', 'AI'].map(tag => (
-                  <span key={tag} className="font-mono text-[8px] px-2 py-0.5 bg-cyan-500/10 text-cyan-300/80 border border-cyan-500/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Link to="/waves" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-br from-cyan-600 to-teal-300 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-shadow">
-                Launch Application <ChevronRight size={12} />
-              </Link>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => openModal('prd-3')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
-                <button onClick={() => openModal('roadmap-3')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Cell: Orbit */}
-          <div className="bg-[#1A1C1E] border border-white/5 rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-[#C5A059]/50 hover:shadow-[0_24px_48px_-12px_rgba(197,160,89,0.15)] relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div>
-              <div className="flex items-center justify-between mb-5">
-                <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
-              </div>
-              <h3 className="text-[22px] leading-tight mb-1 text-white">
-                <span className="font-serif font-bold italic">Orbit</span>
-              </h3>
-              <p className="font-serif italic text-slate-500 text-[10px] mb-4 uppercase tracking-wider">Cash Flow Intelligence</p>
-              <div className="relative mb-4">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-[#C5A059]/30" />
-                <p className="text-[13px] leading-relaxed text-slate-300 pl-5">Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.</p>
-              </div>
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {['Fintech', 'Cash Flow', 'Strategy'].map(tag => (
-                  <span key={tag} className="font-mono text-[8px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{tag}</span>
-                ))}
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(197,160,89,0.4)] transition-shadow">
-                Launch Application <ChevronRight size={12} />
-              </Link>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => openModal('prd-2')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
-                <button onClick={() => openModal('roadmap-2')} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Cell: Connect */}
-          <div className="bg-white rounded-2xl p-8 flex flex-col justify-between border border-slate-200/40">
-            <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-400 font-bold">Get in touch</div>
-            <div>
-              <div className="text-[32px] font-black text-slate-900 leading-[0.85] tracking-tight mb-3" style={{ fontFamily: "'BakersLocal', serif" }}>Let's<br />Connect.</div>
-              <p className="text-[12px] text-slate-400 leading-relaxed mb-6">Open to PM opportunities, product reviews, and building things that matter.</p>
-              <div className="flex flex-col gap-3">
-                <a href="mailto:tshaikh92@gmail.com" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
-                  <Mail size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
-                  <span className="font-mono text-[10px] uppercase tracking-widest font-bold">Email</span>
-                </a>
-                <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
-                  <Linkedin size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
-                  <span className="font-mono text-[10px] uppercase tracking-widest font-bold">LinkedIn</span>
-                </a>
-                <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
-                  <Github size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
-                  <span className="font-mono text-[10px] uppercase tracking-widest font-bold">GitHub</span>
-                </a>
-              </div>
-            </div>
-            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-300 font-bold">NJ · 2026</div>
-          </div>
         </div>
 
         {/* Mobile: stacked cards */}
