@@ -795,13 +795,11 @@ function Orbit() {
 
     const timer = setTimeout(() => {
       if (activeModelId) {
-        // In model editing mode — snapshot the full state to the model doc
         updateModelDoc(activeModelId, Math.round(normalizedMonthlySurplus));
       } else {
-        // Live mode — normal save to orbitProfile/main
         saveProfile(profile);
       }
-    }, 2000);
+    }, 600);
 
     return () => clearTimeout(timer);
   }, [profile, expenses, startDate, endDate, user, isAuthReady, activeModelId]);
@@ -898,7 +896,8 @@ function Orbit() {
 
   const saveExpense = async (exp: RecurringExpense) => {
     if (!user || user.uid === 'guest-user') return;
-    if (activeModelId) return; // In model mode — full snapshot auto-saves, no individual writes
+    if (activeModelId) return;
+    setIsSaving(true);
     try {
       await setDoc(doc(db, 'users', user.uid, 'orbitExpenses', exp.id), {
         ...exp,
@@ -906,6 +905,8 @@ function Orbit() {
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `orbitExpenses/${exp.id}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -928,10 +929,13 @@ function Orbit() {
   const deleteExpenseFromDb = async (id: string) => {
     if (!user || user.uid === 'guest-user') return;
     if (activeModelId) return;
+    setIsSaving(true);
     try {
       await deleteDoc(doc(db, 'users', user.uid, 'orbitExpenses', id));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, `orbitExpenses/${id}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1238,18 +1242,8 @@ function Orbit() {
           <nav className="hidden md:flex items-center gap-6 mr-4">
             {user && (
               <>
-                <div className="relative group py-2">
-                  <button className="text-[11px] font-mono uppercase tracking-widest text-[#2C3338] transition-colors flex items-center gap-1">
-                    Tools <ChevronDown size={12} />
-                  </button>
-                  <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
-                    <button onClick={() => navigate('/orbit')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#2C3338] bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
-                    <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
-                    <div className="px-4 py-2 text-[9px] font-mono uppercase tracking-widest text-[#8C8670]/50 border-t border-[#E8E4D0] mt-1 pt-3">Future Modules (TBD)</div>
-                    <button className="px-4 py-1 text-[11px] font-mono uppercase tracking-widest text-[#8C8670]/40 cursor-not-allowed text-left w-full">Wealth Simulator</button>
-                    <button className="px-4 py-1 text-[11px] font-mono uppercase tracking-widest text-[#8C8670]/40 cursor-not-allowed text-left w-full">Balance Sheet</button>
-                  </div>
-                </div>
+                <Link to="/orbit/balance-sheet" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Balance Sheet</Link>
+                <Link to="/orbit/retirement-planner" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Retirement</Link>
               </>
             )}
           </nav>

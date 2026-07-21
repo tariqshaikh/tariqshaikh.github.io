@@ -11,9 +11,7 @@ import Homebase from './components/Homebase';
 import HomebaseTownPage from './components/HomebaseTownPage';
 import Orbit from './components/Orbit';
 import NetWorth from './components/NetWorth';
-import OrbitHome from './components/OrbitHome';
 import NetWorthHistory from './components/NetWorthHistory';
-import CurrencyConverter from './components/CurrencyConverter';
 import RetirementPlanner from './components/RetirementPlanner';
 import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
@@ -43,7 +41,6 @@ export default function App() {
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />
         <Route path="/orbit/simulator" element={<Orbit />} />
-        <Route path="/orbit/currency-converter" element={<CurrencyConverter />} />
         <Route path="/orbit/retirement-planner" element={<RetirementPlanner />} />
         <Route path="/orbit/capital-deployment" element={<CapitalDeployment />} />
         <Route path="/admin/visitors" element={<VisitorInsights />} />

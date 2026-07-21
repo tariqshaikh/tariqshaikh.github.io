@@ -1,20 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { 
-  TrendingUp, 
-  Wallet, 
-  Zap, 
-  ArrowRight, 
-  ChevronLeft, 
-  ChevronDown,
-  Plus, 
-  History, 
+  TrendingUp,
+  Wallet,
+  Zap,
+  ArrowRight,
+  ChevronLeft,
+  Plus,
+  History,
   User as UserIcon,
   LogOut,
   Target,
   BarChart3,
   ShieldCheck,
-  Globe,
   RefreshCw
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -169,18 +167,8 @@ export default function OrbitHome() {
               </button>
               <Link to="/orbit/dashboard" className="text-[11px] font-mono uppercase tracking-widest text-[#2C3338] transition-colors">Dashboard</Link>
               
-              <div className="relative group py-2">
-                <button className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors flex items-center gap-1">
-                  Tools <ChevronDown size={12} />
-                </button>
-                <div className="absolute top-full right-0 w-48 bg-[#FAF9F6] border border-[#E8E4D0] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2">
-                  <button onClick={() => navigate('/orbit')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Annual Orbit</button>
-                  <button onClick={() => navigate('/orbit/currency-converter')} className="px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] hover:bg-[#E8E4D0] transition-colors text-left w-full">Currency Converter</button>
-                  <div className="px-4 py-2 text-[9px] font-mono uppercase tracking-widest text-[#8C8670]/50 border-t border-[#E8E4D0] mt-1 pt-3">Future Modules (TBD)</div>
-                  <button className="px-4 py-1 text-[11px] font-mono uppercase tracking-widest text-[#8C8670]/40 cursor-not-allowed text-left w-full">Wealth Simulator</button>
-                  <button className="px-4 py-1 text-[11px] font-mono uppercase tracking-widest text-[#8C8670]/40 cursor-not-allowed text-left w-full">Balance Sheet</button>
-                </div>
-              </div>
+              <Link to="/orbit/balance-sheet" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Balance Sheet</Link>
+              <Link to="/orbit/retirement-planner" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Retirement</Link>
             </nav>
             <div className="flex flex-col items-end">
               <span className="text-[12px] font-bold text-[#2C3338]">{user.displayName}</span>
@@ -296,21 +284,7 @@ export default function OrbitHome() {
                 </div>
               </Link>
 
-              <Link 
-                to="/orbit/currency-converter"
-                className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl hover:border-[#C5A059] transition-all group shadow-sm"
-              >
-                <div className="w-12 h-12 bg-[#C5A059]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#C5A059]/20 transition-colors">
-                  <Globe size={24} className="text-[#C5A059]" />
-                </div>
-                <h3 className="text-xl font-serif font-bold text-[#2C3338] mb-2">Currency Converter</h3>
-                <p className="text-sm text-[#8C8670] mb-6 leading-relaxed">Real-time global exchange rates for 15+ major currencies.</p>
-                <div className="flex items-center gap-2 text-[#C5A059] font-mono text-xs uppercase tracking-widest">
-                  Open Converter <ArrowRight size={14} />
-                </div>
-              </Link>
-
-              <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl opacity-60 grayscale-[0.5] transition-all relative overflow-hidden shadow-sm">
+<div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl opacity-60 grayscale-[0.5] transition-all relative overflow-hidden shadow-sm">
                 <div className="absolute top-4 right-4 bg-[#E8E4D0] text-[#8C8670] px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-xl">
                   Coming Soon
                 </div>

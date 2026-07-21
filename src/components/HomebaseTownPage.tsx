@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap, X, GitCompare } from 'lucide-react';
 import { NJ_ENRICHED, NJ_COUNTIES } from '../constants';
 import { logVisit } from '../lib/analytics';
+import MarketIntelligence from './MarketIntelligence';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -51,10 +52,62 @@ export default function HomebaseTownPage() {
   const [groqData, setGroqData] = useState<Record<string, any> | null>(null);
   const [roadDetail, setRoadDetail] = useState<string | null>(null);
   const [roadDetailLoading, setRoadDetailLoading] = useState(false);
+  const [commuteDest, setCommuteDest] = useState<'nyc' | 'philly' | 'shore'>('nyc');
+  const [shoreTown, setShoreTown] = useState('Seaside Heights');
+  const [shoreInput, setShoreInput] = useState('Seaside Heights');
+  const [extraCommutes, setExtraCommutes] = useState<{ philly: number | null; shore: number | null; forTown: string } | null>(null);
+  const [extraCommutesLoading, setExtraCommutesLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState('schools');
 
   const townName = slugToName(townSlug || '');
   const data = NJ_ENRICHED[townName];
   const county = findTownCounty(townName);
+
+  function smoothScrollTo(el: HTMLElement, duration = 1100) {
+    const navOffset = 125;
+    const target = el.getBoundingClientRect().top + window.scrollY - navOffset;
+    const start = window.scrollY;
+    const distance = target - start;
+    let startTime: number | null = null;
+    const ease = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const step = (ts: number) => {
+      if (!startTime) startTime = ts;
+      const p = Math.min((ts - startTime) / duration, 1);
+      window.scrollTo(0, start + distance * ease(p));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  const fetchExtraCommutes = (shoreDestination = 'Seaside Heights') => {
+    if (extraCommutesLoading || !GROQ_API_KEY) return;
+    const cacheKey = `hb_xcommute_${townSlug}_${shoreDestination.toLowerCase().replace(/\s+/g, '-')}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { try { setExtraCommutes(JSON.parse(cached)); } catch {} return; }
+    setExtraCommutesLoading(true);
+    fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 80,
+        messages: [{ role: 'user', content: `Estimate typical drive time in minutes from ${townName}, NJ to: 1) Philadelphia Center City, PA and 2) ${shoreDestination}, NJ. Reply ONLY as valid JSON: {"philly": 75, "shore": 45}. Single numbers only, no ranges.` }]
+      })
+    })
+      .then(r => r.json())
+      .then(res => {
+        const text = res.choices?.[0]?.message?.content?.trim() || '';
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          const result = { philly: parsed.philly ?? null, shore: parsed.shore ?? null, forTown: shoreDestination };
+          setExtraCommutes(result);
+          localStorage.setItem(cacheKey, JSON.stringify(result));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setExtraCommutesLoading(false));
+  };
 
   const fetchRoadDetail = () => {
     if (roadDetail || roadDetailLoading || !county || !GROQ_API_KEY) return;
@@ -90,6 +143,28 @@ export default function HomebaseTownPage() {
     document.title = `${townName}, NJ — Homebase`;
     logVisit(`/homebase/${townSlug}`);
   }, [townName, townSlug]);
+
+  // Auto-fetch road detail on load — no click required
+  useEffect(() => {
+    fetchRoadDetail();
+  }, [county]);
+
+  useEffect(() => {
+    const sectionIds = ['schools', 'who-lives-here', 'prices', 'when-to-buy', 'getting-around', 'safety', 'local-scene'];
+    const THRESHOLD = 140; // px from top of viewport — accounts for both sticky nav bars
+    const handleScroll = () => {
+      let current = sectionIds[0];
+      for (const id of sectionIds) {
+        const el = document.getElementById(`section-${id}`);
+        if (!el) continue;
+        if (el.getBoundingClientRect().top <= THRESHOLD) current = id;
+      }
+      setActiveSection(current);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if ((!data && !groqData) || !GROQ_API_KEY) return;
@@ -286,7 +361,7 @@ Use realistic NJ data. No explanation.`
                       href={`https://www.google.com/maps/search/${encodeURIComponent(townName + ', ' + county + ' County, NJ')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-auto px-3 py-1 rounded-lg text-[10px] font-mono text-white/40 hover:text-white/70 transition-colors"
+                      className="ml-auto px-3 py-1 rounded-lg text-xs font-mono text-white/40 hover:text-white/70 transition-colors"
                     >
                       Open in Google Maps ↗
                     </a>
@@ -307,10 +382,50 @@ Use realistic NJ data. No explanation.`
 
       {/* Sections */}
       <div className="bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-12 space-y-12">
+        {/* Section nav bar */}
+        <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="flex items-center justify-center gap-1 overflow-x-auto py-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {[
+                { id: 'schools', label: 'Schools', icon: <School size={18} />, color: '#059669' },
+                { id: 'who-lives-here', label: 'Who Lives Here', icon: <Users size={18} />, color: '#475569' },
+                { id: 'prices', label: 'Prices', icon: <Home size={18} />, color: '#166534' },
+                { id: 'when-to-buy', label: 'When to Buy', icon: <TrendingUp size={18} />, color: '#6366a3' },
+                { id: 'getting-around', label: 'Getting Around', icon: <Train size={18} />, color: '#d97706' },
+                { id: 'safety', label: 'Safety', icon: <Shield size={18} />, color: '#b91c1c' },
+                { id: 'local-scene', label: 'Local Scene', icon: <Coffee size={18} />, color: '#0e7490' },
+              ].map(({ id, label, icon, color }) => {
+                const active = activeSection === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      const el = document.getElementById(`section-${id}`);
+                      if (el) {
+                        el.style.transition = 'box-shadow 0.2s ease-in';
+                        el.style.boxShadow = `0 0 0 2px ${color}`;
+                        setTimeout(() => {
+                          el.style.transition = 'box-shadow 1.1s ease-out';
+                          el.style.boxShadow = 'none';
+                        }, 300);
+                        smoothScrollTo(el);
+                      }
+                    }}
+                    className="shrink-0 flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-[13px] font-mono font-semibold transition-all whitespace-nowrap cursor-pointer hover:bg-slate-200"
+                  >
+                    <span style={{ color: '#94a3b8' }}>{icon}</span>
+                    <span className="text-slate-400">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-6 py-10 space-y-5">
 
           {/* Schools */}
-          <Section icon={<School size={20} />} title="Schools" color="#0471A4">
+          <Section id="section-schools" icon={<School size={20} />} title="Schools" color="#059669">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="District Rating" value={d?.schoolLabel || 'N/A'} sub="Niche.com rating" highlight={schoolScore >= 80} />
               <StatCard label="Score" value={`${d?.schoolRating ?? 'N/A'}/100`} sub="Composite score" />
@@ -320,8 +435,17 @@ Use realistic NJ data. No explanation.`
             <ScoreBar value={schoolScore} label="School Quality" />
           </Section>
 
-          {/* Housing Market */}
-          <Section icon={<Home size={20} />} title="Housing Market" color="#0471A4">
+          {/* Who Lives Here */}
+          <Section id="section-who-lives-here" icon={<Users size={20} />} title="Who Lives Here" color="#475569">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <StatCard label="Median Income" value={fmtDollar(d?.income)} sub="Household/yr" highlight />
+              <StatCard label="Education" value={d?.eduPct ? `${d.eduPct}%` : 'N/A'} sub="Bachelor's degree+" />
+              <StatCard label="Population" value={d?.pop ? d.pop.toLocaleString() : 'N/A'} sub="Residents" />
+            </div>
+          </Section>
+
+          {/* Prices & Competition */}
+          <Section id="section-prices" icon={<Home size={20} />} title="Prices & Competition" color="#166534">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="Median Home" value={fmtDollar(d?.homeVal)} sub="Estimated value" highlight />
               <StatCard label="Sale-to-List" value={d?.saleToList ? `${d.saleToList}%` : 'N/A'} sub="Market heat" />
@@ -342,30 +466,111 @@ Use realistic NJ data. No explanation.`
             )}
           </Section>
 
+          {/* When to Buy */}
+          <div id="section-when-to-buy" className="scroll-mt-14">
+            <MarketIntelligence
+              townSlug={townSlug || ''}
+              saleToList={d?.saleToList}
+            />
+          </div>
+
           {/* Getting Around */}
-          <Section icon={<Train size={20} />} title="Getting Around" color="#0471A4">
+          <Section id="section-getting-around" icon={<Train size={20} />} title="Getting Around" color="#d97706">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <StatCard label="Avg Commute" value={d?.commute ? `${d.commute} min` : 'N/A'} sub="To NYC (transit)" highlight />
+              {/* Commute widget */}
+              <div className="col-span-2 md:col-span-1 rounded-xl border border-slate-200 overflow-hidden bg-white">
+                <div className="flex items-center border-b border-slate-100 px-3 py-2 gap-2">
+                  <span className="text-xs font-mono text-slate-400 uppercase tracking-wider flex-1">Commute</span>
+                  <div className="flex gap-0.5 bg-slate-100 rounded-lg p-0.5">
+                    {(['nyc', 'philly', 'shore'] as const).map(dest => (
+                      <button
+                        key={dest}
+                        onClick={() => {
+                          setCommuteDest(dest);
+                          if (dest !== 'nyc') fetchExtraCommutes(shoreTown);
+                        }}
+                        className={`px-2 py-0.5 rounded-md text-xs font-mono font-semibold transition-all ${
+                          commuteDest === dest ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                      >
+                        {dest === 'nyc' ? 'NYC' : dest === 'philly' ? 'PHL' : 'Shore'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-4">
+                  {commuteDest === 'nyc' && (
+                    <>
+                      <div className="text-2xl font-bold text-slate-900">{d?.commute ? `${d.commute} min` : '—'}</div>
+                      <div className="text-[13px] font-mono text-slate-400 mt-0.5">To Penn Station, NYC</div>
+                    </>
+                  )}
+                  {commuteDest === 'philly' && (
+                    extraCommutesLoading
+                      ? <div className="text-sm font-mono text-slate-400 animate-pulse flex items-center gap-1.5"><Zap size={10} className="text-[#d97706]" /> Estimating...</div>
+                      : <>
+                          <div className="text-2xl font-bold text-slate-900">{extraCommutes?.philly ? `${extraCommutes.philly} min` : '—'}</div>
+                          <div className="text-[13px] font-mono text-slate-400 mt-0.5">To Center City, Philadelphia</div>
+                        </>
+                  )}
+                  {commuteDest === 'shore' && (
+                    <>
+                      <input
+                        value={shoreInput}
+                        onChange={e => setShoreInput(e.target.value)}
+                        onBlur={() => {
+                          const v = shoreInput.trim();
+                          if (v && v !== shoreTown) { setShoreTown(v); setExtraCommutes(null); fetchExtraCommutes(v); }
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            const v = shoreInput.trim();
+                            if (v && v !== shoreTown) { setShoreTown(v); setExtraCommutes(null); fetchExtraCommutes(v); }
+                            (e.target as HTMLInputElement).blur();
+                          }
+                        }}
+                        className="text-[13px] font-mono px-2 py-1 border border-slate-200 rounded-lg bg-slate-50 focus:outline-none focus:border-[#d97706] w-full mb-2"
+                        placeholder="Seaside Heights"
+                      />
+                      {extraCommutesLoading
+                        ? <div className="text-sm font-mono text-slate-400 animate-pulse flex items-center gap-1.5"><Zap size={10} className="text-[#d97706]" /> Estimating...</div>
+                        : <>
+                            <div className="text-2xl font-bold text-slate-900">{extraCommutes?.shore ? `${extraCommutes.shore} min` : '—'}</div>
+                            <div className="text-[13px] font-mono text-slate-400 mt-0.5">Drive to {shoreTown}</div>
+                          </>
+                      }
+                    </>
+                  )}
+                </div>
+              </div>
               <StatCard label="Walk Score" value={`${d?.walkScore ?? 'N/A'}/100`} sub={d?.walkLabel || ''} />
-              <ExpandableStatCard
-                label="Regional Access"
-                value={`${d?.highway ?? 'N/A'}/100`}
-                sub="Tap to see roads & transit"
-                onExpand={fetchRoadDetail}
-                expandedContent={
-                  roadDetailLoading
-                    ? <span className="animate-pulse">Looking up roads...</span>
-                    : roadDetail
-                    ? roadDetail
-                    : 'Tap to load'
-                }
-              />
+              <StatCard label="Regional Access" value={`${d?.highway ?? 'N/A'}/100`} sub="Highway & transit score" />
             </div>
+            {(roadDetail || roadDetailLoading) && (
+              <div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1.5">Roads & Transit</div>
+                {roadDetailLoading
+                  ? <div className="flex items-center gap-2 text-slate-400 text-xs font-mono animate-pulse"><Zap size={10} className="text-[#d97706]" /> Looking up routes...</div>
+                  : <div className="text-sm text-slate-600 font-mono">{roadDetail}</div>
+                }
+              </div>
+            )}
             <ScoreBar value={d?.walkScore || 0} label="Walkability" />
           </Section>
 
           {/* Safety */}
-          <Section icon={<Shield size={20} />} title="Safety" color="#0471A4">
+          <Section
+            id="section-safety"
+            icon={<Shield size={20} />}
+            title="Safety"
+            color="#b91c1c"
+            badge={
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200">
+                <Zap size={10} className="text-amber-500" />
+                <span className="text-xs font-mono text-amber-700">AI estimated · not from official crime data</span>
+              </div>
+            }
+          >
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <StatCard label="Safety Rating" value={d?.safetyLabel || 'N/A'} sub="Composite score" highlight={safetyScore >= 80} />
               <StatCard label="Safety Score" value={`${d?.safetyScore ?? 'N/A'}/100`} sub="vs NJ average" />
@@ -375,10 +580,10 @@ Use realistic NJ data. No explanation.`
           </Section>
 
           {/* Local Scene */}
-          <Section icon={<Coffee size={20} />} title="Local Scene" color="#0471A4">
+          <Section id="section-local-scene" icon={<Coffee size={20} />} title="Local Scene" color="#0e7490">
             {localScene.length === 0 ? (
               <div className="flex items-center gap-2 text-slate-400 text-sm font-mono animate-pulse py-4">
-                <Zap size={12} className="text-[#0471A4]" />
+                <Zap size={12} className="text-[#0e7490]" />
                 Finding local spots...
               </div>
             ) : (
@@ -391,42 +596,18 @@ Use realistic NJ data. No explanation.`
                       href={`https://www.google.com/search?q=${encodeURIComponent(thing + ' ' + townName + ' NJ')}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[#0471A4]/15 border-l-[3px] border-l-[#0471A4]/40 hover:border-[#0471A4]/35 hover:border-l-[#0471A4] hover:bg-blue-50/50 transition-all group shadow-sm"
+                      className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[#0e7490]/15 border-l-[3px] border-l-[#0e7490]/40 hover:border-[#0e7490]/35 hover:border-l-[#0e7490] hover:bg-cyan-50/50 transition-all group shadow-sm"
                     >
-                      <div className="w-6 h-6 rounded-full bg-[#0471A4]/10 flex items-center justify-center shrink-0 text-xs font-bold text-[#0471A4] group-hover:bg-[#0471A4]/20 transition-colors">
+                      <div className="w-6 h-6 rounded-full bg-[#0e7490]/10 flex items-center justify-center shrink-0 text-xs font-bold text-[#0e7490] group-hover:bg-[#0e7490]/20 transition-colors">
                         {i + 1}
                       </div>
-                      <span className="text-sm font-medium text-slate-700 group-hover:text-[#0471A4] transition-colors">{thing}</span>
-                      <ChevronRight size={14} className="ml-auto text-slate-300 group-hover:text-[#0471A4] transition-colors" />
+                      <span className="text-sm font-medium text-slate-700 group-hover:text-[#0e7490] transition-colors">{thing}</span>
+                      <ChevronRight size={14} className="ml-auto text-slate-300 group-hover:text-[#0e7490] transition-colors" />
                     </a>
                   ))}
                 </div>
               </>
             )}
-          </Section>
-
-          {/* Market Pulse */}
-          <Section icon={<TrendingUp size={20} />} title="Market Pulse" color="#0471A4">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <StatCard
-                label="Market Heat"
-                value={marketHeat >= 105 ? 'Hot 🔥' : marketHeat >= 102 ? 'Warm' : 'Cool'}
-                sub={`${marketHeat}% sale-to-list`}
-                highlight={marketHeat >= 105}
-              />
-              <StatCard label="Avg Tax/yr" value={d?.avgTax ? `$${d.avgTax.toLocaleString()}` : 'N/A'} sub={`${d?.taxRate ?? 'N/A'}% tax rate`} />
-              <StatCard label="Income vs Home" value={d?.income && d?.homeVal ? `${(d.homeVal / d.income).toFixed(1)}x` : 'N/A'} sub="Price-to-income ratio" />
-            </div>
-          </Section>
-
-          {/* Who Lives Here */}
-          <Section icon={<Users size={20} />} title="Who Lives Here" color="#0471A4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard label="Median Income" value={fmtDollar(d?.income)} sub="Household/yr" highlight />
-              <StatCard label="Education" value={d?.eduPct ? `${d.eduPct}%` : 'N/A'} sub="Bachelor's degree+" />
-              <StatCard label="Population" value={d?.pop ? d.pop.toLocaleString() : 'N/A'} sub="Residents" />
-              <StatCard label="Commute" value={d?.commute ? `${d.commute} min` : 'N/A'} sub="Avg travel time" />
-            </div>
           </Section>
 
           {/* CTA */}
@@ -621,7 +802,13 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
   const [hovered, setHovered] = useState<string | null>(null);
 
   const entries = Object.entries(history) as [string, number][];
-  const MIN = 92, MAX = 116, CHART_H = 128;
+  const CHART_H = 128;
+  const values = entries.map(([, v]) => v);
+  const dataMin = Math.min(...values);
+  const dataMax = Math.max(...values);
+  const pad = Math.max(0.5, (dataMax - dataMin) * 0.25);
+  const MIN = Math.floor(dataMin - pad);
+  const MAX = Math.ceil(dataMax + pad);
 
   const interp = (val: number) => {
     if (val >= 106) return 'Homes consistently selling above asking';
@@ -637,86 +824,105 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
   const trend = Math.round((latest - oldest) * 10) / 10;
   const hoveredEntry = hovered ? entries.find(([p]) => p === hovered) : null;
 
+  const maxAbsDev = Math.max(...values.map(v => Math.abs(v - 100)), 0.5);
+  const HALF_H = 80;
+
   return (
-    <div className="mt-6 rounded-2xl border border-slate-100 overflow-hidden">
+    <div className="mt-6 rounded-2xl overflow-hidden" style={{ background: '#f0f6fa', border: '1px solid #4786B830' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3" style={{ borderBottom: '1px solid #2A427418' }}>
         <div className="flex items-center gap-2">
-          <p className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-semibold">Sale-to-List History</p>
-          {isDerived && <span className="text-[9px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">est.</span>}
+          <p className="text-[13px] font-mono uppercase tracking-wider font-semibold" style={{ color: '#2A4274' }}>vs. Asking Price</p>
+          {isDerived && <span className="text-[11px] font-mono px-1.5 py-0.5 rounded" style={{ color: '#4786B8', background: '#4786B820' }}>est.</span>}
         </div>
-        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono ${
-          trend > 0 ? 'bg-emerald-50 text-emerald-700' : trend < 0 ? 'bg-slate-100 text-slate-500' : 'bg-slate-100 text-slate-500'
-        }`}>
+        <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[13px] font-bold font-mono"
+          style={{ background: trend > 0 ? '#66D6B130' : '#4786B820', color: trend > 0 ? '#40968C' : '#4786B8' }}>
           {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend)}%
-          <span className="font-normal opacity-70 ml-0.5">{trend > 0 ? 'vs 5y ago' : trend < 0 ? 'vs 5y ago' : 'stable'}</span>
+          <span className="font-normal opacity-70 ml-0.5">vs 5y ago</span>
         </div>
       </div>
 
-      {/* Tooltip bar */}
-      <div className="px-5 py-2.5 bg-slate-50 min-h-[36px] flex items-center border-b border-slate-100">
-        <p className="text-[12px] font-mono text-slate-500">
-          {hoveredEntry
-            ? <><span className="font-bold text-slate-800">{hoveredEntry[1]}%</span> <span className="text-slate-400 mx-1">·</span> {interp(hoveredEntry[1])}</>
-            : <span className="text-slate-400 italic">Hover a bar for details</span>}
-        </p>
+      {/* Hover readout */}
+      <div className="px-5 py-2 min-h-[34px] flex items-center" style={{ borderBottom: '1px solid #2A427418', background: '#2A42740c' }}>
+        {hoveredEntry ? (
+          <p className="text-[12px] font-mono">
+            <span className="font-bold mr-2" style={{ color: hoveredEntry[1] >= 100 ? '#40968C' : '#4786B8' }}>
+              {hoveredEntry[1] >= 100 ? '+' : ''}{(hoveredEntry[1] - 100).toFixed(1)}% asking
+            </span>
+            <span style={{ color: '#2A427465' }}>{interp(hoveredEntry[1])}</span>
+          </p>
+        ) : (
+          <span className="text-[12px] font-mono italic" style={{ color: '#2A427438' }}>Hover for details</span>
+        )}
       </div>
 
-      {/* Chart */}
-      <div className="px-5 pt-4 pb-1 bg-white">
-        <div className="relative" style={{ height: CHART_H + 32 }}>
-          {/* 100% reference line */}
-          <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: refLineTop }}>
-            <div className="border-t border-dashed border-slate-200 relative">
-              <span className="absolute -right-1 -top-3.5 text-[9px] font-mono text-slate-300 bg-white px-1">100%</span>
-            </div>
+      {/* Chart — deviation from 100% */}
+      <div className="px-5 pt-4 pb-3">
+        <div className="relative" style={{ height: HALF_H * 2 + 28 }}>
+          {/* Asking baseline */}
+          <div className="absolute left-0 right-0 z-10 pointer-events-none flex items-center gap-2" style={{ top: HALF_H }}>
+            <div className="flex-1" style={{ borderTop: '2px solid #2A427435' }} />
+            <span className="text-xs font-mono font-bold shrink-0" style={{ color: '#2A427455' }}>asking</span>
           </div>
 
           {/* Bars */}
-          <div className="absolute left-0 right-0 bottom-8 flex items-end gap-2.5" style={{ height: CHART_H }}>
+          <div className="absolute left-0 right-0 flex items-center gap-2.5" style={{ top: 0, height: HALF_H * 2 }}>
             {entries.map(([period, val]) => {
-              const h = Math.max(8, ((val - MIN) / (MAX - MIN)) * CHART_H);
+              const dev = val - 100;
               const isHov = hovered === period;
-              const intensity = Math.min(1, Math.max(0, (val - MIN) / (MAX - MIN)));
-              const barBg = isHov
-                ? 'linear-gradient(to top, #0471A4, #3B9AC4)'
-                : `linear-gradient(to top, hsl(${205 - intensity * 15}, ${40 + intensity * 30}%, ${55 - intensity * 15}%), hsl(${205 - intensity * 15}, ${35 + intensity * 25}%, ${65 - intensity * 12}%))`;
+              const barH = Math.max(3, (Math.abs(dev) / maxAbsDev) * HALF_H);
+              const above = dev >= 0;
+              const devLabel = `${above ? '+' : ''}${dev.toFixed(1)}%`;
+
               return (
                 <div
                   key={period}
-                  className="flex-1 flex flex-col justify-end cursor-default"
-                  style={{ height: CHART_H }}
+                  className="flex-1 flex flex-col cursor-default"
+                  style={{ height: HALF_H * 2 }}
                   onMouseEnter={() => setHovered(period)}
                   onMouseLeave={() => setHovered(null)}
                 >
-                  {/* Value — always visible, bigger */}
-                  <div className={`text-center text-[13px] font-mono font-bold mb-2 transition-colors duration-150 ${
-                    isHov ? 'text-[#0471A4]' : 'text-slate-600'
-                  }`}>
-                    {val}%
+                  {/* Top half — above asking */}
+                  <div className="flex flex-col justify-end" style={{ height: HALF_H }}>
+                    {above && (
+                      <>
+                        <div className="text-center text-[12px] font-mono font-bold mb-1.5" style={{ color: isHov ? '#2A4274' : '#40968C' }}>
+                          {devLabel}
+                        </div>
+                        <div className="w-full rounded-t-md transition-all duration-200" style={{
+                          height: barH,
+                          background: isHov ? '#66D6B1' : '#66D6B170',
+                          borderTop: `2px solid #40968C`,
+                        }} />
+                      </>
+                    )}
                   </div>
-                  {/* Bar */}
-                  <div
-                    className="w-full rounded-t-lg transition-all duration-200"
-                    style={{
-                      height: h,
-                      background: barBg,
-                      boxShadow: isHov ? '0 -3px 14px rgba(4,113,164,0.3)' : 'none',
-                      transform: isHov ? 'scaleX(0.9)' : 'scaleX(1)',
-                    }}
-                  />
+                  {/* Bottom half — below asking */}
+                  <div className="flex flex-col justify-start" style={{ height: HALF_H }}>
+                    {!above && (
+                      <>
+                        <div className="w-full rounded-b-md transition-all duration-200" style={{
+                          height: barH,
+                          background: isHov ? '#4786B850' : '#4786B828',
+                          borderBottom: `2px solid #4786B8`,
+                        }} />
+                        <div className="text-center text-[12px] font-mono font-bold mt-1.5" style={{ color: isHov ? '#2A4274' : '#4786B8' }}>
+                          {devLabel}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
 
           {/* Period labels */}
-          <div className="absolute bottom-0 left-0 right-0 flex gap-2.5">
+          <div className="absolute left-0 right-0 flex gap-2.5" style={{ bottom: 0 }}>
             {entries.map(([period]) => (
               <div key={period} className="flex-1 text-center">
-                <span className={`text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                  hovered === period ? 'text-[#0471A4] font-bold' : 'text-slate-400'
-                }`}>
+                <span className="text-xs font-mono uppercase tracking-wider transition-colors"
+                  style={{ color: hovered === period ? '#2A4274' : '#4786B860', fontWeight: hovered === period ? 700 : 400 }}>
                   {period}
                 </span>
               </div>
@@ -728,14 +934,15 @@ function SaleToListChart({ history, isDerived }: { history: Record<string, numbe
   );
 }
 
-function Section({ icon, title, color, children }: { icon: React.ReactNode; title: string; color: string; children: React.ReactNode }) {
+function Section({ icon, title, color, children, badge, id }: { icon: React.ReactNode; title: string; color: string; children: React.ReactNode; badge?: React.ReactNode; id?: string }) {
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-5">
+    <div id={id} className="rounded-2xl p-6 scroll-mt-14" style={{ border: `1px solid ${color}30` }}>
+      <div className="flex items-center gap-3 mb-5 flex-wrap">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${color}15`, color }}>
           {icon}
         </div>
         <h2 className="font-display font-bold text-xl text-slate-900">{title}</h2>
+        {badge}
       </div>
       {children}
     </div>
@@ -745,9 +952,9 @@ function Section({ icon, title, color, children }: { icon: React.ReactNode; titl
 function StatCard({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
     <div className={`p-4 rounded-xl border transition-all ${highlight ? 'bg-blue-50 border-[#0471A4]/20' : 'bg-slate-50 border-slate-100'}`}>
-      <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{label}</div>
+      <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">{label}</div>
       <div className={`text-xl font-bold ${highlight ? 'text-[#0471A4]' : 'text-slate-900'}`}>{value}</div>
-      {sub && <div className="text-[11px] text-slate-400 font-mono mt-0.5">{sub}</div>}
+      {sub && <div className="text-[13px] text-slate-400 font-mono mt-0.5">{sub}</div>}
     </div>
   );
 }
@@ -770,10 +977,10 @@ function ExpandableStatCard({ label, value, sub, highlight, onExpand, expandedCo
       onClick={handleClick}
     >
       <div className="p-4">
-        <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{label}</div>
+        <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">{label}</div>
         <div className={`text-xl font-bold ${highlight ? 'text-[#0471A4]' : 'text-slate-900'}`}>{value}</div>
-        {sub && <div className="text-[11px] text-slate-400 font-mono mt-0.5">{sub}</div>}
-        <div className={`inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold transition-all ${
+        {sub && <div className="text-[13px] text-slate-400 font-mono mt-0.5">{sub}</div>}
+        <div className={`inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-md text-xs font-mono font-semibold transition-all ${
           open ? 'bg-[#0471A4]/10 text-[#0471A4]' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
         }`}>
           <span>{open ? 'Hide' : 'See details'}</span>
@@ -790,7 +997,7 @@ function ExpandableStatCard({ label, value, sub, highlight, onExpand, expandedCo
             transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 pt-0 text-[11px] font-mono text-slate-500 border-t border-slate-100 pt-3">
+            <div className="px-4 pb-4 pt-0 text-[13px] font-mono text-slate-500 border-t border-slate-100 pt-3">
               {expandedContent}
             </div>
           </motion.div>
@@ -805,8 +1012,8 @@ function ScoreBar({ value, label }: { value: number; label: string }) {
   return (
     <div className="mt-4">
       <div className="flex justify-between items-center mb-1.5">
-        <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">{label}</span>
-        <span className="text-[11px] font-mono font-bold" style={{ color }}>{value}/100</span>
+        <span className="text-[13px] font-mono text-slate-400 uppercase tracking-wider">{label}</span>
+        <span className="text-[13px] font-mono font-bold" style={{ color }}>{value}/100</span>
       </div>
       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all duration-700" style={{ width: `${value}%`, backgroundColor: color }} />
