@@ -62,8 +62,8 @@ for (let i = 1; i < lines.length; i++) {
   const month = periodBegin.substring(0, 7); // "2024-01"
   const year = parseInt(periodBegin.substring(0, 4));
 
-  // Only keep 2024 and 2025 — the two years shown in the chart
-  if (year !== 2024 && year !== 2025) continue;
+  // Keep 2023–2026
+  if (year < 2023 || year > 2026) continue;
 
   const entry = {
     period: month,

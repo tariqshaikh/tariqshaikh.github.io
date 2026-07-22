@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Calendar, TrendingUp } from 'lucide-react';
+import { Calendar, TrendingUp, AlertCircle } from 'lucide-react';
 
 interface MonthEntry {
   period: string;
@@ -18,7 +18,9 @@ interface TownSeasonality {
 type SeasonalityDB = Record<string, TownSeasonality>;
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ACCENT = '#6366a3'; // muted indigo
+const ACCENT = '#6366a3';
+const YEARS = [2023, 2024, 2025, 2026] as const;
+type Year = typeof YEARS[number];
 
 function findData(slug: string, db: SeasonalityDB): TownSeasonality | null {
   if (db[slug]) return db[slug];
@@ -30,11 +32,12 @@ function findData(slug: string, db: SeasonalityDB): TownSeasonality | null {
 interface Props {
   townSlug: string;
   saleToList?: number;
+  proxyName?: string;
 }
 
-export default function MarketIntelligence({ townSlug, saleToList }: Props) {
+export default function MarketIntelligence({ townSlug, saleToList, proxyName }: Props) {
   const [db, setDb] = useState<SeasonalityDB | null>(null);
-  const [selectedYear, setSelectedYear] = useState<2024 | 2025>(2025);
+  const [selectedYear, setSelectedYear] = useState<Year>(2025);
 
   useEffect(() => {
     import('../data/njSeasonality.json').then(mod => {
@@ -46,27 +49,31 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
 
   const byYear = useMemo(() => {
     if (!townData) return null;
-    const y2024: (MonthEntry | null)[] = Array(12).fill(null);
-    const y2025: (MonthEntry | null)[] = Array(12).fill(null);
+    const map: Record<number, (MonthEntry | null)[]> = {
+      2023: Array(12).fill(null),
+      2024: Array(12).fill(null),
+      2025: Array(12).fill(null),
+      2026: Array(12).fill(null),
+    };
     townData.months.forEach(m => {
       const [year, month] = m.period.split('-').map(Number);
-      if (year === 2024) y2024[month - 1] = m;
-      if (year === 2025) y2025[month - 1] = m;
+      if (map[year]) map[year][month - 1] = m;
     });
-    return { y2024, y2025 };
+    return map;
   }, [townData]);
 
   const insights = useMemo(() => {
     if (!byYear) return null;
-    const { y2024, y2025 } = byYear;
+    // Use 2023–2025 full years for buyer window calc
+    const fullYears = [byYear[2023], byYear[2024], byYear[2025]];
 
     const avgListings = MONTHS.map((_, i) => {
-      const vals = [y2024[i]?.newListings, y2025[i]?.newListings].filter((v): v is number => v != null);
+      const vals = fullYears.flatMap(y => [y[i]?.newListings]).filter((v): v is number => v != null);
       return vals.length ? vals.reduce((a, b) => a + b) / vals.length : null;
     });
 
     const avgDom = MONTHS.map((_, i) => {
-      const vals = [y2024[i]?.daysOnMarket, y2025[i]?.daysOnMarket].filter((v): v is number => v != null);
+      const vals = fullYears.flatMap(y => [y[i]?.daysOnMarket]).filter((v): v is number => v != null);
       return vals.length ? vals.reduce((a, b) => a + b) / vals.length : null;
     });
 
@@ -92,7 +99,7 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
 
   if (!townData || !byYear || !insights) return null;
 
-  const activeMonths = selectedYear === 2024 ? byYear.y2024 : byYear.y2025;
+  const activeMonths = byYear[selectedYear];
   const CHART_H = 110;
   const maxVal = Math.max(...activeMonths.map(m => m?.newListings ?? 0), 1);
 
@@ -100,7 +107,10 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
     ? saleToList >= 105 ? 'Hot 🔥' : saleToList >= 102 ? 'Warm ↗' : 'Cool ↘'
     : null;
 
-  const latestDom = [...byYear.y2025].reverse().find(m => m?.daysOnMarket != null)?.daysOnMarket ?? null;
+  const latestDom = [...byYear[2025]].reverse().find(m => m?.daysOnMarket != null)?.daysOnMarket ?? null;
+
+  const totalSold = activeMonths.reduce((sum, m) => sum + (m?.homesSold ?? 0), 0);
+  const hasAnySold = activeMonths.some(m => m?.homesSold != null);
 
   const buyerWindowLabel = insights.buyerWindow.length === 3 && insights.buyerWindow[2].idx - insights.buyerWindow[0].idx <= 3
     ? `${insights.buyerWindow[0].label} – ${insights.buyerWindow[2].label}`
@@ -109,11 +119,19 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
   return (
     <div className="rounded-2xl p-6" style={{ border: `1px solid ${ACCENT}30` }}>
       {/* Section header */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${ACCENT}15`, color: ACCENT }}>
-          <TrendingUp size={20} />
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${ACCENT}15`, color: ACCENT }}>
+            <TrendingUp size={20} />
+          </div>
+          <h2 className="font-display font-bold text-xl text-slate-900">When to Buy</h2>
         </div>
-        <h2 className="font-display font-bold text-xl text-slate-900">When to Buy</h2>
+        {proxyName && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200">
+            <AlertCircle size={10} className="text-amber-500 shrink-0" />
+            <span className="text-[11px] font-mono text-amber-700">Based on nearby {proxyName} — no data for this town</span>
+          </div>
+        )}
       </div>
 
       {/* Current snapshot row */}
@@ -141,21 +159,32 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
 
       {/* Chart header with year toggle */}
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[13px] font-mono text-slate-400 uppercase tracking-wider">New Listings by Month</p>
+        <div className="flex items-center gap-3">
+          <p className="text-[13px] font-mono text-slate-400 uppercase tracking-wider">New Listings by Month</p>
+          {hasAnySold && (
+            <span className="text-[13px] font-mono text-slate-500">
+              <span className="text-slate-300">·</span> {totalSold} homes sold {selectedYear === 2026 ? 'YTD' : 'total'}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
-          {([2024, 2025] as const).map(yr => (
-            <button
-              key={yr}
-              onClick={() => setSelectedYear(yr)}
-              className={`px-3 py-1 rounded-md text-[13px] font-mono font-semibold transition-all ${
-                selectedYear === yr
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              {yr}
-            </button>
-          ))}
+          {YEARS.map(yr => {
+            const hasData = byYear[yr].some(m => m?.newListings != null);
+            if (!hasData) return null;
+            return (
+              <button
+                key={yr}
+                onClick={() => setSelectedYear(yr)}
+                className={`px-3 py-1 rounded-md text-[13px] font-mono font-semibold transition-all ${
+                  selectedYear === yr
+                    ? 'bg-white text-slate-800 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                {yr === 2026 ? '2026 YTD' : yr}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -170,7 +199,6 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
             return (
               <div key={label} className="flex-1 flex flex-col items-center gap-1 group">
                 <div className="relative flex items-end w-full justify-center" style={{ height: CHART_H }}>
-                  {/* Best window dot */}
                   {isBuyer && (
                     <div className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full z-10" style={{ bottom: barH + 6, backgroundColor: ACCENT }} />
                   )}
@@ -182,10 +210,7 @@ export default function MarketIntelligence({ townSlug, saleToList }: Props) {
                   </div>
                   <div
                     className="w-full rounded-t-sm transition-colors duration-150 group-hover:opacity-80"
-                    style={{
-                      height: barH,
-                      backgroundColor: isBuyer ? ACCENT : `${ACCENT}45`,
-                    }}
+                    style={{ height: barH, backgroundColor: isBuyer ? ACCENT : `${ACCENT}45` }}
                   />
                 </div>
                 <span className="text-xs font-mono text-slate-400 group-hover:text-slate-700 transition-colors">{label}</span>

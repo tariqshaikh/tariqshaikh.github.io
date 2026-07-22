@@ -59,6 +59,8 @@ export default function HomebaseTownPage() {
   const [extraCommutesLoading, setExtraCommutesLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('schools');
   const [hasRedfin, setHasRedfin] = useState(false);
+  const [redfinSlug, setRedfinSlug] = useState<string | null>(null);
+  const [redfinProxyName, setRedfinProxyName] = useState<string | null>(null);
 
   const townName = slugToName(townSlug || '');
   const data = NJ_ENRICHED[townName];
@@ -150,15 +152,31 @@ export default function HomebaseTownPage() {
     fetchRoadDetail();
   }, [county]);
 
-  // Check if this town has real Redfin data before showing sale-to-list numbers
+  // Check Redfin coverage; fall back to nearest county neighbor if missing
   useEffect(() => {
+    const toSlug = (n: string) => n.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '');
     import('../data/njSeasonality.json').then(mod => {
       const db = mod.default as Record<string, any>;
       const slug = townSlug || '';
       const stripped = slug.replace(/-[a-z]+$/, '');
-      setHasRedfin(!!(db[slug] || db[stripped]));
+      if (db[slug] || db[stripped]) {
+        setHasRedfin(true);
+        setRedfinSlug(slug);
+        setRedfinProxyName(null);
+      } else if (county) {
+        const countyTowns = (NJ_COUNTIES[county] as any)?.towns || [];
+        const neighbor = countyTowns.find((t: string) => {
+          const s = toSlug(t);
+          return (db[s] || db[s.replace(/-[a-z]+$/, '')]) && s !== slug;
+        });
+        if (neighbor) {
+          setHasRedfin(true);
+          setRedfinSlug(toSlug(neighbor));
+          setRedfinProxyName(neighbor);
+        }
+      }
     });
-  }, [townSlug]);
+  }, [townSlug, county]);
 
   useEffect(() => {
     const sectionIds = ['schools', 'who-lives-here', 'prices', 'when-to-buy', 'getting-around', 'safety', 'local-scene'];
@@ -480,8 +498,9 @@ Use realistic NJ data. No explanation.`
           {/* When to Buy */}
           <div id="section-when-to-buy" className="scroll-mt-14">
             <MarketIntelligence
-              townSlug={townSlug || ''}
-              saleToList={hasRedfin ? d?.saleToList : undefined}
+              townSlug={redfinSlug || townSlug || ''}
+              saleToList={hasRedfin && !redfinProxyName ? d?.saleToList : undefined}
+              proxyName={redfinProxyName ?? undefined}
             />
           </div>
 
