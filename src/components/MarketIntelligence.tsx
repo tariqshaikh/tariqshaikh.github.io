@@ -109,9 +109,6 @@ export default function MarketIntelligence({ townSlug, saleToList, proxyName }: 
 
   const latestDom = [...byYear[2025]].reverse().find(m => m?.daysOnMarket != null)?.daysOnMarket ?? null;
 
-  const totalSold = activeMonths.reduce((sum, m) => sum + (m?.homesSold ?? 0), 0);
-  const hasAnySold = activeMonths.some(m => m?.homesSold != null);
-
   const buyerWindowLabel = insights.buyerWindow.length === 3 && insights.buyerWindow[2].idx - insights.buyerWindow[0].idx <= 3
     ? `${insights.buyerWindow[0].label} – ${insights.buyerWindow[2].label}`
     : insights.buyerWindow.map(m => m.label).join(', ');
@@ -159,14 +156,7 @@ export default function MarketIntelligence({ townSlug, saleToList, proxyName }: 
 
       {/* Chart header with year toggle */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <p className="text-[13px] font-mono text-slate-400 uppercase tracking-wider">New Listings by Month</p>
-          {hasAnySold && (
-            <span className="text-[13px] font-mono text-slate-500">
-              <span className="text-slate-300">·</span> {totalSold} homes sold {selectedYear === 2026 ? 'YTD' : 'total'}
-            </span>
-          )}
-        </div>
+        <p className="text-[13px] font-mono text-slate-400 uppercase tracking-wider">New Listings by Month</p>
         <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
           {YEARS.map(yr => {
             const hasData = byYear[yr].some(m => m?.newListings != null);
