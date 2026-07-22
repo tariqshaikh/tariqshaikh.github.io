@@ -58,6 +58,7 @@ export default function HomebaseTownPage() {
   const [extraCommutes, setExtraCommutes] = useState<{ philly: number | null; shore: number | null; forTown: string } | null>(null);
   const [extraCommutesLoading, setExtraCommutesLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('schools');
+  const [hasRedfin, setHasRedfin] = useState(false);
 
   const townName = slugToName(townSlug || '');
   const data = NJ_ENRICHED[townName];
@@ -148,6 +149,16 @@ export default function HomebaseTownPage() {
   useEffect(() => {
     fetchRoadDetail();
   }, [county]);
+
+  // Check if this town has real Redfin data before showing sale-to-list numbers
+  useEffect(() => {
+    import('../data/njSeasonality.json').then(mod => {
+      const db = mod.default as Record<string, any>;
+      const slug = townSlug || '';
+      const stripped = slug.replace(/-[a-z]+$/, '');
+      setHasRedfin(!!(db[slug] || db[stripped]));
+    });
+  }, [townSlug]);
 
   useEffect(() => {
     const sectionIds = ['schools', 'who-lives-here', 'prices', 'when-to-buy', 'getting-around', 'safety', 'local-scene'];
@@ -448,11 +459,11 @@ Use realistic NJ data. No explanation.`
           <Section id="section-prices" icon={<Home size={20} />} title="Prices & Competition" color="#166534">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="Median Home" value={fmtDollar(d?.homeVal)} sub="Estimated value" highlight />
-              <StatCard label="Sale-to-List" value={d?.saleToList ? `${d.saleToList}%` : 'N/A'} sub="Market heat" />
+              {hasRedfin && <StatCard label="Sale-to-List" value={d?.saleToList ? `${d.saleToList}%` : 'N/A'} sub="Market heat" />}
               <StatCard label="Avg Property Tax" value={d?.avgTax ? `$${d.avgTax.toLocaleString()}/yr` : 'N/A'} sub={d?.taxRate ? `${d.taxRate}% rate` : ''} />
               <StatCard label="Median Income" value={fmtDollar(d?.income)} sub="Household/yr" />
             </div>
-            {d?.saleToList && (
+            {hasRedfin && d?.saleToList && (
               <SaleToListChart
                 history={d.marketHistory || {
                   '90d': d.saleToList,
@@ -470,7 +481,7 @@ Use realistic NJ data. No explanation.`
           <div id="section-when-to-buy" className="scroll-mt-14">
             <MarketIntelligence
               townSlug={townSlug || ''}
-              saleToList={d?.saleToList}
+              saleToList={hasRedfin ? d?.saleToList : undefined}
             />
           </div>
 
