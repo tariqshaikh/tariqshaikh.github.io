@@ -117,6 +117,13 @@ interface TripIntelligence {
     bestFor: string;
     mustSee: string;
   }[];
+  kidFriendly?: {
+    rating: 1 | 2 | 3 | 4 | 5;
+    summary: string;
+    highlights: { title: string; description: string; ageGroup: 'toddler' | 'kids' | 'teens' | 'all' }[];
+    practicalTips: string[];
+    bestFor: string;
+  };
   practicalInfo?: {
     visa: string;
     currency: string;
@@ -1482,9 +1489,18 @@ flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use G
   "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
   "airports": [{ "iata": "KIX", "name": "Airport Name", "city": "City", "transitToCity": "travel time and method to destination", "costModifier": 1.0, "note": "one line why this airport" }],
   "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }],
-  "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }]
+  "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
+  "kidFriendly": {
+    "rating": 4,
+    "summary": "2 sentences on overall family-friendliness — safety, infrastructure, attitude toward kids",
+    "highlights": [
+      { "title": "Real attraction name", "description": "Why kids love it — specific details, age relevance, what to expect", "ageGroup": "all" }
+    ],
+    "practicalTips": ["Hyper-specific family tip with real details — e.g. 'Tokyo Disneyland sells out months ahead; book via the official app the moment your trip is set. Arrive 30 min before park open to hit Pooh's Hunny Hunt before the line hits 90 min.'"],
+    "bestFor": "e.g. 'Families with kids 5–12' or 'Teens and young adults'"
+  }
 }
-Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. airports: 1-3 entries, include ALL major airports that serve the destination — e.g. New York needs JFK + LGA + EWR, London needs LHR + LGW + STN, Paris needs CDG + ORY, Chicago needs ORD + MDW, Los Angeles needs LAX + BUR + LGB. Skip only if destination has a single obvious airport. costModifier is relative to the primary airport (1.0 = baseline).
+Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. kidFriendly.rating is 1–5 integer (1=adults only, 5=exceptional for families). kidFriendly.highlights exactly 4 items. kidFriendly.practicalTips exactly 3 items, all hyper-specific with real names/prices/times. kidFriendly.ageGroup must be one of: toddler, kids, teens, all. airports: 1-3 entries, include ALL major airports that serve the destination — e.g. New York needs JFK + LGA + EWR, London needs LHR + LGW + STN, Paris needs CDG + ORY, Chicago needs ORD + MDW, Los Angeles needs LAX + BUR + LGB. Skip only if destination has a single obvious airport. costModifier is relative to the primary airport (1.0 = baseline).
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
@@ -2045,6 +2061,7 @@ Return ONLY a JSON object, no markdown, no explanation:
             ...(data.events && data.events.length > 0 ? [{ id: 'events', label: 'Events' }] : []),
             ...(data.insiderTips && data.insiderTips.length > 0 ? [{ id: 'insider', label: 'Insider' }] : []),
             ...(data.neighborhoods && data.neighborhoods.length > 0 ? [{ id: 'neighborhoods', label: 'Areas' }] : []),
+            ...(data.kidFriendly ? [{ id: 'family', label: 'Family' }] : []),
             { id: 'trip-intel', label: 'Intel' },
           ];
           const scrollTo = (id: string) => {
@@ -2780,6 +2797,81 @@ Return ONLY a JSON object, no markdown, no explanation:
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Family & Kids */}
+        {data.kidFriendly && (
+          <section id="family" className="mb-24 scroll-mt-16">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 flex items-center justify-center text-amber-500">
+                <Users size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Family & Kids</h2>
+              </div>
+            </div>
+
+            {/* Rating + summary */}
+            <div className="flex flex-col md:flex-row gap-6 mb-10">
+              <div className="flex items-center gap-4 p-6 bg-white border border-black/[0.13] rounded-3xl shrink-0">
+                <div className="text-5xl font-serif text-[#0A1A2E] leading-none">{data.kidFriendly.rating}</div>
+                <div>
+                  <div className="flex gap-1 mb-1">
+                    {[1,2,3,4,5].map(n => (
+                      <div key={n} className={`w-2.5 h-2.5 rounded-full ${n <= data.kidFriendly!.rating ? 'bg-amber-400' : 'bg-slate-200'}`} />
+                    ))}
+                  </div>
+                  <div className="text-xs text-slate-400 font-light tracking-wide">out of 5</div>
+                  <div className="mt-2 text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5 inline-block">{data.kidFriendly.bestFor}</div>
+                </div>
+              </div>
+              <div className="flex-1 p-6 bg-white border border-black/[0.13] rounded-3xl flex items-center">
+                <p className="text-base text-slate-600 font-light leading-relaxed">{data.kidFriendly.summary}</p>
+              </div>
+            </div>
+
+            {/* Highlights grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              {data.kidFriendly.highlights.map((hl, i) => {
+                const ageColors: Record<string, string> = {
+                  toddler: 'bg-pink-50 text-pink-600 border-pink-200',
+                  kids: 'bg-sky-50 text-sky-600 border-sky-200',
+                  teens: 'bg-violet-50 text-violet-600 border-violet-200',
+                  all: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+                };
+                const ageLabels: Record<string, string> = { toddler: '0–4', kids: '5–12', teens: '13+', all: 'All ages' };
+                return (
+                  <div key={i} className="group flex gap-5 p-6 bg-white border border-black/[0.13] rounded-3xl hover:border-amber-300/40 transition-all">
+                    <span className="text-3xl font-serif text-[#0A1A2E]/10 group-hover:text-amber-400/30 transition-colors leading-none shrink-0 select-none">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <h4 className="text-base text-[#0A1A2E] font-serif group-hover:text-amber-600 transition-colors leading-snug">{hl.title}</h4>
+                        <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 shrink-0 ${ageColors[hl.ageGroup] || ageColors.all}`}>{ageLabels[hl.ageGroup] || 'All ages'}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-light leading-relaxed">{hl.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Practical tips */}
+            <div className="bg-white border border-black/[0.13] rounded-3xl p-8">
+              <h4 className="text-sm font-semibold tracking-widest uppercase text-slate-400 mb-6">Family Tips</h4>
+              <div className="space-y-4">
+                {data.kidFriendly.practicalTips.map((tip, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="w-6 h-6 rounded-full bg-amber-400/15 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[10px] font-bold text-amber-600">{i + 1}</span>
+                    </div>
+                    <p className="text-sm text-slate-600 font-light leading-relaxed">{tip}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
