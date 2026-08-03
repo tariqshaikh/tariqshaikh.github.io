@@ -1499,9 +1499,6 @@ flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use G
   "seasonalHighlights": [{ "title": "string", "description": "string", "timeOfYear": "string" }],
   "events": [{ "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
   "insiderTips": [{ "tip": "HYPER-SPECIFIC tip with real venue names, actual prices, exact times — never generic. Example: 'Book Sukiyabashi Jiro (Ginza) 2 months ahead via hotel concierge only — they reject direct tourist bookings. Lunch omakase ¥55,000 vs dinner ¥110,000, same fish.'", "category": "money" }],
-  "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
-  "airports": [{ "iata": "KIX", "name": "Airport Name", "city": "City", "transitToCity": "travel time and method to destination", "costModifier": 1.0, "note": "one line why this airport" }],
-  "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }],
   "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
   "dayTrips": {
     "intro": "1-2 sentences on the region's day trip potential and what makes it worth exploring beyond the city",
@@ -1526,7 +1523,10 @@ flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use G
     ],
     "practicalTips": ["Hyper-specific family tip with real details — e.g. 'Tokyo Disneyland sells out months ahead; book via the official app the moment your trip is set. Arrive 30 min before park open to hit Pooh's Hunny Hunt before the line hits 90 min.'"],
     "bestFor": "e.g. 'Families with kids 5–12' or 'Teens and young adults'"
-  }
+  },
+  "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
+  "airports": [{ "iata": "KIX", "name": "Airport Name", "city": "City", "transitToCity": "travel time and method to destination", "costModifier": 1.0, "note": "one line why this airport" }],
+  "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }]
 }
 Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. dayTrips.trips exactly 5 (mix of half-day and full-day; include at least 1 overnight-worthy option; range from 30 min to 2.5 hrs away; use real place names). dayTrips.duration must be one of: Half day, Full day, Overnight. kidFriendly.rating is 1–5 integer (1=adults only, 5=exceptional for families). kidFriendly.highlights exactly 4 items. kidFriendly.practicalTips exactly 3 items, all hyper-specific with real names/prices/times. kidFriendly.ageGroup must be one of: toddler, kids, teens, all. airports: 1-3 entries, include ALL major airports that serve the destination — e.g. New York needs JFK + LGA + EWR, London needs LHR + LGW + STN, Paris needs CDG + ORY, Chicago needs ORD + MDW, Los Angeles needs LAX + BUR + LGB. Skip only if destination has a single obvious airport. costModifier is relative to the primary airport (1.0 = baseline).
 Valid event types: festival, cultural, sporting, food, music, market.
@@ -1543,7 +1543,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             messages: [{ role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
             temperature: 0.7,
-            max_tokens: 3800,
+            max_tokens: 7000,
           }),
         });
 
