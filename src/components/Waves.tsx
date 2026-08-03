@@ -124,6 +124,19 @@ interface TripIntelligence {
     practicalTips: string[];
     bestFor: string;
   };
+  dayTrips?: {
+    intro: string;
+    trips: {
+      name: string;
+      distance: string;
+      travelTime: string;
+      duration: 'Half day' | 'Full day' | 'Overnight';
+      vibe: string;
+      description: string;
+      mustSee: string;
+      tip: string;
+    }[];
+  };
   practicalInfo?: {
     visa: string;
     currency: string;
@@ -1490,6 +1503,21 @@ flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use G
   "airports": [{ "iata": "KIX", "name": "Airport Name", "city": "City", "transitToCity": "travel time and method to destination", "costModifier": 1.0, "note": "one line why this airport" }],
   "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }],
   "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
+  "dayTrips": {
+    "intro": "1-2 sentences on the region's day trip potential and what makes it worth exploring beyond the city",
+    "trips": [
+      {
+        "name": "Real place name (e.g. Sintra)",
+        "distance": "e.g. 28 km",
+        "travelTime": "e.g. 40 min by train",
+        "duration": "Half day",
+        "vibe": "2-3 words e.g. Fairy-tale palaces",
+        "description": "2-3 sentences — what makes this place special, what you'll actually experience there",
+        "mustSee": "One specific landmark or experience with real detail",
+        "tip": "Practical tip — best time to go, how to get there cheap, what to avoid"
+      }
+    ]
+  },
   "kidFriendly": {
     "rating": 4,
     "summary": "2 sentences on overall family-friendliness — safety, infrastructure, attitude toward kids",
@@ -1500,7 +1528,7 @@ flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use G
     "bestFor": "e.g. 'Families with kids 5–12' or 'Teens and young adults'"
   }
 }
-Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. kidFriendly.rating is 1–5 integer (1=adults only, 5=exceptional for families). kidFriendly.highlights exactly 4 items. kidFriendly.practicalTips exactly 3 items, all hyper-specific with real names/prices/times. kidFriendly.ageGroup must be one of: toddler, kids, teens, all. airports: 1-3 entries, include ALL major airports that serve the destination — e.g. New York needs JFK + LGA + EWR, London needs LHR + LGW + STN, Paris needs CDG + ORY, Chicago needs ORD + MDW, Los Angeles needs LAX + BUR + LGB. Skip only if destination has a single obvious airport. costModifier is relative to the primary airport (1.0 = baseline).
+Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 6 (all must be hyper-specific with real names/prices). topRestaurants exactly 4. popularRestaurants exactly 10 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. dayTrips.trips exactly 5 (mix of half-day and full-day; include at least 1 overnight-worthy option; range from 30 min to 2.5 hrs away; use real place names). dayTrips.duration must be one of: Half day, Full day, Overnight. kidFriendly.rating is 1–5 integer (1=adults only, 5=exceptional for families). kidFriendly.highlights exactly 4 items. kidFriendly.practicalTips exactly 3 items, all hyper-specific with real names/prices/times. kidFriendly.ageGroup must be one of: toddler, kids, teens, all. airports: 1-3 entries, include ALL major airports that serve the destination — e.g. New York needs JFK + LGA + EWR, London needs LHR + LGW + STN, Paris needs CDG + ORY, Chicago needs ORD + MDW, Los Angeles needs LAX + BUR + LGB. Skip only if destination has a single obvious airport. costModifier is relative to the primary airport (1.0 = baseline).
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
@@ -2062,6 +2090,7 @@ Return ONLY a JSON object, no markdown, no explanation:
             ...(data.insiderTips && data.insiderTips.length > 0 ? [{ id: 'insider', label: 'Insider' }] : []),
             ...(data.neighborhoods && data.neighborhoods.length > 0 ? [{ id: 'neighborhoods', label: 'Areas' }] : []),
             ...(data.kidFriendly ? [{ id: 'family', label: 'Family' }] : []),
+            ...(data.dayTrips ? [{ id: 'day-trips', label: 'Day Trips' }] : []),
             { id: 'trip-intel', label: 'Intel' },
           ];
           const scrollTo = (id: string) => {
@@ -2908,6 +2937,79 @@ Return ONLY a JSON object, no markdown, no explanation:
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* Day Trips */}
+        {data.dayTrips && data.dayTrips.trips.length > 0 && (
+          <section id="day-trips" className="mb-24 scroll-mt-16">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                <MapPin size={24} />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Day Trips</h2>
+              </div>
+            </div>
+            {data.dayTrips.intro && (
+              <p className="text-base text-slate-500 font-light leading-relaxed mb-10 max-w-2xl">{data.dayTrips.intro}</p>
+            )}
+            <div className="space-y-4">
+              {data.dayTrips.trips.map((trip, i) => {
+                const durationColors: Record<string, string> = {
+                  'Half day': 'bg-sky-50 text-sky-600 border-sky-200',
+                  'Full day': 'bg-indigo-50 text-indigo-600 border-indigo-200',
+                  'Overnight': 'bg-violet-50 text-violet-600 border-violet-200',
+                };
+                return (
+                  <a
+                    key={i}
+                    href={`https://www.google.com/search?q=${encodeURIComponent(trip.name + ' day trip from ' + destination)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col md:flex-row gap-6 p-7 bg-white border border-black/[0.13] rounded-3xl hover:border-emerald-400/40 transition-all"
+                  >
+                    {/* Left: number + name + meta */}
+                    <div className="flex gap-5 md:w-72 shrink-0">
+                      <span className="text-3xl font-serif text-[#0A1A2E]/10 group-hover:text-emerald-400/40 transition-colors leading-none shrink-0 select-none mt-0.5">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <h4 className="text-lg text-[#0A1A2E] font-serif group-hover:text-emerald-600 transition-colors leading-snug">{trip.name}</h4>
+                          <ChevronRight size={14} className="text-slate-400 group-hover:text-emerald-500 transition-colors shrink-0" />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs text-slate-500 font-mono">{trip.travelTime}</span>
+                          <span className="text-slate-300">·</span>
+                          <span className="text-xs text-slate-500 font-mono">{trip.distance}</span>
+                          <span className="text-slate-300">·</span>
+                          <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 ${durationColors[trip.duration] || durationColors['Full day']}`}>{trip.duration}</span>
+                        </div>
+                        {trip.vibe && <div className="mt-2 text-xs text-emerald-600 font-medium">{trip.vibe}</div>}
+                      </div>
+                    </div>
+
+                    {/* Right: description + must-see + tip */}
+                    <div className="flex-1 min-w-0 border-t md:border-t-0 md:border-l border-black/[0.07] pt-4 md:pt-0 md:pl-6 space-y-3">
+                      <p className="text-sm text-slate-600 font-light leading-relaxed">{trip.description}</p>
+                      {trip.mustSee && (
+                        <div className="flex gap-2">
+                          <Star size={13} className="text-amber-400 shrink-0 mt-0.5" />
+                          <p className="text-xs text-slate-500 font-light leading-relaxed"><span className="font-medium text-slate-700">Must-see:</span> {trip.mustSee}</p>
+                        </div>
+                      )}
+                      {trip.tip && (
+                        <div className="flex gap-2">
+                          <Lightbulb size={13} className="text-[#0891B2] shrink-0 mt-0.5" />
+                          <p className="text-xs text-slate-500 font-light leading-relaxed">{trip.tip}</p>
+                        </div>
+                      )}
+                    </div>
+                  </a>
+                );
+              })}
             </div>
           </section>
         )}
