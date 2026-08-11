@@ -94,6 +94,7 @@ export function PriceTrendChart({ townSlug }: { townSlug: string }) {
           viewBox={`0 0 ${W} ${H}`}
           className="w-full"
           style={{ height: 130 }}
+          preserveAspectRatio="none"
           onMouseMove={handleSvgMouseMove}
           onMouseLeave={() => setHoveredIdx(null)}
         >
