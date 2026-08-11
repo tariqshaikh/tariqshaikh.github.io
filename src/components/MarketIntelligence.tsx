@@ -11,18 +11,9 @@ function fmtPrice(p: number) {
 export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: string; color?: string }) {
   const [db, setDb] = useState<SeasonalityDB | null>(null);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const [chartW, setChartW] = useState(600);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     import('../data/njSeasonality.json').then(mod => setDb(mod.default as SeasonalityDB));
-  }, []);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const ro = new ResizeObserver(entries => setChartW(entries[0].contentRect.width));
-    ro.observe(containerRef.current);
-    return () => ro.disconnect();
   }, []);
 
   const townData = useMemo(() => (db ? findData(townSlug, db) : null), [db, townSlug]);
@@ -48,15 +39,17 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
   if (!priceTrend) return null;
 
   const { pts, prices, minP, maxP, latestPrice, yoyPct, yearMarkers } = priceTrend;
-  const H = 160; const YPAD = 6; const BOTTOM = 4;
-  const xOf = (i: number) => (i / (pts.length - 1)) * chartW;
+  // SVG uses a fixed 1000-wide coordinate space; CSS scales it to 100% width
+  const W = 1000; const H = 160; const YPAD = 6; const BOTTOM = 4;
+  const xPct = (i: number) => (i / (pts.length - 1)) * 100; // % for HTML overlays
+  const xSvg = (i: number) => (i / (pts.length - 1)) * W;
   const yOf = (p: number) => YPAD + (1 - (p - minP) / (maxP - minP || 1)) * (H - YPAD - BOTTOM);
-  const polyline = pts.map((_, i) => `${xOf(i)},${yOf(prices[i])}`).join(' ');
-  const fillPoly = `0,${H} ${polyline} ${chartW},${H}`;
+  const polyline = pts.map((_, i) => `${xSvg(i)},${yOf(prices[i])}`).join(' ');
+  const fillPoly = `0,${H} ${polyline} ${W},${H}`;
   const hIdx = hoveredIdx ?? pts.length - 1;
   const hPt = pts[hIdx];
   const hPrice = prices[hIdx];
-  const hX = xOf(hIdx);
+  const hPct = xPct(hIdx);
   const hY = yOf(hPrice);
   const isUp = yoyPct != null && yoyPct > 0.5;
   const isDown = yoyPct != null && yoyPct < -0.5;
@@ -90,7 +83,7 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
             <div className="text-sm font-bold text-slate-600">{fmtPrice(maxP)}</div>
           </div>
         </div>
-        {/* Chart column — fills remaining width */}
+        {/* Chart column — CSS-scaled SVG always fills 100% of this flex column */}
         <div className="flex-1 min-w-0">
           <div className="h-6 flex items-center mb-1">
             {hoveredIdx !== null ? (
@@ -102,15 +95,15 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
               <span className="text-xs font-mono text-slate-300">hover to explore</span>
             )}
           </div>
-          <div ref={containerRef} className="relative w-full" style={{ height: H }}>
+          <div className="relative w-full" style={{ height: H }}>
+            {/* SVG scales via CSS; coordinate space is W×H */}
             <svg
-              width={chartW}
-              height={H}
-              className="absolute inset-0"
+              viewBox={`0 0 ${W} ${H}`}
+              preserveAspectRatio="none"
+              style={{ width: '100%', height: H, display: 'block' }}
               onMouseMove={e => {
                 const rect = e.currentTarget.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const idx = Math.round((x / chartW) * (pts.length - 1));
+                const idx = Math.round(((e.clientX - rect.left) / rect.width) * (pts.length - 1));
                 setHoveredIdx(Math.max(0, Math.min(idx, pts.length - 1)));
               }}
               onMouseLeave={() => setHoveredIdx(null)}
@@ -122,20 +115,32 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
                 </linearGradient>
               </defs>
               {[maxP, midP, minP].map((p, gi) => (
-                <line key={gi} x1={0} y1={yOf(p)} x2={chartW} y2={yOf(p)} stroke="#f1f5f9" strokeWidth="1" />
+                <line key={gi} x1={0} y1={yOf(p)} x2={W} y2={yOf(p)} stroke="#f1f5f9" strokeWidth="2" />
               ))}
               {yearMarkers.map(({ idx }) => (
-                <line key={idx} x1={xOf(idx)} y1={YPAD} x2={xOf(idx)} y2={H - BOTTOM} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3,3" />
+                <line key={idx} x1={xSvg(idx)} y1={YPAD} x2={xSvg(idx)} y2={H - BOTTOM} stroke="#e2e8f0" strokeWidth="2" strokeDasharray="6,6" />
               ))}
               <polygon points={fillPoly} fill="url(#priceGradPTC)" />
-              <polyline points={polyline} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-              <line x1={hX} y1={YPAD} x2={hX} y2={H - BOTTOM} stroke={color} strokeWidth="1" strokeOpacity="0.3" strokeDasharray="3,2" />
-              <circle cx={hX} cy={hY} r="4" fill={color} stroke="white" strokeWidth="2" />
+              <polyline points={polyline} fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+              {/* hover crosshair */}
+              <line x1={xSvg(hIdx)} y1={YPAD} x2={xSvg(hIdx)} y2={H - BOTTOM} stroke={color} strokeWidth="2" strokeOpacity="0.3" strokeDasharray="4,4" vectorEffect="non-scaling-stroke" />
             </svg>
+            {/* Hover dot as HTML so it stays circular (SVG circle distorts with preserveAspectRatio=none) */}
+            <div
+              className="absolute w-3 h-3 rounded-full pointer-events-none z-10"
+              style={{
+                left: `${hPct}%`,
+                top: `${(hY / H) * 100}%`,
+                backgroundColor: color,
+                border: '2px solid white',
+                transform: 'translate(-50%, -50%)',
+                boxShadow: '0 0 0 2px ' + color + '33',
+              }}
+            />
           </div>
           <div className="relative w-full h-4 mt-0.5">
             {yearMarkers.map(({ label, idx }) => (
-              <span key={label} className="absolute text-[10px] font-mono text-slate-300 pointer-events-none -translate-x-1/2" style={{ left: xOf(idx) }}>
+              <span key={label} className="absolute text-[10px] font-mono text-slate-300 pointer-events-none -translate-x-1/2" style={{ left: `${xPct(idx)}%` }}>
                 {label}
               </span>
             ))}
