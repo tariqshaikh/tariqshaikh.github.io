@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, School, Home, Train, Shield, Coffee, TrendingUp, Users, ChevronRight, Zap, X, GitCompare } from 'lucide-react';
 import { NJ_ENRICHED, NJ_COUNTIES } from '../constants';
 import { logVisit } from '../lib/analytics';
-import MarketIntelligence from './MarketIntelligence';
+import MarketIntelligence, { PriceTrendChart } from './MarketIntelligence';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -493,6 +493,7 @@ Use realistic NJ data. No explanation.`
                 isDerived={!d.marketHistory}
               />
             )}
+            <PriceTrendChart townSlug={redfinSlug || townSlug || ''} />
           </Section>
 
           {/* When to Buy */}

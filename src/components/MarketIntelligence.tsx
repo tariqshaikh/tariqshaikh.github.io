@@ -1,5 +1,136 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { Calendar, TrendingUp, AlertCircle } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'; // useRef/useCallback used by PriceTrendChart
+import { Calendar, TrendingUp, TrendingDown, AlertCircle, Minus } from 'lucide-react';
+
+const ACCENT = '#6366a3';
+
+function fmtPrice(p: number) {
+  if (p >= 1_000_000) return `$${(p / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
+  return `$${Math.round(p / 1000)}k`;
+}
+
+export function PriceTrendChart({ townSlug }: { townSlug: string }) {
+  const [db, setDb] = useState<SeasonalityDB | null>(null);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    import('../data/njSeasonality.json').then(mod => setDb(mod.default as SeasonalityDB));
+  }, []);
+
+  const townData = useMemo(() => (db ? findData(townSlug, db) : null), [db, townSlug]);
+
+  const priceTrend = useMemo(() => {
+    if (!townData) return null;
+    const pts = townData.months
+      .filter(m => m.medianPrice != null)
+      .sort((a, b) => a.period.localeCompare(b.period));
+    if (pts.length < 3) return null;
+    const prices = pts.map(m => m.medianPrice!);
+    const minP = Math.min(...prices);
+    const maxP = Math.max(...prices);
+    const latestPrice = prices[prices.length - 1];
+    const latestPeriod = pts[pts.length - 1].period;
+    const [ly, lm] = latestPeriod.split('-');
+    const prevPeriod = `${parseInt(ly) - 1}-${lm}`;
+    const prevPt = pts.find(p => p.period === prevPeriod);
+    const yoyPct = prevPt ? ((latestPrice - prevPt.medianPrice!) / prevPt.medianPrice!) * 100 : null;
+    const yearMarkers: { label: string; idx: number }[] = [];
+    pts.forEach((p, i) => {
+      if (p.period.endsWith('-01')) yearMarkers.push({ label: p.period.slice(0, 4), idx: i });
+    });
+    return { pts, prices, minP, maxP, latestPrice, yoyPct, yearMarkers };
+  }, [townData]);
+
+  const handleSvgMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
+    if (!priceTrend || !svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const idx = Math.round((x / rect.width) * (priceTrend.pts.length - 1));
+    setHoveredIdx(Math.max(0, Math.min(idx, priceTrend.pts.length - 1)));
+  }, [priceTrend]);
+
+  if (!priceTrend) return null;
+
+  const { pts, prices, minP, maxP, latestPrice, yoyPct, yearMarkers } = priceTrend;
+  const W = 400; const H = 130; const X_PAD = 4; const Y_PAD = 4;
+  const xOf = (i: number) => X_PAD + (i / (pts.length - 1)) * (W - X_PAD * 2);
+  const yOf = (p: number) => Y_PAD + (1 - (p - minP) / (maxP - minP || 1)) * (H - Y_PAD * 2 - 14);
+  const polyline = pts.map((_, i) => `${xOf(i)},${yOf(prices[i])}`).join(' ');
+  const fillPoly = `${xOf(0)},${H} ${polyline} ${xOf(pts.length - 1)},${H}`;
+  const hIdx = hoveredIdx ?? pts.length - 1;
+  const hPt = pts[hIdx];
+  const hPrice = prices[hIdx];
+  const hX = xOf(hIdx);
+  const hY = yOf(hPrice);
+  const isUp = yoyPct != null && yoyPct > 0.5;
+  const isDown = yoyPct != null && yoyPct < -0.5;
+  const midP = (minP + maxP) / 2;
+  const gridLevels = [maxP, midP, minP];
+
+  return (
+    <div className="mt-4 pt-4 border-t border-slate-100">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-[13px] font-mono text-slate-400 uppercase tracking-wider">Median Sale Price</p>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-slate-700">{fmtPrice(latestPrice)}</span>
+          {yoyPct != null && (
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+              isUp ? 'bg-emerald-50 text-emerald-700' : isDown ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'
+            }`}>
+              {isUp ? <TrendingUp size={11} /> : isDown ? <TrendingDown size={11} /> : <Minus size={11} />}
+              {yoyPct > 0 ? '+' : ''}{yoyPct.toFixed(1)}% YoY
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="h-7 flex items-center mb-1">
+        <span className="text-lg font-bold text-slate-800 leading-none">{fmtPrice(hPrice)}</span>
+        <span className="ml-2 text-xs font-mono text-slate-400">{hPt.period.slice(0, 7)}</span>
+        {hoveredIdx === null && <span className="ml-1.5 text-[10px] font-mono text-slate-300">← hover to explore</span>}
+      </div>
+      <div className="relative">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${W} ${H}`}
+          className="w-full"
+          style={{ height: 130 }}
+          onMouseMove={handleSvgMouseMove}
+          onMouseLeave={() => setHoveredIdx(null)}
+        >
+          <defs>
+            <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={ACCENT} stopOpacity="0.15" />
+              <stop offset="100%" stopColor={ACCENT} stopOpacity="0.01" />
+            </linearGradient>
+          </defs>
+          {gridLevels.map((p, gi) => {
+            const y = yOf(p);
+            const lbl = fmtPrice(p);
+            const lblW = lbl.length * 6.2 + 8;
+            return (
+              <g key={gi}>
+                <line x1={X_PAD} y1={y} x2={W - Y_PAD} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                <rect x={X_PAD + 2} y={y - 9} width={lblW} height={13} rx="3" fill="white" fillOpacity="0.85" />
+                <text x={X_PAD + 6} y={y + 1} fontSize="9.5" fontFamily="monospace" fill="#94a3b8">{lbl}</text>
+              </g>
+            );
+          })}
+          {yearMarkers.map(({ label, idx }) => (
+            <g key={label}>
+              <line x1={xOf(idx)} y1={Y_PAD} x2={xOf(idx)} y2={H} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3,3" />
+              <text x={xOf(idx)} y={H - 1} textAnchor="middle" fontSize="9" fontFamily="monospace" fill="#cbd5e1">{label}</text>
+            </g>
+          ))}
+          <polygon points={fillPoly} fill="url(#priceGrad)" />
+          <polyline points={polyline} fill="none" stroke={ACCENT} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <line x1={hX} y1={Y_PAD} x2={hX} y2={H - 14} stroke={ACCENT} strokeWidth="1" strokeOpacity="0.3" strokeDasharray="3,2" />
+          <circle cx={hX} cy={hY} r="4" fill={ACCENT} stroke="white" strokeWidth="2" />
+        </svg>
+      </div>
+      <p className="text-[11px] font-mono text-slate-300 mt-1">Rolling 3-month median · Redfin data</p>
+    </div>
+  );
+}
 
 interface MonthEntry {
   period: string;
@@ -18,7 +149,6 @@ interface TownSeasonality {
 type SeasonalityDB = Record<string, TownSeasonality>;
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ACCENT = '#6366a3';
 const YEARS = [2023, 2024, 2025, 2026] as const;
 type Year = typeof YEARS[number];
 
@@ -238,6 +368,7 @@ export default function MarketIntelligence({ townSlug, saleToList, proxyName }: 
           </div>
         </div>
       )}
+
     </div>
   );
 }
