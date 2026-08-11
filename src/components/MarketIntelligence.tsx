@@ -48,11 +48,11 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
   if (!priceTrend) return null;
 
   const { pts, prices, minP, maxP, latestPrice, yoyPct, yearMarkers } = priceTrend;
-  const H = 120; const PAD = 6; const BOTTOM = 4;
-  const xOf = (i: number) => PAD + (i / (pts.length - 1)) * (chartW - PAD * 2);
-  const yOf = (p: number) => PAD + (1 - (p - minP) / (maxP - minP || 1)) * (H - PAD - BOTTOM);
+  const H = 120; const YYPAD = 6; const BOTTOM = 4;
+  const xOf = (i: number) => (i / (pts.length - 1)) * chartW;
+  const yOf = (p: number) => YYPAD + (1 - (p - minP) / (maxP - minP || 1)) * (H - YYPAD - BOTTOM);
   const polyline = pts.map((_, i) => `${xOf(i)},${yOf(prices[i])}`).join(' ');
-  const fillPoly = `${xOf(0)},${H} ${polyline} ${xOf(pts.length - 1)},${H}`;
+  const fillPoly = `0,${H} ${polyline} ${chartW},${H}`;
   const hIdx = hoveredIdx ?? pts.length - 1;
   const hPt = pts[hIdx];
   const hPrice = prices[hIdx];
@@ -110,14 +110,14 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
             </linearGradient>
           </defs>
           {gridLevels.map((p, gi) => (
-            <line key={gi} x1={PAD} y1={yOf(p)} x2={chartW - PAD} y2={yOf(p)} stroke="#f1f5f9" strokeWidth="1" />
+            <line key={gi} x1={0} y1={yOf(p)} x2={chartW} y2={yOf(p)} stroke="#f1f5f9" strokeWidth="1" />
           ))}
           {yearMarkers.map(({ idx }) => (
-            <line key={idx} x1={xOf(idx)} y1={PAD} x2={xOf(idx)} y2={H - BOTTOM} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3,3" />
+            <line key={idx} x1={xOf(idx)} y1={YPAD} x2={xOf(idx)} y2={H - BOTTOM} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3,3" />
           ))}
           <polygon points={fillPoly} fill="url(#priceGradPTC)" />
           <polyline points={polyline} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-          <line x1={hX} y1={PAD} x2={hX} y2={H - BOTTOM} stroke={color} strokeWidth="1" strokeOpacity="0.3" strokeDasharray="3,2" />
+          <line x1={hX} y1={YPAD} x2={hX} y2={H - BOTTOM} stroke={color} strokeWidth="1" strokeOpacity="0.3" strokeDasharray="3,2" />
           <circle cx={hX} cy={hY} r="4" fill={color} stroke="white" strokeWidth="2" />
         </svg>
       </div>
