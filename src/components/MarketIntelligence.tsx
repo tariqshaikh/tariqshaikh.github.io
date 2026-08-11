@@ -48,9 +48,9 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
   if (!priceTrend) return null;
 
   const { pts, prices, minP, maxP, latestPrice, yoyPct, yearMarkers } = priceTrend;
-  const H = 120; const YYPAD = 6; const BOTTOM = 4;
+  const H = 120; const YPAD = 6; const BOTTOM = 4;
   const xOf = (i: number) => (i / (pts.length - 1)) * chartW;
-  const yOf = (p: number) => YYPAD + (1 - (p - minP) / (maxP - minP || 1)) * (H - YYPAD - BOTTOM);
+  const yOf = (p: number) => YPAD + (1 - (p - minP) / (maxP - minP || 1)) * (H - YPAD - BOTTOM);
   const polyline = pts.map((_, i) => `${xOf(i)},${yOf(prices[i])}`).join(' ');
   const fillPoly = `0,${H} ${polyline} ${chartW},${H}`;
   const hIdx = hoveredIdx ?? pts.length - 1;
