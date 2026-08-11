@@ -48,7 +48,7 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
   if (!priceTrend) return null;
 
   const { pts, prices, minP, maxP, latestPrice, yoyPct, yearMarkers } = priceTrend;
-  const H = 120; const PAD = 4; const BOTTOM = 16;
+  const H = 120; const PAD = 6; const BOTTOM = 4;
   const xOf = (i: number) => PAD + (i / (pts.length - 1)) * (chartW - PAD * 2);
   const yOf = (p: number) => PAD + (1 - (p - minP) / (maxP - minP || 1)) * (H - PAD - BOTTOM);
   const polyline = pts.map((_, i) => `${xOf(i)},${yOf(prices[i])}`).join(' ');
@@ -91,12 +91,6 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
             {fmtPrice(p)}
           </span>
         ))}
-        {/* Year labels — HTML */}
-        {yearMarkers.map(({ label, idx }) => (
-          <span key={label} className="absolute text-[10px] font-mono text-slate-300 pointer-events-none -translate-x-1/2" style={{ left: xOf(idx), bottom: 0 }}>
-            {label}
-          </span>
-        ))}
         <svg
           width={chartW}
           height={H}
@@ -126,6 +120,14 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
           <line x1={hX} y1={PAD} x2={hX} y2={H - BOTTOM} stroke={color} strokeWidth="1" strokeOpacity="0.3" strokeDasharray="3,2" />
           <circle cx={hX} cy={hY} r="4" fill={color} stroke="white" strokeWidth="2" />
         </svg>
+      </div>
+      {/* Year labels row — separate from chart so no overlap with price labels */}
+      <div className="relative w-full h-4 mt-0.5">
+        {yearMarkers.map(({ label, idx }) => (
+          <span key={label} className="absolute text-[10px] font-mono text-slate-300 pointer-events-none -translate-x-1/2" style={{ left: xOf(idx) }}>
+            {label}
+          </span>
+        ))}
       </div>
       <p className="text-[11px] font-mono text-slate-300 mt-1">Rolling 3-month median · Redfin data</p>
     </div>
