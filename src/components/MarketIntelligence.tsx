@@ -88,12 +88,26 @@ export function PriceTrendChart({ townSlug }: { townSlug: string }) {
         <span className="ml-2 text-xs font-mono text-slate-400">{hPt.period.slice(0, 7)}</span>
         {hoveredIdx === null && <span className="ml-1.5 text-[10px] font-mono text-slate-300">← hover to explore</span>}
       </div>
-      <div className="relative">
+      <div className="relative" style={{ height: 130 }}>
+        {/* Y-axis price labels — HTML so they don't stretch */}
+        {gridLevels.map((p, gi) => {
+          const topPct = `${((yOf(p) / H) * 100).toFixed(1)}%`;
+          return (
+            <span key={gi} className="absolute left-1 text-[10px] font-mono text-slate-400 bg-white/80 rounded px-1 leading-none pointer-events-none" style={{ top: topPct, transform: 'translateY(-50%)' }}>
+              {fmtPrice(p)}
+            </span>
+          );
+        })}
+        {/* Year labels — HTML so they don't stretch */}
+        {yearMarkers.map(({ label, idx }) => (
+          <span key={label} className="absolute bottom-0 text-[10px] font-mono text-slate-300 pointer-events-none -translate-x-1/2" style={{ left: `${((xOf(idx) / W) * 100).toFixed(1)}%` }}>
+            {label}
+          </span>
+        ))}
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
-          className="w-full"
-          style={{ height: 130 }}
+          className="w-full h-full"
           preserveAspectRatio="none"
           onMouseMove={handleSvgMouseMove}
           onMouseLeave={() => setHoveredIdx(null)}
@@ -104,27 +118,15 @@ export function PriceTrendChart({ townSlug }: { townSlug: string }) {
               <stop offset="100%" stopColor={ACCENT} stopOpacity="0.01" />
             </linearGradient>
           </defs>
-          {gridLevels.map((p, gi) => {
-            const y = yOf(p);
-            const lbl = fmtPrice(p);
-            const lblW = lbl.length * 6.2 + 8;
-            return (
-              <g key={gi}>
-                <line x1={X_PAD} y1={y} x2={W - Y_PAD} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                <rect x={X_PAD + 2} y={y - 9} width={lblW} height={13} rx="3" fill="white" fillOpacity="0.85" />
-                <text x={X_PAD + 6} y={y + 1} fontSize="9.5" fontFamily="monospace" fill="#94a3b8">{lbl}</text>
-              </g>
-            );
-          })}
-          {yearMarkers.map(({ label, idx }) => (
-            <g key={label}>
-              <line x1={xOf(idx)} y1={Y_PAD} x2={xOf(idx)} y2={H} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3,3" />
-              <text x={xOf(idx)} y={H - 1} textAnchor="middle" fontSize="9" fontFamily="monospace" fill="#cbd5e1">{label}</text>
-            </g>
+          {gridLevels.map((p, gi) => (
+            <line key={gi} x1={X_PAD} y1={yOf(p)} x2={W - Y_PAD} y2={yOf(p)} stroke="#f1f5f9" strokeWidth="1" />
+          ))}
+          {yearMarkers.map(({ idx }) => (
+            <line key={idx} x1={xOf(idx)} y1={Y_PAD} x2={xOf(idx)} y2={H - 14} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3,3" />
           ))}
           <polygon points={fillPoly} fill="url(#priceGrad)" />
           <polyline points={polyline} fill="none" stroke={ACCENT} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-          <line x1={hX} y1={Y_PAD} x2={hX} y2={H - 14} stroke={ACCENT} strokeWidth="1" strokeOpacity="0.3" strokeDasharray="3,2" />
+          <line x1={hX} y1={Y_PAD} x2={hX} y2={H - 14} stroke={ACCENT} strokeWidth="1" strokeOpacity="0.35" strokeDasharray="3,2" />
           <circle cx={hX} cy={hY} r="4" fill={ACCENT} stroke="white" strokeWidth="2" />
         </svg>
       </div>
