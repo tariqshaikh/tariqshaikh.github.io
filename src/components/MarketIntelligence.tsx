@@ -65,9 +65,9 @@ export function PriceTrendChart({ townSlug, color = '#166534' }: { townSlug: str
   return (
     <div className="mt-4 pt-4 border-t border-slate-100">
       <p className="text-[13px] font-mono text-slate-400 uppercase tracking-wider mb-3">Median Sale Price</p>
-      <div className="flex gap-6 items-start">
+      <div className="flex gap-8 items-start">
         {/* Stats column */}
-        <div className="flex flex-col gap-4 w-24 shrink-0">
+        <div className="flex flex-col gap-4 w-32 shrink-0">
           <div>
             <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">Current</div>
             <div className="text-xl font-bold text-slate-800 leading-none">{fmtPrice(latestPrice)}</div>
