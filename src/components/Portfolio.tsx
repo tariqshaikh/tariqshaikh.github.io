@@ -93,13 +93,43 @@ export default function Portfolio() {
           <div className="flex-1 min-w-0 bg-[#E2E2DF] rounded-2xl p-3 border border-slate-300/40">
             <div className="grid grid-cols-2 gap-3">
 
+              {/* PM Prism */}
+              <div className="aspect-square bg-[#07091A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-violet-500/50 hover:shadow-[0_16px_40px_-8px_rgba(139,92,246,0.25)] relative overflow-hidden group border border-white/5">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-violet-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold rounded-full">Live Product</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.001</span>
+                  </div>
+                  <h3 className="text-[20px] leading-tight mb-1 text-white">
+                    <span className="font-serif font-bold">PM </span><span className="font-serif font-bold italic bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Prism</span>
+                  </h3>
+                  <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Product Thinking Partner</p>
+                  <div className="relative mb-3">
+                    <div className="absolute left-0 top-0 bottom-0 w-px bg-violet-500/30" />
+                    <p className="text-xs leading-relaxed text-slate-300 pl-4">Bring any PM question. Prism refracts it through every framework lens.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {['AI', 'PM Tools', 'Interview Prep'].map(tag => (
+                      <span key={tag} className="font-mono text-[7px] px-1.5 py-0.5 bg-violet-500/10 text-violet-300/80 border border-violet-500/20 tracking-widest uppercase font-bold">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Link to="/prism" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-violet-600 to-cyan-500 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(139,92,246,0.4)] transition-shadow">
+                    Launch <ChevronRight size={10} />
+                  </Link>
+                  <button onClick={() => openModal('prd-prism')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
+                </div>
+              </div>
+
               {/* Homebase NJ */}
               <div className="aspect-square bg-[#090E1A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_16px_40px_-8px_rgba(59,130,246,0.2)] relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-full">Live Product</span>
-                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.001</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.002</span>
                   </div>
                   <h3 className="text-[20px] leading-tight mb-1 text-white">
                     <span className="font-serif font-bold">Homebase</span> <span className="font-sans font-black text-blue-400 ml-1">NJ</span>
@@ -119,10 +149,7 @@ export default function Portfolio() {
                   <Link to="/homebase" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-blue-600 to-cyan-400 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(59,130,246,0.4)] transition-shadow">
                     Launch <ChevronRight size={10} />
                   </Link>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button onClick={() => openModal('prd-1')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
-                    <button onClick={() => openModal('roadmap-1')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">Roadmap</button>
-                  </div>
+                  <button onClick={() => openModal('prd-1')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
                 </div>
               </div>
 
@@ -132,7 +159,7 @@ export default function Portfolio() {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-teal-500/10 text-teal-400 border border-teal-500/20 font-bold rounded-full">Live Product</span>
-                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.002</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
                   </div>
                   <h3 className="text-[20px] leading-tight mb-1 text-white">
                     <span className="font-serif font-bold italic">Waves</span>
@@ -152,10 +179,7 @@ export default function Portfolio() {
                   <Link to="/waves" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-cyan-600 to-teal-300 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(6,182,212,0.4)] transition-shadow">
                     Launch <ChevronRight size={10} />
                   </Link>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button onClick={() => openModal('prd-3')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
-                    <button onClick={() => openModal('roadmap-3')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">Roadmap</button>
-                  </div>
+                  <button onClick={() => openModal('prd-3')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
                 </div>
               </div>
 
@@ -165,7 +189,7 @@ export default function Portfolio() {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
-                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.004</span>
                   </div>
                   <h3 className="text-[20px] leading-tight mb-1 text-white">
                     <span className="font-serif font-bold italic">Orbit</span>
@@ -185,38 +209,8 @@ export default function Portfolio() {
                   <Link to="/orbit" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(197,160,89,0.4)] transition-shadow">
                     Launch <ChevronRight size={10} />
                   </Link>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button onClick={() => openModal('prd-2')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
-                    <button onClick={() => openModal('roadmap-2')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">Roadmap</button>
-                  </div>
+                  <button onClick={() => openModal('prd-2')} className="px-2 py-1.5 bg-white/5 text-[7px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer rounded-sm">PRD</button>
                 </div>
-              </div>
-
-              {/* PM Prism */}
-              <div className="aspect-square bg-[#07091A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-violet-500/50 hover:shadow-[0_16px_40px_-8px_rgba(139,92,246,0.25)] relative overflow-hidden group border border-white/5">
-                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-violet-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold rounded-full">Live Product</span>
-                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.004</span>
-                  </div>
-                  <h3 className="text-[20px] leading-tight mb-1 text-white">
-                    <span className="font-serif font-bold">PM </span><span className="font-serif font-bold italic bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Prism</span>
-                  </h3>
-                  <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Product Thinking Partner</p>
-                  <div className="relative mb-3">
-                    <div className="absolute left-0 top-0 bottom-0 w-px bg-violet-500/30" />
-                    <p className="text-xs leading-relaxed text-slate-300 pl-4">Bring any PM question. Prism refracts it through every framework lens.</p>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {['AI', 'PM Tools', 'Interview Prep'].map(tag => (
-                      <span key={tag} className="font-mono text-[7px] px-1.5 py-0.5 bg-violet-500/10 text-violet-300/80 border border-violet-500/20 tracking-widest uppercase font-bold">{tag}</span>
-                    ))}
-                  </div>
-                </div>
-                <Link to="/prism" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-violet-600 to-cyan-500 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(139,92,246,0.4)] transition-shadow">
-                  Launch <ChevronRight size={10} />
-                </Link>
               </div>
 
             </div>
@@ -238,10 +232,10 @@ export default function Portfolio() {
             </div>
           </div>
           {([
-            { bg: 'bg-[#090E1A]', border: 'hover:border-blue-500/40', bar: 'from-blue-600 to-cyan-400', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20', label: 'P.001', titleEl: <><span className="font-serif font-bold">Homebase</span><span className="font-sans font-black text-blue-400 ml-1.5">NJ</span></>, sub: 'Product Design & Data Strategy', desc: 'I collapsed 6 browser tabs into one weighted comparison tool for real estate decisions.', tags: ['Consumer', 'Real Estate', 'Data Product'], tagCls: 'bg-blue-500/10 text-blue-300/80 border-blue-500/20', btn: 'from-blue-600 to-cyan-400', btnText: 'text-white', href: '/homebase', prd: 'prd-1', rm: 'roadmap-1' },
-            { bg: 'bg-[#0B1A1F]', border: 'hover:border-cyan-500/40', bar: 'from-cyan-600 to-teal-400', badge: 'bg-teal-500/10 text-teal-400 border-teal-500/20', label: 'P.002', titleEl: <span className="font-serif font-bold italic">Waves</span>, sub: 'Destination intelligence', desc: 'Destination intelligence for dream trips. Visualizing when to go and what to see.', tags: ['Travel', 'Data Viz', 'AI'], tagCls: 'bg-cyan-500/10 text-cyan-300/80 border-cyan-500/20', btn: 'from-cyan-600 to-teal-300', btnText: 'text-white', href: '/waves', prd: 'prd-3', rm: 'roadmap-3' },
-            { bg: 'bg-[#1A1C1E]', border: 'hover:border-[#C5A059]/40', bar: 'from-[#C5A059] to-[#E5C079]', badge: 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20', label: 'P.003', titleEl: <span className="font-serif font-bold italic">Orbit</span>, sub: 'Cash Flow Intelligence', desc: 'Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.', tags: ['Fintech', 'Cash Flow', 'Strategy'], tagCls: 'bg-[#C5A059]/10 text-[#D4B470] border-[#C5A059]/20', btn: 'from-[#C5A059] to-[#F0D585]', btnText: 'text-black', href: '/orbit', prd: 'prd-2', rm: 'roadmap-2' },
-            { bg: 'bg-[#07091A]', border: 'hover:border-violet-500/40', bar: 'from-violet-500 to-cyan-400', badge: 'bg-violet-500/10 text-violet-400 border-violet-500/20', label: 'P.004', titleEl: <><span className="font-serif font-bold">PM </span><span className="font-serif font-bold italic bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Prism</span></>, sub: 'Product Thinking Partner', desc: 'Bring any PM question. Prism refracts it through every framework lens.', tags: ['AI', 'PM Tools', 'Interview Prep'], tagCls: 'bg-violet-500/10 text-violet-300/80 border-violet-500/20', btn: 'from-violet-600 to-cyan-500', btnText: 'text-white', href: '/prism', prd: null, rm: null },
+            { bg: 'bg-[#07091A]', border: 'hover:border-violet-500/40', bar: 'from-violet-500 to-cyan-400', badge: 'bg-violet-500/10 text-violet-400 border-violet-500/20', label: 'P.001', titleEl: <><span className="font-serif font-bold">PM </span><span className="font-serif font-bold italic bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Prism</span></>, sub: 'Product Thinking Partner', desc: 'Bring any PM question. Prism refracts it through every framework lens.', tags: ['AI', 'PM Tools', 'Interview Prep'], tagCls: 'bg-violet-500/10 text-violet-300/80 border-violet-500/20', btn: 'from-violet-600 to-cyan-500', btnText: 'text-white', href: '/prism', prd: 'prd-prism', rm: null },
+            { bg: 'bg-[#090E1A]', border: 'hover:border-blue-500/40', bar: 'from-blue-600 to-cyan-400', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20', label: 'P.002', titleEl: <><span className="font-serif font-bold">Homebase</span><span className="font-sans font-black text-blue-400 ml-1.5">NJ</span></>, sub: 'Product Design & Data Strategy', desc: 'I collapsed 6 browser tabs into one weighted comparison tool for real estate decisions.', tags: ['Consumer', 'Real Estate', 'Data Product'], tagCls: 'bg-blue-500/10 text-blue-300/80 border-blue-500/20', btn: 'from-blue-600 to-cyan-400', btnText: 'text-white', href: '/homebase', prd: 'prd-1', rm: null },
+            { bg: 'bg-[#0B1A1F]', border: 'hover:border-cyan-500/40', bar: 'from-cyan-600 to-teal-400', badge: 'bg-teal-500/10 text-teal-400 border-teal-500/20', label: 'P.003', titleEl: <span className="font-serif font-bold italic">Waves</span>, sub: 'Destination intelligence', desc: 'Destination intelligence for dream trips. Visualizing when to go and what to see.', tags: ['Travel', 'Data Viz', 'AI'], tagCls: 'bg-cyan-500/10 text-cyan-300/80 border-cyan-500/20', btn: 'from-cyan-600 to-teal-300', btnText: 'text-white', href: '/waves', prd: 'prd-3', rm: null },
+            { bg: 'bg-[#1A1C1E]', border: 'hover:border-[#C5A059]/40', bar: 'from-[#C5A059] to-[#E5C079]', badge: 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20', label: 'P.004', titleEl: <span className="font-serif font-bold italic">Orbit</span>, sub: 'Cash Flow Intelligence', desc: 'Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.', tags: ['Fintech', 'Cash Flow', 'Strategy'], tagCls: 'bg-[#C5A059]/10 text-[#D4B470] border-[#C5A059]/20', btn: 'from-[#C5A059] to-[#F0D585]', btnText: 'text-black', href: '/orbit', prd: 'prd-2', rm: null },
           ] as const).map((p, i) => (
             <div key={i} className={`${p.bg} border border-white/5 rounded-2xl p-8 flex flex-col gap-4 ${p.border} transition-all group relative overflow-hidden`}>
               <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${p.bar} opacity-0 group-hover:opacity-100 transition-opacity`} />
@@ -1502,6 +1496,153 @@ export default function Portfolio() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </>
+              )}
+              {activeModal === 'prd-prism' && (
+                <>
+                  <div className="px-10 py-10 border-b border-[#1E1535] flex items-start justify-between gap-4 bg-[#07091A] sticky top-0 z-10">
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-400/70 font-black mb-4">Product Requirements Document</div>
+                      <div className="text-5xl font-display leading-[0.8] tracking-tighter uppercase font-black text-white">
+                        PM <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent italic">Prism</span>
+                      </div>
+                      <div className="flex gap-4 mt-8 text-[11px] font-mono font-bold uppercase tracking-widest text-slate-500">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-violet-500"></span> Status: v1.0 Live</span>
+                        <span>|</span>
+                        <span>Q3 2026</span>
+                      </div>
+                    </div>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-2 hover:text-white transition-colors uppercase font-mono">✕</button>
+                  </div>
+
+                  <div className="p-10 bg-white">
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">1. Executive Summary</h2>
+                      <div className="bg-[#07091A] border-l-4 border-violet-500 px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-300 italic rounded-r-md">
+                        "Every PM practicing for interviews or thinking through a strategy problem is doing it in isolation, with no structured framework to guide them. Prism puts every relevant lens in front of them instantly."
+                      </div>
+                      <p className="text-[16px] leading-[1.8] text-slate-600">
+                        PM Prism is an AI-powered product thinking partner. A user types any PM question — an interview prompt, a strategy challenge, a market sizing problem — and Prism analyzes it through a suite of structured frameworks: Product Sense, Opportunity Sizing, Landscape & Competition, Where to Play, and Zero to Launch. Each lens produces a mind map of branches, provocations, and follow-up questions to deepen thinking.
+                      </p>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">2. Problem Statement</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                        <div>
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-violet-500 mb-3">The User Pain</h3>
+                          <p className="text-[15px] leading-[1.7] text-slate-600 mb-4">
+                            PM candidates and practitioners tackle complex questions without a structured way to surface every relevant angle. They default to one or two mental models and miss dimensions that interviewers and stakeholders are looking for.
+                          </p>
+                          <p className="text-[15px] leading-[1.7] text-slate-600">
+                            Generic AI tools give prose answers. Framework cheat sheets are static. Neither adapts to the specific question being asked or surfaces the connections between lenses.
+                          </p>
+                        </div>
+                        <div className="bg-[#07091A] p-5 rounded-lg border border-[#1E1535]">
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-violet-400 mb-3">The Goal</h3>
+                          <p className="text-[15px] leading-[1.7] text-slate-300">
+                            Give any PM — from first-time candidate to senior strategist — a thinking partner that refracts their question through every relevant lens simultaneously, surfacing structured insight rather than free-form prose.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">3. Target Audience & Personas</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div className="border border-slate-100 rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 font-bold">1</div>
+                            <h3 className="font-bold text-lg text-slate-900">The PM Candidate</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Primary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
+                            A PM or APM candidate in active interviews at product-forward companies. Uses Prism to stress-test their thinking on product sense, strategy, and case study prompts before the interview. <strong>Top need:</strong> structured, multi-lens coverage of any question on demand.
+                          </p>
+                        </div>
+                        <div className="border border-slate-100 rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 font-bold">2</div>
+                            <h3 className="font-bold text-lg text-slate-900">The Practicing PM</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Secondary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
+                            A mid-level or senior PM working through a real strategic challenge — a new market, a product pivot, a go-to-market question. Uses Prism to surface angles they haven't considered and pressure-test their existing thinking. <strong>Top need:</strong> depth, not breadth — the ability to go deep on a specific lens.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">4. Goals & Success Metrics (OKRs)</h2>
+                      <div className="overflow-x-auto mt-4">
+                        <table className="w-full border-collapse text-[15px]">
+                          <thead>
+                            <tr>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Objective</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Key Result</th>
+                              <th className="bg-slate-50 p-4 text-left font-mono text-[12px] uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 w-1/3">Target</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[
+                              ['Prove lens utility', 'Sessions where user analyzes ≥2 lenses', '> 40%'],
+                              ['Validate depth', 'Users who open the Elaborate panel per session', '> 35%'],
+                              ['Build return habit', 'D7 return rate', '> 25%'],
+                              ['Validate interview use case', 'Sessions using interview-prep questions', '> 30%'],
+                            ].map(([obj, kr, target], i) => (
+                              <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">{obj}</td>
+                                <td className="p-4 border-b border-slate-100 text-slate-600">{kr}</td>
+                                <td className="p-4 border-b border-slate-100 text-violet-600 font-mono font-semibold">{target}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">5. Core Features (v1.0)</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        {[
+                          { title: 'Multi-Lens Analysis Engine', desc: 'User submits a question. Prism runs parallel Groq (LLaMA 3.3 70B) calls — one per selected framework — and surfaces structured mind maps for each lens simultaneously.', status: 'Live' },
+                          { title: 'Framework Lens Suite', desc: 'Five lenses: Product Sense, Opportunity Sizing, Landscape & Competition, Where to Play, Zero to Launch. Each produces branches, provocations, and follow-up questions tailored to the query.', status: 'Live' },
+                          { title: 'Suggestion Engine', desc: 'As the user types, Prism computes which lens best matches the question (keyword + open-ended signals) and recommends it via an animated pill — 850ms debounce, staggered fly-in.', status: 'Live' },
+                          { title: 'Elaborate Modal', desc: 'Any branch node can be expanded into a deep-dive panel. On desktop: two-column layout with elaboration on the left and a contextual chat on the right for follow-up questions.', status: 'Live' },
+                          { title: 'On-Demand Lens Add', desc: 'Post-submit, users can browse unanalyzed lenses and trigger analysis for any of them without re-submitting the question. Results append without clearing existing analyses.', status: 'Live' },
+                          { title: 'Bottom Contextual Chat', desc: 'Per-lens chat thread below the mind map for follow-up questions about any specific lens output. Chat history is scoped to each framework tab.', status: 'Live' },
+                        ].map((f, i) => (
+                          <div key={i} className="border border-slate-100 rounded-xl p-6 hover:border-violet-200 transition-colors">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="font-bold text-[15px] text-slate-900">{f.title}</h3>
+                              <span className="font-mono text-[9px] px-2 py-0.5 bg-violet-50 text-violet-600 border border-violet-100 rounded-full uppercase tracking-widest">{f.status}</span>
+                            </div>
+                            <p className="text-[14px] text-slate-500 leading-relaxed">{f.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">6. Technical Architecture</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        {[
+                          { label: 'Frontend', value: 'React + TypeScript + Vite' },
+                          { label: 'AI Model', value: 'LLaMA 3.3 70B via Groq API' },
+                          { label: 'Output Format', value: 'JSON structured response' },
+                          { label: 'Hosting', value: 'GitHub Pages' },
+                          { label: 'Analytics', value: 'Firebase Firestore (visit logs)' },
+                          { label: 'Dev Mode', value: 'Hardcoded mock — no API in local' },
+                        ].map((row, i) => (
+                          <div key={i} className="bg-slate-50 rounded-lg p-4">
+                            <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 mb-1">{row.label}</div>
+                            <div className="font-bold text-[14px] text-slate-900">{row.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
