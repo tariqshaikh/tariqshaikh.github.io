@@ -65,7 +65,7 @@ export default function Portfolio() {
           {/* Identity card — stretches to match tray height */}
           <div className="flex-1 bg-white rounded-2xl p-10 flex flex-col justify-between border border-slate-200/40">
             <div className="flex justify-between items-start font-mono text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
-              <div>003+<br />Projects</div>
+              <div>004+<br />Projects</div>
               <div className="text-slate-900">Portfolio</div>
               <div>EN</div>
             </div>
@@ -192,23 +192,31 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              {/* Stealth */}
-              <div className="aspect-square bg-[#0A0A0A] rounded-xl p-5 flex flex-col justify-between border border-white/5 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_30px,rgba(255,255,255,0.008)_30px,rgba(255,255,255,0.008)_31px)] pointer-events-none" />
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold rounded-full">In Development</span>
-                  <span className="font-mono text-[9px] text-slate-600 font-bold">P.004</span>
-                </div>
+              {/* PM Prism */}
+              <div className="aspect-square bg-[#07091A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-violet-500/50 hover:shadow-[0_16px_40px_-8px_rgba(139,92,246,0.25)] relative overflow-hidden group border border-white/5">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-violet-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
-                  <div className="text-[28px] font-black text-white/80 leading-[0.85] tracking-tight mb-3" style={{ fontFamily: "'BakersLocal', serif" }}>◼ Stealth</div>
-                  <p className="text-xs text-slate-600 leading-relaxed mb-3">Something is being built. It ships when it's ready.</p>
-                  <div className="flex flex-wrap gap-1">
-                    {['AI', 'Product', 'Tools'].map(t => (
-                      <span key={t} className="font-mono text-[7px] px-1.5 py-0.5 bg-violet-500/5 text-violet-500/40 border border-violet-500/10 tracking-widest uppercase font-bold">{t}</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold rounded-full">Live Product</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.004</span>
+                  </div>
+                  <h3 className="text-[20px] leading-tight mb-1 text-white">
+                    <span className="font-serif font-bold">PM </span><span className="font-serif font-bold italic bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Prism</span>
+                  </h3>
+                  <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Product Thinking Partner</p>
+                  <div className="relative mb-3">
+                    <div className="absolute left-0 top-0 bottom-0 w-px bg-violet-500/30" />
+                    <p className="text-xs leading-relaxed text-slate-300 pl-4">Bring any PM question. Prism refracts it through every framework lens.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {['AI', 'PM Tools', 'Interview Prep'].map(tag => (
+                      <span key={tag} className="font-mono text-[7px] px-1.5 py-0.5 bg-violet-500/10 text-violet-300/80 border border-violet-500/20 tracking-widest uppercase font-bold">{tag}</span>
                     ))}
                   </div>
                 </div>
-                <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-slate-700 font-bold">Classified ◼</div>
+                <Link to="/prism" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-violet-600 to-cyan-500 text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(139,92,246,0.4)] transition-shadow">
+                  Launch <ChevronRight size={10} />
+                </Link>
               </div>
 
             </div>
@@ -233,6 +241,7 @@ export default function Portfolio() {
             { bg: 'bg-[#090E1A]', border: 'hover:border-blue-500/40', bar: 'from-blue-600 to-cyan-400', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20', label: 'P.001', titleEl: <><span className="font-serif font-bold">Homebase</span><span className="font-sans font-black text-blue-400 ml-1.5">NJ</span></>, sub: 'Product Design & Data Strategy', desc: 'I collapsed 6 browser tabs into one weighted comparison tool for real estate decisions.', tags: ['Consumer', 'Real Estate', 'Data Product'], tagCls: 'bg-blue-500/10 text-blue-300/80 border-blue-500/20', btn: 'from-blue-600 to-cyan-400', btnText: 'text-white', href: '/homebase', prd: 'prd-1', rm: 'roadmap-1' },
             { bg: 'bg-[#0B1A1F]', border: 'hover:border-cyan-500/40', bar: 'from-cyan-600 to-teal-400', badge: 'bg-teal-500/10 text-teal-400 border-teal-500/20', label: 'P.002', titleEl: <span className="font-serif font-bold italic">Waves</span>, sub: 'Destination intelligence', desc: 'Destination intelligence for dream trips. Visualizing when to go and what to see.', tags: ['Travel', 'Data Viz', 'AI'], tagCls: 'bg-cyan-500/10 text-cyan-300/80 border-cyan-500/20', btn: 'from-cyan-600 to-teal-300', btnText: 'text-white', href: '/waves', prd: 'prd-3', rm: 'roadmap-3' },
             { bg: 'bg-[#1A1C1E]', border: 'hover:border-[#C5A059]/40', bar: 'from-[#C5A059] to-[#E5C079]', badge: 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20', label: 'P.003', titleEl: <span className="font-serif font-bold italic">Orbit</span>, sub: 'Cash Flow Intelligence', desc: 'Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.', tags: ['Fintech', 'Cash Flow', 'Strategy'], tagCls: 'bg-[#C5A059]/10 text-[#D4B470] border-[#C5A059]/20', btn: 'from-[#C5A059] to-[#F0D585]', btnText: 'text-black', href: '/orbit', prd: 'prd-2', rm: 'roadmap-2' },
+            { bg: 'bg-[#07091A]', border: 'hover:border-violet-500/40', bar: 'from-violet-500 to-cyan-400', badge: 'bg-violet-500/10 text-violet-400 border-violet-500/20', label: 'P.004', titleEl: <><span className="font-serif font-bold">PM </span><span className="font-serif font-bold italic bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Prism</span></>, sub: 'Product Thinking Partner', desc: 'Bring any PM question. Prism refracts it through every framework lens.', tags: ['AI', 'PM Tools', 'Interview Prep'], tagCls: 'bg-violet-500/10 text-violet-300/80 border-violet-500/20', btn: 'from-violet-600 to-cyan-500', btnText: 'text-white', href: '/prism', prd: null, rm: null },
           ] as const).map((p, i) => (
             <div key={i} className={`${p.bg} border border-white/5 rounded-2xl p-8 flex flex-col gap-4 ${p.border} transition-all group relative overflow-hidden`}>
               <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${p.bar} opacity-0 group-hover:opacity-100 transition-opacity`} />
@@ -252,10 +261,12 @@ export default function Portfolio() {
                 <Link to={p.href} className={`inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-br ${p.btn} ${p.btnText} text-[9px] font-black uppercase tracking-[0.2em]`}>
                   Launch Application <ChevronRight size={12} />
                 </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => openModal(p.prd)} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>
-                  <button onClick={() => openModal(p.rm)} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>
-                </div>
+                {(p.prd || p.rm) && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {p.prd && <button onClick={() => openModal(p.prd!)} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">PRD</button>}
+                    {p.rm && <button onClick={() => openModal(p.rm!)} className="px-3 py-2 bg-white/5 text-[8px] text-slate-400 border border-white/10 font-bold uppercase tracking-widest hover:text-white hover:border-white/30 transition-all cursor-pointer">Roadmap</button>}
+                  </div>
+                )}
               </div>
             </div>
           ))}
