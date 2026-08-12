@@ -15,6 +15,7 @@ export default function Login() {
   const queryParams = new URLSearchParams(location.search);
   const from = queryParams.get('from') || 'orbit';
   const isHomebase = from === 'homebase';
+  const redirectAfterLogin = queryParams.get('redirect') || null;
 
   const config = {
     title: isHomebase ? 'Homebase NJ' : 'Orbit',
@@ -24,7 +25,7 @@ export default function Login() {
       : 'Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life\'s big decisions.',
     icon: isHomebase ? Globe : TrendingUp,
     color: isHomebase ? '#0471A4' : '#C5A059',
-    redirect: isHomebase ? '/homebase' : '/orbit/dashboard',
+    redirect: redirectAfterLogin ?? (isHomebase ? '/homebase' : '/orbit/dashboard'),
     features: isHomebase ? [
       'Side-by-side town comparison matrix',
       'Dynamic priority weighting engine',

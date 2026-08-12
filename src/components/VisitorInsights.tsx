@@ -24,11 +24,12 @@ export default function VisitorInsights() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user && user.email === 'TShaikh92@gmail.com') {
+      if (user && user.email?.toLowerCase() === 'tshaikh92@gmail.com') {
         setIsAdmin(true);
+      } else if (user) {
+        navigate('/'); // logged in but not admin
       } else {
-        setIsAdmin(false);
-        if (user) navigate('/'); // Not admin, redirect
+        navigate('/login?redirect=/admin/visitors'); // not logged in → send to login
       }
     });
     return () => unsubscribe();
