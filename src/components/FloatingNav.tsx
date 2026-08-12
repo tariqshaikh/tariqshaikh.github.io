@@ -5,19 +5,12 @@ import { MapPin, Waves, BarChart3, User, Mail } from 'lucide-react';
 
 function PrismIcon({ size = 22, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 36" fill="none" className={className}>
-      <defs>
-        <filter id="ng-fnav">
-          <feGaussianBlur stdDeviation="1.5" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <line x1="0" y1="16" x2="14" y2="19" stroke="currentColor" strokeWidth="1.5" opacity="0.6" filter="url(#ng-fnav)"/>
-      <polygon points="20,1 6,34 34,34" fill="rgba(160,200,255,0.08)" stroke="currentColor" strokeWidth="0.9" opacity="0.8"/>
-      <line x1="20" y1="1" x2="6" y2="34" stroke="currentColor" strokeWidth="0.7" opacity="0.4"/>
-      {([{ c:'#ff2050',y:6 },{ c:'#ff7700',y:13 },{ c:'#ffe500',y:20 },{ c:'#00e055',y:27 },{ c:'#0099ff',y:34 }] as const).map((b,i)=>(
-        <line key={i} x1="27" y1="20" x2="42" y2={b.y} stroke={b.c} strokeWidth="1.3" opacity="0.85" filter="url(#ng-fnav)"/>
-      ))}
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <polygon points="12,2 3,21 21,21"/>
+      <line x1="0" y1="10" x2="7.5" y2="12"/>
+      <line x1="16.5" y1="10" x2="24" y2="5"/>
+      <line x1="16.5" y1="12" x2="24" y2="12"/>
+      <line x1="16.5" y1="14" x2="24" y2="19"/>
     </svg>
   );
 }
