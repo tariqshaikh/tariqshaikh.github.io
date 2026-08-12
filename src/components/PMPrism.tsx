@@ -1373,7 +1373,7 @@ export default function PMPrism() {
 
         {/* Post-submit: prominent question display with gradient glow */}
         {submitted && (
-          <div className="relative z-10 max-w-3xl mx-auto px-6">
+          <div className="relative z-10 max-w-3xl mx-auto px-6 space-y-2">
             {/* Gradient border wrapper */}
             <div className="relative rounded-2xl p-px" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.7) 0%, rgba(6,182,212,0.5) 100%)', boxShadow: '0 0 28px rgba(139,92,246,0.3), 0 0 60px rgba(6,182,212,0.12)' }}>
               <div className="relative flex items-center rounded-2xl px-5 py-3.5" style={{ backgroundColor: 'rgba(7,9,26,0.92)' }}>
@@ -1387,6 +1387,8 @@ export default function PMPrism() {
                 </button>
               </div>
             </div>
+            {/* Lens info — collapsed by default, always accessible */}
+            <LensCard frameworkId={activeTab}/>
           </div>
         )}
       </div>
