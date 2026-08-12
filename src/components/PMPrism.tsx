@@ -71,10 +71,10 @@ const FRAMEWORKS = [
   { id: 'circles', label: 'CIRCLES' },
   { id: 'north-star', label: 'North Star' },
   { id: 'sizing', label: 'Opportunity Sizing' },
-  { id: 'competitive', label: 'Competitive Analysis' },
-  { id: 'strategy', label: 'Strategy' },
+  { id: 'competitive', label: 'Landscape & Competition' },
+  { id: 'strategy', label: 'Where to Play' },
   { id: 'star', label: 'STAR Method' },
-  { id: 'case-study', label: 'Case Study' },
+  { id: 'case-study', label: 'Zero to Launch' },
 ];
 
 const BRANCH_COLORS = ['#7c3aed', '#0891b2', '#059669', '#ca8a04', '#dc2626', '#db2777', '#2563eb', '#9333ea', '#0e7490'];
@@ -197,7 +197,7 @@ const LENS_INFO: Record<string, LensInfo> = {
     color: '#dc2626',
   },
   'competitive': {
-    name: 'Competitive Analysis',
+    name: 'Landscape & Competition',
     origin: "Rooted in Michael Porter's Five Forces (1979) and Blue Ocean Strategy (Kim & Mauborgne, 2005). Applied to PM practice to map competitive positioning and find strategic whitespace.",
     when: 'When evaluating whether to enter a market, understanding why a product is losing or winning, or deciding where to differentiate.',
     bestFor: ['Market entry decisions', '"Should we build X?" questions', 'Positioning and differentiation', 'Evaluating competitive threats'],
@@ -205,7 +205,7 @@ const LENS_INFO: Record<string, LensInfo> = {
     color: '#db2777',
   },
   'strategy': {
-    name: 'Playing to Win',
+    name: 'Where to Play',
     origin: "Roger Martin and A.G. Lafley's framework from Playing to Win (2013). Strategy is a set of integrated choices: where to play and how to win. Widely used at P&G and in business school strategy courses.",
     when: 'When the question is about long-term direction, market selection, or sustainable competitive advantage.',
     bestFor: ['"What\'s your 3-year strategy for X?" questions', 'Market entry and expansion decisions', 'Executive-level roadmap framing', 'Aligning capabilities to vision'],
@@ -221,7 +221,7 @@ const LENS_INFO: Record<string, LensInfo> = {
     color: '#9333ea',
   },
   'case-study': {
-    name: 'Case Study',
+    name: 'Zero to Launch',
     origin: "Borrowed from MBA case method (Harvard Business School, 1908) and adapted for product reviews. Used by Stripe, Figma, and Linear as a take-home or live interview format to evaluate PM thinking end-to-end.",
     when: 'When given a full product scenario to analyze — a take-home case or a live "walk me through how you\'d approach X" prompt.',
     bestFor: ['Take-home PM case exercises', 'Full product review presentations', 'Senior PM and APM program interviews', '"How would you approach building X from scratch?" questions'],
