@@ -153,7 +153,7 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              {/* Waves */}
+              {/* Waves Travel Co */}
               <div className="aspect-square bg-[#0B1A1F] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_16px_40px_-8px_rgba(6,182,212,0.2)] relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
@@ -162,7 +162,7 @@ export default function Portfolio() {
                     <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
                   </div>
                   <h3 className="text-[20px] leading-tight mb-1 text-white">
-                    <span className="font-serif font-bold italic">Waves</span>
+                    <span className="font-serif font-bold italic">Waves</span><span className="font-sans font-black text-cyan-400 ml-1 text-[14px]">Travel Co</span>
                   </h3>
                   <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Destination intelligence</p>
                   <div className="relative mb-3">
@@ -183,7 +183,7 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              {/* Orbit */}
+              {/* Orbit Capital */}
               <div className="aspect-square bg-[#1A1C1E] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-[#C5A059]/50 hover:shadow-[0_16px_40px_-8px_rgba(197,160,89,0.2)] relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
@@ -192,7 +192,7 @@ export default function Portfolio() {
                     <span className="font-mono text-[9px] text-slate-500 font-bold">P.004</span>
                   </div>
                   <h3 className="text-[20px] leading-tight mb-1 text-white">
-                    <span className="font-serif font-bold italic">Orbit</span>
+                    <span className="font-serif font-bold italic">Orbit</span><span className="font-sans font-black text-[#C5A059] ml-1">Capital</span>
                   </h3>
                   <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Cash Flow Intelligence</p>
                   <div className="relative mb-3">
@@ -234,8 +234,8 @@ export default function Portfolio() {
           {([
             { bg: 'bg-[#07091A]', border: 'hover:border-violet-500/40', bar: 'from-violet-500 to-cyan-400', badge: 'bg-violet-500/10 text-violet-400 border-violet-500/20', label: 'P.001', titleEl: <><span className="font-serif font-bold">PM </span><span className="font-serif font-bold italic bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Prism</span></>, sub: 'Product Thinking Partner', desc: 'Bring any PM question. Prism refracts it through every framework lens.', tags: ['AI', 'PM Tools', 'Interview Prep'], tagCls: 'bg-violet-500/10 text-violet-300/80 border-violet-500/20', btn: 'from-violet-600 to-cyan-500', btnText: 'text-white', href: '/prism', prd: 'prd-prism', rm: null },
             { bg: 'bg-[#090E1A]', border: 'hover:border-blue-500/40', bar: 'from-blue-600 to-cyan-400', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20', label: 'P.002', titleEl: <><span className="font-serif font-bold">Homebase</span><span className="font-sans font-black text-blue-400 ml-1.5">NJ</span></>, sub: 'Product Design & Data Strategy', desc: 'I collapsed 6 browser tabs into one weighted comparison tool for real estate decisions.', tags: ['Consumer', 'Real Estate', 'Data Product'], tagCls: 'bg-blue-500/10 text-blue-300/80 border-blue-500/20', btn: 'from-blue-600 to-cyan-400', btnText: 'text-white', href: '/homebase', prd: 'prd-1', rm: null },
-            { bg: 'bg-[#0B1A1F]', border: 'hover:border-cyan-500/40', bar: 'from-cyan-600 to-teal-400', badge: 'bg-teal-500/10 text-teal-400 border-teal-500/20', label: 'P.003', titleEl: <span className="font-serif font-bold italic">Waves</span>, sub: 'Destination intelligence', desc: 'Destination intelligence for dream trips. Visualizing when to go and what to see.', tags: ['Travel', 'Data Viz', 'AI'], tagCls: 'bg-cyan-500/10 text-cyan-300/80 border-cyan-500/20', btn: 'from-cyan-600 to-teal-300', btnText: 'text-white', href: '/waves', prd: 'prd-3', rm: null },
-            { bg: 'bg-[#1A1C1E]', border: 'hover:border-[#C5A059]/40', bar: 'from-[#C5A059] to-[#E5C079]', badge: 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20', label: 'P.004', titleEl: <span className="font-serif font-bold italic">Orbit</span>, sub: 'Cash Flow Intelligence', desc: 'Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.', tags: ['Fintech', 'Cash Flow', 'Strategy'], tagCls: 'bg-[#C5A059]/10 text-[#D4B470] border-[#C5A059]/20', btn: 'from-[#C5A059] to-[#F0D585]', btnText: 'text-black', href: '/orbit', prd: 'prd-2', rm: null },
+            { bg: 'bg-[#0B1A1F]', border: 'hover:border-cyan-500/40', bar: 'from-cyan-600 to-teal-400', badge: 'bg-teal-500/10 text-teal-400 border-teal-500/20', label: 'P.003', titleEl: <><span className="font-serif font-bold italic">Waves</span><span className="font-sans font-black text-cyan-400 ml-1 text-[14px]">Travel Co</span></>, sub: 'Destination intelligence', desc: 'Destination intelligence for dream trips. Visualizing when to go and what to see.', tags: ['Travel', 'Data Viz', 'AI'], tagCls: 'bg-cyan-500/10 text-cyan-300/80 border-cyan-500/20', btn: 'from-cyan-600 to-teal-300', btnText: 'text-white', href: '/waves', prd: 'prd-3', rm: null },
+            { bg: 'bg-[#1A1C1E]', border: 'hover:border-[#C5A059]/40', bar: 'from-[#C5A059] to-[#E5C079]', badge: 'bg-[#C5A059]/10 text-[#C5A059] border-[#C5A059]/20', label: 'P.004', titleEl: <><span className="font-serif font-bold italic">Orbit</span><span className="font-sans font-black text-[#C5A059] ml-1">Capital</span></>, sub: 'Cash Flow Intelligence', desc: 'Finally understand your cash flow. Map every dollar across 12 months so irregular expenses never catch you off guard.', tags: ['Fintech', 'Cash Flow', 'Strategy'], tagCls: 'bg-[#C5A059]/10 text-[#D4B470] border-[#C5A059]/20', btn: 'from-[#C5A059] to-[#F0D585]', btnText: 'text-black', href: '/orbit', prd: 'prd-2', rm: null },
           ] as const).map((p, i) => (
             <div key={i} className={`${p.bg} border border-white/5 rounded-2xl p-8 flex flex-col gap-4 ${p.border} transition-all group relative overflow-hidden`}>
               <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${p.bar} opacity-0 group-hover:opacity-100 transition-opacity`} />
@@ -420,26 +420,25 @@ export default function Portfolio() {
             >
               {activeModal === 'prd-1' && (
                 <>
-                  <div className="px-10 py-10 border-b border-slate-200 flex items-start justify-between gap-4 bg-white sticky top-0 z-10">
+                  <div className="px-10 py-10 border-b border-[#090E1A] flex items-start justify-between gap-4 bg-[#090E1A] sticky top-0 z-10">
                     <div>
-                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 font-black mb-4">Product Requirements Document</div>
-                      <div className="text-5xl font-display leading-[0.8] tracking-tighter uppercase font-black">
-                        Homebase <span className="text-slate-300">NJ</span>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-blue-400/70 font-black mb-4">Product Requirements Document</div>
+                      <div className="text-4xl font-serif font-bold text-white italic">
+                        Homebase <span className="font-sans font-black text-blue-400 not-italic">NJ</span>
                       </div>
-                      <div className="flex gap-4 mt-8 text-[11px] font-mono font-bold uppercase tracking-widest text-slate-500">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-green-500"></span> Status: v1.0</span>
+                      <div className="flex gap-4 mt-6 text-[11px] font-mono font-bold uppercase tracking-widest text-slate-500">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> Status: v1.0</span>
                         <span>|</span>
                         <span>Q2 2026</span>
                       </div>
                     </div>
-                    <button onClick={closeModal} className="text-slate-900 text-3xl leading-none p-2 hover:bg-slate-100 transition-colors uppercase font-mono">✕</button>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-2 hover:text-white transition-colors uppercase font-mono">✕</button>
                   </div>
                   
                   <div className="p-10 bg-white">
-                    {/* Executive Summary */}
                     <div className="mb-12">
                       <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">1. Executive Summary</h2>
-                      <div className="bg-slate-50 border-l-4 border-blue-600 px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-600 italic rounded-r-md">
+                      <div className="bg-[#090E1A] border-l-4 border-blue-500 px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-300 italic rounded-r-md">
                         "Every home buyer in NJ is doing this research manually across 5–6 different tabs. This tool collapses that into one weighted comparison view, empowering data-driven real estate decisions."
                       </div>
                       <p className="text-[16px] leading-[1.8] text-slate-600">
@@ -447,22 +446,21 @@ export default function Portfolio() {
                       </p>
                     </div>
 
-                    {/* Problem Statement */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-blue-50">2. Problem Statement</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">2. Problem Statement</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                         <div>
-                          <h3 className="text-sm font-bold uppercase tracking-widest text-blue-600 mb-3">The User Pain</h3>
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-blue-400 mb-3">The User Pain</h3>
                           <p className="text-[15px] leading-[1.7] text-slate-600 mb-4">
-                            Home buying research is severely fragmented. A buyer making a $600K+ decision is forced to manually cross-reference GreatSchools, Zillow, NJ Transit schedules, WalkScore, crime databases, and NJ tax records. 
+                            Home buying research is severely fragmented. A buyer making a $600K+ decision is forced to manually cross-reference GreatSchools, Zillow, NJ Transit schedules, WalkScore, crime databases, and NJ tax records.
                           </p>
                           <p className="text-[15px] leading-[1.7] text-slate-600">
                             These data sources exist in different formats, making it impossible to weigh trade-offs effectively (e.g., "Is the higher tax rate in Westfield worth the better commute compared to Cranford?").
                           </p>
                         </div>
-                        <div className="bg-blue-50/30 p-5 rounded-lg border border-blue-100">
-                          <h3 className="text-sm font-bold uppercase tracking-widest text-blue-600 mb-3">Current Workarounds</h3>
-                          <ul className="list-disc pl-5 text-[15px] leading-[1.7] text-slate-600 space-y-2">
+                        <div className="bg-[#090E1A] p-5 rounded-lg border border-blue-500/20">
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-blue-400 mb-3">Current Workarounds</h3>
+                          <ul className="list-disc pl-5 text-[15px] leading-[1.7] text-slate-300 space-y-2">
                             <li>Massive, unmaintainable Excel spreadsheets.</li>
                             <li>Relying entirely on subjective real estate agent advice.</li>
                             <li>"Analysis paralysis" leading to delayed offers in a highly competitive market.</li>
@@ -471,13 +469,12 @@ export default function Portfolio() {
                       </div>
                     </div>
 
-                    {/* Target Audience */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-blue-50">3. Target Audience & Personas</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">3. Target Audience & Personas</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        <div className="border border-slate-100 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div className="border border-slate-100 rounded-lg p-6">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">1</div>
+                            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold">1</div>
                             <h3 className="font-bold text-lg text-slate-900">The Ex-Urbanite Family</h3>
                           </div>
                           <p className="text-[14px] text-slate-400 mb-3 font-mono">Primary Persona</p>
@@ -485,9 +482,9 @@ export default function Portfolio() {
                             Moving from NYC/Hoboken to the suburbs for more space. <strong>Top priorities:</strong> Commute time to Penn Station, school ratings, and maintaining a walkable downtown lifestyle.
                           </p>
                         </div>
-                        <div className="border border-slate-100 rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <div className="border border-slate-100 rounded-lg p-6">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">2</div>
+                            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold">2</div>
                             <h3 className="font-bold text-lg text-slate-900">The Value Optimizer</h3>
                           </div>
                           <p className="text-[14px] text-slate-400 mb-3 font-mono">Secondary Persona</p>
@@ -498,9 +495,8 @@ export default function Portfolio() {
                       </div>
                     </div>
 
-                    {/* Goals & Success Metrics */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-blue-50">4. Goals & Success Metrics (OKRs)</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">4. Goals & Success Metrics (OKRs)</h2>
                       <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-[15px] mt-4">
                           <thead>
@@ -514,70 +510,48 @@ export default function Portfolio() {
                             <tr className="hover:bg-slate-50 transition-colors">
                               <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Drive deep user engagement</td>
                               <td className="p-4 border-b border-slate-100 text-slate-600">Sessions with 3+ towns compared</td>
-                              <td className="p-4 border-b border-slate-100 text-green-600 font-mono font-semibold">&gt; 65%</td>
+                              <td className="p-4 border-b border-slate-100 text-blue-400 font-mono font-semibold">&gt; 65%</td>
                             </tr>
                             <tr className="hover:bg-slate-50 transition-colors">
                               <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Validate dynamic weighting feature</td>
                               <td className="p-4 border-b border-slate-100 text-slate-600">Sessions where default weights are modified</td>
-                              <td className="p-4 border-b border-slate-100 text-green-600 font-mono font-semibold">&gt; 40%</td>
+                              <td className="p-4 border-b border-slate-100 text-blue-400 font-mono font-semibold">&gt; 40%</td>
                             </tr>
                             <tr className="hover:bg-slate-50 transition-colors">
                               <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Establish tool utility</td>
                               <td className="p-4 border-b border-slate-100 text-slate-600">Qualitative feedback (user interviews)</td>
-                              <td className="p-4 border-b border-slate-100 text-green-600 font-mono font-semibold">4/5 report narrowed choices</td>
+                              <td className="p-4 border-b border-slate-100 text-blue-400 font-mono font-semibold">4/5 report narrowed choices</td>
                             </tr>
                             <tr className="hover:bg-slate-50 transition-colors">
                               <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Build habit/retention</td>
                               <td className="p-4 border-b border-slate-100 text-slate-600">D7 Retention Rate</td>
-                              <td className="p-4 border-b border-slate-100 text-green-600 font-mono font-semibold">&gt; 25%</td>
+                              <td className="p-4 border-b border-slate-100 text-blue-400 font-mono font-semibold">&gt; 25%</td>
                             </tr>
                           </tbody>
                         </table>
                       </div>
                     </div>
 
-                    {/* Core Features & Requirements */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-blue-50">5. Core Features & Requirements</h2>
-                      
-                      <div className="space-y-6 mt-6">
-                        <div className="border border-slate-100 rounded-lg overflow-hidden">
-                          <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-3">
-                            <span className="bg-blue-600 text-white text-[11px] font-bold px-2 py-1 rounded uppercase tracking-wider">P0</span>
-                            <h3 className="font-bold text-slate-900">Dynamic Priority Weighting</h3>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">5. Core Features & Requirements</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        {[
+                          { n: '01.', t: 'Dynamic Priority Weighting', d: 'Rank 7 categories (Schools, Commute, Safety, etc.) by importance. Changing a weight instantly recalculates the Match Score for all selected towns.' },
+                          { n: '02.', t: 'Side-by-Side Comparison Matrix', d: 'Compare up to 5 towns simultaneously with color-coded heatmaps. Best-in-class metrics highlighted green; worst in red/orange. Horizontally scrollable on mobile.' },
+                          { n: '03.', t: '"Perfect Match" Algorithm', d: 'A proprietary scoring system (0–100) that normalizes disparate data types (minutes, dollars, 1–10 ratings) and applies the user\'s custom weights to surface the #1 recommendation.' },
+                        ].map((f, i) => (
+                          <div key={i} className="border border-slate-100 rounded-xl p-6 hover:border-blue-400/30 transition-colors">
+                            <h3 className="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
+                              <span className="text-blue-400 font-mono text-sm">{f.n}</span> {f.t}
+                            </h3>
+                            <p className="text-[15px] text-slate-500 leading-relaxed">{f.d}</p>
                           </div>
-                          <div className="p-5">
-                            <p className="text-[15px] text-slate-600 mb-3">Users must be able to rank 7 distinct categories (Schools, Commute, Safety, etc.) by importance. The UI should support drag-and-drop or simple click-to-rank interactions.</p>
-                            <p className="text-[14px] text-slate-400 italic">Acceptance Criteria: Changing a weight must instantly recalculate the "Match Score" for all selected towns without a page reload.</p>
-                          </div>
-                        </div>
-
-                        <div className="border border-slate-100 rounded-lg overflow-hidden">
-                          <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-3">
-                            <span className="bg-blue-600 text-white text-[11px] font-bold px-2 py-1 rounded uppercase tracking-wider">P0</span>
-                            <h3 className="font-bold text-slate-900">Side-by-Side Town Comparison Matrix</h3>
-                          </div>
-                          <div className="p-5">
-                            <p className="text-[15px] text-slate-600 mb-3">A responsive data grid allowing users to compare up to 5 towns simultaneously. Must include visual indicators (heatmaps or color coding) to show relative performance in each category.</p>
-                            <p className="text-[14px] text-slate-400 italic">Acceptance Criteria: Grid must be horizontally scrollable on mobile. Best-in-class metrics should be highlighted in green; worst in red/orange.</p>
-                          </div>
-                        </div>
-
-                        <div className="border border-slate-100 rounded-lg overflow-hidden">
-                          <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex items-center gap-3">
-                            <span className="bg-slate-400 text-white text-[11px] font-bold px-2 py-1 rounded uppercase tracking-wider">P1</span>
-                            <h3 className="font-bold text-slate-900">"Perfect Match" Algorithm</h3>
-                          </div>
-                          <div className="p-5">
-                            <p className="text-[15px] text-slate-600 mb-3">A proprietary scoring system (0-100) that normalizes disparate data types (e.g., minutes vs. dollars vs. 1-10 ratings) and applies the user's custom weights to recommend the #1 town.</p>
-                          </div>
-                        </div>
+                        ))}
                       </div>
                     </div>
 
-                    {/* Data Sources */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-blue-50">6. Data Architecture & Sources</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">6. Data Architecture & Sources</h2>
                       <div className="bg-white border border-slate-100 rounded-lg overflow-hidden mt-4">
                         <table className="w-full text-left border-collapse">
                           <thead>
@@ -606,9 +580,8 @@ export default function Portfolio() {
                       </div>
                     </div>
 
-                    {/* Out of Scope */}
                     <div className="mb-8">
-                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-blue-50">7. Out of Scope (v1.0)</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">7. Out of Scope (v1.0)</h2>
                       <ul className="list-none space-y-3 mt-4">
                         <li className="flex items-start gap-3">
                           <span className="text-red-700 font-bold mt-0.5">✕</span>
@@ -631,87 +604,81 @@ export default function Portfolio() {
               )}
               {activeModal === 'prd-2' && (
                 <>
-                  <div className="px-10 py-8 border-b border-slate-700 flex items-start justify-between gap-4 bg-slate-900 sticky top-0 z-10">
+                  <div className="px-10 py-10 border-b border-[#1A1C1E] flex items-start justify-between gap-4 bg-[#1A1C1E] sticky top-0 z-10">
                     <div>
-                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#C5A059] mb-2">Product Requirements Document</div>
-                      <div className="text-4xl leading-none">
-                        <span className="font-serif font-bold text-white italic">Orbit</span>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#C5A059]/70 font-black mb-4">Product Requirements Document</div>
+                      <div className="text-4xl font-serif font-bold text-white italic">
+                        Orbit <span className="font-sans font-black text-[#C5A059] not-italic">Capital</span>
                       </div>
-                      <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
+                      <div className="flex gap-4 mt-6 text-[11px] font-mono font-bold uppercase tracking-widest text-slate-500">
                         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> Status: Live</span>
                         <span>|</span>
-                        <span>Author: TShaikh92</span>
-                        <span>|</span>
-                        <span>Target: Q2 2026</span>
+                        <span>Q2 2026</span>
                       </div>
                     </div>
-                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-white transition-colors">✕</button>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-2 hover:text-white transition-colors uppercase font-mono">✕</button>
                   </div>
                   
                   <div className="p-10 bg-white">
-                    {/* Executive Summary */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-[#C5A059]/20">1. Executive Summary</h2>
-                      <div className="bg-slate-900 border-l-4 border-[#C5A059] px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-300 italic rounded-r-md">
-                        "Project your financial trajectory based on real inflow and outflow. Orbit helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus."
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">1. Executive Summary</h2>
+                      <div className="bg-[#1A1C1E] border-l-4 border-[#C5A059] px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-300 italic rounded-r-md">
+                        "Project your financial trajectory based on real inflow and outflow. Orbit Capital helps you visualize the impact of life's big decisions—from daycare and new cars to long-term investments—by mapping your annual surplus."
                       </div>
                       <p className="text-[16px] leading-[1.8] text-slate-600">
-                        Orbit is a cash flow intelligence tool designed to help users manage irregular, non-monthly expenses (car insurance, annual fees, taxes). By visualizing the "Orbit" of these expenses, the app provides a clear 12-month trajectory, helping users build sinking funds and avoid financial surprises.
+                        Orbit Capital is a cash flow intelligence tool designed to help users manage irregular, non-monthly expenses (car insurance, annual fees, taxes). By visualizing the "Orbit" of these expenses, the app provides a clear 12-month trajectory, helping users build sinking funds and avoid financial surprises.
                       </p>
                     </div>
 
-                    {/* Problem Statement */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">2. Problem Statement</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">2. Problem Statement</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                         <div>
                           <h3 className="text-sm font-bold uppercase tracking-widest text-[#C5A059] mb-3">The User Pain</h3>
-                          <p className="text-[15px] leading-[1.7] text-[#3D4347] mb-4">
+                          <p className="text-[15px] leading-[1.7] text-slate-600 mb-4">
                             Monthly budgeting tools (like YNAB or Mint) focus on the 30-day cycle, but fail to prepare users for the "Big Hits"—those irregular expenses that orbit your life and cause stress when they land.
                           </p>
-                          <p className="text-[15px] leading-[1.7] text-[#3D4347]">
+                          <p className="text-[15px] leading-[1.7] text-slate-600">
                             Users often feel "broke" during months with insurance premiums or annual fees, even if their annual income is sufficient. They lack a tool that smooths these spikes into a predictable monthly set-aside.
                           </p>
                         </div>
-                        <div className="bg-[#1A1A1A] p-5 rounded-lg border border-[#333333]">
+                        <div className="bg-[#1A1C1E] p-5 rounded-lg border border-[#C5A059]/20">
                           <h3 className="text-sm font-bold uppercase tracking-widest text-[#C5A059] mb-3">The Goal</h3>
-                          <p className="text-[15px] leading-[1.7] text-[#D1D1D1]">
+                          <p className="text-[15px] leading-[1.7] text-slate-300">
                             To create a tool that turns "Annual Cash Flow" from a guessing game into a precise orbit. We want to move users from "Surprise Expenses" to "Strategic Sinking Funds."
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Target Audience */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">3. Target Audience & Personas</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">3. Target Audience & Personas</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                        <div className="border border-slate-100 rounded-lg p-6">
                           <div className="flex items-center gap-3 mb-3">
                             <div className="w-10 h-10 rounded-full bg-[#C5A059]/10 flex items-center justify-center text-[#C5A059] font-bold">1</div>
-                            <h3 className="font-bold text-lg text-[#1A1C1E]">The Dual-Income Household</h3>
+                            <h3 className="font-bold text-lg text-slate-900">The Dual-Income Household</h3>
                           </div>
                           <p className="text-[14px] text-slate-400 mb-3 font-mono">Primary Persona</p>
-                          <p className="text-[15px] leading-[1.6] text-[#3D4347]">
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
                             HHI $150K–$300K. They earn well but feel financially reactive. <strong>Top anxieties:</strong> car insurance renewals, property taxes, holiday spending, and daycare lump sums arriving without warning.
                           </p>
                         </div>
-                        <div className="border border-[#EEEEEF] rounded-lg p-6">
+                        <div className="border border-slate-100 rounded-lg p-6">
                           <div className="flex items-center gap-3 mb-3">
                             <div className="w-10 h-10 rounded-full bg-[#C5A059]/10 flex items-center justify-center text-[#C5A059] font-bold">2</div>
-                            <h3 className="font-bold text-lg text-[#1A1C1E]">The Self-Employed Professional</h3>
+                            <h3 className="font-bold text-lg text-slate-900">The Self-Employed Professional</h3>
                           </div>
                           <p className="text-[14px] text-slate-400 mb-3 font-mono">Secondary Persona</p>
-                          <p className="text-[15px] leading-[1.6] text-[#3D4347]">
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
                             Freelancers and consultants with variable monthly income. <strong>Top priority:</strong> Knowing exactly how much to set aside each month so irregular tax obligations and business expenses never create a cash crunch.
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    {/* OKRs */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">4. Goals & Success Metrics (OKRs)</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">4. Goals & Success Metrics (OKRs)</h2>
                       <div className="overflow-x-auto mt-4">
                         <table className="w-full border-collapse text-[15px]">
                           <thead>
@@ -747,74 +714,56 @@ export default function Portfolio() {
                       </div>
                     </div>
 
-                    {/* Competitive Landscape */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">5. Competitive Landscape</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">5. Competitive Landscape</h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                         {[
                           { name: 'YNAB', gap: 'Forces zero-based budgeting on a 30-day cycle. Has no concept of a 12-month orbit or sinking fund visualizer. High learning curve.' },
                           { name: 'Copilot / Monarch', gap: 'Beautiful transaction categorization, but purely backward-looking. Cannot project forward-looking annual cash flow or model "what if I buy a new car in October?"' },
-                          { name: 'Mint (defunct)', gap: 'Confirmed product-market fit for this segment before shutdown. Its absence is the direct market opportunity Orbit is built to fill.' },
+                          { name: 'Mint (defunct)', gap: 'Confirmed product-market fit for this segment before shutdown. Its absence is the direct market opportunity Orbit Capital is built to fill.' },
                         ].map((c, i) => (
-                          <div key={i} className="bg-[#1A1A1A] rounded-lg p-5 border border-[#333]">
+                          <div key={i} className="bg-[#1A1C1E] rounded-lg p-5 border border-[#C5A059]/20">
                             <div className="font-bold text-[#C5A059] mb-2">{c.name}</div>
                             <p className="text-[14px] text-slate-400 leading-relaxed">{c.gap}</p>
                           </div>
                         ))}
                       </div>
-                      <p className="mt-4 text-[14px] text-[#6E8A96] italic">Orbit's wedge: the only tool built around <strong className="text-slate-300">annual</strong> cash flow, not the monthly cycle.</p>
+                      <p className="mt-4 text-[14px] text-slate-400 italic">Orbit Capital's wedge: the only tool built around <strong className="text-slate-600">annual</strong> cash flow, not the monthly cycle.</p>
                     </div>
 
-                    {/* Core Features */}
                     <div className="mb-12">
-                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">6. Core Features (MVP)</h2>
-                      <div className="space-y-6 mt-6">
-                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-green-50/30">
-                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
-                            Orbit Expense Engine
-                          </h3>
-                          <p className="text-[15px] text-[#6E8A96]">A dedicated system for logging non-monthly expenses with specific month-of-impact tracking and automatic sinking fund calculations.</p>
-                        </div>
-                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-green-50/30">
-                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
-                            12-Month Cash Flow Visualizer
-                          </h3>
-                          <p className="text-[15px] text-[#6E8A96]">Interactive grid showing projected annual spend, surplus tracking, and visual "Danger Zone" identification.</p>
-                        </div>
-                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-green-50/30">
-                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#1E5C38]" />
-                            Statement Analyzer (AI)
-                          </h3>
-                          <p className="text-[15px] text-[#6E8A96]">Upload financial statements to automatically detect and categorize recurring orbiting expenses using Gemini Pro.</p>
-                        </div>
-                        <div className="border border-[#EEEEEF] rounded-lg p-6 bg-blue-50/30">
-                          <h3 className="font-bold text-[#1A1C1E] mb-2 flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-600" />
-                            Merchant Intelligence (Next)
-                          </h3>
-                          <p className="text-[15px] text-[#6E8A96]">Granular merchant-level aggregation (Trader Joe's, ShopRite) and categorical drill-downs for high-fidelity spend analysis.</p>
-                        </div>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">6. Core Features (MVP)</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        {[
+                          { n: '01.', t: 'Orbit Expense Engine', d: 'A dedicated system for logging non-monthly expenses with specific month-of-impact tracking and automatic sinking fund calculations.' },
+                          { n: '02.', t: '12-Month Cash Flow Visualizer', d: 'Interactive grid showing projected annual spend, surplus tracking, and visual "Danger Zone" identification.' },
+                          { n: '03.', t: 'Statement Analyzer (AI)', d: 'Upload financial statements to automatically detect and categorize recurring orbiting expenses using Gemini Pro.' },
+                          { n: '04.', t: 'Merchant Intelligence', d: 'Granular merchant-level aggregation (Trader Joe\'s, ShopRite) and categorical drill-downs for high-fidelity spend analysis. Next release.' },
+                        ].map((f, i) => (
+                          <div key={i} className="border border-slate-100 rounded-xl p-6 hover:border-[#C5A059]/30 transition-colors">
+                            <h3 className="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
+                              <span className="text-[#C5A059] font-mono text-sm">{f.n}</span> {f.t}
+                            </h3>
+                            <p className="text-[15px] text-slate-500 leading-relaxed">{f.d}</p>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    {/* Out of Scope */}
                     <div className="mb-8">
-                      <h2 className="font-serif text-2xl font-bold text-[#1A1C1E] mb-4 pb-2 border-b-2 border-[#C5A059]/20">7. Out of Scope (v1.0)</h2>
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">7. Out of Scope (v1.0)</h2>
                       <ul className="list-none space-y-3 mt-4">
                         <li className="flex items-start gap-3">
                           <span className="text-red-700 font-bold mt-0.5">✕</span>
-                          <span className="text-[15px] text-[#3D4347]"><strong>Bank API / Plaid Integration:</strong> v1 relies on manual entry and statement uploads. Real-time account sync is deferred to avoid auth complexity and compliance scope in MVP.</span>
+                          <span className="text-[15px] text-slate-600"><strong>Bank API / Plaid Integration:</strong> v1 relies on manual entry and statement uploads. Real-time account sync is deferred to avoid auth complexity and compliance scope in MVP.</span>
                         </li>
                         <li className="flex items-start gap-3">
                           <span className="text-red-700 font-bold mt-0.5">✕</span>
-                          <span className="text-[15px] text-[#3D4347]"><strong>Investment Portfolio Tracking:</strong> Orbit focuses on cash flow and spending, not asset growth. Brokerage account integration is a V4 feature.</span>
+                          <span className="text-[15px] text-slate-600"><strong>Investment Portfolio Tracking:</strong> Orbit Capital focuses on cash flow and spending, not asset growth. Brokerage account integration is a V4 feature.</span>
                         </li>
                         <li className="flex items-start gap-3">
                           <span className="text-red-700 font-bold mt-0.5">✕</span>
-                          <span className="text-[15px] text-[#3D4347]"><strong>Multi-User / Household Sync:</strong> Shared budgeting between partners is a compelling V2 feature but adds significant auth and state complexity. Out of scope for v1.</span>
+                          <span className="text-[15px] text-slate-600"><strong>Multi-User / Household Sync:</strong> Shared budgeting between partners is a compelling V2 feature but adds significant auth and state complexity. Out of scope for v1.</span>
                         </li>
                       </ul>
                     </div>
@@ -1010,41 +959,61 @@ export default function Portfolio() {
               )}
               {activeModal === 'prd-3' && (
                 <>
-                  <div className="px-10 py-8 border-b border-slate-200 flex items-start justify-between gap-4 bg-white sticky top-0 z-10">
+                  <div className="px-10 py-10 border-b border-[#0B1A1F] flex items-start justify-between gap-4 bg-[#0B1A1F] sticky top-0 z-10">
                     <div>
-                      <div className="font-mono text-[12px] uppercase tracking-widest text-[#137D97] mb-2">Product Requirements Document</div>
-                      <div className="text-4xl leading-none">
-                        <span className="font-serif font-bold text-slate-900 italic">Waves</span>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#137D97]/70 font-black mb-4">Product Requirements Document</div>
+                      <div className="text-4xl font-serif font-bold text-white italic">
+                        Waves <span className="font-sans font-black text-cyan-400 not-italic text-3xl">Travel Co</span>
                       </div>
-                      <div className="flex gap-4 mt-4 text-sm font-mono text-slate-400">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Status: Draft</span>
+                      <div className="flex gap-4 mt-6 text-[11px] font-mono font-bold uppercase tracking-widest text-slate-500">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> Status: Live</span>
                         <span>|</span>
-                        <span>Author: TShaikh92</span>
-                        <span>|</span>
-                        <span>Updated: April 2026</span>
+                        <span>Q2 2026</span>
                       </div>
                     </div>
-                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-1 hover:text-slate-900 transition-colors">✕</button>
+                    <button onClick={closeModal} className="text-slate-400 text-3xl leading-none p-2 hover:text-white transition-colors uppercase font-mono">✕</button>
                   </div>
-                  
-                  <div className="p-10 max-w-4xl mx-auto bg-white">
-                    <div className="prose prose-slate prose-lg max-w-none">
-                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">1. Executive Summary</h2>
-                      <p className="text-slate-600 leading-relaxed mb-8">
-                        <strong>Problem:</strong> Travelers know where they want to go, but figuring out the best time to book is a stressful, manual process of checking multiple sites and guessing price trends. Coordinating this with friends makes it exponentially harder.
-                        <br/><br/>
-                        <strong>Solution:</strong> Waves is a collaborative flight price tracker that visualizes historical pricing trends, provides AI-driven seasonality context, and allows groups to track and vote on the best travel windows together.
+
+                  <div className="p-10 bg-white">
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">1. Executive Summary</h2>
+                      <div className="bg-[#0B1A1F] border-l-4 border-[#137D97] px-6 py-5 my-5 text-[16px] leading-[1.7] text-slate-300 italic rounded-r-md">
+                        "Travelers know where they want to go, but figuring out the best time to book is a stressful, manual process. Waves Travel Co collapses trend data, AI context, and group coordination into one shared view."
+                      </div>
+                      <p className="text-[16px] leading-[1.8] text-slate-600">
+                        Waves Travel Co is a collaborative flight price intelligence platform. It visualizes historical pricing trends, provides AI-driven seasonality context, and lets groups track and vote on the best travel windows together — replacing 4 different tabs and a group chat.
                       </p>
+                    </div>
 
-                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">2. Target Audience</h2>
-                      <ul className="list-disc pl-6 text-slate-600 space-y-3 mb-8">
-                        <li><strong>The Deal Hunter:</strong> Flexible travelers who want to maximize their budget and are willing to wait for a price drop.</li>
-                        <li><strong>The Group Organizer:</strong> The person responsible for coordinating a trip for 3+ people, trying to find a date that works for everyone's budget.</li>
-                        <li><strong>The Data Nerd:</strong> Users who want to see the historical trends and understand the "why" behind pricing before booking.</li>
-                      </ul>
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">2. Target Audience & Personas</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div className="border border-slate-100 rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-[#137D97]/10 flex items-center justify-center text-[#137D97] font-bold">1</div>
+                            <h3 className="font-bold text-lg text-slate-900">The Group Organizer</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Primary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
+                            The person responsible for coordinating a trip for 3+ people — trying to find a date that works for everyone's calendar and budget. <strong>Top need:</strong> a shared view where everyone can see the same data and vote on a window without a 40-message group chat.
+                          </p>
+                        </div>
+                        <div className="border border-slate-100 rounded-lg p-6">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-[#137D97]/10 flex items-center justify-center text-[#137D97] font-bold">2</div>
+                            <h3 className="font-bold text-lg text-slate-900">The Deal Hunter</h3>
+                          </div>
+                          <p className="text-[14px] text-slate-400 mb-3 font-mono">Secondary Persona</p>
+                          <p className="text-[15px] leading-[1.6] text-slate-600">
+                            A flexible traveler willing to shift dates by a week or two to catch a price dip. <strong>Top need:</strong> trend visualization and seasonality context so they can time a booking with confidence instead of guessing.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">3. Goals & Success Metrics (OKRs)</h2>
-                      <div className="overflow-x-auto mb-8">
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">3. Goals & Success Metrics (OKRs)</h2>
+                      <div className="overflow-x-auto mt-4">
                         <table className="w-full border-collapse text-[15px]">
                           <thead>
                             <tr>
@@ -1054,63 +1023,61 @@ export default function Portfolio() {
                             </tr>
                           </thead>
                           <tbody>
-                            <tr className="hover:bg-slate-50 transition-colors">
-                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Prove core utility</td>
-                              <td className="p-4 border-b border-slate-100 text-slate-600">Sessions where a route is searched and trend chart viewed</td>
-                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 60%</td>
-                            </tr>
-                            <tr className="hover:bg-slate-50 transition-colors">
-                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Validate collaboration feature</td>
-                              <td className="p-4 border-b border-slate-100 text-slate-600">Trip Crews created per 100 users</td>
-                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 20</td>
-                            </tr>
-                            <tr className="hover:bg-slate-50 transition-colors">
-                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Drive AI engagement</td>
-                              <td className="p-4 border-b border-slate-100 text-slate-600">Seasonality insight panel opened per session</td>
-                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 45%</td>
-                            </tr>
-                            <tr className="hover:bg-slate-50 transition-colors">
-                              <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">Build retention</td>
-                              <td className="p-4 border-b border-slate-100 text-slate-600">D7 Return Rate (same route checked again)</td>
-                              <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">&gt; 35%</td>
-                            </tr>
+                            {[
+                              ['Prove core utility', 'Sessions where a route is searched and trend chart viewed', '> 60%'],
+                              ['Validate collaboration feature', 'Trip Crews created per 100 users', '> 20'],
+                              ['Drive AI engagement', 'Seasonality insight panel opened per session', '> 45%'],
+                              ['Build retention', 'D7 Return Rate (same route checked again)', '> 35%'],
+                            ].map(([obj, kr, target], i) => (
+                              <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">{obj}</td>
+                                <td className="p-4 border-b border-slate-100 text-slate-600">{kr}</td>
+                                <td className="p-4 border-b border-slate-100 text-[#137D97] font-mono font-semibold">{target}</td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
+                    </div>
 
-                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">4. Competitive Landscape</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">4. Competitive Landscape</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                         {[
                           { name: 'Google Flights', gap: 'Excellent price calendar but zero collaboration. No trend context, no AI insight, no shared group decision layer.' },
                           { name: 'Hopper', gap: 'Predicts price direction (buy/wait) but is a black box. No chart, no history, no crew coordination. Single-user only.' },
-                          { name: 'Kayak / Skyscanner', gap: 'Aggregation tools, not intelligence tools. Show current prices but provide no seasonality context or trend visualization.' },
+                          { name: 'Kayak / Skyscanner', gap: 'Aggregation tools, not intelligence tools. Show current prices but no seasonality context or trend visualization.' },
                         ].map((c, i) => (
-                          <div key={i} className="bg-slate-50 rounded-lg p-5 border border-slate-100">
+                          <div key={i} className="bg-[#0B1A1F] rounded-lg p-5 border border-[#137D97]/20">
                             <div className="font-bold text-[#137D97] mb-2">{c.name}</div>
-                            <p className="text-[14px] text-slate-500 leading-relaxed">{c.gap}</p>
+                            <p className="text-[14px] text-slate-400 leading-relaxed">{c.gap}</p>
                           </div>
                         ))}
                       </div>
-                      <p className="text-[14px] text-slate-400 italic mb-8">Waves' wedge: the only tool that combines <strong className="text-slate-600">trend visualization + AI context + group collaboration</strong> in one place.</p>
+                      <p className="mt-4 text-[14px] text-slate-400 italic">Waves Travel Co's wedge: the only tool combining <strong className="text-slate-600">trend visualization + AI context + group collaboration</strong> in one place.</p>
+                    </div>
 
-                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4">5. Core Features (MVP)</h2>
-                      <div className="space-y-6 mb-8">
-                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                          <h4 className="font-bold text-slate-900 text-xl mb-2 flex items-center gap-2"><span className="text-[#137D97]">01.</span> Price Trend Visualization</h4>
-                          <p className="text-slate-600">A 90-day interactive area chart showing historical and projected flight prices for a specific route, helping users identify the "waves" in pricing.</p>
-                        </div>
-                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                          <h4 className="font-bold text-slate-900 text-xl mb-2 flex items-center gap-2"><span className="text-[#137D97]">02.</span> AI Seasonality Insights</h4>
-                          <p className="text-slate-600">Integration with Google Gemini to provide instant context on weather, local events, and why prices might be spiking or dropping during a specific window.</p>
-                        </div>
-                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
-                          <h4 className="font-bold text-slate-900 text-xl mb-2 flex items-center gap-2"><span className="text-[#137D97]">03.</span> Trip Crew Collaboration</h4>
-                          <p className="text-slate-600">A shared workspace where invited friends can view the same price trends, set their own alerts, and vote on preferred travel dates.</p>
-                        </div>
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">5. Core Features (MVP)</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        {[
+                          { n: '01.', t: 'Price Trend Visualization', d: 'A 90-day interactive area chart showing historical and projected flight prices for a route, helping users identify the "waves" in pricing.' },
+                          { n: '02.', t: 'AI Seasonality Insights', d: 'Integration with Google Gemini to provide instant context on weather, local events, and why prices might be spiking or dropping during a specific window.' },
+                          { n: '03.', t: 'Trip Crew Collaboration', d: 'A shared workspace where invited friends can view the same price trends, set their own alerts, and vote on preferred travel dates.' },
+                        ].map((f, i) => (
+                          <div key={i} className="border border-slate-100 rounded-xl p-6 hover:border-[#137D97]/30 transition-colors">
+                            <h3 className="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
+                              <span className="text-[#137D97] font-mono text-sm">{f.n}</span> {f.t}
+                            </h3>
+                            <p className="text-[15px] text-slate-500 leading-relaxed">{f.d}</p>
+                          </div>
+                        ))}
                       </div>
+                    </div>
 
-                      <h2 className="font-serif text-3xl text-slate-900 mb-6 border-b pb-4 mt-12">6. Out of Scope (v1.0)</h2>
-                      <ul className="list-none space-y-3 mb-8">
+                    <div className="mb-8">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">6. Out of Scope (v1.0)</h2>
+                      <ul className="list-none space-y-3 mt-4">
                         <li className="flex items-start gap-3">
                           <span className="text-red-700 font-bold mt-0.5">✕</span>
                           <span className="text-[15px] text-slate-600"><strong>Live Flight Booking:</strong> v1 is a research and intelligence tool. Actual ticket purchasing is deferred to V3 via deep-link partnerships, not in-app checkout.</span>
@@ -1124,7 +1091,6 @@ export default function Portfolio() {
                           <span className="text-[15px] text-slate-600"><strong>Real-Time Price Alerts (v1):</strong> Push notifications require a backend job scheduler. v1 uses mock trend data; live alerts ship in V2 alongside the Skyscanner API integration.</span>
                         </li>
                       </ul>
-
                     </div>
                   </div>
                 </>
@@ -1553,7 +1519,7 @@ export default function Portfolio() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                         <div className="border border-slate-100 rounded-lg p-6">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 font-bold">1</div>
+                            <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400 font-bold">1</div>
                             <h3 className="font-bold text-lg text-slate-900">The PM Candidate</h3>
                           </div>
                           <p className="text-[14px] text-slate-400 mb-3 font-mono">Primary Persona</p>
@@ -1563,7 +1529,7 @@ export default function Portfolio() {
                         </div>
                         <div className="border border-slate-100 rounded-lg p-6">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center text-violet-600 font-bold">2</div>
+                            <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400 font-bold">2</div>
                             <h3 className="font-bold text-lg text-slate-900">The Practicing PM</h3>
                           </div>
                           <p className="text-[14px] text-slate-400 mb-3 font-mono">Secondary Persona</p>
@@ -1595,7 +1561,7 @@ export default function Portfolio() {
                               <tr key={i} className="hover:bg-slate-50 transition-colors">
                                 <td className="p-4 border-b border-slate-100 text-slate-900 font-medium">{obj}</td>
                                 <td className="p-4 border-b border-slate-100 text-slate-600">{kr}</td>
-                                <td className="p-4 border-b border-slate-100 text-violet-600 font-mono font-semibold">{target}</td>
+                                <td className="p-4 border-b border-slate-100 text-violet-400 font-mono font-semibold">{target}</td>
                               </tr>
                             ))}
                           </tbody>
