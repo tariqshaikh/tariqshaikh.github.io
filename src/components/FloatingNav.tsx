@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Waves, BarChart3, User, Mail } from 'lucide-react';
+import { MapPin, Waves, BarChart3, User, Mail, Sparkles } from 'lucide-react';
 
 interface NavItem {
   name: string;
@@ -10,9 +10,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  { name: 'PM Prism', href: '/prism', icon: Sparkles },
   { name: 'Homebase NJ', href: '/homebase', icon: MapPin },
-  { name: 'Waves', href: '/waves', icon: Waves },
-  { name: 'Orbit', href: '/orbit', icon: BarChart3 },
+  { name: 'Waves Travel Co', href: '/waves', icon: Waves },
+  { name: 'Orbit Capital', href: '/orbit', icon: BarChart3 },
   { name: 'About', href: '#about', icon: User },
   { name: 'Contact', href: 'mailto:tshaikh92@gmail.com', icon: Mail },
 ];

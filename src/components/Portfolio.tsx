@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, ExternalLink, ChevronRight, ChevronDown, Menu, X, Terminal, Layers, Globe, Phone, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
+import { Github, Linkedin, Mail, ExternalLink, ChevronRight, ChevronDown, Menu, X, Terminal, Layers, Globe, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import FloatingNav from './FloatingNav';
 import { auth } from '../firebase';
@@ -392,10 +392,6 @@ export default function Portfolio() {
                 <a href="mailto:tshaikh92@gmail.com" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">Email</a>
                 <a href="https://linkedin.com" target="_blank" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">LinkedIn</a>
               </div>
-            </div>
-            <div className="flex flex-col gap-6">
-              <span className="font-mono text-[10px] text-slate-500 uppercase font-bold tracking-widest">Reach</span>
-              <a href="tel:8483914393" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">848.391.4393</a>
             </div>
           </div>
         </div>
