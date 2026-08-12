@@ -1284,78 +1284,115 @@ export default function PMPrism() {
         <Link to="/" className="font-mono text-xs uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">← Portfolio</Link>
       </nav>
 
-      {/* Hero */}
-      <div className="relative z-10 text-center px-6 pt-32 pb-10">
-        <div className="flex justify-center mb-6">
-          <PrismWordmark size="hero"/>
+      {/* Hero — collapses after submit */}
+      <div
+        className="relative z-10 text-center px-6 overflow-hidden"
+        style={{
+          maxHeight: submitted ? '0px' : '420px',
+          opacity: submitted ? 0 : 1,
+          paddingTop: submitted ? '0px' : undefined,
+          paddingBottom: submitted ? '0px' : undefined,
+          transition: 'max-height 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, padding 0.5s ease',
+        }}
+      >
+        <div style={{ paddingTop: '8rem', paddingBottom: '2.5rem' }}>
+          <div className="flex justify-center mb-6">
+            <PrismWordmark size="hero"/>
+          </div>
+          <p className="text-slate-400 text-base max-w-sm mx-auto leading-relaxed mt-16">
+            Bring any product question. Prism refracts it through every framework lens.
+          </p>
         </div>
-        <p className="text-slate-400 text-base max-w-sm mx-auto leading-relaxed mt-16">
-          Bring any product question. Prism refracts it through every framework lens.
-        </p>
       </div>
 
-      {/* Framework pills — always visible, single scrollable row */}
-      <div className="relative z-10 max-w-3xl mx-auto px-6 mb-6">
-        <FrameworkPills selected={selectedFrameworks} onChange={toggleFramework}/>
-      </div>
+      {/* Controls — sticky compact bar after submit, full layout before */}
+      <div
+        className="relative z-20"
+        style={submitted ? {
+          position: 'sticky',
+          top: 0,
+          backgroundColor: 'rgba(7,9,26,0.94)',
+          backdropFilter: 'blur(18px)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          paddingTop: '10px',
+          paddingBottom: '10px',
+        } : undefined}
+      >
+        {/* Framework pills — always visible */}
+        <div className={`relative z-10 max-w-3xl mx-auto px-6 ${submitted ? 'mb-2' : 'mb-6'}`}>
+          <FrameworkPills selected={selectedFrameworks} onChange={toggleFramework}/>
+        </div>
 
-      {/* Lens card — always visible, collapsed by default */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 mb-4">
-        <LensCard frameworkId={submitted ? activeTab : selectedFrameworks[selectedFrameworks.length - 1]}/>
-      </div>
-
-      {/* Input */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 space-y-4">
-        <div className={`rounded-2xl border transition-all duration-500 ${questionLoaded ? 'border-violet-400/70 bg-violet-950/20' : input ? 'border-violet-500/30 bg-violet-950/10' : 'border-white/8 bg-white/3'}`}
-          style={questionLoaded ? { boxShadow:'0 0 20px rgba(139,92,246,0.25)' } : undefined}
-        >
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder={submitted ? 'Ask another question...' : 'What product problem are you working through?'}
-            className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden"
-            style={{
-              height: submitted ? 52 : 120,
-              transition: 'height 1.1s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-            onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
-          />
-          {(() => {
-            const suggestions = input.trim().length > 10 ? suggestFrameworks(input) : [];
-            return suggestions.length > 0 ? (
-              <div className="flex items-center gap-2 px-5 py-2 border-t border-white/5">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-slate-700 shrink-0">Suggested lens:</span>
-                {suggestions.map(fw => {
-                  const label = FRAMEWORKS.find(f => f.id === fw)?.label;
-                  return (
-                    <button key={fw} onClick={() => toggleFramework(fw)}
-                      className={`px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wide border transition-all ${
-                        selectedFrameworks.includes(fw)
-                          ? 'bg-violet-600/25 border-violet-400/60 text-violet-300'
-                          : 'bg-white/4 border-white/15 text-slate-400 hover:text-white hover:border-white/30'
-                      }`}>
-                      {label}
-                    </button>
-                  );
-                })}
+        {/* Pre-submit: lens card + full input */}
+        {!submitted && (
+          <>
+            <div className="relative z-10 max-w-2xl mx-auto px-6 mb-4">
+              <LensCard frameworkId={selectedFrameworks[selectedFrameworks.length - 1]}/>
+            </div>
+            <div className="relative z-10 max-w-2xl mx-auto px-6">
+              <div className={`rounded-2xl border transition-all duration-500 ${questionLoaded ? 'border-violet-400/70 bg-violet-950/20' : input ? 'border-violet-500/30 bg-violet-950/10' : 'border-white/8 bg-white/3'}`}
+                style={questionLoaded ? { boxShadow:'0 0 20px rgba(139,92,246,0.25)' } : undefined}
+              >
+                <textarea
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder="What product problem are you working through?"
+                  className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden"
+                  style={{ height: 120 }}
+                  onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
+                />
+                {(() => {
+                  const suggestions = input.trim().length > 10 ? suggestFrameworks(input) : [];
+                  return suggestions.length > 0 ? (
+                    <div className="flex items-center gap-2 px-5 py-2 border-t border-white/5">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-slate-700 shrink-0">Suggested lens:</span>
+                      {suggestions.map(fw => {
+                        const label = FRAMEWORKS.find(f => f.id === fw)?.label;
+                        return (
+                          <button key={fw} onClick={() => toggleFramework(fw)}
+                            className={`px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wide border transition-all ${
+                              selectedFrameworks.includes(fw)
+                                ? 'bg-violet-600/25 border-violet-400/60 text-violet-300'
+                                : 'bg-white/4 border-white/15 text-slate-400 hover:text-white hover:border-white/30'
+                            }`}>
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null;
+                })()}
+                <div className="flex items-center justify-end gap-3 px-4 pb-4 pt-2 border-t border-white/5">
+                  <span className="font-mono text-xs text-slate-600 hidden sm:block">⌘↵</span>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!input.trim() || loadingFrameworks.length > 0}
+                    className="px-5 py-2 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity"
+                  >
+                    {loadingFrameworks.length > 0 ? 'Analyzing...' : `Analyze${selectedFrameworks.length > 1 ? ` (${selectedFrameworks.length} lenses)` : ''} →`}
+                  </button>
+                </div>
               </div>
-            ) : null;
-          })()}
-          <div className="flex items-center justify-end gap-3 px-4 pb-4 pt-2 border-t border-white/5">
-            <span className="font-mono text-xs text-slate-600 hidden sm:block">⌘↵</span>
+            </div>
+          </>
+        )}
+
+        {/* Post-submit: compact question summary + new question CTA */}
+        {submitted && (
+          <div className="relative z-10 max-w-3xl mx-auto px-6 flex items-center gap-3">
+            <span className="font-mono text-[9px] uppercase tracking-widest text-slate-700 shrink-0">Q:</span>
+            <p className="flex-1 min-w-0 text-slate-400 text-xs truncate">{submittedQuestion}</p>
             <button
-              onClick={handleSubmit}
-              disabled={!input.trim() || loadingFrameworks.length > 0}
-              className="px-5 py-2 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity"
+              onClick={reset}
+              className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-slate-600 hover:text-slate-200 border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
             >
-              {loadingFrameworks.length > 0 ? 'Analyzing...' : `Analyze${selectedFrameworks.length > 1 ? ` (${selectedFrameworks.length} lenses)` : ''} →`}
+              New question ↑
             </button>
           </div>
-        </div>
-
+        )}
       </div>
 
-      {/* Question catalog — wider, only pre-submit */}
+      {/* Question catalog — pre-submit only */}
       {!submitted && (
         <div className="relative z-10 max-w-5xl mx-auto px-6 mt-4">
           <QuestionCatalog onSelect={q => { setInput(q); setQuestionLoaded(true); setTimeout(() => setQuestionLoaded(false), 900); }}/>
