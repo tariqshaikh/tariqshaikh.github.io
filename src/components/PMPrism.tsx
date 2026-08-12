@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { logVisit } from '../lib/analytics';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const DEV_MOCK = import.meta.env.DEV;
@@ -1146,6 +1147,8 @@ export default function PMPrism() {
   }
   const responseRef = useRef<HTMLDivElement>(null);
   const bottomChatEndRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => { logVisit('/prism'); }, []);
 
   React.useEffect(() => {
     bottomChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
