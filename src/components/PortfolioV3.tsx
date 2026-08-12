@@ -22,7 +22,7 @@ export default function PortfolioV3() {
           {/* Cell 1 — Identity (row-span-2) */}
           <div className="row-span-2 bg-white rounded-2xl p-10 flex flex-col justify-between border border-slate-200/60">
             <div className="flex justify-between items-start font-mono text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
-              <div>003+<br />Projects</div>
+              <div>004+<br />Projects</div>
               <div className="text-slate-900">Portfolio</div>
               <div>EN</div>
             </div>
@@ -38,16 +38,9 @@ export default function PortfolioV3() {
               <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400">Indeed · New Jersey</div>
             </div>
 
-            <div className="flex flex-col gap-6">
-              <p className="text-[13px] leading-relaxed text-slate-500 font-sans max-w-[22ch]">
+            <p className="text-[13px] leading-relaxed text-slate-500 font-sans max-w-[22ch]">
                 Bridging data, strategy, and product at scale.
               </p>
-              <div className="flex items-center gap-4">
-                <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Github size={17} /></a>
-                <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Linkedin size={17} /></a>
-                <a href="mailto:tshaikh92@gmail.com" className="text-slate-400 hover:text-slate-900 transition-colors"><Mail size={17} /></a>
-              </div>
-            </div>
           </div>
 
           {/* Cell 2 — Homebase NJ */}
@@ -99,29 +92,52 @@ export default function PortfolioV3() {
             </Link>
           </div>
 
-          {/* Cell 4 — Orbit (col-span-2) */}
-          <div className="col-span-2 bg-[#1A1C1E] rounded-2xl p-8 flex items-center gap-10 border border-white/5 hover:border-[#C5A059]/40 transition-all duration-300 group relative overflow-hidden">
+          {/* Cell 4 — Orbit */}
+          <div className="bg-[#1A1C1E] rounded-2xl p-8 flex flex-col justify-between border border-white/5 hover:border-[#C5A059]/40 transition-all duration-300 group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex-1">
-              <div className="flex items-center gap-4 mb-4">
-                <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
-                <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
-              </div>
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-[#C5A059]/10 text-[#C5A059] border border-[#C5A059]/20 font-bold rounded-full">Live Product</span>
+              <span className="font-mono text-[9px] text-slate-500 font-bold">P.003</span>
+            </div>
+            <div>
               <h3 className="text-[26px] leading-tight mb-1 text-white">
                 <span className="font-serif font-bold italic">Orbit</span>
               </h3>
               <p className="font-serif italic text-slate-500 text-[11px] mb-4 uppercase tracking-wider">Financial Simulation & Strategy</p>
-              <div className="flex flex-wrap gap-1.5">
-                {['Fintech', 'Simulation', 'Strategy'].map(t => (
-                  <span key={t} className="font-mono text-[8px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{t}</span>
-                ))}
-              </div>
+              <p className="text-[13px] leading-relaxed text-slate-400 line-clamp-2">A financial trajectory simulator designed to map annual cash flow and sinking funds — so big irregular expenses never catch you off guard.</p>
             </div>
-            <div className="flex-1">
-              <p className="text-[13px] leading-relaxed text-slate-400 mb-6">A financial trajectory simulator designed to map annual cash flow and sinking funds — so big irregular expenses never catch you off guard.</p>
-              <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(197,160,89,0.4)] transition-shadow">
-                Launch <ChevronRight size={12} />
-              </Link>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {['Fintech', 'Simulation', 'Strategy'].map(t => (
+                <span key={t} className="font-mono text-[8px] px-2 py-0.5 bg-[#C5A059]/10 text-[#D4B470] border border-[#C5A059]/20 tracking-widest uppercase font-bold">{t}</span>
+              ))}
+            </div>
+            <Link to="/orbit" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-br from-[#C5A059] to-[#F0D585] text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-none hover:shadow-[0_0_20px_rgba(197,160,89,0.4)] transition-shadow">
+              Launch <ChevronRight size={12} />
+            </Link>
+          </div>
+
+          {/* Cell 5 — Stealth App */}
+          <div className="bg-[#0A0A0A] rounded-2xl p-8 flex flex-col justify-between border border-white/5 hover:border-violet-500/30 transition-all duration-300 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-700 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_40px,rgba(255,255,255,0.008)_40px,rgba(255,255,255,0.008)_41px)] pointer-events-none" />
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold rounded-full">In Development</span>
+              <span className="font-mono text-[9px] text-slate-600 font-bold">P.004</span>
+            </div>
+            <div>
+              <h3 className="text-[26px] leading-tight mb-1 text-white/80">
+                <span className="font-serif font-bold">◼ Stealth</span>
+              </h3>
+              <p className="font-serif italic text-slate-600 text-[11px] mb-4 uppercase tracking-wider">Details redacted</p>
+              <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">Something is being built. It ships when it's ready.</p>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {['AI', 'Product', 'Tools'].map(t => (
+                <span key={t} className="font-mono text-[8px] px-2 py-0.5 bg-violet-500/5 text-violet-500/40 border border-violet-500/10 tracking-widest uppercase font-bold">{t}</span>
+              ))}
+            </div>
+            <div className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-white/10 text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] rounded-none cursor-not-allowed select-none">
+              Classified ◼
             </div>
           </div>
         </div>
@@ -132,12 +148,7 @@ export default function PortfolioV3() {
             <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-400 font-bold mb-3">Portfolio</div>
             <div className="text-[42px] font-black text-slate-900 tracking-tight leading-[0.85] mb-4" style={{ fontFamily: "'BakersLocal', serif" }}>Tariq<br />Shaikh</div>
             <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Senior Data Strategist · Indeed</div>
-            <p className="text-[13px] text-slate-500 mt-4 mb-6">Bridging data, strategy, and product at scale.</p>
-            <div className="flex gap-4">
-              <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Github size={17} /></a>
-              <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors"><Linkedin size={17} /></a>
-              <a href="mailto:tshaikh92@gmail.com" className="text-slate-400 hover:text-slate-900 transition-colors"><Mail size={17} /></a>
-            </div>
+            <p className="text-[13px] text-slate-500 mt-4">Bridging data, strategy, and product at scale.</p>
           </div>
           {[
             { bg: 'bg-[#090E1A]', accentBorder: 'hover:border-blue-500/40', bar: 'from-blue-600 to-cyan-400', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20', label: 'P.001', title: <><span className="font-serif font-bold">Homebase</span><span className="font-sans font-black text-blue-400 ml-1.5">NJ</span></>, sub: 'Product Design & Data Strategy', desc: 'I collapsed 6 browser tabs into one weighted comparison tool for real estate decisions.', tags: ['Consumer', 'Real Estate'], tagCls: 'bg-blue-500/10 text-blue-300/80 border-blue-500/20', btn: 'from-blue-600 to-cyan-400', href: '/homebase', btnColor: 'text-white' },
@@ -161,6 +172,21 @@ export default function PortfolioV3() {
               </Link>
             </div>
           ))}
+          {/* Stealth — mobile */}
+          <div className="bg-[#0A0A0A] rounded-2xl p-8 border border-white/5 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_40px,rgba(255,255,255,0.008)_40px,rgba(255,255,255,0.008)_41px)] pointer-events-none" />
+            <div className="flex items-center justify-between mb-5">
+              <span className="font-mono text-[8px] px-2.5 py-1 uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold rounded-full">In Development</span>
+              <span className="font-mono text-[9px] text-slate-600 font-bold">P.004</span>
+            </div>
+            <h3 className="text-2xl text-white/80 mb-1"><span className="font-serif font-bold">◼ Stealth</span></h3>
+            <p className="font-serif italic text-slate-600 text-[11px] mb-3 uppercase tracking-wider">Details redacted</p>
+            <p className="text-[13px] leading-relaxed text-slate-600 mb-4">Something is being built. It ships when it's ready.</p>
+            <div className="flex flex-wrap gap-1.5 mb-5">
+              {['AI', 'Product', 'Tools'].map(t => <span key={t} className="font-mono text-[8px] px-2 py-0.5 bg-violet-500/5 text-violet-500/40 border border-violet-500/10 tracking-widest uppercase font-bold">{t}</span>)}
+            </div>
+            <div className="inline-flex items-center gap-2 px-5 py-3 border border-white/10 text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] cursor-not-allowed">Classified ◼</div>
+          </div>
         </div>
       </section>
 
@@ -240,6 +266,7 @@ export default function PortfolioV3() {
               <div className="flex flex-col gap-3">
                 <a href="mailto:tshaikh92@gmail.com" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">Email</a>
                 <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">LinkedIn</a>
+                <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="font-sans text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors tracking-tight uppercase">GitHub</a>
               </div>
             </div>
             <div className="flex flex-col gap-6">
