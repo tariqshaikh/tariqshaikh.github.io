@@ -1135,6 +1135,8 @@ export default function PMPrism() {
   const [dictClosing, setDictClosing] = useState(false);
   const [questionLoaded, setQuestionLoaded] = useState(false);
   const [lensPreview, setLensPreview] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestionsComputing, setSuggestionsComputing] = useState(false);
   const [bottomChats, setBottomChats] = useState<Record<string, { role: 'user' | 'assistant'; content: string }[]>>({});
   const [bottomChatInput, setBottomChatInput] = useState('');
   const [bottomChatSending, setBottomChatSending] = useState(false);
@@ -1148,6 +1150,22 @@ export default function PMPrism() {
   React.useEffect(() => {
     bottomChatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [bottomChats, bottomChatSending]);
+
+  React.useEffect(() => {
+    const trimmed = input.trim();
+    if (trimmed.length <= 10) {
+      setSuggestions([]);
+      setSuggestionsComputing(false);
+      return;
+    }
+    setSuggestionsComputing(true);
+    setSuggestions([]);
+    const computeTimer = setTimeout(() => {
+      setSuggestionsComputing(false);
+      setSuggestions(suggestFrameworks(trimmed));
+    }, 850);
+    return () => clearTimeout(computeTimer);
+  }, [input]);
 
   async function sendBottomChat() {
     const userMsg = bottomChatInput.trim();
@@ -1360,27 +1378,37 @@ export default function PMPrism() {
                   style={{ height: 120 }}
                   onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
                 />
-                {(() => {
-                  const suggestions = input.trim().length > 10 ? suggestFrameworks(input) : [];
-                  return suggestions.length > 0 ? (
-                    <div className="flex items-center gap-2 px-5 py-2 border-t border-white/5">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-slate-700 shrink-0">Suggested lens:</span>
-                      {suggestions.map(fw => {
-                        const label = FRAMEWORKS.find(f => f.id === fw)?.label;
-                        return (
-                          <button key={fw} onClick={() => toggleFramework(fw)}
-                            className={`px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wide border transition-all ${
-                              selectedFrameworks.includes(fw)
-                                ? 'bg-violet-600/25 border-violet-400/60 text-violet-300'
-                                : 'bg-white/4 border-white/15 text-slate-400 hover:text-white hover:border-white/30'
-                            }`}>
-                            {label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : null;
-                })()}
+                {(suggestionsComputing || suggestions.length > 0) && (
+                  <div className="flex items-center gap-2 px-5 py-2.5 border-t border-white/5 min-h-[38px]">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-slate-700 shrink-0">Suggested lens:</span>
+                    {suggestionsComputing ? (
+                      <div className="flex items-center gap-1.5">
+                        {[0,1,2].map(i => (
+                          <div key={i} className="w-1 h-1 rounded-full bg-violet-500/60"
+                            style={{ animation: 'suggest-dot 1s ease-in-out infinite', animationDelay: `${i * 0.18}s` }}/>
+                        ))}
+                        <span className="font-mono text-[10px] text-slate-700 ml-1" style={{ animation: 'suggest-dot 1s ease-in-out infinite' }}>computing…</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {suggestions.map((fw, i) => {
+                          const label = FRAMEWORKS.find(f => f.id === fw)?.label;
+                          return (
+                            <button key={fw} onClick={() => toggleFramework(fw)}
+                              className={`px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wide border transition-all ${
+                                selectedFrameworks.includes(fw)
+                                  ? 'bg-violet-600/25 border-violet-400/60 text-violet-300'
+                                  : 'bg-white/4 border-white/15 text-slate-400 hover:text-white hover:border-white/30'
+                              }`}
+                              style={{ animation: 'suggest-in 0.4s cubic-bezier(0.16,1,0.3,1) both', animationDelay: `${i * 90}ms` }}>
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center justify-end gap-3 px-4 pb-4 pt-2 border-t border-white/5">
                   <span className="font-mono text-xs text-slate-600 hidden sm:block">⌘↵</span>
                   <button
@@ -1672,6 +1700,8 @@ export default function PMPrism() {
         @keyframes dict-panel-in  { from { opacity: 0; transform: scale(0.95) translateX(-8px); } to { opacity: 1; transform: scale(1) translateX(0); } }
         @keyframes dict-panel-out { from { opacity: 1; transform: scale(1) translateX(0); } to { opacity: 0; transform: scale(0.95) translateX(-8px); } }
         @keyframes q-flash { 0%,100% { background-color: transparent; } 40% { background-color: rgba(139,92,246,0.2); } }
+        @keyframes suggest-dot { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes suggest-in { from { opacity: 0; transform: translateY(5px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
