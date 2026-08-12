@@ -666,20 +666,28 @@ function PrismWordmark({ size = 'hero' }: { size?: 'hero' | 'nav' }) {
 }
 
 // ─── Framework pills (always visible) ────────────────────────────────────────
-function FrameworkPills({ selected, onChange }: { selected: string[]; onChange: (id: string) => void }) {
+function FrameworkPills({ selected, active, onChange }: { selected: string[]; active?: string; onChange: (id: string) => void }) {
   return (
     <div className="flex flex-wrap justify-center gap-2">
       {FRAMEWORKS.map(f => {
         const color = FRAMEWORK_COLORS[f.id] || '#8b5cf6';
         const isSelected = selected.includes(f.id);
+        const isActive = active === f.id;
         return (
           <button
             key={f.id}
             onClick={() => onChange(f.id)}
             className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 ${
-              isSelected ? 'scale-105' : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+              isSelected && !isActive ? 'scale-100 opacity-60' :
+              isSelected || isActive ? 'scale-105' :
+              'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
             }`}
-            style={isSelected ? { backgroundColor:`${color}22`, borderColor:`${color}70`, color } : undefined}
+            style={isSelected || isActive ? {
+              backgroundColor: `${color}${isActive ? '30' : '15'}`,
+              borderColor: `${color}${isActive ? '90' : '45'}`,
+              color,
+              opacity: isActive ? 1 : undefined,
+            } : undefined}
           >
             {f.label}
           </button>
@@ -1126,6 +1134,7 @@ export default function PMPrism() {
   const [dictOpen, setDictOpen] = useState(false);
   const [dictClosing, setDictClosing] = useState(false);
   const [questionLoaded, setQuestionLoaded] = useState(false);
+  const [lensPreview, setLensPreview] = useState<string | null>(null);
   const [bottomChats, setBottomChats] = useState<Record<string, { role: 'user' | 'assistant'; content: string }[]>>({});
   const [bottomChatInput, setBottomChatInput] = useState('');
   const [bottomChatSending, setBottomChatSending] = useState(false);
@@ -1184,8 +1193,8 @@ export default function PMPrism() {
     }
   }
 
-  async function runAnalysis(question: string, frameworkIds: string[]) {
-    setMindMaps({});
+  async function runAnalysis(question: string, frameworkIds: string[], clearExisting = true) {
+    if (clearExisting) setMindMaps({});
     setError('');
     setLoadingFrameworks([...frameworkIds]);
 
@@ -1239,6 +1248,7 @@ export default function PMPrism() {
     setSubmittedFrameworks(fws);
     setActiveTab(fws[0]);
     setBottomChats({});
+    setLensPreview(null);
     setTimeout(() => responseRef.current?.scrollIntoView({ behavior:'smooth', block:'start' }), 150);
     runAnalysis(input, fws);
   }
@@ -1259,6 +1269,7 @@ export default function PMPrism() {
     setError('');
     setDictOpen(false);
     setBottomChats({});
+    setLensPreview(null);
     window.scrollTo({ top:0, behavior:'smooth' });
   }
 
@@ -1314,7 +1325,18 @@ export default function PMPrism() {
       >
         {/* Framework pills — always visible */}
         <div className={`relative z-10 max-w-3xl mx-auto px-6 ${submitted ? 'mb-2' : 'mb-6'}`}>
-          <FrameworkPills selected={selectedFrameworks} onChange={toggleFramework}/>
+          <FrameworkPills
+            selected={submitted ? submittedFrameworks : selectedFrameworks}
+            active={submitted ? (lensPreview ?? activeTab) : undefined}
+            onChange={fw => {
+              if (submitted) {
+                setLensPreview(fw);
+                if (submittedFrameworks.includes(fw)) setActiveTab(fw);
+              } else {
+                toggleFramework(fw);
+              }
+            }}
+          />
         </div>
 
         {/* Pre-submit: lens card + full input */}
@@ -1329,7 +1351,10 @@ export default function PMPrism() {
               >
                 <textarea
                   value={input}
-                  onChange={e => setInput(e.target.value)}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setInput(v.length === 1 ? v.toUpperCase() : v);
+                  }}
                   placeholder="What product problem are you working through?"
                   className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden"
                   style={{ height: 120 }}
@@ -1374,6 +1399,35 @@ export default function PMPrism() {
         {/* Post-submit: prominent question display with gradient glow */}
         {submitted && (
           <div className="relative z-10 max-w-3xl mx-auto px-6 space-y-2">
+            {/* Lens info — tracks lensPreview if set, else activeTab */}
+            {(() => {
+              const displayLens = lensPreview ?? activeTab;
+              const isUnanalyzed = lensPreview && !submittedFrameworks.includes(lensPreview);
+              return (
+                <>
+                  <LensCard frameworkId={displayLens}/>
+                  {isUnanalyzed && (
+                    <button
+                      onClick={() => {
+                        const fw = lensPreview!;
+                        setSubmittedFrameworks(prev => [...prev, fw]);
+                        setActiveTab(fw);
+                        setLensPreview(null);
+                        runAnalysis(submittedQuestion, [fw], false);
+                      }}
+                      className="w-full py-2 rounded-xl font-mono text-xs uppercase tracking-wider font-bold border transition-all"
+                      style={{
+                        backgroundColor: `${FRAMEWORK_COLORS[lensPreview] ?? '#8b5cf6'}18`,
+                        borderColor: `${FRAMEWORK_COLORS[lensPreview] ?? '#8b5cf6'}50`,
+                        color: FRAMEWORK_COLORS[lensPreview] ?? '#8b5cf6',
+                      }}
+                    >
+                      Analyze with {FRAMEWORKS.find(f => f.id === lensPreview)?.label} →
+                    </button>
+                  )}
+                </>
+              );
+            })()}
             {/* Gradient border wrapper */}
             <div className="relative rounded-2xl p-px" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.7) 0%, rgba(6,182,212,0.5) 100%)', boxShadow: '0 0 28px rgba(139,92,246,0.3), 0 0 60px rgba(6,182,212,0.12)' }}>
               <div className="relative flex items-center rounded-2xl px-5 py-3.5" style={{ backgroundColor: 'rgba(7,9,26,0.92)' }}>
@@ -1387,8 +1441,6 @@ export default function PMPrism() {
                 </button>
               </div>
             </div>
-            {/* Lens info — collapsed by default, always accessible */}
-            <LensCard frameworkId={activeTab}/>
           </div>
         )}
       </div>
