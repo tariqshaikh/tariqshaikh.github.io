@@ -192,28 +192,23 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              {/* Connect */}
-              <div className="aspect-square bg-white rounded-xl p-5 flex flex-col justify-between border border-slate-200/60">
-                <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-400 font-bold">Get in touch</div>
+              {/* Stealth */}
+              <div className="aspect-square bg-[#0A0A0A] rounded-xl p-5 flex flex-col justify-between border border-white/5 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_30px,rgba(255,255,255,0.008)_30px,rgba(255,255,255,0.008)_31px)] pointer-events-none" />
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-violet-500/10 text-violet-400 border border-violet-500/20 font-bold rounded-full">In Development</span>
+                  <span className="font-mono text-[9px] text-slate-600 font-bold">P.004</span>
+                </div>
                 <div>
-                  <div className="text-[28px] font-black text-slate-900 leading-[0.85] tracking-tight mb-3" style={{ fontFamily: "'BakersLocal', serif" }}>Let's<br />Connect.</div>
-                  <p className="text-xs text-slate-400 leading-relaxed mb-4">Open to PM opportunities, product reviews, and building things that matter.</p>
-                  <div className="flex flex-col gap-2.5">
-                    <a href="mailto:tshaikh92@gmail.com" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
-                      <Mail size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
-                      <span className="font-mono text-[10px] uppercase tracking-widest font-bold">Email</span>
-                    </a>
-                    <a href="https://linkedin.com/in/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
-                      <Linkedin size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
-                      <span className="font-mono text-[10px] uppercase tracking-widest font-bold">LinkedIn</span>
-                    </a>
-                    <a href="https://github.com/tariqshaikh" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-slate-500 hover:text-slate-900 transition-colors group/link">
-                      <Github size={13} className="text-slate-400 group-hover/link:text-slate-900 transition-colors" />
-                      <span className="font-mono text-[10px] uppercase tracking-widest font-bold">GitHub</span>
-                    </a>
+                  <div className="text-[28px] font-black text-white/80 leading-[0.85] tracking-tight mb-3" style={{ fontFamily: "'BakersLocal', serif" }}>◼ Stealth</div>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-3">Something is being built. It ships when it's ready.</p>
+                  <div className="flex flex-wrap gap-1">
+                    {['AI', 'Product', 'Tools'].map(t => (
+                      <span key={t} className="font-mono text-[7px] px-1.5 py-0.5 bg-violet-500/5 text-violet-500/40 border border-violet-500/10 tracking-widest uppercase font-bold">{t}</span>
+                    ))}
                   </div>
                 </div>
-                <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-300 font-bold">NJ · 2026</div>
+                <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-slate-700 font-bold">Classified ◼</div>
               </div>
 
             </div>
