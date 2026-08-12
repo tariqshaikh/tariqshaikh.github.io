@@ -1380,8 +1380,9 @@ export default function PMPrism() {
         {/* Post-submit: compact question summary + new question CTA */}
         {submitted && (
           <div className="relative z-10 max-w-3xl mx-auto px-6 flex items-center gap-3">
-            <span className="font-mono text-[9px] uppercase tracking-widest text-slate-700 shrink-0">Q:</span>
-            <p className="flex-1 min-w-0 text-slate-400 text-xs truncate">{submittedQuestion}</p>
+            <div className="flex-1 min-w-0 px-4 py-2 rounded-xl border border-violet-500/25 bg-violet-950/20" style={{ boxShadow: '0 0 16px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+              <p className="text-white text-sm font-medium truncate" style={{ textShadow: '0 0 20px rgba(167,139,250,0.5)' }}>{submittedQuestion}</p>
+            </div>
             <button
               onClick={reset}
               className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-slate-600 hover:text-slate-200 border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
