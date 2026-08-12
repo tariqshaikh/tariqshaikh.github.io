@@ -942,12 +942,6 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
         <span className="font-mono text-xs uppercase tracking-widest text-slate-500">{schema.description.split(':')[0]}</span>
         <div className="h-px flex-1 bg-white/5"/>
       </div>
-      <div className="flex justify-center">
-        <div className="max-w-xl w-full px-6 py-5 border border-white/15 rounded-2xl text-center" style={{ backgroundColor:'rgba(255,255,255,0.04)' }}>
-          <p className="text-white text-base font-semibold leading-relaxed">{question}</p>
-        </div>
-      </div>
-      <div className="flex justify-center"><div className="w-px h-5 bg-white/10"/></div>
       <div className={`grid ${gridCols(data.branches.length)} gap-4`}>
         {data.branches.map((b,i) => {
           const color = BRANCH_COLORS[i % BRANCH_COLORS.length];
