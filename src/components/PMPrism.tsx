@@ -1231,7 +1231,7 @@ export default function PMPrism() {
     }
 
     await Promise.all(frameworkIds.map(async (frameworkId) => {
-      try {
+      const callGroq = async () => {
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: { Authorization:`Bearer ${GROQ_API_KEY}`, 'Content-Type':'application/json' },
@@ -1241,7 +1241,7 @@ export default function PMPrism() {
               { role:'system', content:buildSystemPrompt(frameworkId) },
               { role:'user', content:question },
             ],
-            max_tokens: 1600,
+            max_tokens: 2500,
             stream: false,
             response_format: { type:'json_object' },
           }),
@@ -1250,7 +1250,22 @@ export default function PMPrism() {
         if (json.error) throw new Error(json.error.message || 'API error');
         const raw = json.choices?.[0]?.message?.content;
         if (!raw) throw new Error('Empty response from model');
-        const parsed: MindMapData = JSON.parse(raw);
+        return JSON.parse(raw) as MindMapData;
+      };
+
+      try {
+        let parsed: MindMapData;
+        try {
+          parsed = await callGroq();
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : '';
+          if (msg.includes('failed_generation') || msg.includes('Failed to generate JSON')) {
+            await new Promise(r => setTimeout(r, 800));
+            parsed = await callGroq();
+          } else {
+            throw e;
+          }
+        }
         setMindMaps(prev => ({ ...prev, [frameworkId]: parsed }));
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Unknown error';
