@@ -1,9 +1,42 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 import { logVisit } from '../lib/analytics';
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const DEV_MOCK = import.meta.env.DEV;
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+
+async function geminiChat(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[],
+  opts: { maxTokens?: number; jsonMode?: boolean } = {}
+): Promise<string> {
+  const { maxTokens = 1000, jsonMode = false } = opts;
+  const contents = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }));
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents,
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
+        },
+      }),
+    }
+  );
+  const json = await res.json();
+  if (json.error) throw new Error(json.error.message || 'API error');
+  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error(`Empty response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
+  return text;
+}
+const DEV_MOCK = false;
 
 // ─── Mock answer (dev mode only — triggered on localhost when DEV_MOCK=true) ──
 const MOCK_QUESTION = 'How would you improve Spotify for podcast listeners?';
@@ -698,10 +731,61 @@ function FrameworkPills({ selected, active, onChange }: { selected: string[]; ac
   );
 }
 
+function LensDetail({ info, schema }: { info: typeof LENS_INFO[string]; schema: typeof FRAMEWORK_SCHEMAS[string] }) {
+  if (!info) return null;
+  return (
+    <div className="border-t px-5 pb-6 pt-5 space-y-5" style={{ borderColor:`${info.color}25` }}>
+      <div className="flex items-center gap-3">
+        <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center font-mono text-base font-black" style={{ backgroundColor:`${info.color}20`, color:info.color }}>
+          {info.name[0]}
+        </div>
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest mb-0.5" style={{ color:info.color }}>About this lens</div>
+          <div className="text-white font-semibold text-base">{info.name}</div>
+        </div>
+      </div>
+      <p className="text-slate-400 text-sm leading-relaxed">{info.origin}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-slate-600 mb-2">When to use</div>
+          <p className="text-slate-300 text-sm leading-relaxed">{info.when}</p>
+        </div>
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-slate-600 mb-2">Best for</div>
+          <ul className="space-y-1">
+            {info.bestFor.map((b: string, i: number) => (
+              <li key={i} className="text-slate-300 text-sm flex gap-2">
+                <span style={{ color:info.color }} className="shrink-0">·</span>{b}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="pt-1 border-t" style={{ borderColor:`${info.color}15` }}>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600">Not for: </span>
+        <span className="text-slate-500 text-sm">{info.notFor}</span>
+      </div>
+      {schema && (
+        <div className="pt-1 border-t space-y-3" style={{ borderColor:`${info.color}15` }}>
+          <div className="font-mono text-xs uppercase tracking-widest font-bold text-slate-200">What you'll get</div>
+          <div className="flex flex-wrap gap-2">
+            {schema.branches.map((b: string, i: number) => (
+              <span key={i} className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider" style={{ backgroundColor:`${info.color}20`, color:info.color, border:`1px solid ${info.color}40` }}>
+                {b}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Lens card (collapsible, always mounted) ──────────────────────────────────
 function LensCard({ frameworkId }: { frameworkId: string }) {
   const [open, setOpen] = useState(false);
   const info = LENS_INFO[frameworkId];
+  const schema = FRAMEWORK_SCHEMAS[frameworkId];
   if (!info) return null;
   return (
     <div className="rounded-2xl border overflow-hidden transition-colors duration-300" style={{ borderColor:`${info.color}25`, backgroundColor:`${info.color}08` }}>
@@ -719,13 +803,13 @@ function LensCard({ frameworkId }: { frameworkId: string }) {
       </button>
       <div
         style={{
-          maxHeight: open ? '520px' : '0px',
+          maxHeight: open ? '800px' : '0px',
           opacity: open ? 1 : 0,
           overflow: 'hidden',
-          transition: 'max-height 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.25s ease',
+          transition: 'max-height 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.25s ease',
         }}
       >
-        <div className="px-5 pb-5 space-y-4 border-t" style={{ borderColor:`${info.color}15` }}>
+        <div className="px-5 pb-6 space-y-5 border-t" style={{ borderColor:`${info.color}15` }}>
           <p className="text-slate-400 text-sm leading-relaxed pt-4">{info.origin}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -743,6 +827,18 @@ function LensCard({ frameworkId }: { frameworkId: string }) {
             <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600">Not for: </span>
             <span className="text-slate-500 text-sm">{info.notFor}</span>
           </div>
+          {schema && (
+            <div className="pt-3 border-t space-y-3" style={{ borderColor:`${info.color}15` }}>
+              <div className="font-mono text-xs uppercase tracking-widest font-bold text-slate-200">What you'll get</div>
+              <div className="flex flex-wrap gap-2">
+                {schema.branches.map((b, i) => (
+                  <span key={i} className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider" style={{ backgroundColor:`${info.color}20`, color:info.color, border:`1px solid ${info.color}40` }}>
+                    {b}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -889,21 +985,12 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
     setChatInput('');
     setElaborating(true);
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization:`Bearer ${GROQ_API_KEY}`, 'Content-Type':'application/json' },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role:'system', content:`You are Prism, a world-class PM thinking partner. The user analyzed a question using the ${schema.description.split(':')[0]} framework. Elaborate deeply on the "${branch.label}" branch. Go 3 levels deeper: expose the non-obvious, cite real examples from Figma, Stripe, Notion, Linear, Duolingo or similar, give a concrete mental model, and end with one sharp action the PM should take this week. 4-6 focused paragraphs. No generic advice.` },
-            { role:'user', content:`Original question: ${question}\n\nBranch: ${branch.label}\nInsight: ${branch.insight}\nPoints: ${branch.points.join('; ')}\n\nGo deeper.` },
-          ],
-          max_tokens: 900,
-          stream: false,
-        }),
-      });
-      const json = await res.json();
-      setElaboration(json.choices?.[0]?.message?.content || '');
+      const text = await geminiChat(
+        `You are Prism, a world-class PM thinking partner. The user analyzed a question using the ${schema.description.split(':')[0]} framework. Elaborate deeply on the "${branch.label}" branch. Go 3 levels deeper: expose the non-obvious, cite real examples from Figma, Stripe, Notion, Linear, Duolingo or similar, give a concrete mental model, and end with one sharp action the PM should take this week. 4-6 focused paragraphs. No generic advice.`,
+        [{ role: 'user', content: `Original question: ${question}\n\nBranch: ${branch.label}\nInsight: ${branch.insight}\nPoints: ${branch.points.join('; ')}\n\nGo deeper.` }],
+        { maxTokens: 900 }
+      );
+      setElaboration(text);
     } catch {
       setElaboration('Could not load elaboration. Try again.');
     } finally {
@@ -920,21 +1007,11 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
     setChatHistory(nextHistory);
     setTimeout(() => chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: 'smooth' }), 50);
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization:`Bearer ${GROQ_API_KEY}`, 'Content-Type':'application/json' },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role:'system', content:`You are Prism, a PM thinking partner. The user is doing a deep dive into the "${modal.branch.label}" branch of a ${schema.description.split(':')[0]} analysis of: "${question}". Your elaboration so far: "${elaboration.slice(0,400)}...". Answer follow-up questions sharply and concisely. No fluff.` },
-            ...nextHistory.map(m => ({ role: m.role, content: m.content })),
-          ],
-          max_tokens: 500,
-          stream: false,
-        }),
-      });
-      const json = await res.json();
-      const reply = json.choices?.[0]?.message?.content || 'No response.';
+      const reply = await geminiChat(
+        `You are Prism, a PM thinking partner. The user is doing a deep dive into the "${modal.branch.label}" branch of a ${schema.description.split(':')[0]} analysis of: "${question}". Your elaboration so far: "${elaboration.slice(0,400)}...". Answer follow-up questions sharply and concisely. No fluff.`,
+        nextHistory,
+        { maxTokens: 500 }
+      );
       setChatHistory(prev => [...prev, { role: 'assistant', content: reply }]);
       setTimeout(() => chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: 'smooth' }), 50);
     } catch {
@@ -946,31 +1023,33 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 mb-2">
         <div className="h-px flex-1 bg-white/5"/>
-        <span className="font-mono text-xs uppercase tracking-widest text-slate-500">{schema.description.split(':')[0]}</span>
+        <span className="font-mono text-xs uppercase tracking-widest text-slate-500">
+          {FRAMEWORKS.find(f => f.id === frameworkId)?.label ?? schema.description.split(':')[0]}
+        </span>
         <div className="h-px flex-1 bg-white/5"/>
       </div>
-      <div className={`grid ${gridCols(data.branches.length)} gap-4`}>
+      <div className="flex flex-wrap gap-6 justify-center">
         {data.branches.map((b,i) => {
           const color = BRANCH_COLORS[i % BRANCH_COLORS.length];
           return (
-            <div key={i} className="rounded-xl p-5 flex flex-col gap-3" style={{ backgroundColor:`${color}10`, border:`1px solid ${color}30` }}>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] font-black text-white/25">{String(i+1).padStart(2,'0')}</span>
-                <span className="font-mono text-xs font-black uppercase tracking-widest" style={{ color }}>{b.label}</span>
+            <div key={i} className="rounded-2xl p-7 flex flex-col gap-4 w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.33%-16px)]" style={{ backgroundColor:`${color}10`, border:`1px solid ${color}30` }}>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-sm font-black" style={{ color, opacity: 0.4 }}>{String(i+1).padStart(2,'0')}</span>
+                <span className="font-mono text-sm font-black uppercase tracking-widest" style={{ color }}>{b.label}</span>
               </div>
-              <p className="text-slate-200 text-sm leading-relaxed">{b.insight}</p>
-              <ul className="space-y-1.5 pt-1 border-t flex-1" style={{ borderColor:`${color}20` }}>
+              <p className="text-slate-200 text-base leading-relaxed">{b.insight}</p>
+              <ul className="space-y-2.5 pt-3 border-t flex-1" style={{ borderColor:`${color}20` }}>
                 {b.points.map((p,j)=>(
-                  <li key={j} className="text-slate-400 text-sm flex gap-2 leading-snug">
-                    <span style={{ color }} className="shrink-0 mt-0.5 font-bold">·</span><span>{p}</span>
+                  <li key={j} className="text-slate-400 text-sm flex gap-2.5 leading-relaxed">
+                    <span style={{ color }} className="shrink-0 mt-1 font-bold text-base leading-none">·</span><span>{p}</span>
                   </li>
                 ))}
               </ul>
               <button
                 onClick={() => openModal(b, color)}
-                className="mt-1 w-full py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider border transition-all duration-200 hover:opacity-90"
+                className="mt-2 w-full py-3 rounded-xl font-mono text-xs uppercase tracking-wider border transition-all duration-200 hover:opacity-90"
                 style={{ borderColor:`${color}35`, color, backgroundColor:`${color}08` }}
               >
                 Expand & Elaborate →
@@ -1130,12 +1209,15 @@ export default function PMPrism() {
   const [submittedFrameworks, setSubmittedFrameworks] = useState<string[]>(['product-sense']);
   const [loadingFrameworks, setLoadingFrameworks] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('product-sense');
+  const [pendingFrameworks, setPendingFrameworks] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [dictOpen, setDictOpen] = useState(false);
   const [dictClosing, setDictClosing] = useState(false);
   const [questionLoaded, setQuestionLoaded] = useState(false);
   const [lensPreview, setLensPreview] = useState<string | null>(null);
+  const [focusedLens, setFocusedLens] = useState<string>('product-sense');
+  const [lensesOpen, setLensesOpen] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestionsComputing, setSuggestionsComputing] = useState(false);
   const [bottomChats, setBottomChats] = useState<Record<string, { role: 'user' | 'assistant'; content: string }[]>>({});
@@ -1147,6 +1229,7 @@ export default function PMPrism() {
   }
   const responseRef = useRef<HTMLDivElement>(null);
   const bottomChatEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   React.useEffect(() => { logVisit('/prism'); }, []);
 
@@ -1156,7 +1239,7 @@ export default function PMPrism() {
 
   React.useEffect(() => {
     const trimmed = input.trim();
-    if (trimmed.length <= 10) {
+    if (trimmed.length <= 15) {
       setSuggestions([]);
       setSuggestionsComputing(false);
       return;
@@ -1192,19 +1275,7 @@ export default function PMPrism() {
       const fw = FRAMEWORKS.find(f => f.id === activeTab);
       const ctx = currentData.branches.map(b => `${b.label}: ${b.insight}\n${b.points.join('; ')}`).join('\n\n');
       const sys = `You are Prism, a sharp PM thinking partner. The user analyzed this question using the ${fw?.label ?? activeTab} framework: "${submittedQuestion}"\n\nAnalysis:\n${ctx}\n\nAnswer concisely and directly, grounded in what this specific analysis revealed. Max 3 short paragraphs. Be opinionated.`;
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'system', content: sys }, ...withUser],
-          temperature: 0.7,
-          max_tokens: 400,
-        }),
-      });
-      const json = await res.json();
-      if (json.error) throw new Error(json.error.message);
-      const reply = json.choices?.[0]?.message?.content ?? 'No response.';
+      const reply = await geminiChat(sys, withUser, { maxTokens: 400 });
       setBottomChats(c => ({ ...c, [activeTab]: [...withUser, { role: 'assistant', content: reply }] }));
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Unknown error';
@@ -1232,25 +1303,13 @@ export default function PMPrism() {
 
     await Promise.all(frameworkIds.map(async (frameworkId) => {
       const callGroq = async () => {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: { Authorization:`Bearer ${GROQ_API_KEY}`, 'Content-Type':'application/json' },
-          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              { role:'system', content:buildSystemPrompt(frameworkId) },
-              { role:'user', content:question },
-            ],
-            max_tokens: 2500,
-            stream: false,
-            response_format: { type:'json_object' },
-          }),
-        });
-        const json = await res.json();
-        if (json.error) throw new Error(json.error.message || 'API error');
-        const raw = json.choices?.[0]?.message?.content;
-        if (!raw) throw new Error('Empty response from model');
-        return JSON.parse(raw) as MindMapData;
+        const raw = await geminiChat(
+          buildSystemPrompt(frameworkId),
+          [{ role: 'user', content: question }],
+          { maxTokens: 4000, jsonMode: true }
+        );
+        const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        return JSON.parse(cleaned) as MindMapData;
       };
 
       try {
@@ -1259,12 +1318,17 @@ export default function PMPrism() {
           parsed = await callGroq();
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : '';
-          if (msg.includes('failed_generation') || msg.includes('Failed to generate JSON')) {
+          if (msg.includes('failed_generation') || msg.includes('Failed to generate JSON') || msg.includes('Empty response')) {
             await new Promise(r => setTimeout(r, 800));
             parsed = await callGroq();
           } else {
             throw e;
           }
+        }
+        // Enforce schema branch labels — LLM often substitutes its own labels
+        const schemaBranches = (FRAMEWORK_SCHEMAS[frameworkId] ?? FRAMEWORK_SCHEMAS['product-sense']).branches;
+        if (parsed.branches) {
+          parsed.branches = parsed.branches.map((b, i) => ({ ...b, label: schemaBranches[i] ?? b.label }));
         }
         setMindMaps(prev => ({ ...prev, [frameworkId]: parsed }));
       } catch (e: unknown) {
@@ -1278,8 +1342,9 @@ export default function PMPrism() {
 
   function handleSubmit() {
     if (!input.trim() || loadingFrameworks.length > 0) return;
-    const fws = [...selectedFrameworks];
+    const fws = [selectedFrameworks[0] ?? 'product-sense'];
     setSubmitted(true);
+    setLensesOpen(false);
     setSubmittedQuestion(input);
     setSubmittedFrameworks(fws);
     setActiveTab(fws[0]);
@@ -1299,8 +1364,11 @@ export default function PMPrism() {
 
   function reset() {
     setSubmitted(false);
+    setLensesOpen(true);
+    setPendingFrameworks([]);
+    setSelectedFrameworks(['product-sense']);
+    setFocusedLens('product-sense');
     setMindMaps({});
-    setInput('');
     setSubmittedQuestion('');
     setError('');
     setDictOpen(false);
@@ -1322,7 +1390,7 @@ export default function PMPrism() {
 
       <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/5">
         <PrismWordmark size="nav"/>
-        <Link to="/" className="font-mono text-xs uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors">← Portfolio</Link>
+        <Link to="/" className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-300 transition-colors"><ChevronLeft size={12}/>Portfolio</Link>
       </nav>
 
       {/* Hero — collapses after submit */}
@@ -1340,8 +1408,8 @@ export default function PMPrism() {
           <div className="flex justify-center mb-6">
             <PrismWordmark size="hero"/>
           </div>
-          <p className="text-slate-400 text-base max-w-sm mx-auto leading-relaxed mt-16">
-            Bring any product question. Prism refracts it through every framework lens.
+          <p className="text-slate-400 text-base mx-auto mt-16 whitespace-nowrap">
+            Bring any product question — Prism refracts it through every framework lens
           </p>
         </div>
       </div>
@@ -1355,148 +1423,245 @@ export default function PMPrism() {
           backgroundColor: 'rgba(7,9,26,0.94)',
           backdropFilter: 'blur(18px)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
-          paddingTop: '10px',
-          paddingBottom: '10px',
+          paddingTop: '12px',
+          paddingBottom: '12px',
         } : undefined}
       >
-        {/* Framework pills — always visible */}
-        <div className={`relative z-10 max-w-3xl mx-auto px-6 ${submitted ? 'mb-2' : 'mb-6'}`}>
-          <FrameworkPills
-            selected={submitted ? submittedFrameworks : selectedFrameworks}
-            active={submitted ? (lensPreview ?? activeTab) : undefined}
-            onChange={fw => {
-              if (submitted) {
-                setLensPreview(fw);
-                if (submittedFrameworks.includes(fw)) setActiveTab(fw);
-              } else {
-                toggleFramework(fw);
-              }
-            }}
-          />
-        </div>
-
-        {/* Pre-submit: lens card + full input */}
+        {/* PRE-SUBMIT: question box first, then PM Lenses card */}
         {!submitted && (
-          <>
-            <div className="relative z-10 max-w-2xl mx-auto px-6 mb-4">
-              <LensCard frameworkId={selectedFrameworks[selectedFrameworks.length - 1]}/>
-            </div>
-            <div className="relative z-10 max-w-2xl mx-auto px-6">
-              <div className={`rounded-2xl border transition-all duration-500 ${questionLoaded ? 'border-violet-400/70 bg-violet-950/20' : input ? 'border-violet-500/30 bg-violet-950/10' : 'border-white/8 bg-white/3'}`}
-                style={questionLoaded ? { boxShadow:'0 0 20px rgba(139,92,246,0.25)' } : undefined}
-              >
-                <textarea
-                  value={input}
-                  onChange={e => {
-                    const v = e.target.value;
-                    setInput(v.length === 1 ? v.toUpperCase() : v);
-                  }}
-                  placeholder="What product problem are you working through?"
-                  className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden"
-                  style={{ height: 120 }}
-                  onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
-                />
-                {(suggestionsComputing || suggestions.length > 0) && (
-                  <div className="flex items-center gap-2 px-5 py-2.5 border-t border-white/5 min-h-[38px]">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-slate-700 shrink-0">Suggested lens:</span>
-                    {suggestionsComputing ? (
-                      <div className="flex items-center gap-1.5">
-                        {[0,1,2].map(i => (
-                          <div key={i} className="w-1 h-1 rounded-full bg-violet-500/60"
-                            style={{ animation: 'suggest-dot 1s ease-in-out infinite', animationDelay: `${i * 0.18}s` }}/>
-                        ))}
-                        <span className="font-mono text-[10px] text-slate-700 ml-1" style={{ animation: 'suggest-dot 1s ease-in-out infinite' }}>computing…</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        {suggestions.map((fw, i) => {
-                          const label = FRAMEWORKS.find(f => f.id === fw)?.label;
-                          return (
-                            <button key={fw} onClick={() => toggleFramework(fw)}
-                              className={`px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wide border transition-all ${
-                                selectedFrameworks.includes(fw)
-                                  ? 'bg-violet-600/25 border-violet-400/60 text-violet-300'
-                                  : 'bg-white/4 border-white/15 text-slate-400 hover:text-white hover:border-white/30'
-                              }`}
-                              style={{ animation: 'suggest-in 0.4s cubic-bezier(0.16,1,0.3,1) both', animationDelay: `${i * 90}ms` }}>
-                              {label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="flex items-center justify-end gap-3 px-4 pb-4 pt-2 border-t border-white/5">
-                  <span className="font-mono text-xs text-slate-600 hidden sm:block">⌘↵</span>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!input.trim() || loadingFrameworks.length > 0}
-                    className="px-5 py-2 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity"
-                  >
-                    {loadingFrameworks.length > 0 ? 'Analyzing...' : `Analyze${selectedFrameworks.length > 1 ? ` (${selectedFrameworks.length} lenses)` : ''} →`}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Post-submit: prominent question display with gradient glow */}
-        {submitted && (
-          <div className="relative z-10 max-w-3xl mx-auto px-6 space-y-2">
-            {/* Lens info — tracks lensPreview if set, else activeTab */}
-            {(() => {
-              const displayLens = lensPreview ?? activeTab;
-              const isUnanalyzed = lensPreview && !submittedFrameworks.includes(lensPreview);
-              return (
-                <>
-                  <LensCard frameworkId={displayLens}/>
-                  {isUnanalyzed && (
-                    <button
-                      onClick={() => {
-                        const fw = lensPreview!;
-                        setSubmittedFrameworks(prev => [...prev, fw]);
-                        setActiveTab(fw);
-                        setLensPreview(null);
-                        runAnalysis(submittedQuestion, [fw], false);
-                      }}
-                      className="w-full py-2 rounded-xl font-mono text-xs uppercase tracking-wider font-bold border transition-all"
-                      style={{
-                        backgroundColor: `${FRAMEWORK_COLORS[lensPreview] ?? '#8b5cf6'}18`,
-                        borderColor: `${FRAMEWORK_COLORS[lensPreview] ?? '#8b5cf6'}50`,
-                        color: FRAMEWORK_COLORS[lensPreview] ?? '#8b5cf6',
-                      }}
+          <div className="relative z-10 max-w-7xl mx-auto px-6 pb-8">
+            {/* 1. Question box */}
+            <div className={`rounded-2xl border transition-all duration-500 mb-5 ${questionLoaded ? 'border-violet-400/70 bg-violet-950/20' : input ? 'border-violet-500/30 bg-violet-950/10' : 'border-violet-800/40 bg-violet-950/6'}`}
+              style={questionLoaded ? { boxShadow:'0 0 20px rgba(139,92,246,0.25)' } : !input ? { boxShadow:'0 0 0 1px rgba(139,92,246,0.08) inset' } : undefined}
+            >
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={e => {
+                  const v = e.target.value;
+                  setInput(v.length === 1 ? v.toUpperCase() : v);
+                }}
+                placeholder="What product problem are you working through?"
+                className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden"
+                style={{ height: 120 }}
+                onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
+              />
+              {/* Always-visible lens pills — single-select */}
+              <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-t border-white/5">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600 shrink-0">Lens:</span>
+                {FRAMEWORKS.map(f => {
+                  const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
+                  const isSelected = selectedFrameworks[0] === f.id;
+                  return (
+                    <button key={f.id} onClick={() => { setSelectedFrameworks([f.id]); setFocusedLens(f.id); }}
+                      className={`px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wide border transition-all ${
+                        isSelected ? 'scale-105' : 'bg-white/3 border-white/8 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                      }`}
+                      style={isSelected ? { backgroundColor:`${color}20`, borderColor:`${color}60`, color } : undefined}
                     >
-                      Analyze with {FRAMEWORKS.find(f => f.id === lensPreview)?.label} →
+                      {f.label}
                     </button>
+                  );
+                })}
+              </div>
+              {/* AI pick — pops up after 15 chars */}
+              {(suggestionsComputing || suggestions.length > 0) && (
+                <div className="flex items-center gap-2 px-5 py-2.5 border-t border-white/5 min-h-[34px]">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-violet-400/70 shrink-0">AI pick:</span>
+                  {suggestionsComputing ? (
+                    <div className="flex items-center gap-1.5">
+                      {[0,1,2].map(i => (
+                        <div key={i} className="w-1 h-1 rounded-full bg-violet-500/60"
+                          style={{ animation: 'suggest-dot 1s ease-in-out infinite', animationDelay: `${i * 0.18}s` }}/>
+                      ))}
+                      <span className="font-mono text-[10px] text-slate-600 ml-1" style={{ animation: 'suggest-dot 1s ease-in-out infinite' }}>thinking…</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {suggestions.map((fw, i) => {
+                        const label = FRAMEWORKS.find(f => f.id === fw)?.label;
+                        const color = FRAMEWORK_COLORS[fw] ?? '#8b5cf6';
+                        return (
+                          <button key={fw} onClick={() => { setSelectedFrameworks([fw]); setFocusedLens(fw); }}
+                            className={`px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wide border transition-all ${focusedLens === fw ? 'scale-105' : 'text-violet-300 hover:text-violet-200'}`}
+                            style={{
+                              backgroundColor: focusedLens === fw ? `${color}25` : 'rgba(139,92,246,0.1)',
+                              borderColor: focusedLens === fw ? `${color}60` : 'rgba(139,92,246,0.3)',
+                              color: focusedLens === fw ? color : undefined,
+                              animation: 'suggest-in 0.4s cubic-bezier(0.16,1,0.3,1) both',
+                              animationDelay: `${i * 90}ms`,
+                            }}>
+                            ✦ {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
-                </>
-              );
-            })()}
-            {/* Gradient border wrapper */}
-            <div className="relative rounded-2xl p-px" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.7) 0%, rgba(6,182,212,0.5) 100%)', boxShadow: '0 0 28px rgba(139,92,246,0.3), 0 0 60px rgba(6,182,212,0.12)' }}>
-              <div className="relative flex items-center rounded-2xl px-5 py-3.5" style={{ backgroundColor: 'rgba(7,9,26,0.92)' }}>
-                <p className="flex-1 min-w-0 text-white text-base font-medium text-center truncate" style={{ textShadow: '0 0 24px rgba(167,139,250,0.6)' }}>{submittedQuestion}</p>
+                </div>
+              )}
+              <div className="flex items-center justify-end gap-3 px-4 pb-4 pt-2 border-t border-white/5">
+                <span className="font-mono text-xs text-slate-600 hidden sm:block">⌘↵</span>
                 <button
-                  onClick={reset}
-                  title="New question"
-                  className="absolute right-3 shrink-0 font-mono text-[10px] uppercase tracking-wider text-slate-600 hover:text-slate-300 border border-white/8 hover:border-white/20 px-2.5 py-1 rounded-lg transition-colors"
+                  onClick={handleSubmit}
+                  disabled={!input.trim() || loadingFrameworks.length > 0}
+                  className="px-5 py-2 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity"
                 >
-                  ↺
+                  {loadingFrameworks.length > 0 ? 'Analyzing...' : 'Analyze →'}
                 </button>
               </div>
+            </div>
+
+            {/* 2. PM Lenses card */}
+            <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-4 border-b border-white/6 flex items-center gap-3 hover:bg-white/[0.02] transition-colors text-left">
+                <div className="font-mono text-xs uppercase tracking-widest text-slate-200 font-bold">PM Lenses</div>
+                <span className="text-slate-500 text-xs">— click any lens to explore it, then analyze</span>
+                <div className={`ml-auto text-slate-500 text-lg transition-transform duration-300 ${lensesOpen ? 'rotate-45' : ''}`}>+</div>
+              </button>
+              <div className={lensesOpen ? 'p-5' : 'hidden'}>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {FRAMEWORKS.map(f => {
+                      const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
+                      const isFocused = focusedLens === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          onClick={() => setFocusedLens(f.id)}
+                          className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 ${
+                            isFocused ? 'scale-105' : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                          }`}
+                          style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70`, color } : undefined}
+                        >
+                          {f.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {focusedLens && LENS_INFO[focusedLens] && (
+                    <LensDetail info={LENS_INFO[focusedLens]} schema={FRAMEWORK_SCHEMAS[focusedLens]} />
+                  )}
+                </div>
+            </div>
+          </div>
+        )}
+
+        {/* Question catalog — pre-submit only */}
+        {!submitted && (
+          <div className="relative z-10 max-w-7xl mx-auto px-6 mt-4">
+            <QuestionCatalog onSelect={q => {
+              setInput(q);
+              setQuestionLoaded(true);
+              setTimeout(() => setQuestionLoaded(false), 900);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setTimeout(() => textareaRef.current?.focus(), 100);
+            }}/>
+          </div>
+        )}
+
+        {/* POST-SUBMIT: compact question + framework tabs */}
+        {submitted && (
+          <div className="max-w-7xl mx-auto px-6">
+            {/* Compact question display */}
+            <div className="relative flex items-center rounded-xl px-5 py-2.5 mb-3" style={{ background:'linear-gradient(135deg,rgba(139,92,246,0.12),rgba(6,182,212,0.08))', border:'1px solid rgba(139,92,246,0.25)' }}>
+              <p className="flex-1 text-white text-sm font-medium text-center leading-relaxed" style={{ textShadow:'0 0 16px rgba(167,139,250,0.5)' }}>{submittedQuestion}</p>
+              <button onClick={reset} title="New question" className="absolute right-3 font-mono text-[10px] uppercase tracking-wider text-slate-600 hover:text-slate-300 border border-white/8 hover:border-white/20 px-2.5 py-1 rounded-lg transition-colors">↺</button>
+            </div>
+            {/* Framework tabs — fixed order, state changes styling only (no reflow) */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {FRAMEWORKS.map(f => {
+                const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
+                const isActive = activeTab === f.id;
+                const isAnalyzed = submittedFrameworks.includes(f.id);
+                const isLoading = loadingFrameworks.includes(f.id);
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => {
+                      if (isAnalyzed) {
+                        setActiveTab(f.id);
+                        setFocusedLens(f.id);
+                      } else {
+                        setPendingFrameworks([f.id]);
+                        setFocusedLens(f.id);
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-colors duration-200 flex items-center gap-2 ${
+                      isActive
+                        ? ''
+                        : isAnalyzed
+                          ? 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                          : pendingFrameworks[0] === f.id
+                            ? ''
+                            : 'bg-white/3 border-white/12 text-slate-500 hover:border-white/25 hover:text-slate-300'
+                    }`}
+                    style={
+                      isActive ? { backgroundColor:`${color}30`, borderColor:`${color}80`, color } :
+                      !isAnalyzed && pendingFrameworks[0] === f.id ? { backgroundColor:`${color}18`, borderColor:`${color}50`, color } :
+                      undefined
+                    }
+                  >
+                    {isLoading && <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse inline-block"/>}
+                    {!isLoading && isAnalyzed && !isActive && <span className="opacity-50 text-[9px]">✓</span>}
+                    {!isAnalyzed && !isLoading && <span className="opacity-40 text-[9px]">+</span>}
+                    {f.label}
+                  </button>
+                );
+              })}
+            </div>
+            {/* PM Lenses card — collapsed by default in post-submit */}
+            <div className="rounded-2xl border border-white/10 overflow-hidden mt-3" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors text-left">
+                <div className="font-mono text-xs uppercase tracking-widest text-slate-400 font-bold">PM Lenses</div>
+                <span className="text-slate-600 text-xs">— explore frameworks</span>
+                <div className={`ml-auto text-slate-500 text-lg transition-transform duration-300 ${lensesOpen ? 'rotate-45' : ''}`}>+</div>
+              </button>
+              <div className={lensesOpen ? 'p-5' : 'hidden'}>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {FRAMEWORKS.map(f => {
+                    const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
+                    const isFocused = focusedLens === f.id;
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={() => setFocusedLens(f.id)}
+                        className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 ${
+                          isFocused ? 'scale-105' : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                        }`}
+                        style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70`, color } : undefined}
+                      >
+                        {f.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {focusedLens && LENS_INFO[focusedLens] && (
+                  <LensDetail info={LENS_INFO[focusedLens]} schema={FRAMEWORK_SCHEMAS[focusedLens]} />
+                )}
+              </div>
+            </div>
+            <div className="flex justify-center mt-3">
+              <button
+                onClick={() => {
+                  const toRun = pendingFrameworks.length > 0 ? pendingFrameworks : focusedLens ? [focusedLens] : [];
+                  if (toRun.length === 0) return;
+                  setSubmittedFrameworks(prev => [...new Set([...prev, ...toRun])]);
+                  setActiveTab(toRun[0]);
+                  setPendingFrameworks([]);
+                  runAnalysis(submittedQuestion, toRun, false);
+                  setLensesOpen(false);
+                }}
+                disabled={(pendingFrameworks.length === 0 && !focusedLens) || loadingFrameworks.length > 0}
+                className="px-5 py-2 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity"
+              >
+                {loadingFrameworks.length > 0 ? 'Analyzing...' :
+                  pendingFrameworks[0] ? `Analyze with ${FRAMEWORKS.find(f => f.id === pendingFrameworks[0])?.label} →` :
+                  focusedLens ? `Analyze with ${FRAMEWORKS.find(f => f.id === focusedLens)?.label ?? '—'} →` : 'Select a lens'}
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Question catalog — pre-submit only */}
-      {!submitted && (
-        <div className="relative z-10 max-w-5xl mx-auto px-6 mt-4">
-          <QuestionCatalog onSelect={q => { setInput(q); setQuestionLoaded(true); setTimeout(() => setQuestionLoaded(false), 900); }}/>
-        </div>
-      )}
 
       {/* Floating catalog button + panel — post-submit */}
       {submitted && (
@@ -1553,11 +1718,13 @@ export default function PMPrism() {
                 <button onClick={closeDict} className="text-slate-600 hover:text-slate-300 text-xl leading-none transition-colors">×</button>
               </div>
               <QuestionCatalog inline onSelect={q => {
+                reset();
                 setInput(q);
                 closeDict();
                 setQuestionLoaded(true);
                 setTimeout(() => setQuestionLoaded(false), 900);
-                window.scrollTo({top:300,behavior:'smooth'});
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => textareaRef.current?.focus(), 150);
               }}/>
             </div>
           )}
@@ -1566,32 +1733,7 @@ export default function PMPrism() {
 
       {/* Output */}
       {submitted && (
-        <div className="relative z-10 max-w-5xl mx-auto px-6 mt-12 pb-28" ref={responseRef}>
-          {/* Framework tabs — only shown when multiple lenses selected */}
-          {submittedFrameworks.length > 1 && (
-            <div className="flex flex-wrap gap-2 mb-8 justify-center">
-              {submittedFrameworks.map(fw => {
-                const label = FRAMEWORKS.find(f => f.id === fw)?.label;
-                const isLoading = loadingFrameworks.includes(fw);
-                const isDone = !!mindMaps[fw];
-                return (
-                  <button
-                    key={fw}
-                    onClick={() => setActiveTab(fw)}
-                    className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 flex items-center gap-2 ${
-                      activeTab === fw
-                        ? 'bg-violet-600/25 border-violet-400/60 text-violet-300 scale-105'
-                        : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
-                    }`}
-                  >
-                    {isLoading && <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse inline-block"/>}
-                    {isDone && !isLoading && <span className="opacity-60 text-[9px]">✓</span>}
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 mt-8 pb-28" ref={responseRef}>
           {/* Loading state for the active tab */}
           {loadingFrameworks.includes(activeTab) && (
             <div className="flex flex-col items-center gap-4 py-20">
@@ -1608,7 +1750,7 @@ export default function PMPrism() {
           {error && <div className="text-center text-red-400 text-sm py-8">{error}</div>}
           {mindMaps[activeTab] && !loadingFrameworks.includes(activeTab) && (
             <>
-              <MindMap data={mindMaps[activeTab]} question={submittedQuestion} frameworkId={activeTab}/>
+              <MindMap key={activeTab} data={mindMaps[activeTab]} question={submittedQuestion} frameworkId={activeTab}/>
               {loadingFrameworks.length === 0 && (() => {
                 const data = mindMaps[activeTab];
                 if (!data) return null;
