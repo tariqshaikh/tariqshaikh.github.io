@@ -8,9 +8,9 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 async function geminiChat(
   systemPrompt: string,
   messages: { role: 'user' | 'assistant'; content: string }[],
-  opts: { maxTokens?: number; jsonMode?: boolean } = {}
+  opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {}
 ): Promise<string> {
-  const { maxTokens = 1000, jsonMode = false } = opts;
+  const { maxTokens = 1000, jsonMode = false, onRateLimit } = opts;
   const contents = messages.map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
@@ -35,8 +35,9 @@ async function geminiChat(
     const msg: string = json.error.message || 'API error';
     if (json.error.code === 429) {
       const match = msg.match(/retry in ([\d.]+)s/i);
-      const wait = match ? Math.ceil(parseFloat(match[1])) * 1000 : 15000;
-      await new Promise(r => setTimeout(r, wait));
+      const secs = match ? Math.ceil(parseFloat(match[1])) : 15;
+      onRateLimit?.(secs);
+      await new Promise(r => setTimeout(r, secs * 1000));
       return geminiChat(systemPrompt, messages, opts);
     }
     throw new Error(msg);
@@ -1220,6 +1221,7 @@ export default function PMPrism() {
   const [activeTab, setActiveTab] = useState('product-sense');
   const [pendingFrameworks, setPendingFrameworks] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [rateLimitMsg, setRateLimitMsg] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [dictOpen, setDictOpen] = useState(false);
   const [dictClosing, setDictClosing] = useState(false);
@@ -1315,8 +1317,9 @@ export default function PMPrism() {
         const raw = await geminiChat(
           buildSystemPrompt(frameworkId),
           [{ role: 'user', content: question }],
-          { maxTokens: 4000, jsonMode: true }
+          { maxTokens: 4000, jsonMode: true, onRateLimit: (secs) => setRateLimitMsg(`Rate limited — retrying in ${secs}s...`) }
         );
+        setRateLimitMsg('');
         const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
         return JSON.parse(cleaned) as MindMapData;
       };
@@ -1343,6 +1346,7 @@ export default function PMPrism() {
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Unknown error';
         setError(`Analysis failed: ${msg}. Try again or select fewer lenses.`);
+        setRateLimitMsg('');
       } finally {
         setLoadingFrameworks(prev => prev.filter(f => f !== frameworkId));
       }
@@ -1752,7 +1756,7 @@ export default function PMPrism() {
                 ))}
               </div>
               <span className="font-mono text-xs text-slate-500 uppercase tracking-wider">
-                Mapping through {FRAMEWORKS.find(f=>f.id===activeTab)?.label}...
+                {rateLimitMsg || `Mapping through ${FRAMEWORKS.find(f=>f.id===activeTab)?.label}...`}
               </span>
             </div>
           )}
