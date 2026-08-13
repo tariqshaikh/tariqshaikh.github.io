@@ -31,7 +31,16 @@ async function geminiChat(
     }
   );
   const json = await res.json();
-  if (json.error) throw new Error(json.error.message || 'API error');
+  if (json.error) {
+    const msg: string = json.error.message || 'API error';
+    if (json.error.code === 429) {
+      const match = msg.match(/retry in ([\d.]+)s/i);
+      const wait = match ? Math.ceil(parseFloat(match[1])) * 1000 : 15000;
+      await new Promise(r => setTimeout(r, wait));
+      return geminiChat(systemPrompt, messages, opts);
+    }
+    throw new Error(msg);
+  }
   const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error(`Empty response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
   return text;
