@@ -523,7 +523,7 @@ function Orbit() {
   });
 
   useEffect(() => {
-    document.title = "Annual Orbit: Cash Flow Intelligence";
+    document.title = "Orbit Capital: Cash Flow Intelligence";
     logVisit('/orbit');
   }, []);
 
@@ -1223,31 +1223,23 @@ function Orbit() {
     <div className="min-h-screen bg-[#FAF9F6] text-[#2C3338] font-sans selection:bg-[#C5A059]/30">
       {/* Header */}
       <header className="border-b border-[#E8E4D0] bg-[#FAF9F6]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-12 h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/portfolio" className="p-2 hover:bg-[#E8E4D0] rounded-xl transition-colors group">
-              <ChevronLeft size={20} className="text-[#8C8670] group-hover:text-[#2C3338]" />
+            <Link to="/" className="flex items-center gap-1.5 px-3 py-2 hover:bg-[#E8E4D0] rounded-xl transition-colors group">
+              <ChevronLeft size={16} className="text-[#8C8670] group-hover:text-[#2C3338]" />
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] group-hover:text-[#2C3338] font-bold">Portfolio</span>
             </Link>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-[#C5A059] rounded-xl flex items-center justify-center">
                 <TrendingUp size={24} className="text-[#FAF9F6]" />
               </div>
               <div>
-                <h1 className="text-2xl font-serif font-bold text-[#2C3338] italic leading-none">Annual Orbit</h1>
+                <h1 className="text-2xl font-serif font-bold text-[#2C3338] italic leading-none">Orbit <span className="font-sans font-black not-italic text-[#C5A059]">Capital</span></h1>
                 <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#C5A059] mt-1">Cash Flow Intelligence</p>
               </div>
             </div>
           </div>
           
-          <nav className="hidden md:flex items-center gap-6 mr-4">
-            {user && (
-              <>
-                <Link to="/orbit/balance-sheet" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Balance Sheet</Link>
-                <Link to="/orbit/retirement-planner" className="text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#2C3338] transition-colors">Retirement</Link>
-              </>
-            )}
-          </nav>
-
           <div className="flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-4">
@@ -1296,7 +1288,20 @@ function Orbit() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      {user && user.uid !== 'guest-user' && (
+        <div className="border-b border-[#E8E4D0] bg-[#FAF9F6]/60">
+          <div className="max-w-[1600px] mx-auto px-12 flex justify-end py-2">
+            <Link
+              to="/orbit/balance-sheet"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[11px] font-mono uppercase tracking-widest text-[#8C8670] hover:text-[#C5A059] transition-colors font-bold"
+            >
+              Networth Balance Sheet
+            </Link>
+          </div>
+        </div>
+      )}
+
+      <main className="max-w-[1600px] mx-auto px-12 py-12">
         {/* Guest Mode Banner */}
         {user?.uid === 'guest-user' && (
           <motion.div 
@@ -1364,8 +1369,7 @@ function Orbit() {
         <div className="mb-12 w-full">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
-              <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">Orbit: Cash Flow Intelligence</h2>
-              <p className="text-[11px] font-mono uppercase tracking-widest text-[#C5A059] mt-2">Cash Flow Timeline: {monthsInRange} Months</p>
+              <h2 className="text-4xl font-serif font-bold text-[#2C3338] italic leading-tight">Orbit <span className="font-sans font-black not-italic text-[#C5A059]">Capital</span>: Cash Flow Intelligence</h2>
             </div>
             {user && user.uid !== 'guest-user' && (
               <div className="flex items-center gap-2 shrink-0">
@@ -1393,18 +1397,13 @@ function Orbit() {
               </div>
             )}
           </div>
-          
+
           <div className="py-8 border-y border-[#E8E4D0]/60 flex flex-col md:flex-row gap-12 items-start">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap size={16} className="text-[#C5A059]" />
-                <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-[#8C8670]">Intelligence Overview</span>
-              </div>
               <p className="text-[#8C8670] text-sm leading-relaxed max-w-3xl">
                 Orbit is built to work with the actual money that <span className="text-[#2C3338] font-bold">hits your bank account</span>—not your gross salary, 401k, or pre-tax figures. By focusing on your net inflow, we accurately project your true cash flow trajectory and the impact of life's big decisions.
               </p>
             </div>
-            
             <div className="md:w-80 shrink-0">
               <div className="flex items-center gap-2 mb-4">
                 <Info size={14} className="text-[#C5A059]" />
@@ -1418,6 +1417,60 @@ function Orbit() {
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* Time Range Selector */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1 h-4 bg-[#C5A059] rounded-full" />
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#8C8670] font-bold">Orbit Timeframe</span>
+          </div>
+          <div className="flex gap-3 w-full">
+            <button
+              onClick={() => { const year = new Date().getFullYear(); setStartDate(`${year}-01-01`); setEndDate(`${year}-12-31`); setShowCustomCalendar(false); }}
+              className={`flex-1 py-4 rounded-2xl font-serif italic text-base transition-all ${startDate.endsWith('-01-01') && endDate.endsWith('-12-31') && monthsInRange === 12 && !showCustomCalendar ? 'bg-[#C5A059] text-white font-bold shadow-[0_4px_14px_rgba(197,160,89,0.35)]' : 'bg-[#FAF9F6] text-[#8C8670] border border-[#E8E4D0] hover:border-[#C5A059] hover:text-[#2C3338]'}`}
+            >Annual Orbit</button>
+            <button
+              onClick={() => { const now = new Date(); const year = now.getFullYear(); const month = String(now.getMonth() + 1).padStart(2, '0'); const lastDay = new Date(year, now.getMonth() + 1, 0).getDate(); setStartDate(`${year}-${month}-01`); setEndDate(`${year}-${month}-${lastDay}`); setShowCustomCalendar(false); }}
+              className={`flex-1 py-4 rounded-2xl font-serif italic text-base transition-all ${startDate.includes(`-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`) && monthsInRange === 1 && !showCustomCalendar ? 'bg-[#C5A059] text-white font-bold shadow-[0_4px_14px_rgba(197,160,89,0.35)]' : 'bg-[#FAF9F6] text-[#8C8670] border border-[#E8E4D0] hover:border-[#C5A059] hover:text-[#2C3338]'}`}
+            >Monthly Orbit</button>
+            <button
+              onClick={() => setShowCustomCalendar(!showCustomCalendar)}
+              className={`flex-1 py-4 rounded-2xl font-serif italic text-base transition-all ${showCustomCalendar ? 'bg-[#2C3338] text-white font-bold shadow-[0_4px_14px_rgba(44,51,56,0.25)]' : 'bg-[#FAF9F6] text-[#8C8670] border border-[#E8E4D0] hover:border-[#2C3338] hover:text-[#2C3338]'}`}
+            >Custom Timeframe Orbit</button>
+          </div>
+          <AnimatePresence>
+            {showCustomCalendar && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-[#E8E4D0]/10 p-4 rounded-xl border border-[#E8E4D0]/60 flex flex-wrap items-end gap-6 mt-2">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Start Date</label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">End Date</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-[#8C8670] uppercase mb-1">{monthsInRange} mo active</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Stats Grid (Full Width) */}
@@ -1469,7 +1522,7 @@ function Orbit() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Controls */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="lg:col-span-4 xl:col-span-4 space-y-8">
             <section className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
               <div className="flex justify-between items-center mb-8">
                 <h2 className="font-serif text-xl font-bold text-[#2C3338] flex items-center gap-3">
@@ -1612,97 +1665,8 @@ function Orbit() {
           <div className="lg:col-span-8 space-y-8">
             {/* Fluid Expense Grid */}
             <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl shadow-sm">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                <div className="w-full">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Finance Orbit</h2>
-
-                  </div>
-                  
-                  <div className="flex flex-col gap-4 mt-4">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button 
-                        onClick={() => {
-                          const year = new Date().getFullYear();
-                          setStartDate(`${year}-01-01`);
-                          setEndDate(`${year}-12-31`);
-                          setShowCustomCalendar(false);
-                        }}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all ${
-                          startDate.endsWith('-01-01') && endDate.endsWith('-12-31') && monthsInRange === 12 && !showCustomCalendar
-                          ? 'bg-[#C5A059] text-white font-bold shadow-md' 
-                          : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
-                        }`}
-                      >
-                        Annual Orbit
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const now = new Date();
-                          const year = now.getFullYear();
-                          const month = String(now.getMonth() + 1).padStart(2, '0');
-                          const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
-                          setStartDate(`${year}-${month}-01`);
-                          setEndDate(`${year}-${month}-${lastDay}`);
-                          setShowCustomCalendar(false);
-                        }}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all ${
-                          startDate.includes(`-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`) && monthsInRange === 1 && !showCustomCalendar
-                          ? 'bg-[#C5A059] text-white font-bold shadow-md' 
-                          : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
-                        }`}
-                      >
-                        Monthly Orbit
-                      </button>
-                      <button 
-                        onClick={() => setShowCustomCalendar(!showCustomCalendar)}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all ${
-                          showCustomCalendar
-                          ? 'bg-[#2C3338] text-white font-bold shadow-md' 
-                          : 'bg-[#E8E4D0]/50 text-[#8C8670] hover:bg-[#E8E4D0]'
-                        }`}
-                      >
-                        Custom Frame
-                      </button>
-                    </div>
-
-                    <AnimatePresence>
-                      {showCustomCalendar && (
-                        <motion.div 
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="bg-[#E8E4D0]/10 p-4 rounded-xl border border-[#E8E4D0]/60 flex flex-wrap items-end gap-6 mt-2">
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">Start Date</label>
-                              <input 
-                                type="date" 
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
-                              />
-                            </div>
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-[9px] font-mono uppercase tracking-widest text-[#8C8670] font-bold">End Date</label>
-                              <input 
-                                type="date" 
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="bg-transparent border-b border-[#E8E4D0] text-sm font-serif text-[#2C3338] outline-none focus:border-[#C5A059] transition-colors py-1"
-                              />
-                            </div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-[10px] font-mono text-[#8C8670] uppercase">{monthsInRange} mo active</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-
+              <div className="flex items-center mb-8">
+                <h2 className="font-serif text-2xl font-bold text-[#2C3338] italic">Your Finance Orbit</h2>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -2051,7 +2015,7 @@ function Orbit() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-[#FAF9F6] border border-[#E8E4D0] p-8 max-w-4xl w-full rounded-xl shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="relative bg-[#FAF9F6] border border-[#E8E4D0] p-10 w-[96vw] max-w-[1500px] rounded-2xl shadow-2xl overflow-y-auto max-h-[94vh]"
             >
               <div className="flex justify-between items-start mb-8">
                 <div>
@@ -2070,40 +2034,40 @@ function Orbit() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 {/* Form Side */}
                 <div className="lg:col-span-5 space-y-6">
-                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-6 rounded-xl">
-                    <h3 className="font-mono text-[10px] uppercase tracking-widest text-[#C5A059] mb-6">Expense Details</h3>
+                  <div className="bg-[#FAF9F6] border border-[#E8E4D0] p-8 rounded-xl">
+                    <h3 className="font-mono text-xs uppercase tracking-widest text-[#C5A059] mb-6 font-bold">Expense Details</h3>
                     
                     <div className="space-y-6">
                       <div>
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Service Name</label>
-                        <input 
-                          type="text" 
+                        <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-2 font-bold">Service Name</label>
+                        <input
+                          type="text"
                           value={newExpense.name}
                           onChange={e => setNewExpense({...newExpense, name: e.target.value})}
-                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-serif italic"
+                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl text-base focus:border-[#C5A059] outline-none transition-all font-serif italic"
                           placeholder="e.g. YouTube Premium"
                         />
                       </div>
 
                       <div>
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Parent Merchant / Brand (Optional)</label>
-                        <input 
-                          type="text" 
+                        <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-2 font-bold">Parent Merchant / Brand (Optional)</label>
+                        <input
+                          type="text"
                           value={newExpense.merchant || ''}
                           onChange={e => setNewExpense({...newExpense, merchant: e.target.value})}
-                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono"
+                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl text-base focus:border-[#C5A059] outline-none transition-all font-mono"
                           placeholder="e.g. Google"
                         />
-                        <p className="text-[10px] text-slate-400 mt-2 italic leading-relaxed">Bundles this expense under a single brand for smarter drill-down analysis.</p>
+                        <p className="text-xs text-slate-400 mt-2 italic leading-relaxed">Bundles this expense under a single brand for smarter drill-down analysis.</p>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Amount ($)</label>
-                          <input 
+                          <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-2 font-bold">Amount ($)</label>
+                          <input
                             type="text"
                             inputMode="numeric"
                             value={newExpense.amount === 0 ? '' : newExpense.amount?.toString()}
@@ -2111,13 +2075,13 @@ function Orbit() {
                               const val = e.target.value.replace(/[^0-9]/g, '');
                               setNewExpense({...newExpense, amount: val === '' ? 0 : parseInt(val, 10)});
                             }}
-                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-mono"
+                            className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl text-base focus:border-[#C5A059] outline-none transition-all font-mono"
                           />
                         </div>
                         <div className="col-span-2">
-                          <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-3">
-                            {['monthly', 'bi-weekly', 'weekly'].includes(newExpense.frequency || '') 
-                              ? 'Month (Reference Only)' 
+                          <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-3 font-bold">
+                            {['monthly', 'bi-weekly', 'weekly'].includes(newExpense.frequency || '')
+                              ? 'Month (Reference Only)'
                               : 'Select Active Months'}
                           </label>
                           
@@ -2154,7 +2118,7 @@ function Orbit() {
                                       }
                                       setNewExpense({ ...newExpense, months: nextMonths, month: nextMonths[0] || 1 });
                                     }}
-                                    className={`py-2 px-1 text-[9px] font-mono uppercase tracking-tighter border rounded-lg transition-all ${isSelected ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
+                                    className={`py-3 text-[11px] font-mono uppercase tracking-wider border rounded-lg transition-all ${isSelected ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
                                   >
                                     {name.substring(0, 3)}
                                   </button>
@@ -2166,9 +2130,9 @@ function Orbit() {
                           {/* Validation Hint */}
                           {!['monthly', 'bi-weekly', 'weekly'].includes(newExpense.frequency || '') && (
                             <div className="flex justify-between items-center mt-2">
-                              <p className="text-[9px] text-[#8C8670] font-mono italic">
-                                {newExpense.frequency === 'annual' || newExpense.frequency === 'one-time' ? 'Select 1 month (Optional)' : 
-                                 newExpense.frequency === 'semi-annual' ? 'Select 2 months (Optional)' : 
+                              <p className="text-[11px] text-[#8C8670] font-mono italic">
+                                {newExpense.frequency === 'annual' || newExpense.frequency === 'one-time' ? 'Select 1 month (Optional)' :
+                                 newExpense.frequency === 'semi-annual' ? 'Select 2 months (Optional)' :
                                  newExpense.frequency === 'quarterly' ? 'Select 4 months (Optional)' : ''}
                               </p>
                             </div>
@@ -2177,13 +2141,13 @@ function Orbit() {
                       </div>
 
                       <div>
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Frequency</label>
+                        <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-2 font-bold">Frequency</label>
                         <div className="grid grid-cols-3 gap-2">
                           {['annual', 'semi-annual', 'quarterly', 'monthly', 'bi-weekly', 'weekly', 'one-time'].map(freq => (
                             <button
                               key={freq}
                               onClick={() => setNewExpense({...newExpense, frequency: freq as any})}
-                              className={`py-2 px-1 text-[9px] font-mono uppercase tracking-widest border rounded-xl transition-all ${newExpense.frequency === freq ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
+                              className={`py-3 text-[11px] font-mono uppercase tracking-wider border rounded-xl transition-all ${newExpense.frequency === freq ? 'bg-[#C5A059] border-[#C5A059] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#C5A059]'}`}
                             >
                               {freq}
                             </button>
@@ -2192,13 +2156,13 @@ function Orbit() {
                       </div>
 
                       <div>
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Category</label>
+                        <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-2 font-bold">Category</label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {['insurance', 'tax', 'subscription', 'maintenance_and_utilities', 'health_and_fitness', 'vacation', 'food', 'retail', 'other'].map(cat => (
                             <button
                               key={cat}
                               onClick={() => setNewExpense({...newExpense, category: cat})}
-                              className={`py-2 px-1 text-[9px] font-mono uppercase tracking-tighter border rounded-xl transition-all ${newExpense.category === cat ? 'bg-[#2C3338] border-[#2C3338] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#2C3338]'}`}
+                              className={`py-3 text-[11px] font-mono uppercase tracking-tighter border rounded-xl transition-all ${newExpense.category === cat ? 'bg-[#2C3338] border-[#2C3338] text-[#FAF9F6] font-bold shadow-sm' : 'border-[#E8E4D0] text-[#8C8670] hover:border-[#2C3338]'}`}
                             >
                               {cat.replace(/_/g, ' ')}
                             </button>
@@ -2210,7 +2174,7 @@ function Orbit() {
                               type="text" 
                               value={newExpense.customCategory || ''}
                               onChange={e => setNewExpense({...newExpense, customCategory: e.target.value})}
-                              className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-2 rounded-xl text-[10px] focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
+                              className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-xs focus:border-[#C5A059] outline-none transition-all font-mono uppercase tracking-widest"
                               placeholder="Write in category..."
                             />
                           </div>
@@ -2218,29 +2182,29 @@ function Orbit() {
                       </div>
 
                       <div>
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Payment Method</label>
+                        <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-2 font-bold">Payment Method</label>
                         <div className="grid grid-cols-2 gap-3">
-                          <button 
-                            onClick={() => setNewExpense({ 
-                              ...newExpense, 
-                              paymentType: newExpense.paymentType === 'automated' ? undefined : 'automated' 
+                          <button
+                            onClick={() => setNewExpense({
+                              ...newExpense,
+                              paymentType: newExpense.paymentType === 'automated' ? undefined : 'automated'
                             })}
-                            className={`py-3 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border ${newExpense.paymentType === 'automated' ? 'bg-[#1E5C38] text-white border-[#1E5C38]' : 'bg-[#FAF9F6] text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
+                            className={`py-4 rounded-xl text-xs font-mono uppercase tracking-widest transition-all border ${newExpense.paymentType === 'automated' ? 'bg-[#1E5C38] text-white border-[#1E5C38]' : 'bg-[#FAF9F6] text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
                           >
                             <div className="flex items-center justify-center gap-2">
-                              <RefreshCw size={12} className={newExpense.paymentType === 'automated' ? 'animate-spin-slow' : ''} />
+                              <RefreshCw size={14} className={newExpense.paymentType === 'automated' ? 'animate-spin-slow' : ''} />
                               Automated
                             </div>
                           </button>
-                          <button 
-                            onClick={() => setNewExpense({ 
-                              ...newExpense, 
-                              paymentType: newExpense.paymentType === 'manual' ? undefined : 'manual' 
+                          <button
+                            onClick={() => setNewExpense({
+                              ...newExpense,
+                              paymentType: newExpense.paymentType === 'manual' ? undefined : 'manual'
                             })}
-                            className={`py-3 rounded-xl text-[10px] font-mono uppercase tracking-widest transition-all border ${newExpense.paymentType === 'manual' ? 'bg-[#C5A059] text-white border-[#C5A059]' : 'bg-[#FAF9F6] text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
+                            className={`py-4 rounded-xl text-xs font-mono uppercase tracking-widest transition-all border ${newExpense.paymentType === 'manual' ? 'bg-[#C5A059] text-white border-[#C5A059]' : 'bg-[#FAF9F6] text-[#8C8670] border-[#E8E4D0] hover:border-[#C5A059]'}`}
                           >
                             <div className="flex items-center justify-center gap-2">
-                              <Zap size={12} />
+                              <Zap size={14} />
                               Manual
                             </div>
                           </button>
@@ -2248,12 +2212,12 @@ function Orbit() {
                       </div>
 
                       <div>
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-[#8C8670] block mb-2">Strategic Notes</label>
-                        <textarea 
+                        <label className="font-mono text-xs uppercase tracking-widest text-[#8C8670] block mb-2 font-bold">Strategic Notes</label>
+                        <textarea
                           value={newExpense.notes || ''}
                           onChange={e => setNewExpense({...newExpense, notes: e.target.value})}
                           placeholder="e.g. Log in to renew, account ID..."
-                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-3 rounded-xl text-[10px] focus:border-[#C5A059] outline-none transition-all font-sans h-20 resize-none"
+                          className="w-full bg-[#FAF9F6] border border-[#E8E4D0] p-4 rounded-xl text-sm focus:border-[#C5A059] outline-none transition-all font-sans h-24 resize-none"
                         />
                       </div>
                     </div>
@@ -2270,11 +2234,6 @@ function Orbit() {
 
                     {editingExpenseId && (
                       <div className="mt-8 pt-6 border-t border-[#E8E4D0] space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertCircle size={14} className="text-[#8B0000]" />
-                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-[#8B0000] font-bold">Maintenance Zone</h4>
-                        </div>
-                        
                         <div className="flex gap-3">
                           {!isDeletingFromModal ? (
                             <button 
@@ -2348,7 +2307,7 @@ function Orbit() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto max-h-[450px] pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 overflow-y-auto max-h-[640px] pr-2 custom-scrollbar">
                       {Object.entries(categorizedPresets).flatMap(([cat, items]) => 
                         items.filter(p => 
                           (selectedCategory === 'All Categories' || cat === selectedCategory || librarySearch.length > 0) && 
@@ -2392,7 +2351,7 @@ function Orbit() {
       </AnimatePresence>
 
       <footer className="border-t border-[#E8E4D0] py-12 mt-20">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="max-w-[1600px] mx-auto px-12 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3 opacity-50">
             <TrendingUp size={20} className="text-[#C5A059]" />
             <span className="font-serif font-bold text-[#2C3338] italic">Orbit</span>

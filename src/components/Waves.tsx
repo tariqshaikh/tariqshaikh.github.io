@@ -1098,28 +1098,36 @@ const DARK_STYLE = `
   .waves-dark .bg-\\[\\#F7F2E8\\] { background-color: #0B1221 !important; }
   .waves-dark .bg-\\[\\#F7F2E8\\]\\/80 { background-color: rgba(11,18,33,0.8) !important; }
   .waves-dark .bg-\\[\\#F7F2E8\\]\\/95 { background-color: rgba(11,18,33,0.95) !important; }
+  .waves-dark .bg-\\[\\#F7F2E8\\]\\/60 { background-color: transparent !important; }
+  .waves-dark .bg-\\[\\#F7F2E8\\]\\/50 { background-color: transparent !important; }
   .waves-dark .bg-white { background-color: #0D1B2E !important; }
   .waves-dark .bg-white\\/80 { background-color: rgba(13,27,46,0.8) !important; }
   .waves-dark .text-\\[\\#0A1A2E\\] { color: #f1f5f9 !important; }
+  .waves-dark .text-\\[\\#0A1A2E\\]\\/10 { color: rgba(241,245,249,0.22) !important; }
+  .waves-dark .text-\\[\\#0A1A2E\\]\\/8  { color: rgba(241,245,249,0.22) !important; }
   .waves-dark .text-slate-700 { color: #cbd5e1 !important; }
   .waves-dark .text-slate-600 { color: #94a3b8 !important; }
-  .waves-dark .text-slate-500 { color: #64748b !important; }
-  .waves-dark .text-slate-400 { color: #475569 !important; }
+  .waves-dark .text-slate-500 { color: #94a3b8 !important; }
+  .waves-dark .text-slate-400 { color: #64748b !important; }
   .waves-dark .border-black\\/\\[0\\.06\\] { border-color: rgba(255,255,255,0.06) !important; }
   .waves-dark .border-black\\/\\[0\\.07\\] { border-color: rgba(255,255,255,0.07) !important; }
   .waves-dark .border-black\\/\\[0\\.08\\] { border-color: rgba(255,255,255,0.08) !important; }
   .waves-dark .border-black\\/\\[0\\.09\\] { border-color: rgba(255,255,255,0.09) !important; }
   .waves-dark .border-black\\/\\[0\\.13\\] { border-color: rgba(255,255,255,0.13) !important; }
   .waves-dark .bg-emerald-100 { background-color: rgba(16,185,129,0.12) !important; }
-  .waves-dark .bg-amber-100  { background-color: rgba(245,158,11,0.12) !important; }
-  .waves-dark .bg-orange-100 { background-color: rgba(249,115,22,0.12) !important; }
-  .waves-dark .bg-rose-100   { background-color: rgba(244,63,94,0.12) !important; }
-  .waves-dark .bg-purple-100 { background-color: rgba(168,85,247,0.12) !important; }
-  .waves-dark .bg-slate-100  { background-color: rgba(100,116,139,0.12) !important; }
+  .waves-dark .bg-emerald-50  { background-color: rgba(16,185,129,0.08) !important; }
+  .waves-dark .bg-amber-100   { background-color: rgba(245,158,11,0.12) !important; }
+  .waves-dark .bg-orange-100  { background-color: rgba(249,115,22,0.12) !important; }
+  .waves-dark .bg-rose-100    { background-color: rgba(244,63,94,0.12) !important; }
+  .waves-dark .bg-purple-100  { background-color: rgba(168,85,247,0.12) !important; }
+  .waves-dark .bg-slate-100   { background-color: rgba(100,116,139,0.12) !important; }
   .waves-dark .text-emerald-700 { color: #34d399 !important; }
+  .waves-dark .text-emerald-600 { color: #6ee7b7 !important; }
   .waves-dark .text-amber-700   { color: #fbbf24 !important; }
   .waves-dark .text-orange-600  { color: #fb923c !important; }
   .waves-dark .text-rose-600    { color: #fb7185 !important; }
+  .waves-dark .border-emerald-200 { border-color: rgba(52,211,153,0.2) !important; }
+  .waves-dark .text-\\[\\#0369A1\\] { color: #38bdf8 !important; }
   .waves-dark .text-purple-700  { color: #c084fc !important; }
   .waves-dark .text-yellow-700  { color: #fde047 !important; }
   .waves-dark .shadow-md  { box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important; }
@@ -1798,9 +1806,14 @@ Return ONLY a JSON object, no markdown, no explanation:
               <WavesLogo />
               <span className="text-[#0A1A2E] font-medium tracking-widest text-sm uppercase group-hover:text-[#0891B2] transition-colors">Waves</span>
             </Link>
-            <button onClick={toggleTheme} className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-[#0891B2] hover:bg-black/[0.04] transition-all" title={isDark ? 'Light mode' : 'Night mode'}>
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+            <div className="flex items-center gap-4">
+              <Link to="/" className="font-mono text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-700 transition-colors flex items-center gap-1">
+                <ChevronLeft size={12} />Portfolio
+              </Link>
+              <button onClick={toggleTheme} className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-[#0891B2] hover:bg-black/[0.04] transition-all" title={isDark ? 'Light mode' : 'Night mode'}>
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+            </div>
           </div>
         </nav>
 
@@ -2056,12 +2069,19 @@ Return ONLY a JSON object, no markdown, no explanation:
         
         {/* Top Nav */}
         <header className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-6 text-xs uppercase tracking-widest text-slate-500 font-medium">
-            <button 
-              onClick={() => setHasSearched(false)}
-              className="flex items-center gap-2 hover:text-[#0A1A2E] transition-colors text-[#0891B2]"
+          <div className="flex items-center gap-4 text-xs uppercase tracking-widest font-medium">
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-black/[0.09] text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.2] transition-all"
             >
-              <ArrowRight size={14} className="rotate-180" /> Back to Search
+              <ChevronLeft size={14} />
+              <span className="font-mono tracking-widest">Portfolio</span>
+            </Link>
+            <button
+              onClick={() => setHasSearched(false)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-400 hover:text-[#0891B2] transition-colors font-mono tracking-widest"
+            >
+              <ChevronLeft size={14} /> New Search
             </button>
           </div>
           <div className="flex items-center gap-3">
@@ -2270,8 +2290,8 @@ Return ONLY a JSON object, no markdown, no explanation:
                                 } ${isSelected ? 'ring-2 ring-[#0891B2] ring-offset-4 ring-offset-[#FDFAF5]' : ''}`}
                                 style={{ height: `${heightPercent}%` }}
                               >
-                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-[#FDFAF5] border border-black/[0.13] rounded-xl px-3 py-1.5 opacity-0 group-hover:opacity-100 transition-all z-30 shadow-2xl">
-                                  <span className="text-[#0A1A2E] font-bold text-xs">${displayCosts[i]}</span>
+                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-30">
+                                  <span className={`text-[10px] font-bold ${isSelected ? 'text-[#0891B2]' : 'text-slate-500'}`}>${displayCosts[i]}</span>
                                 </div>
                               </button>
                             </div>

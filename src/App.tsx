@@ -12,7 +12,6 @@ import HomebaseTownPage from './components/HomebaseTownPage';
 import Orbit from './components/Orbit';
 import NetWorth from './components/NetWorth';
 import NetWorthHistory from './components/NetWorthHistory';
-import RetirementPlanner from './components/RetirementPlanner';
 import PMPrism from './components/PMPrism';
 import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
@@ -21,6 +20,7 @@ import WavesThemePreview from './components/WavesThemePreview';
 import PortfolioV2 from './components/PortfolioV2';
 import PortfolioV3 from './components/PortfolioV3';
 import CapitalDeployment from './components/CapitalDeployment';
+import OrbitLogos from './components/OrbitLogos';
 
 export default function App() {
   return (
@@ -43,8 +43,8 @@ export default function App() {
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />
         <Route path="/orbit/simulator" element={<Orbit />} />
-        <Route path="/orbit/retirement-planner" element={<RetirementPlanner />} />
         <Route path="/orbit/capital-deployment" element={<CapitalDeployment />} />
+        <Route path="/orbit/logos" element={<OrbitLogos />} />
         <Route path="/admin/visitors" element={<VisitorInsights />} />
       </Routes>
     </Router>
