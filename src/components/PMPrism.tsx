@@ -4,6 +4,48 @@ import { ChevronLeft } from 'lucide-react';
 import { logVisit } from '../lib/analytics';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
+async function groqChat(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[],
+  opts: { maxTokens?: number; jsonMode?: boolean } = {}
+): Promise<string> {
+  const { maxTokens = 1000, jsonMode = false } = opts;
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      max_tokens: maxTokens,
+      ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
+    }),
+  });
+  const json = await res.json();
+  if (json.error) {
+    if (res.status === 429 || json.error.type === 'rate_limit_exceeded') throw new Error('groq_rate_limit');
+    throw new Error(json.error.message || 'Groq error');
+  }
+  const text = json.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Empty response from Groq');
+  return text;
+}
+
+async function llmChat(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[],
+  opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {}
+): Promise<string> {
+  try {
+    return await groqChat(systemPrompt, messages, opts);
+  } catch (e) {
+    if (e instanceof Error && e.message === 'groq_rate_limit') {
+      opts.onRateLimit?.(-1);
+    }
+    return geminiChat(systemPrompt, messages, opts);
+  }
+}
 
 async function geminiChat(
   systemPrompt: string,
@@ -995,7 +1037,7 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
     setChatInput('');
     setElaborating(true);
     try {
-      const text = await geminiChat(
+      const text = await llmChat(
         `You are Prism, a world-class PM thinking partner. The user analyzed a question using the ${schema.description.split(':')[0]} framework. Elaborate deeply on the "${branch.label}" branch. Go 3 levels deeper: expose the non-obvious, cite real examples from Figma, Stripe, Notion, Linear, Duolingo or similar, give a concrete mental model, and end with one sharp action the PM should take this week. 4-6 focused paragraphs. No generic advice.`,
         [{ role: 'user', content: `Original question: ${question}\n\nBranch: ${branch.label}\nInsight: ${branch.insight}\nPoints: ${branch.points.join('; ')}\n\nGo deeper.` }],
         { maxTokens: 900 }
@@ -1017,7 +1059,7 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
     setChatHistory(nextHistory);
     setTimeout(() => chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: 'smooth' }), 50);
     try {
-      const reply = await geminiChat(
+      const reply = await llmChat(
         `You are Prism, a PM thinking partner. The user is doing a deep dive into the "${modal.branch.label}" branch of a ${schema.description.split(':')[0]} analysis of: "${question}". Your elaboration so far: "${elaboration.slice(0,400)}...". Answer follow-up questions sharply and concisely. No fluff.`,
         nextHistory,
         { maxTokens: 500 }
@@ -1286,7 +1328,7 @@ export default function PMPrism() {
       const fw = FRAMEWORKS.find(f => f.id === activeTab);
       const ctx = currentData.branches.map(b => `${b.label}: ${b.insight}\n${b.points.join('; ')}`).join('\n\n');
       const sys = `You are Prism, a sharp PM thinking partner. The user analyzed this question using the ${fw?.label ?? activeTab} framework: "${submittedQuestion}"\n\nAnalysis:\n${ctx}\n\nAnswer concisely and directly, grounded in what this specific analysis revealed. Max 3 short paragraphs. Be opinionated.`;
-      const reply = await geminiChat(sys, withUser, { maxTokens: 400 });
+      const reply = await llmChat(sys, withUser, { maxTokens: 400 });
       setBottomChats(c => ({ ...c, [activeTab]: [...withUser, { role: 'assistant', content: reply }] }));
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Unknown error';
@@ -1314,10 +1356,10 @@ export default function PMPrism() {
 
     await Promise.all(frameworkIds.map(async (frameworkId) => {
       const callGroq = async () => {
-        const raw = await geminiChat(
+        const raw = await llmChat(
           buildSystemPrompt(frameworkId),
           [{ role: 'user', content: question }],
-          { maxTokens: 4000, jsonMode: true, onRateLimit: (secs) => setRateLimitMsg(`Rate limited — retrying in ${secs}s...`) }
+          { maxTokens: 4000, jsonMode: true, onRateLimit: (secs) => setRateLimitMsg(secs < 0 ? 'Groq rate limited — switching to Gemini...' : `Rate limited — retrying in ${secs}s...`) }
         );
         setRateLimitMsg('');
         const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
