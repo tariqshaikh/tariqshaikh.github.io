@@ -1485,9 +1485,10 @@ export default function PMPrism() {
         {/* PRE-SUBMIT: question box first, then PM Lenses card */}
         {!submitted && (
           <div className="relative z-10 max-w-7xl mx-auto px-6 pb-8">
-            {/* 1. Question box */}
-            <div className={`rounded-2xl border transition-all duration-500 mb-5 ${questionLoaded ? 'border-violet-400/70 bg-violet-950/20' : input ? 'border-violet-500/30 bg-violet-950/10' : 'border-violet-800/40 bg-violet-950/6'}`}
-              style={questionLoaded ? { boxShadow:'0 0 20px rgba(139,92,246,0.25)' } : !input ? { boxShadow:'0 0 0 1px rgba(139,92,246,0.08) inset' } : undefined}
+            {/* 1. Question box — narrowed 25% */}
+            <div className="px-[12.5%]">
+            <div className={`rounded-2xl border transition-all duration-500 mb-5 ${questionLoaded ? 'border-violet-400/80 bg-violet-950/25' : input ? 'border-violet-500/60 bg-violet-950/18' : 'border-violet-700/55 bg-violet-950/14'}`}
+              style={questionLoaded ? { boxShadow:'0 0 28px rgba(139,92,246,0.30)' } : { boxShadow:'0 0 20px rgba(139,92,246,0.12), 0 0 0 1px rgba(139,92,246,0.10) inset' }}
             >
               <textarea
                 ref={textareaRef}
@@ -1565,6 +1566,7 @@ export default function PMPrism() {
                 </button>
               </div>
             </div>
+            </div>{/* end question box narrow wrapper */}
 
             {/* 2. PM Lenses card */}
             <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
@@ -1602,7 +1604,7 @@ export default function PMPrism() {
 
         {/* Question catalog — pre-submit only */}
         {!submitted && (
-          <div className="relative z-10 max-w-7xl mx-auto px-6 mt-4">
+          <div className="relative z-10 max-w-7xl mx-auto px-6 mt-4 pb-24">
             <QuestionCatalog onSelect={q => {
               setInput(q);
               setQuestionLoaded(true);
