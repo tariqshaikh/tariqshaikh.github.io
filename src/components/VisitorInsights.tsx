@@ -57,6 +57,7 @@ export default function VisitorInsights() {
   const [logs, setLogs] = useState<VisitorLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [now, setNow] = useState(Date.now());
   const navigate = useNavigate();
 
@@ -67,6 +68,7 @@ export default function VisitorInsights() {
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(user => {
+      setAuthLoading(false);
       if (user && user.email?.toLowerCase() === 'tshaikh92@gmail.com') {
         setIsAdmin(true);
       } else if (user) {
@@ -88,6 +90,15 @@ export default function VisitorInsights() {
     return () => unsub();
   }, [isAdmin]);
 
+  if (authLoading) return (
+    <div className="min-h-screen bg-[#07091A] flex items-center justify-center">
+      <div className="flex gap-2">
+        {[0,1,2].map(i => (
+          <div key={i} className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay:`${i*0.15}s` }} />
+        ))}
+      </div>
+    </div>
+  );
   if (!isAdmin) return null;
 
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
