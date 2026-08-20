@@ -42,8 +42,8 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuthenticated() && 
-             request.auth.token.email == "TShaikh92@gmail.com" && 
+      return isAuthenticated() &&
+             request.auth.token.email.lower() == "tshaikh92@gmail.com" &&
              request.auth.token.email_verified == true;
     }
 
@@ -227,8 +227,10 @@ service cloud.firestore {
       // Only the admin can see the logs
       allow read: if isAdmin();
       
-      // No updates or deletes allowed
-      allow update, delete: if false;
+      // Allow geo + time-spent fields to be written back after initial create
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['country', 'countryCode', 'city', 'region', 'timeSpentSeconds']);
+      allow delete: if false;
     }
   }
 }
