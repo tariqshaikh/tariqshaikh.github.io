@@ -594,6 +594,32 @@ export default function Portfolio() {
                       </ul>
                     </div>
 
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">8. Key Tradeoffs & Decisions</h2>
+                      <p className="text-[15px] text-slate-500 mb-6">Every decision has a cost. These are the deliberate ones.</p>
+                      <div className="space-y-4">
+                        {[
+                          { d: 'Static curated data over live APIs', r: 'Manually curated every NJ town data point rather than integrating 6 live sources. Full control over data quality, no brittle external dependencies for v1.', c: 'Data can go stale. NJ transit fares, property taxes, and crime stats change — requiring a manual refresh cycle.' },
+                          { d: 'Weighted comparison over a fixed ranking', r: 'Built a weight-slider model so users can rebalance priorities (schools vs. commute vs. taxes). A ranked list assumes everyone wants the same thing.', c: 'More UX complexity. First-time users need to understand what weights mean before results feel meaningful.' },
+                          { d: 'Union County only, not all of NJ', r: 'Constrained v1 to one county to validate every data point before scaling. Going statewide with unverified data would undermine trust in the tool.', c: 'Excludes buyers cross-shopping counties — a real use case for people priced out of Union County.' },
+                          { d: 'No user accounts in v1', r: 'URL-based state sharing over Firebase auth. Ships in days instead of weeks, avoids auth infrastructure, lets me validate the core comparison loop first.', c: 'No saved comparisons, no personalization, no return-user data to understand how people actually use it.' },
+                        ].map((t, i) => (
+                          <div key={i} className="border border-slate-100 rounded-lg p-5 hover:border-blue-200 transition-colors">
+                            <div className="flex items-start gap-4">
+                              <div className="shrink-0 w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-mono text-[11px] font-bold mt-0.5">{i+1}</div>
+                              <div className="flex-1">
+                                <div className="font-bold text-slate-900 mb-1">{t.d}</div>
+                                <p className="text-[14px] text-slate-600 mb-2">{t.r}</p>
+                                <div className="flex items-start gap-1.5">
+                                  <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-bold mt-0.5 shrink-0">Cost →</span>
+                                  <span className="text-[13px] text-slate-500">{t.c}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
                   </div>
                 </>
@@ -762,6 +788,33 @@ export default function Portfolio() {
                           <span className="text-[15px] text-slate-600"><strong>Multi-User / Household Sync:</strong> Shared budgeting between partners is a compelling V2 feature but adds significant auth and state complexity. Out of scope for v1.</span>
                         </li>
                       </ul>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">8. Key Tradeoffs & Decisions</h2>
+                      <p className="text-[15px] text-slate-500 mb-6">Every decision has a cost. These are the deliberate ones.</p>
+                      <div className="space-y-4">
+                        {[
+                          { d: 'Manual entry over bank integration (Plaid)', r: 'Plaid requires a compliance review, OAuth flows, and production approval — weeks of overhead before a single user can log in. Manual entry ships in days and lets me validate whether the cash flow view is actually useful before investing in the integration.', c: 'Higher friction. Data is only as accurate as what the user enters. Irregular users will have stale data.' },
+                          { d: 'Forward-looking cash flow over historical analysis', r: 'Most personal finance tools (Mint, YNAB) show you what happened. Orbit shows you what\'s coming — specifically the 3-month cliff when irregular expenses cluster. That\'s the unmet need.', c: 'Doesn\'t help users understand spending patterns or category breakdowns. That\'s a different product.' },
+                          { d: 'Cash flow focus over full personal finance suite', r: 'Chose to be exceptional at one thing — planning around irregular income and lumpy expenses — rather than average at everything. Scope creep into investments or net worth tracking would dilute the core insight.', c: 'Users still need separate tools for investment tracking, bill pay, and net worth over time.' },
+                          { d: 'Single user over household sync', r: 'Multi-user budgeting between partners adds conflict-resolution UX, permission models, and real-time sync complexity. Deferred until the core solo loop is validated.', c: 'Couples and families have to manage finances separately. A significant real-world use case is unaddressed.' },
+                        ].map((t, i) => (
+                          <div key={i} className="border border-slate-100 rounded-lg p-5 hover:border-amber-200 transition-colors">
+                            <div className="flex items-start gap-4">
+                              <div className="shrink-0 w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 font-mono text-[11px] font-bold mt-0.5">{i+1}</div>
+                              <div className="flex-1">
+                                <div className="font-bold text-slate-900 mb-1">{t.d}</div>
+                                <p className="text-[14px] text-slate-600 mb-2">{t.r}</p>
+                                <div className="flex items-start gap-1.5">
+                                  <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-bold mt-0.5 shrink-0">Cost →</span>
+                                  <span className="text-[13px] text-slate-500">{t.c}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                   </div>
@@ -1087,6 +1140,33 @@ export default function Portfolio() {
                           <span className="text-[15px] text-slate-600"><strong>Real-Time Price Alerts (v1):</strong> Push notifications require a backend job scheduler. v1 uses mock trend data; live alerts ship in V2 alongside the Skyscanner API integration.</span>
                         </li>
                       </ul>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">7. Key Tradeoffs & Decisions</h2>
+                      <p className="text-[15px] text-slate-500 mb-6">Every decision has a cost. These are the deliberate ones.</p>
+                      <div className="space-y-4">
+                        {[
+                          { d: 'Collaborative trip planning from day one', r: 'Most travel decisions are made with a partner or group. Building shared trip state (Firebase real-time sync) into v1 rather than bolting it on later made the product immediately useful for the real use case.', c: 'Significant state complexity from the start. Solo users carry overhead they don\'t need.' },
+                          { d: 'AI-curated recommendations over live data', r: 'Integrating Google Maps or Yelp live data requires API keys, cost management, and rate-limit handling. AI-generated recommendations ship instantly and cost nothing at v1 scale.', c: 'Recommendations can be stale, hallucinated, or non-specific. Real restaurants and hours need to be verified.' },
+                          { d: 'Season and price intelligence as the wedge, not full itinerary', r: '"When to go" and "what\'s worth seeing" are questions travelers ask before booking — before they need an itinerary. Catching the user earlier in the funnel is a better wedge than competing with TripAdvisor on day-by-day scheduling.', c: 'Users still need another tool to finalize plans. Waves is a starting point, not an end-to-end solution in v1.' },
+                          { d: 'Flights as the primary price signal, not accommodation', r: 'Flights are the most volatile and time-sensitive travel cost — the difference between $300 and $900 on the same route is real and changes daily. Hotels move more slowly and have more inventory. The urgency is in flights.', c: 'Users can\'t get a full trip cost estimate in v1. Hotel costs are excluded from the intelligence layer.' },
+                        ].map((t, i) => (
+                          <div key={i} className="border border-slate-100 rounded-lg p-5 hover:border-cyan-200 transition-colors">
+                            <div className="flex items-start gap-4">
+                              <div className="shrink-0 w-6 h-6 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-600 font-mono text-[11px] font-bold mt-0.5">{i+1}</div>
+                              <div className="flex-1">
+                                <div className="font-bold text-slate-900 mb-1">{t.d}</div>
+                                <p className="text-[14px] text-slate-600 mb-2">{t.r}</p>
+                                <div className="flex items-start gap-1.5">
+                                  <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-bold mt-0.5 shrink-0">Cost →</span>
+                                  <span className="text-[13px] text-slate-500">{t.c}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </>
@@ -1601,6 +1681,34 @@ export default function Portfolio() {
                           <div key={i} className="bg-slate-50 rounded-lg p-4">
                             <div className="font-mono text-[10px] uppercase tracking-widest text-slate-400 mb-1">{row.label}</div>
                             <div className="font-bold text-[14px] text-slate-900">{row.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-2 border-slate-100">7. Key Tradeoffs & Decisions</h2>
+                      <p className="text-[15px] text-slate-500 mb-6">Every decision has a cost. These are the deliberate ones.</p>
+                      <div className="space-y-4">
+                        {[
+                          { d: 'Single-select lens over multi-select', r: 'Forces the user to commit to one angle per analysis run rather than running everything at once. Multi-select encourages shallow coverage of many lenses; single-select encourages depth on the one that matters most right now.', c: 'Users who want to compare two frameworks in one session have to run analysis twice. Creates a small amount of intentional friction.' },
+                          { d: 'Structured JSON output over prose', r: 'All AI responses are forced into a schema (branches, insight, points). This gives full control over rendering, enables mind map layout, and allows follow-up elaboration on specific branches without re-running the full analysis.', c: 'More brittle than prose. If the model drifts from the schema, parsing fails. Requires robust retry logic and error handling.' },
+                          { d: 'Fixed framework schemas over AI-generated structure', r: 'Each lens has hardcoded branch labels (e.g., JTBD always produces Functional, Emotional, Social Jobs). Ensures consistency and comparability across runs — users know what to expect from each lens.', c: 'The AI can\'t surface a genuinely novel angle that doesn\'t fit the schema. Creativity is constrained by the predetermined structure.' },
+                          { d: 'Groq primary with Gemini fallback over a single provider', r: 'Groq\'s LPU hardware delivers sub-second responses that feel meaningfully faster than Gemini. Using Groq first and Gemini as a fallback gives reliability across two independent rate-limit pools.', c: 'Two API keys to manage. Subtle behavior differences between models can produce inconsistent output quality across sessions.' },
+                          { d: 'Free-tier APIs only', r: 'The entire stack runs on free tiers (Groq 14k/day, Gemini 1.5k/day). No infrastructure cost makes this sustainable as a side project indefinitely, and keeps the focus on product decisions over DevOps.', c: 'Rate limits become the hard ceiling. High-traffic days hit limits and degrade the experience. Can\'t support scale without moving to paid tiers.' },
+                        ].map((t, i) => (
+                          <div key={i} className="border border-slate-100 rounded-lg p-5 hover:border-violet-200 transition-colors">
+                            <div className="flex items-start gap-4">
+                              <div className="shrink-0 w-6 h-6 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-500 font-mono text-[11px] font-bold mt-0.5">{i+1}</div>
+                              <div className="flex-1">
+                                <div className="font-bold text-slate-900 mb-1">{t.d}</div>
+                                <p className="text-[14px] text-slate-600 mb-2">{t.r}</p>
+                                <div className="flex items-start gap-1.5">
+                                  <span className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-bold mt-0.5 shrink-0">Cost →</span>
+                                  <span className="text-[13px] text-slate-500">{t.c}</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
