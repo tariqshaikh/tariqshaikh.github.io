@@ -1109,8 +1109,15 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
   );
   const json = await res.json();
   if (json.error) throw Object.assign(new Error(json.error.message || 'Gemini error'), { status: json.error.code });
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
+  const candidate = json.candidates?.[0];
+  const finishReason = candidate?.finishReason ?? 'unknown';
+  const text = candidate?.content?.parts?.[0]?.text;
+  if (!text) {
+    if (finishReason === 'SAFETY' || finishReason === 'RECITATION') {
+      throw new Error(`Gemini blocked the response (${finishReason}). Please try a different destination.`);
+    }
+    throw new SyntaxError(`Empty Gemini response (finishReason: ${finishReason})`);
+  }
   return text;
 }
 
@@ -1556,8 +1563,10 @@ Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights ex
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
-        const text = await geminiGenerate(prompt, true, 6000);
-        data = JSON.parse(text);
+        const rawText = await geminiGenerate(prompt, true, 8192);
+        // Strip markdown fences in case Gemini adds them despite JSON mode
+        const cleanText = rawText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+        data = JSON.parse(cleanText);
 
         // Cache successful response for 24h
         try {
@@ -1565,8 +1574,12 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         } catch { /* storage full — skip */ }
 
         // Ensure required arrays exist (defensive merge)
-        if (!Array.isArray(data.monthlyData) || data.monthlyData.length !== 12) {
-          throw new Error('Malformed response: monthlyData missing');
+        if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
+          throw new SyntaxError('Malformed monthlyData in response');
+        }
+        // Pad to 12 if Gemini returned fewer (response truncation)
+        while (data.monthlyData.length < 12) {
+          data.monthlyData.push(data.monthlyData[data.monthlyData.length - 1] ?? { month: 'JAN', flightCost: 800, temp: 65, condition: 'Sunny', note: '', isIdeal: false, crowdLevel: 5 });
         }
 
         if (!forTrip) {
@@ -1602,14 +1615,17 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         const errStatus = err?.status || err?.code || '';
         console.error("Waves AI error — status:", errStatus, "message:", errMsg);
         const isQuota = errStatus === 429 || errMsg.includes('429') || errMsg.toLowerCase().includes('rate_limit') || errMsg.toLowerCase().includes('quota');
-        const isKey = errStatus === 400 || errStatus === 401 || errStatus === 403 || errMsg.toLowerCase().includes('api key');
-        const isJson = err instanceof SyntaxError || errMsg.includes('JSON') || errMsg.includes('Unexpected token');
+        const isKey = errStatus === 401 || errStatus === 403 || errMsg.toLowerCase().includes('api key');
+        const isJson = err instanceof SyntaxError || errMsg.includes('JSON') || errMsg.includes('Unexpected token') || errMsg.includes('Malformed');
+        const isBlocked = errMsg.toLowerCase().includes('blocked');
         const msg = isQuota
           ? "API limit reached — try again in a moment. Use the demo destinations in the meantime."
           : isKey
           ? "Invalid API key. Check your GEMINI_API_KEY in .env."
+          : isBlocked
+          ? errMsg
           : isJson
-          ? "Unexpected response format — please try again."
+          ? "Response was incomplete — please try again."
           : `Couldn't load "${dest}". Please try again.`;
         if (forTrip) throw new Error(msg);
         setError(msg);
