@@ -1,166 +1,278 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, query, orderBy, limit, onSnapshot, Timestamp } from 'firebase/firestore';
-import { ChevronLeft, Users, Globe, Clock, Monitor } from 'lucide-react';
+import { ChevronLeft, Activity, Users, Globe, Clock, Monitor, Smartphone, Tablet } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 
 interface VisitorLog {
   id: string;
   path: string;
   referrer: string;
   userAgent: string;
+  browser: string;
+  device: string;
+  language: string;
   timestamp: Timestamp;
   userId: string | null;
   sessionId: string;
   screenResolution: string;
+  country: string | null;
+  countryCode: string | null;
+  city: string | null;
+  region: string | null;
+  timeSpentSeconds: number | null;
+}
+
+function flag(code: string | null): string {
+  if (!code || code.length !== 2) return '🌐';
+  return code.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
+}
+
+function timeAgo(date: Date): string {
+  const s = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+function formatDuration(s: number | null): string {
+  if (!s || s < 3) return '—';
+  if (s < 60) return `${s}s`;
+  return `${Math.floor(s / 60)}m ${s % 60}s`;
+}
+
+function pageName(path: string): string {
+  if (!path || path === '/') return 'Home';
+  return path.replace(/^\//, '').replace(/-/g, ' ');
+}
+
+function DeviceIcon({ device }: { device: string }) {
+  if (device === 'Mobile') return <Smartphone size={12} className="inline mr-1 opacity-60" />;
+  if (device === 'Tablet') return <Tablet size={12} className="inline mr-1 opacity-60" />;
+  return <Monitor size={12} className="inline mr-1 opacity-60" />;
 }
 
 export default function VisitorInsights() {
   const [logs, setLogs] = useState<VisitorLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [now, setNow] = useState(Date.now());
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const interval = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged(user => {
       if (user && user.email?.toLowerCase() === 'tshaikh92@gmail.com') {
         setIsAdmin(true);
       } else if (user) {
-        navigate('/'); // logged in but not admin
+        navigate('/');
       } else {
-        navigate('/login?redirect=/admin/visitors'); // not logged in → send to login
+        navigate('/login?redirect=/admin/visitors');
       }
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, [navigate]);
 
   useEffect(() => {
     if (!isAdmin) return;
-
-    const logsRef = collection(db, 'visitorLogs');
-    const q = query(logsRef, orderBy('timestamp', 'desc'), limit(100));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const logsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as VisitorLog[];
-      setLogs(logsData);
+    const q = query(collection(db, 'visitorLogs'), orderBy('timestamp', 'desc'), limit(200));
+    const unsub = onSnapshot(q, snap => {
+      setLogs(snap.docs.map(d => ({ id: d.id, ...d.data() } as VisitorLog)));
       setLoading(false);
     });
-
-    return () => unsubscribe();
+    return () => unsub();
   }, [isAdmin]);
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-serif font-bold text-slate-900 mb-2">Restricted Access</h1>
-          <p className="text-slate-500 mb-6">Only the administrator can view visitor insights.</p>
-          <Link to="/" className="text-blue-600 font-medium hover:underline">Return Home</Link>
-        </div>
-      </div>
-    );
-  }
+  if (!isAdmin) return null;
 
-  const stats = {
-    total: logs.length,
-    uniqueSessions: new Set(logs.map(l => l.sessionId)).size,
-    topPages: Object.entries(logs.reduce((acc, log) => {
-      acc[log.path] = (acc[log.path] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>)).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5)
-  };
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const todayLogs = logs.filter(l => l.timestamp?.toDate() >= todayStart);
+  const uniqueSessions = new Set(logs.map(l => l.sessionId)).size;
+  const withTime = logs.filter(l => l.timeSpentSeconds && l.timeSpentSeconds >= 3);
+  const avgTime = withTime.length
+    ? Math.round(withTime.reduce((s, l) => s + (l.timeSpentSeconds ?? 0), 0) / withTime.length)
+    : null;
+
+  const topCountry = Object.entries(
+    logs.reduce((acc, l) => { if (l.country) acc[l.country] = (acc[l.country] || 0) + 1; return acc; }, {} as Record<string, number>)
+  ).sort((a, b) => b[1] - a[1])[0];
+
+  const topPages = Object.entries(
+    logs.reduce((acc, l) => { acc[l.path] = (acc[l.path] || 0) + 1; return acc; }, {} as Record<string, number>)
+  ).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  const topSources = Object.entries(
+    logs.reduce((acc, l) => { const r = l.referrer || 'direct'; acc[r] = (acc[r] || 0) + 1; return acc; }, {} as Record<string, number>)
+  ).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+  const maxPageCount = topPages[0]?.[1] ?? 1;
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#07091A] text-white font-sans">
+      {/* Header */}
+      <header className="border-b border-white/8 sticky top-0 z-10 backdrop-blur-md bg-[#07091A]/80">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-              <ChevronLeft size={20} />
+            <Link to="/" className="p-1.5 hover:bg-white/8 rounded-lg transition-colors text-slate-400 hover:text-white">
+              <ChevronLeft size={18} />
             </Link>
-            <h1 className="text-xl font-serif font-bold">Visitor Insights</h1>
+            <div className="flex items-center gap-2">
+              <Activity size={16} className="text-violet-400" />
+              <span className="font-mono text-sm font-bold text-slate-200 uppercase tracking-widest">Visitor Insights</span>
+            </div>
           </div>
-          <div className="text-sm font-mono text-slate-400 uppercase tracking-widest">Admin Only</div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="font-mono text-[10px] text-slate-500 uppercase tracking-widest">Live</span>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-3 text-blue-600 mb-2">
-              <Users size={20} />
-              <span className="text-xs font-mono uppercase tracking-widest font-bold">Total Visits</span>
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {[
+            { label: 'Total Visits', value: logs.length, sub: 'last 200', icon: <Activity size={14} />, color: 'violet' },
+            { label: 'Unique Visitors', value: uniqueSessions, sub: 'by session', icon: <Users size={14} />, color: 'cyan' },
+            { label: 'Today', value: todayLogs.length, sub: 'visits so far', icon: <Clock size={14} />, color: 'green' },
+            { label: 'Avg Time', value: formatDuration(avgTime), sub: 'per visit', icon: <Clock size={14} />, color: 'amber' },
+            { label: 'Top Country', value: topCountry ? `${flag(logs.find(l => l.country === topCountry[0])?.countryCode ?? null)} ${topCountry[0]}` : '—', sub: topCountry ? `${topCountry[1]} visits` : 'no data', icon: <Globe size={14} />, color: 'rose' },
+          ].map(card => (
+            <div key={card.label} className="rounded-xl border border-white/8 bg-white/[0.03] p-4">
+              <div className={`flex items-center gap-1.5 mb-2 text-${card.color}-400 opacity-70`}>
+                {card.icon}
+                <span className="font-mono text-[9px] uppercase tracking-widest">{card.label}</span>
+              </div>
+              <div className="text-xl font-bold text-white leading-tight">{loading ? '—' : card.value}</div>
+              <div className="text-[10px] text-slate-600 mt-0.5">{card.sub}</div>
             </div>
-            <div className="text-3xl font-serif font-bold">{stats.total}</div>
-            <p className="text-xs text-slate-400 mt-1">Last 100 entries</p>
-          </div>
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-3 text-green-600 mb-2">
-              <Globe size={20} />
-              <span className="text-xs font-mono uppercase tracking-widest font-bold">Unique Sessions</span>
-            </div>
-            <div className="text-3xl font-serif font-bold">{stats.uniqueSessions}</div>
-            <p className="text-xs text-slate-400 mt-1">Based on session IDs</p>
-          </div>
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-3 text-purple-600 mb-2">
-              <Monitor size={20} />
-              <span className="text-xs font-mono uppercase tracking-widest font-bold">Top Page</span>
-            </div>
-            <div className="text-3xl font-serif font-bold">{stats.topPages[0]?.[0] || 'N/A'}</div>
-            <p className="text-xs text-slate-400 mt-1">{stats.topPages[0]?.[1] || 0} visits</p>
-          </div>
+          ))}
         </div>
 
-        {/* Logs Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
-            <h2 className="font-serif font-bold">Recent Activity</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-[10px] font-mono uppercase tracking-widest text-slate-400 border-b border-slate-100">
-                  <th className="px-6 py-4">Time</th>
-                  <th className="px-6 py-4">Page</th>
-                  <th className="px-6 py-4">Referrer</th>
-                  <th className="px-6 py-4">Device / UA</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {loading ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">Loading logs...</td>
-                  </tr>
-                ) : logs.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">No logs found yet.</td>
-                  </tr>
-                ) : (
-                  logs.map((log) => (
-                    <tr key={log.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-500 font-mono text-[11px]">
-                        {log.timestamp?.toDate().toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-medium text-slate-900">{log.path}</span>
-                      </td>
-                      <td className="px-6 py-4 text-slate-500 truncate max-w-[200px]" title={log.referrer}>
-                        {log.referrer}
-                      </td>
-                      <td className="px-6 py-4 text-slate-400 text-xs truncate max-w-[300px]" title={log.userAgent}>
-                        {log.userAgent}
-                      </td>
+        {/* Main content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Recent visits table */}
+          <div className="lg:col-span-2 rounded-xl border border-white/8 bg-white/[0.02] overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-white/6 flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-slate-400 font-bold">Recent Activity</span>
+              <span className="font-mono text-[10px] text-slate-600">{logs.length} entries</span>
+            </div>
+            <div className="overflow-x-auto">
+              {loading ? (
+                <div className="flex items-center justify-center py-20 text-slate-600 text-sm">Loading...</div>
+              ) : logs.length === 0 ? (
+                <div className="flex items-center justify-center py-20 text-slate-600 text-sm">No visits logged yet.</div>
+              ) : (
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-[9px] font-mono uppercase tracking-widest text-slate-600 border-b border-white/5">
+                      <th className="px-5 py-3">When</th>
+                      <th className="px-5 py-3">Page</th>
+                      <th className="px-5 py-3">Location</th>
+                      <th className="px-5 py-3">Device</th>
+                      <th className="px-5 py-3">Source</th>
+                      <th className="px-5 py-3">Time</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {logs.map((log, i) => {
+                      const ts = log.timestamp?.toDate?.();
+                      const isNew = ts && (Date.now() - ts.getTime()) < 300000;
+                      return (
+                        <tr key={log.id} className={`border-b border-white/4 text-sm transition-colors ${i % 2 === 0 ? 'bg-white/[0.01]' : ''} hover:bg-violet-500/5`}>
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            <span className={`font-mono text-[11px] ${isNew ? 'text-green-400' : 'text-slate-500'}`}>
+                              {ts ? timeAgo(ts) : '—'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3">
+                            <span className="text-slate-200 text-xs font-medium capitalize">{pageName(log.path)}</span>
+                          </td>
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            {log.city || log.country ? (
+                              <span className="text-slate-400 text-xs">
+                                {flag(log.countryCode)} {log.city ?? log.country}
+                              </span>
+                            ) : (
+                              <span className="text-slate-700 text-xs">—</span>
+                            )}
+                          </td>
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            <span className="text-slate-500 text-xs">
+                              <DeviceIcon device={log.device ?? 'Desktop'} />
+                              {log.browser ?? '—'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3">
+                            <span className={`text-xs ${log.referrer && log.referrer !== 'direct' ? 'text-cyan-400/80' : 'text-slate-600'}`}>
+                              {log.referrer || 'direct'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            <span className="font-mono text-[11px] text-slate-500">
+                              {formatDuration(log.timeSpentSeconds)}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* Right column */}
+          <div className="space-y-4">
+
+            {/* Top pages */}
+            <div className="rounded-xl border border-white/8 bg-white/[0.02] overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-white/6">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-slate-400 font-bold">Top Pages</span>
+              </div>
+              <div className="p-4 space-y-2">
+                {topPages.length === 0 ? (
+                  <p className="text-slate-600 text-xs">No data</p>
+                ) : topPages.map(([path, count]) => (
+                  <div key={path} className="flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-slate-300 text-xs truncate capitalize">{pageName(path)}</span>
+                        <span className="font-mono text-[10px] text-slate-500 ml-2 shrink-0">{count}</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                        <div className="h-full rounded-full bg-violet-500/60" style={{ width: `${(count / maxPageCount) * 100}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Traffic sources */}
+            <div className="rounded-xl border border-white/8 bg-white/[0.02] overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-white/6">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-slate-400 font-bold">Traffic Sources</span>
+              </div>
+              <div className="p-4 space-y-2">
+                {topSources.length === 0 ? (
+                  <p className="text-slate-600 text-xs">No data</p>
+                ) : topSources.map(([source, count]) => (
+                  <div key={source} className="flex items-center justify-between py-1 border-b border-white/4 last:border-0">
+                    <span className={`text-xs ${source === 'direct' ? 'text-slate-500' : 'text-cyan-400/80'}`}>{source}</span>
+                    <span className="font-mono text-[10px] text-slate-500">{count} visits</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </main>
