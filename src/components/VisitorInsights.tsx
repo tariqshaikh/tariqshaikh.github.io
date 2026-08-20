@@ -91,12 +91,9 @@ export default function VisitorInsights() {
   }, [isAdmin]);
 
   if (authLoading) return (
-    <div className="min-h-screen bg-[#07091A] flex items-center justify-center">
-      <div className="flex gap-2">
-        {[0,1,2].map(i => (
-          <div key={i} className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay:`${i*0.15}s` }} />
-        ))}
-      </div>
+    <div className="min-h-screen bg-[#07091A] flex flex-col items-center justify-center gap-4">
+      <div className="w-10 h-10 rounded-full border-2 border-violet-800 border-t-violet-400 animate-spin" />
+      <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600">Checking access...</span>
     </div>
   );
   if (!isAdmin) return null;
@@ -177,7 +174,10 @@ export default function VisitorInsights() {
             </div>
             <div className="overflow-x-auto">
               {loading ? (
-                <div className="flex items-center justify-center py-20 text-slate-600 text-sm">Loading...</div>
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <div className="w-8 h-8 rounded-full border-2 border-violet-800 border-t-violet-400 animate-spin" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600">Fetching logs...</span>
+                </div>
               ) : logs.length === 0 ? (
                 <div className="flex items-center justify-center py-20 text-slate-600 text-sm">No visits logged yet.</div>
               ) : (
