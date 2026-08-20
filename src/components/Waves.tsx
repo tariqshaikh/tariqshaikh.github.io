@@ -1551,7 +1551,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             messages: [{ role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
             temperature: 0.7,
-            max_tokens: 7000,
+            max_tokens: 4000,
           }),
         });
 
