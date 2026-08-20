@@ -92,7 +92,7 @@ export default function HomebaseTownPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         max_tokens: 80,
         messages: [{ role: 'user', content: `Estimate typical drive time in minutes from ${townName}, NJ to: 1) Philadelphia Center City, PA and 2) ${shoreDestination}, NJ. Reply ONLY as valid JSON: {"philly": 75, "shore": 45}. Single numbers only, no ranges.` }]
       })
@@ -122,7 +122,7 @@ export default function HomebaseTownPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         max_tokens: 120,
         messages: [{ role: 'user', content: `List 3–5 specific highways, routes, and NJ Transit rail or bus lines that directly serve ${townName}, ${county} County, NJ. Be specific to this exact town. Reply ONLY as a JSON array of strings, e.g. ["Route 287", "Garden State Pkwy", "NJ Transit Morris & Essex Line"]. No explanation.` }]
       })
@@ -207,7 +207,7 @@ export default function HomebaseTownPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         max_tokens: 180,
         messages: [{
           role: 'user',
@@ -236,7 +236,7 @@ export default function HomebaseTownPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         max_tokens: 200,
         messages: [{
           role: 'user',
@@ -268,7 +268,7 @@ export default function HomebaseTownPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         max_tokens: 250,
         messages: [{
           role: 'user',

@@ -1212,7 +1212,7 @@ export default function Waves() {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages: [{
           role: 'user',
           content: `You are a travel industry analyst. As of ${monthYear}, rank the top 24 trending travel destinations worldwide by actual traveler demand.
@@ -1547,7 +1547,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
+            model: 'openai/gpt-oss-120b',
             messages: [{ role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
             temperature: 0.7,
@@ -1650,7 +1650,7 @@ Return ONLY a JSON object, no markdown, no explanation:
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'openai/gpt-oss-120b',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 200,
           temperature: 0.3,
