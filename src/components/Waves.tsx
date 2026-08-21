@@ -1433,9 +1433,11 @@ export default function Waves() {
       }
 
       try {
-        const prompt = `You are an expert travel planner with deep local knowledge. The user wants to travel to: ${dest}.
-Provide a comprehensive destination guide with insider knowledge a typical tourist wouldn't know.
-Return ONLY a valid JSON object (no markdown, no code fences, no explanation) with exactly these keys:
+        const stripFences = (t: string) => t.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+
+        // --- CORE prompt (always fits in ~4k tokens) ---
+        const corePrompt = `You are an expert travel planner. Destination: ${dest}.
+Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
 {
   "title": "Catchy 2-word title e.g. The Ultimate",
   "subtitle": "Destination tagline e.g. Kyoto Experience",
@@ -1451,79 +1453,98 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation) wi
   },
   "weatherCard": { "condition": "Sunny", "tempHigh": 75, "tempLow": 55, "note": "string", "month": "October" },
   "monthlyData": [
-    { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "Local insight", "isIdeal": false, "crowdLevel": 4 },
-    ... exactly 12 objects Jan-Dec. condition must be one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
+    { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "one insight", "isIdeal": false, "crowdLevel": 4 }
   ],
-flightCost guidance: round-trip USD from a major US gateway (JFK/LAX/ORD). Use Google Flights-calibrated seasonal ranges — not random numbers. Reference ranges: domestic US $150–550; Mexico/Caribbean $300–900; Europe $450–1,600; Japan/SE Asia $700–1,900; Middle East/Africa $800–2,200; South America $600–1,500; Australia/NZ $1,000–2,400. Peak travel months (Jul/Aug + local holidays) push toward the top of the range. Off-peak months approach the floor. Costs must feel realistic to someone checking Google Flights today.
-  "foodAndCulture": {
-    "categories": [
-      { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "string", "imageKeyword": "2-3 descriptive words for photo search e.g. japanese matcha tea ceremony" }] },
-      { "title": "Lunch & Street Food", "items": [...] },
-      { "title": "Dinner & Fine Dining", "items": [...] },
-      { "title": "Drinks & Nightlife", "items": [...] },
-      { "title": "Café Culture", "items": [{ "name": "Specific real café name", "description": "What makes it worth visiting — specific details, not generic praise. Include what to order, when to go, and what makes it local. 2-3 sentences.", "imageKeyword": "cafe name + city keywords" }] }
-    ],
-    "mustTry": ["specific dish or experience"],
-    "culturalEtiquette": [{ "title": "string", "description": "string" }]
-  },
-  "topActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 descriptive words for photo search e.g. bamboo forest path japan" }],
-  "nicheActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 descriptive words for photo search" }],
-  "seasonalHighlights": [{ "title": "string", "description": "string", "timeOfYear": "string" }],
-  "events": [{ "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
-  "insiderTips": [{ "tip": "HYPER-SPECIFIC tip with real venue names, actual prices, exact times — never generic. Example: 'Book Sukiyabashi Jiro (Ginza) 2 months ahead via hotel concierge only — they reject direct tourist bookings. Lunch omakase ¥55,000 vs dinner ¥110,000, same fish.'", "category": "money" }],
+  "topActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 words" }],
   "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
-  "dayTrips": {
-    "intro": "1-2 sentences on the region's day trip potential and what makes it worth exploring beyond the city",
-    "trips": [
-      {
-        "name": "Real place name (e.g. Sintra)",
-        "distance": "e.g. 28 km",
-        "travelTime": "e.g. 40 min by train",
-        "duration": "Half day",
-        "vibe": "2-3 words e.g. Fairy-tale palaces",
-        "description": "2-3 sentences — what makes this place special, what you'll actually experience there",
-        "mustSee": "One specific landmark or experience with real detail",
-        "tip": "Practical tip — best time to go, how to get there cheap, what to avoid"
-      }
-    ]
-  },
-  "kidFriendly": {
-    "rating": 4,
-    "summary": "2 sentences on overall family-friendliness — safety, infrastructure, attitude toward kids",
-    "highlights": [
-      { "title": "Real attraction name", "description": "Why kids love it — specific details, age relevance, what to expect", "ageGroup": "all" }
-    ],
-    "practicalTips": ["Hyper-specific family tip with real details — e.g. 'Tokyo Disneyland sells out months ahead; book via the official app the moment your trip is set. Arrive 30 min before park open to hit Pooh's Hunny Hunt before the line hits 90 min.'"],
-    "bestFor": "e.g. 'Families with kids 5–12' or 'Teens and young adults'"
-  },
-  "topRestaurants": [{ "name": "Real restaurant name", "cuisine": "type", "priceRange": "$ to $$$$", "mustOrder": "specific dish name", "neighborhood": "specific area", "localTip": "specific booking tip, ordering advice, or secret" }],
-  "airports": [{ "iata": "KIX", "name": "Airport Name", "city": "City", "transitToCity": "travel time and method to destination", "costModifier": 1.0, "note": "one line why this airport" }],
-  "popularRestaurants": [{ "name": "Real restaurant name with most Google reviews", "cuisine": "type", "rating": 4.3, "reviewCount": 12400, "priceRange": "$ to $$$$", "neighborhood": "specific area" }]
+  "airports": [{ "iata": "JFK", "name": "Airport Name", "city": "City", "transitToCity": "time + method", "costModifier": 1.0, "note": "one line" }]
 }
-Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights exactly 5. events exactly 5. insiderTips exactly 5 (keep each tip under 40 words; specific but concise). topRestaurants exactly 4. popularRestaurants exactly 6 (order by estimated real-world Google review count, highest first). neighborhoods exactly 4. monthlyData exactly 12. dayTrips.trips exactly 4 (mix of half-day and full-day; use real place names). dayTrips.duration must be one of: Half day, Full day, Overnight. kidFriendly.rating is 1–5 integer (1=adults only, 5=exceptional for families). kidFriendly.highlights exactly 3 items. kidFriendly.practicalTips exactly 2 items. kidFriendly.ageGroup must be one of: toddler, kids, teens, all. airports: 1-3 entries, include major airports serving the destination. costModifier is relative to the primary airport (1.0 = baseline).
-Valid event types: festival, cultural, sporting, food, music, market.
-Valid insiderTip categories: money, transport, food, culture, safety.`;
+Rules: monthlyData exactly 12 (JAN–DEC). condition one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
+flightCost: round-trip USD from JFK/LAX/ORD. Ranges: domestic $150–550; Mexico/Caribbean $300–900; Europe $450–1,600; Japan/SE Asia $700–1,900; South America $600–1,500; Australia/NZ $1,000–2,400. Peak months push to top of range.
+topActivities exactly 6. neighborhoods exactly 4. airports 1-3 entries.`;
 
-        const rawText = await geminiGenerate(prompt, true, 16384);
-        // Strip markdown fences in case Gemini adds them despite JSON mode
-        const cleanText = rawText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
-        data = JSON.parse(cleanText);
+        const coreRaw = await geminiGenerate(corePrompt, true, 8192);
+        data = JSON.parse(stripFences(coreRaw));
 
-        // Cache successful response for 24h
-        try {
-          localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: data }));
-        } catch { /* storage full — skip */ }
-
-        // Ensure required arrays exist (defensive merge)
         if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
           throw new SyntaxError('Malformed monthlyData in response');
         }
-        // Pad to 12 if Gemini returned fewer (response truncation)
         while (data.monthlyData.length < 12) {
           data.monthlyData.push(data.monthlyData[data.monthlyData.length - 1] ?? { month: 'JAN', flightCost: 800, temp: 65, condition: 'Sunny', note: '', isIdeal: false, crowdLevel: 5 });
         }
 
+        // Show the page immediately with core data
         if (!forTrip) {
+          setIntelligence(data);
+          setActiveMonthIndex(new Date().getMonth());
+          setHasSearched(true);
+          setIsSearching(false);
+        }
+
+        // --- EXTRAS prompt (non-blocking, merges in after) ---
+        const extrasPrompt = `You are an expert travel planner. Destination: ${dest}.
+Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
+{
+  "foodAndCulture": {
+    "categories": [
+      { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "1-2 sentences", "imageKeyword": "2-3 words" }] },
+      { "title": "Lunch & Street Food", "items": [...] },
+      { "title": "Dinner & Fine Dining", "items": [...] },
+      { "title": "Drinks & Nightlife", "items": [...] },
+      { "title": "Café Culture", "items": [...] }
+    ],
+    "mustTry": ["dish or experience"],
+    "culturalEtiquette": [{ "title": "string", "description": "string" }]
+  },
+  "nicheActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 words" }],
+  "seasonalHighlights": [{ "title": "string", "description": "string", "timeOfYear": "string" }],
+  "events": [{ "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
+  "insiderTips": [{ "tip": "Specific tip with real names/prices under 30 words", "category": "money" }],
+  "dayTrips": {
+    "intro": "1 sentence",
+    "trips": [{ "name": "Place", "distance": "km", "travelTime": "time", "duration": "Half day", "vibe": "2 words", "description": "1-2 sentences", "mustSee": "string", "tip": "string" }]
+  },
+  "kidFriendly": {
+    "rating": 4, "summary": "1-2 sentences", "bestFor": "string",
+    "highlights": [{ "title": "string", "description": "string", "ageGroup": "all" }],
+    "practicalTips": ["string"]
+  },
+  "topRestaurants": [{ "name": "string", "cuisine": "string", "priceRange": "$$", "mustOrder": "string", "neighborhood": "string", "localTip": "string" }],
+  "popularRestaurants": [{ "name": "string", "cuisine": "string", "rating": 4.3, "reviewCount": 5000, "priceRange": "$$", "neighborhood": "string" }]
+}
+Rules: each foodAndCulture category has exactly 3 items. mustTry exactly 5. culturalEtiquette exactly 4.
+nicheActivities exactly 4. seasonalHighlights exactly 4. events exactly 4. insiderTips exactly 4.
+dayTrips.trips exactly 3. duration: Half day, Full day, or Overnight. kidFriendly.rating 1-5 integer. kidFriendly.highlights exactly 3. kidFriendly.practicalTips exactly 2. ageGroup: toddler, kids, teens, or all.
+topRestaurants exactly 4. popularRestaurants exactly 5 ordered by review count desc.
+Valid event types: festival, cultural, sporting, food, music, market.
+Valid insiderTip categories: money, transport, food, culture, safety.`;
+
+        const fetchExtras = async () => {
+          try {
+            const extrasRaw = await geminiGenerate(extrasPrompt, true, 8192);
+            const extras = JSON.parse(stripFences(extrasRaw));
+            if (!forTrip) {
+              setIntelligence(prev => {
+                if (!prev) return prev;
+                const merged = { ...prev, ...extras };
+                try { localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: merged })); } catch {}
+                return merged;
+              });
+            } else {
+              data = { ...data, ...extras };
+            }
+          } catch { /* extras are optional — core content already shown */ }
+        };
+
+        // Cache core data immediately so next visit is instant
+        try {
+          localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: data }));
+        } catch { /* storage full — skip */ }
+
+        if (forTrip) {
+          await fetchExtras();
+        } else {
+          fetchExtras(); // non-blocking — page already rendered
           // Kick off real restaurant fetch in parallel (non-blocking)
           const workerUrl = import.meta.env.VITE_RESTAURANT_WORKER_URL;
           if (workerUrl) {
@@ -1546,10 +1567,6 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
               })
               .catch(() => {});
           }
-
-          setIntelligence(data);
-          setActiveMonthIndex(new Date().getMonth());
-          setHasSearched(true);
         }
       } catch (err: any) {
         const errMsg = err?.message || err?.toString() || '';
