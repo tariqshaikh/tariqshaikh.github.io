@@ -1092,26 +1092,40 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
+const GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: maxTokens,
-          ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
-        },
-      }),
+  let lastErr: any;
+  for (const model of GEMINI_MODELS) {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: maxTokens,
+            ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
+          },
+        }),
+      }
+    );
+    const json = await res.json();
+    if (json.error) {
+      const code = json.error.code;
+      lastErr = Object.assign(new Error(json.error.message || 'Gemini error'), { status: code });
+      if (code === 503 || code === 429 || code === 404) continue;
+      throw lastErr;
     }
-  );
-  const json = await res.json();
-  if (json.error) throw Object.assign(new Error(json.error.message || 'Gemini error'), { status: json.error.code });
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new SyntaxError(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
-  return text;
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      lastErr = new SyntaxError(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
+      continue;
+    }
+    return text;
+  }
+  throw lastErr ?? new Error('All Gemini models unavailable');
 }
 
 const DARK_STYLE = `
@@ -1160,15 +1174,6 @@ const DARK_STYLE = `
 `;
 
 export default function Waves() {
-  return (
-    <div className="min-h-screen bg-[#FDFAF5] flex flex-col items-center justify-center gap-6 px-6">
-      <WavesLogo size={56} />
-      <h1 className="text-3xl font-serif text-[#0A1A2E] tracking-tight">Waves</h1>
-      <p className="text-slate-500 text-sm tracking-widest uppercase">Under maintenance — back soon</p>
-      <Link to="/" className="mt-4 text-xs uppercase tracking-widest text-[#0891B2] hover:underline font-mono">← Portfolio</Link>
-    </div>
-  );
-
   const { tripId } = useParams();
   const navigate = useNavigate();
 
