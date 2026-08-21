@@ -1090,25 +1090,27 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
   return <img src={src} alt={alt} className={className} onError={() => setSrc('')} />;
 };
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'openai/gpt-oss-120b',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: maxTokens,
-      ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
-    }),
-  });
+async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
+        },
+      }),
+    }
+  );
   const json = await res.json();
-  if (json.error) {
-    throw Object.assign(new Error(JSON.stringify(json.error)), { status: res.status });
-  }
-  const text = json.choices?.[0]?.message?.content;
-  if (!text) throw new SyntaxError('Empty response from Groq');
+  if (json.error) throw Object.assign(new Error(json.error.message || 'Gemini error'), { status: json.error.code });
+  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new SyntaxError(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
   return text;
 }
 
@@ -1220,7 +1222,7 @@ export default function Waves() {
       }
     } catch {}
 
-    if (!GROQ_API_KEY) {
+    if (!GEMINI_API_KEY) {
       setTrendingList(TRENDING_FALLBACK);
       setTrendingLoading(false);
       return;
@@ -1231,7 +1233,7 @@ export default function Waves() {
 
     (async () => {
       try {
-        const text = await groqGenerate(
+        const text = await geminiGenerate(
           `You are a travel industry analyst. As of ${monthYear}, rank the top 24 trending travel destinations worldwide by actual traveler demand.
 
 MANDATORY — reason through each of these before answering:
@@ -1474,8 +1476,8 @@ Return ONLY a JSON array, no markdown, no explanation:
       if (!forTrip) setIsSearching(true);
       setError(null);
 
-      if (!GROQ_API_KEY) {
-        const msg = "AI search is not configured. Add your GROQ_API_KEY to .env to enable live destination lookup.";
+      if (!GEMINI_API_KEY) {
+        const msg = "AI search is not configured. Add your GEMINI_API_KEY to .env to enable live destination lookup.";
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
@@ -1554,7 +1556,7 @@ Rules: topActivities exactly 6. nicheActivities exactly 4. seasonalHighlights ex
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
-        const rawText = await groqGenerate(prompt, true, 4000);
+        const rawText = await geminiGenerate(prompt, true, 8192);
         // Strip markdown fences in case Gemini adds them despite JSON mode
         const cleanText = rawText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
         data = JSON.parse(cleanText);
@@ -1611,7 +1613,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         const msg = isQuota
           ? "Rate limit hit — wait a minute and try again, or use a demo destination."
           : isKey
-          ? "Invalid API key. Check your GROQ_API_KEY in .env."
+          ? "Invalid API key. Check your GEMINI_API_KEY in .env."
           : isJson
           ? "Response was incomplete — please try again."
           : `Couldn't load "${dest}". Please try again.`;
@@ -1627,7 +1629,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
   };
 
   const fetchFlightEstimates = async (fromAirport: string, toAirport: string, dest: string) => {
-    if (!GROQ_API_KEY) return;
+    if (!GEMINI_API_KEY) return;
     setFetchingFlightCosts(true);
     try {
       const prompt = `You are a flight pricing expert. Estimate realistic round-trip airfare in USD for each month, flying from ${fromAirport} to ${toAirport} (gateway airport for ${dest}).
@@ -1644,7 +1646,7 @@ Rules:
 Return ONLY a JSON object, no markdown, no explanation:
 {"JAN":0,"FEB":0,"MAR":0,"APR":0,"MAY":0,"JUN":0,"JUL":0,"AUG":0,"SEP":0,"OCT":0,"NOV":0,"DEC":0}`;
 
-      const text = await groqGenerate(prompt, false, 300);
+      const text = await geminiGenerate(prompt, false, 300);
       const parsed = JSON.parse(text.trim());
       setCustomFlightCosts(parsed);
       setHomeAirport(fromAirport);
