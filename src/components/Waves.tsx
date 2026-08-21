@@ -2134,8 +2134,8 @@ Return ONLY a JSON object, no markdown, no explanation:
                       <Plane size={10} /> Fly into
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {data.airports.map(ap => {
-                        const isActive = selectedAirportIata === ap.iata || (!selectedAirportIata && ap === data.airports![0]);
+                      {(data.airports ?? []).map(ap => {
+                        const isActive = selectedAirportIata === ap.iata || (!selectedAirportIata && ap === (data.airports ?? [])[0]);
                         return (
                           <button
                             key={ap.iata}
@@ -2437,7 +2437,7 @@ Return ONLY a JSON object, no markdown, no explanation:
 
           {/* Category Tab Bar */}
           <div className="flex flex-wrap gap-2 mb-10">
-            {data.foodAndCulture.categories.map((cat, idx) => (
+            {(data.foodAndCulture?.categories ?? []).map((cat, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveFoodCat(idx)}
@@ -2454,7 +2454,7 @@ Return ONLY a JSON object, no markdown, no explanation:
 
           {/* Tab Content: full-width grid */}
           <AnimatePresence mode="wait">
-            {data.foodAndCulture.categories[activeFoodCat] && (
+            {data.foodAndCulture?.categories?.[activeFoodCat] && (
               <motion.div
                 key={activeFoodCat}
                 initial={{ opacity: 0, y: 10 }}
@@ -2463,7 +2463,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                 transition={{ duration: 0.2 }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16"
               >
-                {data.foodAndCulture.categories[activeFoodCat].items.map((item, i) => (
+                {(data.foodAndCulture?.categories?.[activeFoodCat]?.items ?? []).map((item, i) => (
                   <div key={i} className="group flex gap-4 bg-white border border-black/[0.13] rounded-3xl p-5 hover:border-cyan-500/20 transition-all">
                     <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                       <WikiImg
@@ -2490,7 +2490,7 @@ Return ONLY a JSON object, no markdown, no explanation:
               </div>
               <h4 className="text-[#0A1A2E] font-serif text-xl mb-8">The Must-Haves</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {data.foodAndCulture.mustTry.map((item, i) => (
+                {(data.foodAndCulture?.mustTry ?? []).map((item, i) => (
                   <div key={i} className="flex items-center gap-3 group">
                     <div className="w-7 h-7 rounded-full bg-[#0891B2]/10 border border-cyan-500/20 flex items-center justify-center text-[#0891B2] text-[10px] font-bold shrink-0 transition-all group-hover:bg-cyan-500 group-hover:text-[#0A1A2E]">
                       {i + 1}
@@ -2507,7 +2507,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                 Local Etiquette
               </h4>
               <div className="space-y-6">
-                {data.foodAndCulture.culturalEtiquette.map((item, i) => (
+                {(data.foodAndCulture?.culturalEtiquette ?? []).map((item, i) => (
                   <div key={i} className="relative pl-5 border-l-2 border-teal-400/50 hover:border-teal-500 transition-colors">
                     <h5 className="text-[10px] uppercase tracking-[0.2em] text-[#0891B2] font-bold mb-1">{item.title}</h5>
                     <p className="text-xs text-slate-500 font-light leading-relaxed">"{item.description}"</p>
@@ -2624,7 +2624,7 @@ Return ONLY a JSON object, no markdown, no explanation:
             <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Top Activities</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.topActivities.map((act, i) => (
+            {(data.topActivities ?? []).map((act, i) => (
               <div key={i} className="group flex gap-5 p-6 bg-white border border-black/[0.13] rounded-3xl hover:border-[#0891B2]/25 hover:bg-white transition-all">
                 <span className="text-3xl font-serif text-[#0A1A2E]/10 group-hover:text-cyan-500/30 transition-colors leading-none shrink-0 select-none">
                   {String(i + 1).padStart(2, '0')}
@@ -2645,7 +2645,7 @@ Return ONLY a JSON object, no markdown, no explanation:
             <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Niche Experiences</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.nicheActivities.map((act, i) => (
+            {(data.nicheActivities ?? []).map((act, i) => (
               <a
                 key={i}
                 href={`https://www.google.com/search?q=${encodeURIComponent(act.title + ' ' + destination)}`}
@@ -2675,7 +2675,7 @@ Return ONLY a JSON object, no markdown, no explanation:
             <h2 className="text-3xl md:text-4xl text-[#0A1A2E] font-serif">Seasonal Highlights</h2>
           </div>
           <div className="space-y-6">
-            {data.seasonalHighlights.map((hl, i) => (
+            {(data.seasonalHighlights ?? []).map((hl, i) => (
               <div key={i} className="relative pl-12 pb-12 border-l border-black/[0.13] last:border-0 last:pb-0">
                 <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(8,145,178,0.4)]"></div>
                 <div className="bg-white border border-black/[0.13] rounded-3xl p-8 hover:bg-white/80 transition-all">
