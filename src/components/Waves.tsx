@@ -1204,77 +1204,8 @@ export default function Waves() {
   const [hasSearched, setHasSearched] = useState(false);
   const [trendingPage, setTrendingPage] = useState(0);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const [trendingList, setTrendingList] = useState<{ name: string; reason: string }[]>([]);
-  const [trendingLoading, setTrendingLoading] = useState(true);
-
-  // Fetch AI-curated trending destinations from Groq, cache for 7 days
-  useEffect(() => {
-    const CACHE_KEY = 'waves_trending_ai_v2';
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { ts, data } = JSON.parse(cached);
-        if (Date.now() - ts < 7 * 24 * 60 * 60 * 1000 && Array.isArray(data) && data.length > 0) {
-          setTrendingList(data);
-          setTrendingLoading(false);
-          return;
-        }
-      }
-    } catch {}
-
-    if (!GEMINI_API_KEY) {
-      setTrendingList(TRENDING_FALLBACK);
-      setTrendingLoading(false);
-      return;
-    }
-
-    const now = new Date();
-    const monthYear = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-
-    (async () => {
-      try {
-        const text = await geminiGenerate(
-          `You are a travel industry analyst. As of ${monthYear}, rank the top 24 trending travel destinations worldwide by actual traveler demand.
-
-MANDATORY — reason through each of these before answering:
-
-MAJOR GLOBAL EVENTS 2026 (huge booking drivers — host cities MUST appear):
-- FIFA World Cup 2026 (June–July 2026): hosted across USA, Canada, Mexico. Host cities include New York, Los Angeles, Miami, Dallas, San Francisco, Seattle, Boston, Atlanta, Kansas City, Houston, Philadelphia (USA); Toronto, Vancouver (Canada); Mexico City, Guadalajara, Monterrey (Mexico). Millions of international visitors.
-- Milano Cortina Winter Olympics 2026 (Feb 2026): Milan and Cortina d'Ampezzo, Italy — drove major European travel.
-- Commonwealth Games 2026 (July–Aug): Glasgow, Scotland.
-- Expo 2025 Osaka (through Oct 2025): lingering Japan tourism momentum.
-
-BOOKING PLATFORM SIGNALS:
-- Skyscanner, Kayak, Expedia 2026 trend reports
-- New direct international flight routes launched in 2025-2026
-- Visa-free policy expansions driving new visitor markets
-
-CULTURAL/SOCIAL SIGNALS:
-- Viral TikTok and Instagram travel moments
-- Emerging "off the beaten path" destinations gaining momentum
-- Destinations with strong food/wellness/adventure tourism growth
-
-Return ONLY a JSON array, no markdown, no explanation:
-[{"name":"City, Country","reason":"5 words max why it's hot"}]
-
-24 entries total. World Cup host cities should feature prominently given it's happening NOW. Vary regions globally.`,
-          false,
-          1024
-        );
-        const parsed: { name: string; reason: string }[] = JSON.parse(text.trim());
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: parsed })); } catch {}
-          setTrendingList(parsed);
-        } else {
-          setTrendingList(TRENDING_FALLBACK);
-        }
-      } catch {
-        setTrendingList(TRENDING_FALLBACK);
-      } finally {
-        setTrendingLoading(false);
-      }
-    })();
-  }, []);
+  const [trendingList, setTrendingList] = useState<{ name: string; reason: string }[]>(TRENDING_FALLBACK);
+  const [trendingLoading, setTrendingLoading] = useState(false);
 
   useEffect(() => {
     if (trendingList.length === 0) return;
