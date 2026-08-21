@@ -1108,14 +1108,11 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
     }
   );
   const json = await res.json();
-  console.log('[Waves/Gemini] raw response:', JSON.stringify(json).slice(0, 500));
   if (json.error) {
-    console.error('[Waves/Gemini] API error:', json.error);
     throw Object.assign(new Error(json.error.message || 'Gemini error'), { status: json.error.code });
   }
   const candidate = json.candidates?.[0];
   const finishReason = candidate?.finishReason ?? 'unknown';
-  console.log('[Waves/Gemini] finishReason:', finishReason, '| text length:', candidate?.content?.parts?.[0]?.text?.length ?? 0);
   const text = candidate?.content?.parts?.[0]?.text;
   if (!text) {
     if (finishReason === 'SAFETY' || finishReason === 'RECITATION') {
@@ -1618,7 +1615,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
       } catch (err: any) {
         const errMsg = err?.message || err?.toString() || '';
         const errStatus = err?.status || err?.code || '';
-        console.error("Waves AI error — status:", errStatus, "message:", errMsg, "| isSyntaxError:", err instanceof SyntaxError, "| err:", err);
+        console.error("Waves AI error — status:", errStatus, "message:", errMsg);
         const isQuota = errStatus === 429 || errMsg.includes('429') || errMsg.toLowerCase().includes('rate_limit') || errMsg.toLowerCase().includes('quota');
         const isKey = errStatus === 401 || errStatus === 403 || errMsg.toLowerCase().includes('api key');
         const isJson = err instanceof SyntaxError || errMsg.includes('JSON') || errMsg.includes('Unexpected token') || errMsg.includes('Malformed');
