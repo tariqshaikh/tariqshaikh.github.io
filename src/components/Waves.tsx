@@ -1160,6 +1160,15 @@ const DARK_STYLE = `
 `;
 
 export default function Waves() {
+  return (
+    <div className="min-h-screen bg-[#FDFAF5] flex flex-col items-center justify-center gap-6 px-6">
+      <WavesLogo size={56} />
+      <h1 className="text-3xl font-serif text-[#0A1A2E] tracking-tight">Waves</h1>
+      <p className="text-slate-500 text-sm tracking-widest uppercase">Under maintenance — back soon</p>
+      <Link to="/" className="mt-4 text-xs uppercase tracking-widest text-[#0891B2] hover:underline font-mono">← Portfolio</Link>
+    </div>
+  );
+
   const { tripId } = useParams();
   const navigate = useNavigate();
 
