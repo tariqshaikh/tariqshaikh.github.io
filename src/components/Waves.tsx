@@ -1292,7 +1292,7 @@ export default function Waves() {
     const unsubTrip = onSnapshot(tripRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        if (data.intelligence) {
+        if (data.intelligence && Array.isArray(data.intelligence.monthlyData) && data.intelligence.monthlyData.length > 0) {
           setIntelligence(data.intelligence);
           setHasSearched(true);
         }
@@ -1388,7 +1388,8 @@ export default function Waves() {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const { ts, payload } = JSON.parse(cached);
-          if (Date.now() - ts < 86_400_000) {
+          const isValid = Array.isArray(payload?.monthlyData) && payload.monthlyData.length > 0;
+          if (Date.now() - ts < 86_400_000 && isValid) {
             if (!forTrip) setIsSearching(true);
             data = payload;
             if (!forTrip) {
@@ -1400,6 +1401,8 @@ export default function Waves() {
               }, 400);
             }
             if (!forTrip) return data;
+          } else if (!isValid) {
+            localStorage.removeItem(cacheKey);
           }
         }
       } catch { /* ignore parse errors */ }
@@ -1898,7 +1901,8 @@ Return ONLY a JSON object, no markdown, no explanation:
     );
   }
 
-  const data = intelligence || fallbackIntelligence;
+  const isIntelligenceValid = intelligence !== null && Array.isArray(intelligence.monthlyData) && intelligence.monthlyData.length > 0;
+  const data = isIntelligenceValid ? intelligence! : fallbackIntelligence;
 
   return (
     <div className={`min-h-screen bg-[#FDFAF5] text-slate-700 font-sans selection:bg-[#0891B2]/15 flex flex-col lg:flex-row${isDark ? ' waves-dark' : ''}`}>
