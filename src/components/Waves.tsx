@@ -2455,52 +2455,45 @@ Return ONLY a JSON object, no markdown, no explanation:
             <h2 className="text-4xl md:text-6xl text-[#0A1A2E] font-serif tracking-tight">The Culinary Journey</h2>
           </div>
 
-          {/* Category Tab Bar */}
-          <div className="flex flex-wrap gap-2 mb-10">
-            {(data.foodAndCulture?.categories ?? []).map((cat, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveFoodCat(idx)}
-                className={`px-5 py-2.5 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all ${
-                  activeFoodCat === idx
-                    ? 'bg-cyan-500 text-[#0A1A2E] shadow-[0_0_16px_rgba(6,182,212,0.4)]'
-                    : 'bg-white border border-black/[0.13] text-slate-500 hover:text-[#0A1A2E] hover:border-black/[0.13]'
-                }`}
-              >
-                {cat.title}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content: full-width grid */}
-          <AnimatePresence mode="wait">
-            {data.foodAndCulture?.categories?.[activeFoodCat] && (
-              <motion.div
-                key={activeFoodCat}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16"
-              >
-                {(data.foodAndCulture?.categories?.[activeFoodCat]?.items ?? []).map((item, i) => (
-                  <div key={i} className="group flex gap-4 bg-white border border-black/[0.13] rounded-3xl p-5 hover:border-cyan-500/20 transition-all">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                      <WikiImg
-                        keyword={item.imageKeyword}
-                        alt={item.name}
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                      />
+          {/* All categories stacked */}
+          {(() => {
+            const categoryMeta: Record<string, string> = {
+              'Breakfast & Morning Rituals': 'How the city wakes up',
+              'Lunch & Street Food': 'What locals eat on the go',
+              'Dinner & Fine Dining': 'Where evenings happen',
+              'Drinks & Nightlife': 'After dark',
+              'Café Culture': 'The slow ritual',
+            };
+            return (
+              <div className="space-y-14 mb-16">
+                {(data.foodAndCulture?.categories ?? []).map((cat, idx) => (
+                  <div key={idx}>
+                    <div className="flex items-baseline gap-3 mb-6">
+                      <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#0891B2]">{cat.title}</span>
+                      <span className="text-xs text-slate-400 font-light">{categoryMeta[cat.title] ?? ''}</span>
                     </div>
-                    <div className="flex flex-col justify-center min-w-0">
-                      <h4 className="text-sm text-[#0A1A2E] font-serif mb-1 group-hover:text-[#0891B2] transition-colors leading-snug">{item.name}</h4>
-                      <p className="text-xs text-slate-500 font-light leading-relaxed line-clamp-2">{item.description}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {(cat.items ?? []).map((item, i) => (
+                        <div key={i} className="group flex gap-4 bg-white border border-black/[0.13] rounded-3xl p-5 hover:border-cyan-500/20 transition-all">
+                          <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
+                            <WikiImg
+                              keyword={item.imageKeyword}
+                              alt={item.name}
+                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                            />
+                          </div>
+                          <div className="flex flex-col justify-center min-w-0">
+                            <h4 className="text-sm text-[#0A1A2E] font-serif mb-1 group-hover:text-[#0891B2] transition-colors leading-snug">{item.name}</h4>
+                            <p className="text-xs text-slate-500 font-light leading-relaxed line-clamp-3">{item.description}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+            );
+          })()}
 
           {/* Must-Haves + Etiquette: side by side below the tabs */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
