@@ -1234,6 +1234,7 @@ export default function Waves() {
   }, []);
   const fetchGenRef = useRef(0);
   const [activeFoodCat, setActiveFoodCat] = useState(0);
+  const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
   const [selectedAirportIata, setSelectedAirportIata] = useState<string | null>(null);
@@ -1244,6 +1245,7 @@ export default function Waves() {
   // Reset food category tab and airport state whenever a new destination loads
   useEffect(() => {
     setActiveFoodCat(0);
+    setShowAllNeighborhoods(false);
     setSelectedAirportIata(null);
     setHomeAirportInput('');
     setHomeAirport('');
@@ -1462,7 +1464,7 @@ Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
 }
 Rules: monthlyData exactly 12 (JAN–DEC). condition one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
 flightCost: round-trip USD from JFK/LAX/ORD. Ranges: domestic $150–550; Mexico/Caribbean $300–900; Europe $450–1,600; Japan/SE Asia $700–1,900; South America $600–1,500; Australia/NZ $1,000–2,400. Peak months push to top of range.
-topActivities exactly 6. neighborhoods exactly 4. airports 1-3 entries.`;
+topActivities exactly 6. neighborhoods exactly 6. airports 1-3 entries.`;
 
         const coreRaw = await geminiGenerate(corePrompt, true, 8192);
         data = JSON.parse(stripFences(coreRaw));
@@ -2890,7 +2892,7 @@ Return ONLY a JSON object, no markdown, no explanation:
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {data.neighborhoods.map((hood, i) => (
+              {(showAllNeighborhoods ? data.neighborhoods : data.neighborhoods.slice(0, 4)).map((hood, i) => (
                 <div key={i} className="bg-white border border-black/[0.13] rounded-[2.5rem] p-8 hover:border-[#0891B2]/25 transition-all group">
                   <div className="flex items-start justify-between mb-6">
                     <h4 className="text-2xl text-[#0A1A2E] font-serif group-hover:text-[#0891B2] transition-colors">{hood.name}</h4>
@@ -2909,6 +2911,14 @@ Return ONLY a JSON object, no markdown, no explanation:
                 </div>
               ))}
             </div>
+            {data.neighborhoods.length > 4 && (
+              <button
+                onClick={() => setShowAllNeighborhoods(s => !s)}
+                className="mt-6 flex items-center gap-2 px-6 py-3 rounded-full border border-black/[0.13] bg-white text-[10px] uppercase tracking-widest font-bold text-slate-500 hover:text-[#0891B2] hover:border-[#0891B2]/30 transition-all"
+              >
+                {showAllNeighborhoods ? <><ChevronLeft size={12} /> Show less</> : <><ChevronRight size={12} /> {data.neighborhoods.length - 4} more neighborhoods</>}
+              </button>
+            )}
           </section>
         )}
 
