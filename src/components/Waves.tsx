@@ -1092,38 +1092,52 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-const GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   let lastErr: any;
   for (const model of GEMINI_MODELS) {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            maxOutputTokens: maxTokens,
-            ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
-          },
-        }),
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              maxOutputTokens: maxTokens,
+              ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
+            },
+          }),
+        }
+      );
+      const json = await res.json();
+      if (json.error) {
+        const code = json.error.code;
+        lastErr = Object.assign(new Error(json.error.message || 'Gemini error'), { status: code });
+        if (code === 503 || code === 429 || code === 404) continue;
+        throw lastErr;
       }
-    );
-    const json = await res.json();
-    if (json.error) {
-      const code = json.error.code;
-      lastErr = Object.assign(new Error(json.error.message || 'Gemini error'), { status: code });
-      if (code === 503 || code === 429 || code === 404) continue;
-      throw lastErr;
+      const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        lastErr = new SyntaxError(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
+        continue;
+      }
+      return text;
+    } catch (e: any) {
+      if (e.name === 'AbortError') {
+        lastErr = new Error(`Gemini timeout on ${model}`);
+        continue;
+      }
+      if (e.status === 503 || e.status === 429 || e.status === 404) { lastErr = e; continue; }
+      throw e;
+    } finally {
+      clearTimeout(timeout);
     }
-    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      lastErr = new SyntaxError(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
-      continue;
-    }
-    return text;
   }
   throw lastErr ?? new Error('All Gemini models unavailable');
 }
@@ -1469,7 +1483,7 @@ Rules: monthlyData exactly 12 (JAN–DEC). condition one of: Sunny, Partly Cloud
 flightCost: round-trip USD from JFK/LAX/ORD. Ranges: domestic $150–550; Mexico/Caribbean $300–900; Europe $450–1,600; Japan/SE Asia $700–1,900; South America $600–1,500; Australia/NZ $1,000–2,400. Peak months push to top of range.
 topActivities exactly 6. neighborhoods exactly 6. airports 1-3 entries.`;
 
-        const coreRaw = await geminiGenerate(corePrompt, true, 8192);
+        const coreRaw = await geminiGenerate(corePrompt, true, 4096);
         data = JSON.parse(stripFences(coreRaw));
 
         if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
