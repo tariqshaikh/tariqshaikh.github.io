@@ -6,7 +6,7 @@ import {
   ThermometerSun, CheckCircle2, RefreshCw, Sparkles, Plane,
   Bookmark, SlidersHorizontal, Clock, AlertCircle,
   Copy, Link2, Ghost, Crown, DollarSign,
-  Lightbulb, Map as MapIcon, Info, Star, Wallet, ChevronRight, ChevronLeft, Moon
+  Lightbulb, Map as MapIcon, Info, Star, Wallet, ChevronRight, ChevronLeft, Moon, ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { logVisit } from '../lib/analytics';
@@ -1235,6 +1235,7 @@ export default function Waves() {
   const fetchGenRef = useRef(0);
   const [activeFoodCat, setActiveFoodCat] = useState(0);
   const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
+  const [extrasLoaded, setExtrasLoaded] = useState(false);
   
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
   const [selectedAirportIata, setSelectedAirportIata] = useState<string | null>(null);
@@ -1380,8 +1381,9 @@ export default function Waves() {
 
 
   const fetchDestinationIntelligence = async (dest: string, forTrip: boolean = false) => {
+    if (!forTrip) setExtrasLoaded(false);
     // Check for Demo Data first to bypass API
-    const demoMatch = Object.keys(DEMO_DATA).find(key => 
+    const demoMatch = Object.keys(DEMO_DATA).find(key =>
       key.toLowerCase().includes(dest.toLowerCase()) || dest.toLowerCase().includes(key.toLowerCase())
     );
 
@@ -1415,6 +1417,7 @@ export default function Waves() {
                 setActiveMonthIndex(new Date().getMonth());
                 setHasSearched(true);
                 setIsSearching(false);
+                if (payload.foodAndCulture) setExtrasLoaded(true);
               }, 400);
             }
             if (!forTrip) return data;
@@ -1535,6 +1538,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                 try { localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: merged })); } catch {}
                 return merged;
               });
+              setExtrasLoaded(true);
             } else {
               data = { ...data, ...extras };
             }
@@ -2360,8 +2364,8 @@ Return ONLY a JSON object, no markdown, no explanation:
         </section>
 
         {/* The Draw: Why & When - WITH BUDGET INSIGHTS */}
-        <section id="overview" className="mb-20 grid grid-cols-1 xl:grid-cols-3 gap-12 scroll-mt-16">
-          <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-12">
+        <section id="overview" className="mb-20 scroll-mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-[#0891B2]/10 flex items-center justify-center text-[#0891B2]">
@@ -2405,60 +2409,26 @@ Return ONLY a JSON object, no markdown, no explanation:
             )}
           </div>
           
-          {/* Weather Card - REFINED */}
-          <div className="bg-[#F7F2E8] border border-black/[0.13] rounded-3xl p-8 flex flex-col shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#0891B2]/[0.06] rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#0891B2]/10 transition-colors"></div>
-            
-            <div className="flex items-center justify-between mb-8 relative z-10">
-              <span className="text-[10px] uppercase tracking-widest text-[#0891B2] font-black px-3 py-1 bg-[#0891B2]/10 rounded-full">Climate Pulse</span>
-              {(() => {
-                const monthData = data.monthlyData[activeMonthIndex];
-                const cond = monthData?.condition || "Sunny";
-                if (cond.includes('Sun')) return <Sun size={24} className="text-amber-700" />;
-                if (cond.includes('Rain')) return <CloudRain size={24} className="text-[#0891B2]" />;
-                if (cond.includes('Snow')) return <Snowflake size={24} className="text-[#0891B2]" />;
-                return <Cloud size={24} className="text-slate-500" />;
-              })()}
-            </div>
-
-            <div className="flex items-center justify-between gap-1 mb-10 bg-white p-1 rounded-2xl relative z-10">
-              {data.monthlyData.map((m, idx) => (
-                <button
-                  key={m.month}
-                  onClick={() => setActiveMonthIndex(idx)}
-                  className={`flex-1 text-[9px] py-2 rounded-xl transition-all font-black uppercase ${
-                    activeMonthIndex === idx 
-                      ? 'bg-cyan-500 text-[#0A1A2E] shadow-lg shadow-cyan-500/20' 
-                      : 'text-slate-600 hover:text-slate-500'
-                  }`}
-                >
-                  {m.month.substring(0, 1)}
-                </button>
-              ))}
-            </div>
-            
-            <div className="flex items-baseline gap-2 mb-4 relative z-10">
-              <span className="text-7xl text-[#0A1A2E] font-light tracking-tighter">{data.monthlyData[activeMonthIndex]?.temp || 0}°</span>
-              <span className="text-2xl text-slate-500 font-serif">F</span>
-            </div>
-            
-            <p className="text-sm text-slate-700 font-light leading-relaxed relative z-10">
-              {data.monthlyData[activeMonthIndex]?.note || "Select a month to see local weather context."}
-            </p>
-          </div>
         </section>
 
-        {/* Food & Culture Section - Editorial Redesign */}
-        <section id="dining" className="mb-32 scroll-mt-16">
-          <div className="flex items-center gap-4 mb-16">
-            <div className="w-12 h-12 rounded-2xl bg-[#0891B2]/10 flex items-center justify-center">
-              <Sparkles size={28} className="text-[#0891B2]" />
+        {/* Extras fade in once loaded — prevents abrupt pop-in */}
+        <motion.div
+          animate={{ opacity: extrasLoaded ? 1 : 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+        >
+
+        {/* Food & Culture Section - Compact Tabbed */}
+        <section id="dining" className="mb-20 scroll-mt-16">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="w-10 h-10 rounded-xl bg-[#0891B2]/10 flex items-center justify-center">
+              <Sparkles size={20} className="text-[#0891B2]" />
             </div>
-            <h2 className="text-4xl md:text-6xl text-[#0A1A2E] font-serif tracking-tight">The Culinary Journey</h2>
+            <h2 className="text-3xl text-[#0A1A2E] font-serif tracking-tight">Culinary Journey</h2>
           </div>
 
-          {/* All categories stacked */}
-          {(() => {
+          {(data.foodAndCulture?.categories ?? []).length > 0 && (() => {
+            const categories = data.foodAndCulture!.categories ?? [];
+            const cat = categories[activeFoodCat] ?? categories[0];
             const categoryMeta: Record<string, string> = {
               'Breakfast & Morning Rituals': 'How the city wakes up',
               'Lunch & Street Food': 'What locals eat on the go',
@@ -2467,70 +2437,99 @@ Return ONLY a JSON object, no markdown, no explanation:
               'Café Culture': 'The slow ritual',
             };
             return (
-              <div className="space-y-14 mb-16">
-                {(data.foodAndCulture?.categories ?? []).map((cat, idx) => (
-                  <div key={idx}>
-                    <div className="flex items-baseline gap-3 mb-6">
-                      <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#0891B2]">{cat.title}</span>
-                      <span className="text-xs text-slate-400 font-light">{categoryMeta[cat.title] ?? ''}</span>
+              <div>
+                {/* Compact pill tabs */}
+                <div className="flex gap-2 flex-wrap mb-6">
+                  {categories.map((c, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveFoodCat(idx)}
+                      className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 rounded-full transition-all ${
+                        activeFoodCat === idx
+                          ? 'bg-[#0891B2] text-white'
+                          : 'bg-black/[0.05] text-slate-500 hover:bg-black/[0.09]'
+                      }`}
+                    >
+                      {c.title.split(' & ')[0].split(' ')[0]}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Active category label */}
+                <div className="flex items-baseline gap-3 mb-4">
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#0891B2]">{cat.title}</span>
+                  <span className="text-xs text-slate-400 font-light">{categoryMeta[cat.title] ?? ''}</span>
+                </div>
+
+                {/* Items — compact clickable cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+                  {(cat.items ?? []).map((item, i) => (
+                    <a
+                      key={i}
+                      href={`https://www.google.com/search?q=${encodeURIComponent(item.name + ' ' + data.title)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-3 bg-white border border-black/[0.13] rounded-2xl p-4 hover:border-[#0891B2]/40 hover:shadow-sm transition-all"
+                    >
+                      <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                        <WikiImg
+                          keyword={item.imageKeyword}
+                          alt={item.name}
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-[#0A1A2E] font-medium group-hover:text-[#0891B2] transition-colors leading-snug truncate">{item.name}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">{item.description}</p>
+                      </div>
+                      <ExternalLink size={12} className="text-slate-300 group-hover:text-[#0891B2] shrink-0 transition-colors" />
+                    </a>
+                  ))}
+                </div>
+
+                {/* Must-Haves as tight chips */}
+                {(data.foodAndCulture?.mustTry ?? []).length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mb-3">Must Try</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(data.foodAndCulture?.mustTry ?? []).map((item, i) => (
+                        <a
+                          key={i}
+                          href={`https://www.google.com/search?q=${encodeURIComponent(item + ' ' + data.title)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F7F2E8] border border-black/[0.09] rounded-full text-xs text-slate-700 hover:border-[#0891B2]/40 hover:text-[#0891B2] transition-all"
+                        >
+                          <span className="text-[9px] font-bold text-[#0891B2]">{i + 1}</span>
+                          {item}
+                        </a>
+                      ))}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {(cat.items ?? []).map((item, i) => (
-                        <div key={i} className="group flex gap-4 bg-white border border-black/[0.13] rounded-3xl p-5 hover:border-cyan-500/20 transition-all">
-                          <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                            <WikiImg
-                              keyword={item.imageKeyword}
-                              alt={item.name}
-                              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                            />
-                          </div>
-                          <div className="flex flex-col justify-center min-w-0">
-                            <h4 className="text-sm text-[#0A1A2E] font-serif mb-1 group-hover:text-[#0891B2] transition-colors leading-snug">{item.name}</h4>
-                            <p className="text-xs text-slate-500 font-light leading-relaxed line-clamp-3">{item.description}</p>
+                  </div>
+                )}
+
+                {/* Cultural Etiquette — compact inline */}
+                {(data.foodAndCulture?.culturalEtiquette ?? []).length > 0 && (
+                  <div className="bg-teal-500/[0.06] border border-teal-400/20 rounded-2xl p-5">
+                    <p className="text-[9px] uppercase tracking-widest text-teal-600 font-bold mb-4 flex items-center gap-2">
+                      <Users size={10} /> Local Etiquette
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {(data.foodAndCulture?.culturalEtiquette ?? []).map((item, i) => (
+                        <div key={i} className="flex gap-2">
+                          <div className="w-1 rounded-full bg-teal-400/50 shrink-0 mt-1" />
+                          <div>
+                            <p className="text-[10px] font-bold text-teal-700 mb-0.5">{item.title}</p>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">{item.description}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             );
           })()}
-
-          {/* Must-Haves + Etiquette: side by side below the tabs */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-[#F7F2E8] border border-black/[0.13] rounded-[2.5rem] p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-6 opacity-5">
-                <CheckCircle2 size={100} />
-              </div>
-              <h4 className="text-[#0A1A2E] font-serif text-xl mb-8">The Must-Haves</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(data.foodAndCulture?.mustTry ?? []).map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 group">
-                    <div className="w-7 h-7 rounded-full bg-[#0891B2]/10 border border-cyan-500/20 flex items-center justify-center text-[#0891B2] text-[10px] font-bold shrink-0 transition-all group-hover:bg-cyan-500 group-hover:text-[#0A1A2E]">
-                      {i + 1}
-                    </div>
-                    <span className="text-sm text-slate-700 group-hover:text-[#0A1A2E] transition-colors">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-teal-500/10 to-cyan-500/5 border border-black/[0.13] rounded-[2.5rem] p-8">
-              <h4 className="text-[#0A1A2E] font-serif text-xl mb-8 flex items-center gap-3">
-                <Users size={18} className="text-[#0891B2]" />
-                Local Etiquette
-              </h4>
-              <div className="space-y-6">
-                {(data.foodAndCulture?.culturalEtiquette ?? []).map((item, i) => (
-                  <div key={i} className="relative pl-5 border-l-2 border-teal-400/50 hover:border-teal-500 transition-colors">
-                    <h5 className="text-[10px] uppercase tracking-[0.2em] text-[#0891B2] font-bold mb-1">{item.title}</h5>
-                    <p className="text-xs text-slate-500 font-light leading-relaxed">"{item.description}"</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* Top Restaurants */}
@@ -3152,6 +3151,8 @@ Return ONLY a JSON object, no markdown, no explanation:
             })()}
           </section>
         )}
+        </motion.div>{/* end extras fade wrapper */}
+
       </main>
       <InviteModal
         show={showInviteModal}
