@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   Calendar, Users, Bell, TrendingDown, TrendingUp,
@@ -1232,6 +1232,7 @@ export default function Waves() {
     const t = setInterval(() => setPlaceholderIdx(i => (i + 1) % PLACEHOLDER_CYCLE.length), 3000);
     return () => clearInterval(t);
   }, []);
+  const fetchGenRef = useRef(0);
   const [activeFoodCat, setActiveFoodCat] = useState(0);
   
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
@@ -1519,9 +1520,11 @@ topRestaurants exactly 4. popularRestaurants exactly 5 ordered by review count d
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
+        const myGen = ++fetchGenRef.current;
         const fetchExtras = async () => {
           try {
             const extrasRaw = await geminiGenerate(extrasPrompt, true, 8192);
+            if (fetchGenRef.current !== myGen) return; // a newer search started — discard
             const extras = JSON.parse(stripFences(extrasRaw));
             if (!forTrip) {
               setIntelligence(prev => {
@@ -2839,7 +2842,7 @@ Return ONLY a JSON object, no markdown, no explanation:
 
             {/* Highlights grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {data.kidFriendly.highlights.map((hl, i) => {
+              {(data.kidFriendly.highlights ?? []).map((hl, i) => {
                 const ageColors: Record<string, string> = {
                   toddler: 'bg-pink-50 text-pink-600 border-pink-200',
                   kids: 'bg-sky-50 text-sky-600 border-sky-200',
@@ -2868,7 +2871,7 @@ Return ONLY a JSON object, no markdown, no explanation:
             <div className="bg-white border border-black/[0.13] rounded-3xl p-8">
               <h4 className="text-sm font-semibold tracking-widest uppercase text-slate-400 mb-6">Family Tips</h4>
               <div className="space-y-4">
-                {data.kidFriendly.practicalTips.map((tip, i) => (
+                {(data.kidFriendly.practicalTips ?? []).map((tip, i) => (
                   <div key={i} className="flex gap-4">
                     <div className="w-6 h-6 rounded-full bg-amber-400/15 flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-[10px] font-bold text-amber-600">{i + 1}</span>
@@ -2917,7 +2920,7 @@ Return ONLY a JSON object, no markdown, no explanation:
         )}
 
         {/* Day Trips */}
-        {data.dayTrips && data.dayTrips.trips.length > 0 && (
+        {data.dayTrips && Array.isArray(data.dayTrips.trips) && data.dayTrips.trips.length > 0 && (
           <section id="day-trips" className="mb-24 scroll-mt-16">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
