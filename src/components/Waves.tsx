@@ -1092,7 +1092,7 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
 
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   let lastErr: any;
@@ -1556,7 +1556,9 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
             } else {
               data = { ...data, ...extras };
             }
-          } catch { /* extras are optional — core content already shown */ }
+          } catch {
+            if (!forTrip) setExtrasLoaded(true); // always reveal content even if extras fail
+          }
         };
 
         // Cache core data immediately so next visit is instant
