@@ -1092,7 +1092,7 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-const GEMINI_MODELS = ['gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-2.5-flash'];
 
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   let lastErr: any;
@@ -1606,7 +1606,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
           ? "Invalid API key. Check your GEMINI_API_KEY in .env."
           : isJson
           ? "Response was incomplete — please try again."
-          : `Couldn't load "${dest}". [${errStatus || 'no-status'}: ${errMsg.slice(0, 120)}]`;
+          : `Couldn't load "${dest}". Please try again.`;
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
