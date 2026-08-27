@@ -1091,6 +1091,7 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 };
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-flash-latest'];
 
@@ -1140,6 +1141,41 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
     }
   }
   throw lastErr ?? new Error('All Gemini models unavailable');
+}
+
+async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: maxTokens,
+        ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
+      }),
+    });
+    const json = await res.json();
+    if (json.error) throw Object.assign(new Error(json.error.message || 'Groq error'), { status: json.error.status });
+    const text = json.choices?.[0]?.message?.content;
+    if (!text) throw new Error('Empty Groq response');
+    return text;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
+  if (GEMINI_API_KEY) {
+    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch { /* fall through to Groq */ }
+  }
+  if (GROQ_API_KEY) {
+    return groqGenerate(prompt, jsonMode, Math.min(maxTokens, 8192));
+  }
+  throw new Error('No AI provider configured');
 }
 
 const DARK_STYLE = `
@@ -1524,9 +1560,9 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         const myGen = ++fetchGenRef.current;
 
         // Fire core and extras simultaneously — page shows when core resolves, extras fade in after
-        const extrasPromise = forTrip ? null : geminiGenerate(extrasPrompt, true, 8192).catch(() => null);
+        const extrasPromise = forTrip ? null : aiGenerate(extrasPrompt, true, 8192).catch(() => null);
 
-        const coreRaw = await geminiGenerate(corePrompt, true, 4096);
+        const coreRaw = await aiGenerate(corePrompt, true, 4096);
         data = JSON.parse(stripFences(coreRaw));
 
         if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
@@ -1552,7 +1588,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         if (forTrip) {
           // Trip path: extras sequentially
           try {
-            const extrasRaw = await geminiGenerate(extrasPrompt, true, 8192);
+            const extrasRaw = await aiGenerate(extrasPrompt, true, 8192);
             data = { ...data, ...JSON.parse(stripFences(extrasRaw)) };
           } catch { /* extras optional */ }
         } else {
@@ -1636,7 +1672,7 @@ Rules:
 Return ONLY a JSON object, no markdown, no explanation:
 {"JAN":0,"FEB":0,"MAR":0,"APR":0,"MAY":0,"JUN":0,"JUL":0,"AUG":0,"SEP":0,"OCT":0,"NOV":0,"DEC":0}`;
 
-      const text = await geminiGenerate(prompt, false, 300);
+      const text = await aiGenerate(prompt, false, 300);
       const parsed = JSON.parse(text.trim());
       setCustomFlightCosts(parsed);
       setHomeAirport(fromAirport);
