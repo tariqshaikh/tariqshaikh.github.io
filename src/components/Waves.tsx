@@ -1143,7 +1143,7 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
   throw lastErr ?? new Error('All Gemini models unavailable');
 }
 
-async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096): Promise<string> {
+async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096, model = 'llama-3.3-70b-versatile'): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
   try {
@@ -1152,7 +1152,7 @@ async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096):
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` },
       signal: controller.signal,
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: maxTokens,
         ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
@@ -1166,6 +1166,15 @@ async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096):
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function aiGenerateFast(prompt: string, jsonMode = false, maxTokens = 4096): Promise<string> {
+  if (GROQ_API_KEY) {
+    try { return await groqGenerate(prompt, jsonMode, maxTokens, 'llama-3.1-8b-instant'); } catch { /* fall through */ }
+    try { return await groqGenerate(prompt, jsonMode, maxTokens, 'llama-3.3-70b-versatile'); } catch { /* fall through */ }
+  }
+  if (GEMINI_API_KEY) return geminiGenerate(prompt, jsonMode, maxTokens);
+  throw new Error('No AI provider configured');
 }
 
 async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
@@ -1222,6 +1231,34 @@ const DARK_STYLE = `
   .waves-dark .shadow-2xl { box-shadow: 0 25px 60px rgba(0,0,0,0.8) !important; }
   .waves-dark .shadow-sm  { box-shadow: 0 1px 4px rgba(0,0,0,0.4) !important; }
 `;
+
+const LOADING_HINTS = [
+  "Pulling flight price patterns…",
+  "Mapping the neighborhoods…",
+  "Finding the best local spots…",
+  "Reading the seasonal trends…",
+  "Sourcing insider tips…",
+  "Almost there…",
+];
+function LoadingHints() {
+  const [idx, setIdx] = React.useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % LOADING_HINTS.length), 2200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <motion.p
+      key={idx}
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      className="text-xs text-slate-400 font-light"
+    >
+      {LOADING_HINTS[idx]}
+    </motion.p>
+  );
+}
 
 export default function Waves() {
   const { tripId } = useParams();
@@ -1491,33 +1528,10 @@ export default function Waves() {
       try {
         const stripFences = (t: string) => t.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
 
-        // --- CORE prompt (always fits in ~4k tokens) ---
-        const corePrompt = `You are an expert travel planner. Destination: ${dest}.
-Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
-{
-  "title": "Catchy 2-word title e.g. The Ultimate",
-  "subtitle": "Destination tagline e.g. Kyoto Experience",
-  "summary": "2-3 sentences on vibe and appeal",
-  "whyVisit": "2-3 sentences on why people visit",
-  "whenToVisit": "2-3 sentences on best times and crowds",
-  "averageDailySpend": 150,
-  "seasons": { "high": "months", "low": "months", "shoulder": "months" },
-  "practicalInfo": {
-    "visa": "string", "currency": "string", "language": "string",
-    "tipping": "string", "safety": "string", "bestTransport": "string",
-    "budgetBreakdown": { "budget": "range + notes", "midRange": "range + notes", "luxury": "range + notes" }
-  },
-  "weatherCard": { "condition": "Sunny", "tempHigh": 75, "tempLow": 55, "note": "string", "month": "October" },
-  "monthlyData": [
-    { "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "one insight", "isIdeal": false, "crowdLevel": 4 }
-  ],
-  "topActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 words" }],
-  "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "string", "mustSee": "string" }],
-  "airports": [{ "iata": "JFK", "name": "Airport Name", "city": "City", "transitToCity": "time + method", "costModifier": 1.0, "note": "one line" }]
-}
-Rules: monthlyData exactly 12 (JAN–DEC). condition one of: Sunny, Partly Cloudy, Rainy, Snow. isIdeal true for max 3 months.
-flightCost: round-trip USD from JFK/LAX/ORD. Ranges: domestic $150–550; Mexico/Caribbean $300–900; Europe $450–1,600; Japan/SE Asia $700–1,900; South America $600–1,500; Australia/NZ $1,000–2,400. Peak months push to top of range.
-topActivities exactly 6. neighborhoods exactly 6. airports 1-3 entries.`;
+        // --- CORE prompt — lean, fast, above-fold only ---
+        const corePrompt = `Travel expert. Destination: ${dest}. Return ONLY valid JSON, no markdown:
+{"title":"short title","subtitle":"tagline","summary":"2 sentences","whyVisit":"2 sentences","whenToVisit":"2 sentences","averageDailySpend":150,"seasons":{"high":"months","low":"months","shoulder":"months"},"monthlyData":[{"month":"JAN","flightCost":800,"temp":55,"condition":"Sunny","note":"under 8 words","isIdeal":false,"crowdLevel":4}],"topActivities":[{"title":"string","description":"1 sentence","imageKeyword":"2 words"}],"airports":[{"iata":"JFK","name":"Airport Name","city":"City","transitToCity":"time + method","costModifier":1.0,"note":"one line"}]}
+Rules: monthlyData exactly 12 (JAN-DEC). condition: Sunny|Partly Cloudy|Rainy|Snow. isIdeal true for max 3 months. flightCost round-trip USD: domestic $150-550, Mexico/Caribbean $300-900, Europe $450-1600, Asia $700-1900, Australia/NZ $1000-2400. topActivities exactly 4. airports 1-3.`;
 
         // --- EXTRAS prompt ---
         const extrasPrompt = `You are an expert travel planner. Destination: ${dest}.
@@ -1547,22 +1561,23 @@ Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
     "highlights": [{ "title": "string", "description": "string", "ageGroup": "all" }],
     "practicalTips": ["string"]
   },
+  "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "1 sentence", "mustSee": "string" }],
+  "practicalInfo": { "visa": "string", "currency": "string", "language": "string", "tipping": "string", "safety": "string", "bestTransport": "string", "budgetBreakdown": { "budget": "range", "midRange": "range", "luxury": "range" } },
   "topRestaurants": [{ "name": "string", "cuisine": "string", "priceRange": "$$", "mustOrder": "string", "neighborhood": "string", "localTip": "string" }],
   "popularRestaurants": [{ "name": "string", "cuisine": "string", "rating": 4.3, "reviewCount": 5000, "priceRange": "$$", "neighborhood": "string" }]
 }
-Rules: each foodAndCulture category has exactly 3 items. mustTry exactly 5. culturalEtiquette exactly 4.
+Rules: each foodAndCulture category exactly 3 items. mustTry exactly 5. culturalEtiquette exactly 4.
 nicheActivities exactly 4. seasonalHighlights exactly 4. events exactly 4. insiderTips exactly 4.
-dayTrips.trips exactly 3. duration: Half day, Full day, or Overnight. kidFriendly.rating 1-5 integer. kidFriendly.highlights exactly 3. kidFriendly.practicalTips exactly 2. ageGroup: toddler, kids, teens, or all.
-topRestaurants exactly 4. popularRestaurants exactly 5 ordered by review count desc.
+neighborhoods exactly 6. dayTrips.trips exactly 3. duration: Half day, Full day, or Overnight.
+kidFriendly.rating 1-5 integer. kidFriendly.highlights exactly 3. kidFriendly.practicalTips exactly 2. ageGroup: toddler, kids, teens, or all.
+topRestaurants exactly 4. popularRestaurants exactly 5.
 Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
         const myGen = ++fetchGenRef.current;
 
-        // Fire core and extras simultaneously — page shows when core resolves, extras fade in after
-        const extrasPromise = forTrip ? null : aiGenerate(extrasPrompt, true, 8192).catch(() => null);
-
-        const coreRaw = await aiGenerate(corePrompt, true, 8192);
+        // Core first with fast model — page renders immediately. Extras sequential after.
+        const coreRaw = await aiGenerateFast(corePrompt, true, 4096);
         data = JSON.parse(stripFences(coreRaw));
 
         if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
@@ -1586,16 +1601,16 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         } catch { /* storage full — skip */ }
 
         if (forTrip) {
-          // Trip path: extras sequentially
           try {
             const extrasRaw = await aiGenerate(extrasPrompt, true, 8192);
             data = { ...data, ...JSON.parse(stripFences(extrasRaw)) };
           } catch { /* extras optional */ }
         } else {
-          // Non-trip: extras already in flight, merge when ready
-          extrasPromise!.then(extrasRaw => {
-            if (fetchGenRef.current !== myGen || !extrasRaw) { setExtrasLoaded(true); return; }
+          // Non-blocking extras — fires after core renders the page
+          (async () => {
             try {
+              const extrasRaw = await aiGenerate(extrasPrompt, true, 8192);
+              if (fetchGenRef.current !== myGen) return;
               const extras = JSON.parse(stripFences(extrasRaw));
               setIntelligence(prev => {
                 if (!prev) return prev;
@@ -1603,9 +1618,9 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
                 try { localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: merged })); } catch {}
                 return merged;
               });
-            } catch { /* ignore parse error */ }
+            } catch { /* extras optional */ }
             setExtrasLoaded(true);
-          }).catch(() => { setExtrasLoaded(true); });
+          })();
           // Kick off real restaurant fetch in parallel (non-blocking)
           const workerUrl = import.meta.env.VITE_RESTAURANT_WORKER_URL;
           if (workerUrl) {
@@ -1793,7 +1808,8 @@ Return ONLY a JSON object, no markdown, no explanation:
           </svg>
           <div className="text-center">
             <p className="text-[#0A1A2E] font-serif text-2xl mb-3 tracking-tight">Charting the waves</p>
-            <p className="text-slate-500 text-sm tracking-widest uppercase">{destination}</p>
+            <p className="text-slate-500 text-sm tracking-widest uppercase mb-4">{destination}</p>
+            <LoadingHints />
           </div>
         </div>
         {/* Subtle animated dots */}
