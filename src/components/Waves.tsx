@@ -1169,11 +1169,11 @@ async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096):
 }
 
 async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
-  if (GEMINI_API_KEY) {
-    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch { /* fall through to Groq */ }
-  }
   if (GROQ_API_KEY) {
-    return groqGenerate(prompt, jsonMode, Math.min(maxTokens, 8192));
+    try { return await groqGenerate(prompt, jsonMode, Math.min(maxTokens, 8192)); } catch { /* fall through to Gemini */ }
+  }
+  if (GEMINI_API_KEY) {
+    return geminiGenerate(prompt, jsonMode, maxTokens);
   }
   throw new Error('No AI provider configured');
 }
@@ -1562,7 +1562,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         // Fire core and extras simultaneously — page shows when core resolves, extras fade in after
         const extrasPromise = forTrip ? null : aiGenerate(extrasPrompt, true, 8192).catch(() => null);
 
-        const coreRaw = await aiGenerate(corePrompt, true, 4096);
+        const coreRaw = await aiGenerate(corePrompt, true, 8192);
         data = JSON.parse(stripFences(coreRaw));
 
         if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
