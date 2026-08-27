@@ -1606,7 +1606,7 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
           ? "Invalid API key. Check your GEMINI_API_KEY in .env."
           : isJson
           ? "Response was incomplete — please try again."
-          : `Couldn't load "${dest}". Please try again.`;
+          : `Couldn't load "${dest}". [${errStatus || 'no-status'}: ${errMsg.slice(0, 120)}]`;
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
