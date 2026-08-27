@@ -1092,7 +1092,7 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-2.5-flash'];
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-flash-latest'];
 
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   let lastErr: any;
@@ -1483,25 +1483,7 @@ Rules: monthlyData exactly 12 (JAN–DEC). condition one of: Sunny, Partly Cloud
 flightCost: round-trip USD from JFK/LAX/ORD. Ranges: domestic $150–550; Mexico/Caribbean $300–900; Europe $450–1,600; Japan/SE Asia $700–1,900; South America $600–1,500; Australia/NZ $1,000–2,400. Peak months push to top of range.
 topActivities exactly 6. neighborhoods exactly 6. airports 1-3 entries.`;
 
-        const coreRaw = await geminiGenerate(corePrompt, true, 4096);
-        data = JSON.parse(stripFences(coreRaw));
-
-        if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
-          throw new SyntaxError('Malformed monthlyData in response');
-        }
-        while (data.monthlyData.length < 12) {
-          data.monthlyData.push(data.monthlyData[data.monthlyData.length - 1] ?? { month: 'JAN', flightCost: 800, temp: 65, condition: 'Sunny', note: '', isIdeal: false, crowdLevel: 5 });
-        }
-
-        // Show the page immediately with core data
-        if (!forTrip) {
-          setIntelligence(data);
-          setActiveMonthIndex(new Date().getMonth());
-          setHasSearched(true);
-          setIsSearching(false);
-        }
-
-        // --- EXTRAS prompt (non-blocking, merges in after) ---
+        // --- EXTRAS prompt ---
         const extrasPrompt = `You are an expert travel planner. Destination: ${dest}.
 Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
 {
@@ -1540,26 +1522,27 @@ Valid event types: festival, cultural, sporting, food, music, market.
 Valid insiderTip categories: money, transport, food, culture, safety.`;
 
         const myGen = ++fetchGenRef.current;
-        const fetchExtras = async () => {
-          try {
-            const extrasRaw = await geminiGenerate(extrasPrompt, true, 8192);
-            if (fetchGenRef.current !== myGen) return; // a newer search started — discard
-            const extras = JSON.parse(stripFences(extrasRaw));
-            if (!forTrip) {
-              setIntelligence(prev => {
-                if (!prev) return prev;
-                const merged = { ...prev, ...extras };
-                try { localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: merged })); } catch {}
-                return merged;
-              });
-              setExtrasLoaded(true);
-            } else {
-              data = { ...data, ...extras };
-            }
-          } catch {
-            if (!forTrip) setExtrasLoaded(true); // always reveal content even if extras fail
-          }
-        };
+
+        // Fire core and extras simultaneously — page shows when core resolves, extras fade in after
+        const extrasPromise = forTrip ? null : geminiGenerate(extrasPrompt, true, 8192).catch(() => null);
+
+        const coreRaw = await geminiGenerate(corePrompt, true, 4096);
+        data = JSON.parse(stripFences(coreRaw));
+
+        if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
+          throw new SyntaxError('Malformed monthlyData in response');
+        }
+        while (data.monthlyData.length < 12) {
+          data.monthlyData.push(data.monthlyData[data.monthlyData.length - 1] ?? { month: 'JAN', flightCost: 800, temp: 65, condition: 'Sunny', note: '', isIdeal: false, crowdLevel: 5 });
+        }
+
+        // Show the page immediately with core data
+        if (!forTrip) {
+          setIntelligence(data);
+          setActiveMonthIndex(new Date().getMonth());
+          setHasSearched(true);
+          setIsSearching(false);
+        }
 
         // Cache core data immediately so next visit is instant
         try {
@@ -1567,9 +1550,26 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
         } catch { /* storage full — skip */ }
 
         if (forTrip) {
-          await fetchExtras();
+          // Trip path: extras sequentially
+          try {
+            const extrasRaw = await geminiGenerate(extrasPrompt, true, 8192);
+            data = { ...data, ...JSON.parse(stripFences(extrasRaw)) };
+          } catch { /* extras optional */ }
         } else {
-          fetchExtras(); // non-blocking — page already rendered
+          // Non-trip: extras already in flight, merge when ready
+          extrasPromise!.then(extrasRaw => {
+            if (fetchGenRef.current !== myGen || !extrasRaw) { setExtrasLoaded(true); return; }
+            try {
+              const extras = JSON.parse(stripFences(extrasRaw));
+              setIntelligence(prev => {
+                if (!prev) return prev;
+                const merged = { ...prev, ...extras };
+                try { localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: merged })); } catch {}
+                return merged;
+              });
+            } catch { /* ignore parse error */ }
+            setExtrasLoaded(true);
+          }).catch(() => { setExtrasLoaded(true); });
           // Kick off real restaurant fetch in parallel (non-blocking)
           const workerUrl = import.meta.env.VITE_RESTAURANT_WORKER_URL;
           if (workerUrl) {
