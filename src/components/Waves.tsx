@@ -1092,7 +1092,7 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
+const GEMINI_MODELS = ['gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-2.0-flash'];
 
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   let lastErr: any;
@@ -1119,7 +1119,7 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
       if (json.error) {
         const code = json.error.code;
         lastErr = Object.assign(new Error(json.error.message || 'Gemini error'), { status: code });
-        if (code === 503 || code === 429 || code === 404) continue;
+        if (code === 503 || code === 429 || code === 404 || code === 400) continue;
         throw lastErr;
       }
       const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -1133,7 +1133,7 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
         lastErr = new Error(`Gemini timeout on ${model}`);
         continue;
       }
-      if (e.status === 503 || e.status === 429 || e.status === 404) { lastErr = e; continue; }
+      if (e.status === 503 || e.status === 429 || e.status === 404 || e.status === 400) { lastErr = e; continue; }
       throw e;
     } finally {
       clearTimeout(timeout);
