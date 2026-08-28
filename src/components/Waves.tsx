@@ -1504,7 +1504,7 @@ export default function Waves() {
                 setActiveMonthIndex(new Date().getMonth());
                 setHasSearched(true);
                 setIsSearching(false);
-                if (payload.foodAndCulture) setExtrasLoaded(true);
+                setExtrasLoaded(true);
               }, 400);
             }
             if (!forTrip) return data;
@@ -1517,8 +1517,8 @@ export default function Waves() {
       if (!forTrip) setIsSearching(true);
       setError(null);
 
-      if (!GEMINI_API_KEY) {
-        const msg = "AI search is not configured. Add your GEMINI_API_KEY to .env to enable live destination lookup.";
+      if (!GEMINI_API_KEY && !GROQ_API_KEY) {
+        const msg = "AI search is not configured. Add VITE_GEMINI_API_KEY or VITE_GROQ_API_KEY to enable live search.";
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
@@ -1528,57 +1528,55 @@ export default function Waves() {
       try {
         const stripFences = (t: string) => t.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
 
-        // --- CORE prompt — lean, fast, above-fold only ---
-        const corePrompt = `Travel expert. Destination: ${dest}. Return ONLY valid JSON, no markdown:
-{"title":"short title","subtitle":"tagline","summary":"2 sentences","whyVisit":"2 sentences","whenToVisit":"2 sentences","averageDailySpend":150,"seasons":{"high":"months","low":"months","shoulder":"months"},"monthlyData":[{"month":"JAN","flightCost":800,"temp":55,"condition":"Sunny","note":"under 8 words","isIdeal":false,"crowdLevel":4}],"topActivities":[{"title":"string","description":"1 sentence","imageKeyword":"2 words"}],"airports":[{"iata":"JFK","name":"Airport Name","city":"City","transitToCity":"time + method","costModifier":1.0,"note":"one line"}]}
-Rules: monthlyData exactly 12 (JAN-DEC). condition: Sunny|Partly Cloudy|Rainy|Snow. isIdeal true for max 3 months. flightCost round-trip USD: domestic $150-550, Mexico/Caribbean $300-900, Europe $450-1600, Asia $700-1900, Australia/NZ $1000-2400. topActivities exactly 4. airports 1-3.`;
-
-        // --- EXTRAS prompt ---
-        const extrasPrompt = `You are an expert travel planner. Destination: ${dest}.
+        // Single unified prompt — full page loads at once
+        const prompt = `You are an expert travel planner. Destination: ${dest}.
 Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
 {
-  "foodAndCulture": {
-    "categories": [
-      { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "1-2 sentences", "imageKeyword": "2-3 words" }] },
-      { "title": "Lunch & Street Food", "items": [...] },
-      { "title": "Dinner & Fine Dining", "items": [...] },
-      { "title": "Drinks & Nightlife", "items": [...] },
-      { "title": "Café Culture", "items": [...] }
-    ],
-    "mustTry": ["dish or experience"],
-    "culturalEtiquette": [{ "title": "string", "description": "string" }]
-  },
-  "nicheActivities": [{ "title": "string", "description": "string", "imageKeyword": "2-3 words" }],
-  "seasonalHighlights": [{ "title": "string", "description": "string", "timeOfYear": "string" }],
-  "events": [{ "name": "string", "month": "JAN", "description": "string", "type": "festival" }],
-  "insiderTips": [{ "tip": "Specific tip with real names/prices under 30 words", "category": "money" }],
-  "dayTrips": {
-    "intro": "1 sentence",
-    "trips": [{ "name": "Place", "distance": "km", "travelTime": "time", "duration": "Half day", "vibe": "2 words", "description": "1-2 sentences", "mustSee": "string", "tip": "string" }]
-  },
-  "kidFriendly": {
-    "rating": 4, "summary": "1-2 sentences", "bestFor": "string",
-    "highlights": [{ "title": "string", "description": "string", "ageGroup": "all" }],
-    "practicalTips": ["string"]
-  },
+  "title": "2-3 word destination title",
+  "subtitle": "short tagline",
+  "summary": "2 sentences on vibe",
+  "whyVisit": "2 sentences",
+  "whenToVisit": "2 sentences",
+  "averageDailySpend": 150,
+  "seasons": { "high": "months", "low": "months", "shoulder": "months" },
+  "monthlyData": [{ "month": "JAN", "flightCost": 800, "temp": 55, "condition": "Sunny", "note": "under 8 words", "isIdeal": false, "crowdLevel": 4 }],
+  "topActivities": [{ "title": "string", "description": "1 sentence", "imageKeyword": "2-3 words" }],
+  "airports": [{ "iata": "JFK", "name": "Airport Name", "city": "City", "transitToCity": "time + method", "costModifier": 1.0, "note": "one line" }],
   "neighborhoods": [{ "name": "string", "vibe": "2 words", "bestFor": "1 sentence", "mustSee": "string" }],
   "practicalInfo": { "visa": "string", "currency": "string", "language": "string", "tipping": "string", "safety": "string", "bestTransport": "string", "budgetBreakdown": { "budget": "range", "midRange": "range", "luxury": "range" } },
+  "foodAndCulture": {
+    "categories": [
+      { "title": "Breakfast & Morning Rituals", "items": [{ "name": "string", "description": "1 sentence", "imageKeyword": "2-3 words" }] },
+      { "title": "Lunch & Street Food", "items": [{ "name": "string", "description": "1 sentence", "imageKeyword": "2-3 words" }] },
+      { "title": "Dinner & Fine Dining", "items": [{ "name": "string", "description": "1 sentence", "imageKeyword": "2-3 words" }] },
+      { "title": "Drinks & Nightlife", "items": [{ "name": "string", "description": "1 sentence", "imageKeyword": "2-3 words" }] },
+      { "title": "Café Culture", "items": [{ "name": "string", "description": "1 sentence", "imageKeyword": "2-3 words" }] }
+    ],
+    "mustTry": ["dish or experience"],
+    "culturalEtiquette": [{ "title": "string", "description": "1 sentence" }]
+  },
+  "nicheActivities": [{ "title": "string", "description": "1 sentence", "imageKeyword": "2-3 words" }],
+  "seasonalHighlights": [{ "title": "string", "description": "1 sentence", "timeOfYear": "string" }],
+  "events": [{ "name": "string", "month": "JAN", "description": "1 sentence", "type": "festival" }],
+  "insiderTips": [{ "tip": "specific tip under 20 words", "category": "money" }],
+  "dayTrips": { "intro": "1 sentence", "trips": [{ "name": "string", "distance": "km", "travelTime": "time", "duration": "Half day", "vibe": "2 words", "description": "1 sentence", "mustSee": "string", "tip": "string" }] },
+  "kidFriendly": { "rating": 4, "summary": "1 sentence", "bestFor": "string", "highlights": [{ "title": "string", "description": "1 sentence", "ageGroup": "all" }], "practicalTips": ["string"] },
   "topRestaurants": [{ "name": "string", "cuisine": "string", "priceRange": "$$", "mustOrder": "string", "neighborhood": "string", "localTip": "string" }],
   "popularRestaurants": [{ "name": "string", "cuisine": "string", "rating": 4.3, "reviewCount": 5000, "priceRange": "$$", "neighborhood": "string" }]
 }
-Rules: each foodAndCulture category exactly 3 items. mustTry exactly 5. culturalEtiquette exactly 4.
-nicheActivities exactly 4. seasonalHighlights exactly 4. events exactly 4. insiderTips exactly 4.
-neighborhoods exactly 6. dayTrips.trips exactly 3. duration: Half day, Full day, or Overnight.
-kidFriendly.rating 1-5 integer. kidFriendly.highlights exactly 3. kidFriendly.practicalTips exactly 2. ageGroup: toddler, kids, teens, or all.
-topRestaurants exactly 4. popularRestaurants exactly 5.
-Valid event types: festival, cultural, sporting, food, music, market.
-Valid insiderTip categories: money, transport, food, culture, safety.`;
+Rules:
+- monthlyData exactly 12 entries (JAN-DEC). condition: Sunny|Partly Cloudy|Rainy|Snow. isIdeal true for max 3 months.
+- flightCost round-trip USD from JFK/LAX/ORD: domestic $150-550, Mexico/Caribbean $300-900, Europe $450-1600, Asia $700-1900, Australia/NZ $1000-2400.
+- topActivities exactly 6. airports 1-3. neighborhoods exactly 6.
+- Each foodAndCulture category exactly 3 items. mustTry exactly 5. culturalEtiquette exactly 4.
+- nicheActivities 4. seasonalHighlights 4. events 4. insiderTips 4. dayTrips.trips 3.
+- kidFriendly.highlights 3. kidFriendly.practicalTips 2. ageGroup: toddler|kids|teens|all.
+- topRestaurants 4. popularRestaurants 5.
+- event types: festival|cultural|sporting|food|music|market. insiderTip categories: money|transport|food|culture|safety.`;
 
-        const myGen = ++fetchGenRef.current;
-
-        // Core first with fast model — page renders immediately. Extras sequential after.
-        const coreRaw = await aiGenerateFast(corePrompt, true, 4096);
-        data = JSON.parse(stripFences(coreRaw));
+        ++fetchGenRef.current;
+        const raw = await aiGenerate(prompt, true, 8192);
+        data = JSON.parse(stripFences(raw));
 
         if (!Array.isArray(data.monthlyData) || data.monthlyData.length === 0) {
           throw new SyntaxError('Malformed monthlyData in response');
@@ -1587,41 +1585,18 @@ Valid insiderTip categories: money, transport, food, culture, safety.`;
           data.monthlyData.push(data.monthlyData[data.monthlyData.length - 1] ?? { month: 'JAN', flightCost: 800, temp: 65, condition: 'Sunny', note: '', isIdeal: false, crowdLevel: 5 });
         }
 
-        // Show the page immediately with core data
+        // Cache and show full page at once
+        try {
+          localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: data }));
+        } catch { /* storage full */ }
+
         if (!forTrip) {
           setIntelligence(data);
           setActiveMonthIndex(new Date().getMonth());
           setHasSearched(true);
           setIsSearching(false);
-        }
-
-        // Cache core data immediately so next visit is instant
-        try {
-          localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: data }));
-        } catch { /* storage full — skip */ }
-
-        if (forTrip) {
-          try {
-            const extrasRaw = await aiGenerate(extrasPrompt, true, 8192);
-            data = { ...data, ...JSON.parse(stripFences(extrasRaw)) };
-          } catch { /* extras optional */ }
-        } else {
-          // Non-blocking extras — fires after core renders the page
-          (async () => {
-            try {
-              const extrasRaw = await aiGenerate(extrasPrompt, true, 8192);
-              if (fetchGenRef.current !== myGen) return;
-              const extras = JSON.parse(stripFences(extrasRaw));
-              setIntelligence(prev => {
-                if (!prev) return prev;
-                const merged = { ...prev, ...extras };
-                try { localStorage.setItem(`waves_v1_${dest.toLowerCase().trim()}`, JSON.stringify({ ts: Date.now(), payload: merged })); } catch {}
-                return merged;
-              });
-            } catch { /* extras optional */ }
-            setExtrasLoaded(true);
-          })();
-          // Kick off real restaurant fetch in parallel (non-blocking)
+          setExtrasLoaded(true);
+          // Real restaurant data from worker (non-blocking enrichment)
           const workerUrl = import.meta.env.VITE_RESTAURANT_WORKER_URL;
           if (workerUrl) {
             fetch(`${workerUrl}?destination=${encodeURIComponent(dest)}`)
