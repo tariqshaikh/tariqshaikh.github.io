@@ -1143,9 +1143,9 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
   throw lastErr ?? new Error('All Gemini models unavailable');
 }
 
-async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096, model = 'llama-3.3-70b-versatile'): Promise<string> {
+async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096, model = 'llama-3.1-8b-instant'): Promise<string> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
+  const timeout = setTimeout(() => controller.abort(), 60000);
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -1178,13 +1178,15 @@ async function aiGenerateFast(prompt: string, jsonMode = false, maxTokens = 4096
 }
 
 async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
+  const tokens = Math.min(maxTokens, 8192);
   if (GROQ_API_KEY) {
-    try { return await groqGenerate(prompt, jsonMode, Math.min(maxTokens, 8192)); } catch { /* fall through to Gemini */ }
+    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.1-8b-instant'); } catch { /* try next */ }
+    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.3-70b-versatile'); } catch { /* try next */ }
   }
   if (GEMINI_API_KEY) {
-    return geminiGenerate(prompt, jsonMode, maxTokens);
+    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch { /* fall through */ }
   }
-  throw new Error('No AI provider configured');
+  throw new Error('All AI providers unavailable — please try again.');
 }
 
 const DARK_STYLE = `
