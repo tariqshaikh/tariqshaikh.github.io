@@ -1093,57 +1093,58 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-flash-latest'];
+const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash'];
+const GROQ_MODELS = ['groq/compound-mini', 'groq/compound', 'openai/gpt-oss-20b', 'qwen/qwen3.6-27b'];
 
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   let lastErr: any;
   for (const model of GEMINI_MODELS) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000);
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: {
-              maxOutputTokens: maxTokens,
-              ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
-            },
-          }),
+    for (let attempt = 0; attempt < 4; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 1500 * attempt));
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 28000);
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: {
+                maxOutputTokens: maxTokens,
+                ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
+              },
+            }),
+          }
+        );
+        const json = await res.json();
+        if (json.error) {
+          const code = json.error.code;
+          lastErr = Object.assign(new Error(json.error.message || 'Gemini error'), { status: code });
+          if (code === 503 || code === 429) continue;
+          break;
         }
-      );
-      const json = await res.json();
-      if (json.error) {
-        const code = json.error.code;
-        lastErr = Object.assign(new Error(json.error.message || 'Gemini error'), { status: code });
-        if (code === 503 || code === 429 || code === 404 || code === 400) continue;
-        throw lastErr;
+        const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) {
+          lastErr = new SyntaxError(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
+          break;
+        }
+        return text;
+      } catch (e: any) {
+        if (e.name === 'AbortError') { lastErr = new Error(`Gemini timeout on ${model}`); break; }
+        if (e.status === 503 || e.status === 429) { lastErr = e; continue; }
+        throw e;
+      } finally {
+        clearTimeout(timeout);
       }
-      const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) {
-        lastErr = new SyntaxError(`Empty Gemini response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
-        continue;
-      }
-      return text;
-    } catch (e: any) {
-      if (e.name === 'AbortError') {
-        lastErr = new Error(`Gemini timeout on ${model}`);
-        continue;
-      }
-      if (e.status === 503 || e.status === 429 || e.status === 404 || e.status === 400) { lastErr = e; continue; }
-      throw e;
-    } finally {
-      clearTimeout(timeout);
     }
   }
   throw lastErr ?? new Error('All Gemini models unavailable');
 }
 
-async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096, model = 'llama-3.1-8b-instant'): Promise<string> {
+async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096, model = 'groq/compound-mini'): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60000);
   try {
@@ -1168,30 +1169,18 @@ async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096, 
   }
 }
 
-async function aiGenerateFast(prompt: string, jsonMode = false, maxTokens = 4096): Promise<string> {
-  if (GROQ_API_KEY) {
-    try { return await groqGenerate(prompt, jsonMode, maxTokens, 'llama-3.1-8b-instant'); } catch { /* fall through */ }
-    try { return await groqGenerate(prompt, jsonMode, maxTokens, 'llama-3.3-70b-versatile'); } catch { /* fall through */ }
-  }
-  if (GEMINI_API_KEY) return geminiGenerate(prompt, jsonMode, maxTokens);
-  throw new Error('No AI provider configured');
-}
-
 async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   const tokens = Math.min(maxTokens, 8192);
   let lastErr: any;
   if (GROQ_API_KEY) {
-    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.1-8b-instant'); } catch(e) { lastErr = e; console.error('Groq 8b failed:', e); }
-    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.3-70b-versatile'); } catch(e) { lastErr = e; console.error('Groq 70b failed:', e); }
-  } else {
-    console.error('GROQ_API_KEY not set in build');
+    for (const model of GROQ_MODELS) {
+      try { return await groqGenerate(prompt, jsonMode, tokens, model); } catch(e) { lastErr = e; }
+    }
   }
   if (GEMINI_API_KEY) {
-    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch(e) { lastErr = e; console.error('Gemini failed:', e); }
-  } else {
-    console.error('GEMINI_API_KEY not set in build');
+    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch(e) { lastErr = e; }
   }
-  throw new Error(`All providers failed. GROQ_KEY=${GROQ_API_KEY ? 'set' : 'MISSING'} GEMINI_KEY=${GEMINI_API_KEY ? 'set' : 'MISSING'} lastErr=${lastErr?.message?.slice(0,80) ?? 'none'}`);
+  throw lastErr ?? new Error(`No AI provider available. GROQ=${GROQ_API_KEY ? 'set' : 'missing'} GEMINI=${GEMINI_API_KEY ? 'set' : 'missing'}`);
 }
 
 const DARK_STYLE = `
