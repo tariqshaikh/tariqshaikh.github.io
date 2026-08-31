@@ -1191,7 +1191,7 @@ async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): P
   } else {
     console.error('GEMINI_API_KEY not set in build');
   }
-  throw lastErr ?? new Error('All AI providers unavailable — please try again.');
+  throw new Error(`All providers failed. GROQ_KEY=${GROQ_API_KEY ? 'set' : 'MISSING'} GEMINI_KEY=${GEMINI_API_KEY ? 'set' : 'MISSING'} lastErr=${lastErr?.message?.slice(0,80) ?? 'none'}`);
 }
 
 const DARK_STYLE = `
@@ -1639,7 +1639,7 @@ Rules:
           ? "Invalid API key. Check your GEMINI_API_KEY in .env."
           : isJson
           ? "Response was incomplete — please try again."
-          : `Couldn't load "${dest}". Please try again.`;
+          : `Error: ${errMsg.slice(0, 200)}`;
         if (forTrip) throw new Error(msg);
         setError(msg);
         if (!forTrip) setIsSearching(false);
