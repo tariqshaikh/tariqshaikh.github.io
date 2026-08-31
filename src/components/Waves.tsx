@@ -1179,14 +1179,19 @@ async function aiGenerateFast(prompt: string, jsonMode = false, maxTokens = 4096
 
 async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   const tokens = Math.min(maxTokens, 8192);
+  let lastErr: any;
   if (GROQ_API_KEY) {
-    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.1-8b-instant'); } catch { /* try next */ }
-    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.3-70b-versatile'); } catch { /* try next */ }
+    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.1-8b-instant'); } catch(e) { lastErr = e; console.error('Groq 8b failed:', e); }
+    try { return await groqGenerate(prompt, jsonMode, tokens, 'llama-3.3-70b-versatile'); } catch(e) { lastErr = e; console.error('Groq 70b failed:', e); }
+  } else {
+    console.error('GROQ_API_KEY not set in build');
   }
   if (GEMINI_API_KEY) {
-    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch { /* fall through */ }
+    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch(e) { lastErr = e; console.error('Gemini failed:', e); }
+  } else {
+    console.error('GEMINI_API_KEY not set in build');
   }
-  throw new Error('All AI providers unavailable — please try again.');
+  throw lastErr ?? new Error('All AI providers unavailable — please try again.');
 }
 
 const DARK_STYLE = `
