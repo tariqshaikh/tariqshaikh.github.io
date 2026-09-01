@@ -1093,7 +1093,8 @@ const WikiImg = ({ keyword, className, alt }: { keyword: string; className: stri
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
-const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash'];
+// Only non-thinking lite models — thinking models burn token budgets and time
+const GEMINI_MODELS = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
 const GROQ_MODELS = ['groq/compound-mini', 'groq/compound', 'openai/gpt-oss-20b', 'qwen/qwen3.6-27b'];
 
 async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
@@ -1102,7 +1103,7 @@ async function geminiGenerate(prompt: string, jsonMode = false, maxTokens = 2048
     for (let attempt = 0; attempt < 4; attempt++) {
       if (attempt > 0) await new Promise(r => setTimeout(r, 1500 * attempt));
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 28000);
+      const timeout = setTimeout(() => controller.abort(), 45000);
       try {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
@@ -1172,13 +1173,15 @@ async function groqGenerate(prompt: string, jsonMode = false, maxTokens = 4096, 
 async function aiGenerate(prompt: string, jsonMode = false, maxTokens = 2048): Promise<string> {
   const tokens = Math.min(maxTokens, 8192);
   let lastErr: any;
+  // Gemini lite models first — no thinking overhead, handle large JSON reliably
+  if (GEMINI_API_KEY) {
+    try { return await geminiGenerate(prompt, jsonMode, tokens); } catch(e) { lastErr = e; }
+  }
+  // Groq fallback — may truncate very large responses
   if (GROQ_API_KEY) {
     for (const model of GROQ_MODELS) {
       try { return await groqGenerate(prompt, jsonMode, tokens, model); } catch(e) { lastErr = e; }
     }
-  }
-  if (GEMINI_API_KEY) {
-    try { return await geminiGenerate(prompt, jsonMode, maxTokens); } catch(e) { lastErr = e; }
   }
   throw lastErr ?? new Error(`No AI provider available. GROQ=${GROQ_API_KEY ? 'set' : 'missing'} GEMINI=${GEMINI_API_KEY ? 'set' : 'missing'}`);
 }
@@ -1556,9 +1559,7 @@ Return ONLY valid JSON (no markdown, no fences) with exactly these keys:
   "events": [{ "name": "string", "month": "JAN", "description": "1 sentence", "type": "festival" }],
   "insiderTips": [{ "tip": "specific tip under 20 words", "category": "money" }],
   "dayTrips": { "intro": "1 sentence", "trips": [{ "name": "string", "distance": "km", "travelTime": "time", "duration": "Half day", "vibe": "2 words", "description": "1 sentence", "mustSee": "string", "tip": "string" }] },
-  "kidFriendly": { "rating": 4, "summary": "1 sentence", "bestFor": "string", "highlights": [{ "title": "string", "description": "1 sentence", "ageGroup": "all" }], "practicalTips": ["string"] },
-  "topRestaurants": [{ "name": "string", "cuisine": "string", "priceRange": "$$", "mustOrder": "string", "neighborhood": "string", "localTip": "string" }],
-  "popularRestaurants": [{ "name": "string", "cuisine": "string", "rating": 4.3, "reviewCount": 5000, "priceRange": "$$", "neighborhood": "string" }]
+  "kidFriendly": { "rating": 4, "summary": "1 sentence", "bestFor": "string", "highlights": [{ "title": "string", "description": "1 sentence", "ageGroup": "all" }], "practicalTips": ["string"] }
 }
 Rules:
 - monthlyData exactly 12 entries (JAN-DEC). condition: Sunny|Partly Cloudy|Rainy|Snow. isIdeal true for max 3 months.
@@ -1567,7 +1568,6 @@ Rules:
 - Each foodAndCulture category exactly 3 items. mustTry exactly 5. culturalEtiquette exactly 4.
 - nicheActivities 4. seasonalHighlights 4. events 4. insiderTips 4. dayTrips.trips 3.
 - kidFriendly.highlights 3. kidFriendly.practicalTips 2. ageGroup: toddler|kids|teens|all.
-- topRestaurants 4. popularRestaurants 5.
 - event types: festival|cultural|sporting|food|music|market. insiderTip categories: money|transport|food|culture|safety.`;
 
         ++fetchGenRef.current;
