@@ -37,14 +37,18 @@ async function llmChat(
   messages: { role: 'user' | 'assistant'; content: string }[],
   opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {}
 ): Promise<string> {
-  try {
-    return await groqChat(systemPrompt, messages, opts);
-  } catch (e) {
-    if (e instanceof Error && e.message === 'groq_rate_limit') {
-      opts.onRateLimit?.(-1);
-    }
-    return geminiChat(systemPrompt, messages, opts);
+  // Gemini primary (1500 req/day free) — Groq fallback (8k TPM, exhausts fast)
+  if (GEMINI_API_KEY) {
+    try { return await geminiChat(systemPrompt, messages, opts); } catch { /* fall through */ }
   }
+  if (GROQ_API_KEY) {
+    try { return await groqChat(systemPrompt, messages, opts); }
+    catch (e) {
+      if (e instanceof Error && e.message === 'groq_rate_limit') opts.onRateLimit?.(-1);
+      throw e;
+    }
+  }
+  throw new Error('No AI provider available');
 }
 
 async function geminiChat(
@@ -58,7 +62,7 @@ async function geminiChat(
     parts: [{ text: m.content }],
   }));
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -88,6 +92,26 @@ async function geminiChat(
   if (!text) throw new Error(`Empty response (finishReason: ${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
   return text;
 }
+// ─── Analysis cache (localStorage, 6-hour TTL) ───────────────────────────────
+function _prismKey(q: string, fw: string): string {
+  let h = 0;
+  const s = q.toLowerCase().trim() + '|' + fw;
+  for (let i = 0; i < s.length; i++) h = ((h * 31) + s.charCodeAt(i)) >>> 0;
+  return `prism_v2_${h.toString(36)}`;
+}
+function prismCacheGet(q: string, fw: string): MindMapData | null {
+  try {
+    const raw = localStorage.getItem(_prismKey(q, fw));
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > 6 * 3600 * 1000) { localStorage.removeItem(_prismKey(q, fw)); return null; }
+    return data as MindMapData;
+  } catch { return null; }
+}
+function prismCacheSet(q: string, fw: string, data: MindMapData): void {
+  try { localStorage.setItem(_prismKey(q, fw), JSON.stringify({ data, ts: Date.now() })); } catch { /* quota */ }
+}
+
 const DEV_MOCK = false;
 
 // ─── Mock answer (dev mode only — triggered on localhost when DEV_MOCK=true) ──
@@ -1446,6 +1470,19 @@ export default function PMPrism() {
     }
 
     await Promise.all(frameworkIds.map(async (frameworkId) => {
+      const cached = prismCacheGet(question, frameworkId);
+      if (cached) {
+        setMindMaps(prev => ({ ...prev, [frameworkId]: cached }));
+        setLoadingFrameworks(prev => prev.filter(f => f !== frameworkId));
+        runCriticPass(question, frameworkId, cached).then(pressureTest => {
+          if (pressureTest) setMindMaps(prev => {
+            const existing = prev[frameworkId];
+            return existing ? { ...prev, [frameworkId]: { ...existing, pressureTest } } : prev;
+          });
+        });
+        return;
+      }
+
       const callGroq = async () => {
         const raw = await llmChat(
           buildSystemPrompt(frameworkId),
@@ -1475,6 +1512,7 @@ export default function PMPrism() {
         if (parsed.branches) {
           parsed.branches = parsed.branches.map((b, i) => ({ ...b, label: schemaBranches[i] ?? b.label }));
         }
+        prismCacheSet(question, frameworkId, parsed);
         setMindMaps(prev => ({ ...prev, [frameworkId]: parsed }));
 
         // Critic pass — runs after main analysis, non-blocking
