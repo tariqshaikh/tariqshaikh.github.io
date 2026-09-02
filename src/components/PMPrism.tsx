@@ -165,6 +165,15 @@ const FRAMEWORKS = [
 
 const BRANCH_COLORS = ['#7c3aed', '#0891b2', '#059669', '#ca8a04', '#dc2626', '#db2777', '#2563eb', '#9333ea', '#0e7490'];
 
+const PERSPECTIVE_SEEDS = [
+  "You've watched this exact decision fail at three companies. Your analysis must surface what everyone gets wrong.",
+  "You're a skeptical Series B investor who has heard 200 pitches on this exact problem. Find the gap in the logic everyone else misses.",
+  "You just interviewed someone who gave a textbook-perfect answer that revealed no original product thinking. Do the opposite.",
+  "You're a veteran PM who has seen this pattern quietly destroy a product. Surface the non-obvious risk everyone assumes away.",
+  "You're analyzing this for a first-principles thinker who rejects received wisdom. Every insight must be earned, not inherited.",
+  "You're the harshest possible coach — someone who has read every PM book and is bored by safe answers. Cut to what's actually hard.",
+];
+
 const FRAMEWORK_COLORS: Record<string, string> = {
   'product-sense': '#8b5cf6',
   'jtbd':          '#0891b2',
@@ -690,8 +699,13 @@ function suggestFrameworks(input: string): string[] {
 function buildSystemPrompt(frameworkId: string): string {
   const schema = FRAMEWORK_SCHEMAS[frameworkId] || FRAMEWORK_SCHEMAS['product-sense'];
   const branchList = schema.branches.map((b, i) => `  ${i + 1}. "${b}"`).join('\n');
-  const exampleBranches = schema.branches.map(b => `    {"label": "${b}", "insight": "...", "points": ["...", "...", "..."]}`).join(',\n');
+  const seed = PERSPECTIVE_SEEDS[Math.floor(Math.random() * PERSPECTIVE_SEEDS.length)];
+  const exampleBranches = schema.branches.map(b =>
+    `    {"label": "${b}", "insight": "...", "points": ["...", "...", "..."], "keyTension": "The single thing most PMs miss about this branch — one sharp sentence specific to this question"}`
+  ).join(',\n');
   return `You are Prism — a Jarvis-level product thinking partner trained on the canon of PM excellence: Cracking the PM Interview (McDowell), Decode and Conquer (Lewis Lin), Inspired (Marty Cagan), Playing to Win (Roger Martin), The Lean Startup, Swipe to Unlock, and years of wisdom from Exponent, IGotAnOffer, and Blind.
+
+Analytical lens for this response: ${seed}
 
 Framework: ${schema.description}
 ${schema.instruction}
@@ -699,16 +713,61 @@ ${schema.instruction}
 You must use EXACTLY these branch labels in EXACTLY this order:
 ${branchList}
 
-For each branch: write a sharp 1-2 sentence insight a top PM would actually say for this specific question (not generic), then 3 concrete, specific bullet points. Name real products, real metrics, real failure modes where relevant.
+For each branch:
+- insight: 1-2 sentences a top PM would actually say — not generic, specific to this question. Name real products, metrics, failure modes.
+- points: 3 concrete, specific bullets the interviewer would remember. Not advice — actual content.
+- keyTension: The single most important thing most PMs miss about this branch. One sharp sentence, not a platitude.
 
 Return ONLY valid JSON — no markdown, no explanation, no code fences:
 {
   "branches": [
 ${exampleBranches}
   ],
-  "provocation": "One sharp question that pushes their thinking further or exposes a blind spot",
-  "followUps": ["3-4 pointed follow-up questions the user should explore next, based specifically on what was revealed in this analysis — not generic, but rooted in what the framework surfaced"]
+  "provocation": "One sharp question that exposes a blind spot or forces a choice — the kind a top-tier PM interviewer would actually ask",
+  "followUps": ["3-4 pointed follow-up questions rooted in what this specific analysis revealed — not generic, derived from this question"]
 }`;
+}
+
+// ─── Critic agent ─────────────────────────────────────────────────────────────
+function buildCriticSystemPrompt(): string {
+  return `You are a brutally honest PM interview coach — a former PM director who has conducted 500+ interviews. You've reviewed an analysis and your only job is to find its weaknesses with surgical precision.
+
+Return ONLY valid JSON:
+{
+  "weakness": "The single weakest or most generic part of this analysis — one sentence identifying exactly what's wrong",
+  "blindSpot": "The most important angle this analysis completely missed — one specific insight a great PM would have caught",
+  "sharperAngle": "Rewrite the provocation to cut twice as deep — the question that would genuinely unsettle an overprepared candidate"
+}`;
+}
+
+async function runCriticPass(
+  question: string,
+  frameworkId: string,
+  analysis: MindMapData
+): Promise<PressureTest | null> {
+  const schema = FRAMEWORK_SCHEMAS[frameworkId] || FRAMEWORK_SCHEMAS['product-sense'];
+  const branchSummary = analysis.branches
+    .map(b => `${b.label}: ${b.insight}`)
+    .join('\n');
+  const userMsg = `Question: "${question}"
+Framework: ${schema.description}
+
+Analysis produced:
+${branchSummary}
+
+Provocation given: "${analysis.provocation}"`;
+
+  try {
+    const raw = await llmChat(
+      buildCriticSystemPrompt(),
+      [{ role: 'user', content: userMsg }],
+      { maxTokens: 600, jsonMode: true }
+    );
+    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(cleaned) as PressureTest;
+  } catch {
+    return null;
+  }
 }
 
 // ─── Prism wordmark ───────────────────────────────────────────────────────────
@@ -1015,8 +1074,9 @@ function gridCols(n: number): string {
 }
 
 // ─── Mind map ─────────────────────────────────────────────────────────────────
-interface Branch { label: string; insight: string; points: string[]; }
-interface MindMapData { branches: Branch[]; provocation: string; followUps?: string[]; }
+interface Branch { label: string; insight: string; points: string[]; keyTension?: string; }
+interface PressureTest { weakness: string; blindSpot: string; sharperAngle: string; }
+interface MindMapData { branches: Branch[]; provocation: string; followUps?: string[]; pressureTest?: PressureTest; }
 
 function MindMap({ data, question, frameworkId }: { data: MindMapData; question: string; frameworkId: string }) {
   const schema = FRAMEWORK_SCHEMAS[frameworkId] || FRAMEWORK_SCHEMAS['product-sense'];
@@ -1099,6 +1159,12 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
                   </li>
                 ))}
               </ul>
+              {b.keyTension && (
+                <div className="pt-3 border-t" style={{ borderColor:`${color}15` }}>
+                  <div className="font-mono text-[9px] uppercase tracking-widest mb-1.5" style={{ color, opacity: 0.55 }}>Most PMs miss</div>
+                  <p className="text-sm italic leading-relaxed" style={{ color }}>{b.keyTension}</p>
+                </div>
+              )}
               <button
                 onClick={() => openModal(b, color)}
                 className="mt-2 w-full py-3 rounded-xl font-mono text-xs uppercase tracking-wider border transition-all duration-200 hover:opacity-90"
@@ -1110,12 +1176,37 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
           );
         })}
       </div>
-      <div className="flex justify-center pt-2">
+      <div className="flex flex-col items-center gap-3 pt-2">
         <div className="border border-violet-500/25 rounded-xl px-6 py-5 max-w-2xl w-full" style={{ backgroundColor:'rgba(109,40,217,0.08)' }}>
           <div className="font-mono text-[10px] uppercase tracking-widest text-violet-500 mb-2">Provocation</div>
           <p className="text-slate-400 text-xs mb-3">The question a great PM coach would ask after hearing your answer — the blind spot, the assumption unchecked, the thing that separates good from great.</p>
           <p className="text-violet-300 text-sm italic leading-relaxed">→ {data.provocation}</p>
         </div>
+
+        {data.pressureTest ? (
+          <div className="border border-red-500/20 rounded-xl px-6 py-5 max-w-2xl w-full" style={{ backgroundColor:'rgba(239,68,68,0.05)' }}>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-red-400 mb-4">Pressure Test — Critic's View</div>
+            <div className="space-y-4">
+              <div>
+                <div className="font-mono text-[9px] uppercase tracking-wider text-red-400/60 mb-1">Weakest Point</div>
+                <p className="text-slate-300 text-sm leading-relaxed">{data.pressureTest.weakness}</p>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] uppercase tracking-wider text-red-400/60 mb-1">Blind Spot</div>
+                <p className="text-slate-300 text-sm leading-relaxed">{data.pressureTest.blindSpot}</p>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] uppercase tracking-wider text-red-400/60 mb-1">Sharper Provocation</div>
+                <p className="text-red-200 text-sm italic leading-relaxed">→ {data.pressureTest.sharperAngle}</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-2xl w-full flex items-center gap-2 px-4 py-3 rounded-xl border border-white/5" style={{ backgroundColor:'rgba(255,255,255,0.02)' }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400/40 animate-pulse shrink-0"/>
+            <span className="font-mono text-[9px] uppercase tracking-widest text-slate-600">Pressure test loading…</span>
+          </div>
+        )}
       </div>
 
       {/* Elaborate modal */}
@@ -1385,6 +1476,17 @@ export default function PMPrism() {
           parsed.branches = parsed.branches.map((b, i) => ({ ...b, label: schemaBranches[i] ?? b.label }));
         }
         setMindMaps(prev => ({ ...prev, [frameworkId]: parsed }));
+
+        // Critic pass — runs after main analysis, non-blocking
+        runCriticPass(question, frameworkId, parsed).then(pressureTest => {
+          if (pressureTest) {
+            setMindMaps(prev => {
+              const existing = prev[frameworkId];
+              if (!existing) return prev;
+              return { ...prev, [frameworkId]: { ...existing, pressureTest } };
+            });
+          }
+        });
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Unknown error';
         setError(`Analysis failed: ${msg}. Try again or select fewer lenses.`);
