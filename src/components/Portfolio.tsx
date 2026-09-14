@@ -60,7 +60,7 @@ export default function Portfolio() {
       <section id="projects" className="bg-[#F5F5F3] px-6 md:px-14 pt-10 md:pt-14 pb-10 md:pb-14">
 
         {/* Desktop: identity card left + 2x2 square tray right */}
-        <div className="hidden md:flex gap-5 items-stretch w-full">
+        <div className="hidden md:flex gap-5 items-stretch w-full max-w-[1400px] mx-auto">
 
           {/* Identity card — stretches to match tray height */}
           <div className="flex-1 bg-white rounded-2xl p-10 flex flex-col justify-between border border-slate-200/40">
@@ -94,7 +94,7 @@ export default function Portfolio() {
             <div className="grid grid-cols-2 gap-3">
 
               {/* PM Prism */}
-              <div className="min-h-[220px] bg-[#07091A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-violet-500/50 hover:shadow-[0_16px_40px_-8px_rgba(139,92,246,0.25)] relative overflow-hidden group border border-white/5">
+              <div className="aspect-square bg-[#07091A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-violet-500/50 hover:shadow-[0_16px_40px_-8px_rgba(139,92,246,0.25)] relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-violet-500 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -124,7 +124,7 @@ export default function Portfolio() {
               </div>
 
               {/* Homebase NJ */}
-              <div className="min-h-[220px] bg-[#090E1A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_16px_40px_-8px_rgba(59,130,246,0.2)] relative overflow-hidden group border border-white/5">
+              <div className="aspect-square bg-[#090E1A] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_16px_40px_-8px_rgba(59,130,246,0.2)] relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -154,7 +154,7 @@ export default function Portfolio() {
               </div>
 
               {/* Waves Travel Co */}
-              <div className="min-h-[220px] bg-[#0B1A1F] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_16px_40px_-8px_rgba(6,182,212,0.2)] relative overflow-hidden group border border-white/5">
+              <div className="aspect-square bg-[#0B1A1F] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_16px_40px_-8px_rgba(6,182,212,0.2)] relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-cyan-600 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -184,7 +184,7 @@ export default function Portfolio() {
               </div>
 
               {/* Orbit Capital */}
-              <div className="min-h-[220px] bg-[#1A1C1E] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-[#C5A059]/50 hover:shadow-[0_16px_40px_-8px_rgba(197,160,89,0.2)] relative overflow-hidden group border border-white/5">
+              <div className="aspect-square bg-[#1A1C1E] rounded-xl p-5 flex flex-col justify-between transition-all duration-300 hover:border-[#C5A059]/50 hover:shadow-[0_16px_40px_-8px_rgba(197,160,89,0.2)] relative overflow-hidden group border border-white/5">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#C5A059] to-[#E5C079] opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div>
                   <div className="flex items-center justify-between mb-3">
