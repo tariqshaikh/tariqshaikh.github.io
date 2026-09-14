@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { logVisit } from '../lib/analytics';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
 
 async function groqChat(
   systemPrompt: string,
@@ -801,14 +802,14 @@ function PrismWordmark({ size = 'hero' }: { size?: 'hero' | 'nav' }) {
       <div className="relative flex items-center">
         <svg width="20" height="20" viewBox="0 0 40 36" fill="none" className="mr-2.5 shrink-0">
           <defs><filter id="ng"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-          <line x1="0" y1="16" x2="14" y2="19" stroke="white" strokeWidth="1.5" opacity="0.7" filter="url(#ng)"/>
-          <polygon points="20,1 6,34 34,34" fill="rgba(160,200,255,0.10)" stroke="rgba(200,225,255,0.4)" strokeWidth="0.9"/>
-          <line x1="20" y1="1" x2="6" y2="34" stroke="rgba(220,235,255,0.5)" strokeWidth="0.7"/>
+          <line x1="0" y1="16" x2="14" y2="19" stroke="#7a6a60" strokeWidth="1.5" opacity="0.3" filter="url(#ng)"/>
+          <polygon points="20,1 6,34 34,34" fill="rgba(110,85,160,0.05)" stroke="rgba(90,70,120,0.2)" strokeWidth="0.9"/>
+          <line x1="20" y1="1" x2="6" y2="34" stroke="rgba(90,70,120,0.15)" strokeWidth="0.7"/>
           {[{ c:'#ff2050',y:6 },{ c:'#ff7700',y:13 },{ c:'#ffe500',y:20 },{ c:'#00e055',y:27 },{ c:'#0099ff',y:34 }].map((b,i)=>(
-            <line key={i} x1="27" y1="20" x2="42" y2={b.y} stroke={b.c} strokeWidth="1.3" opacity="0.85" filter="url(#ng)"/>
+            <line key={i} x1="27" y1="20" x2="42" y2={b.y} stroke={b.c} strokeWidth="1.3" opacity="0.9" filter="url(#ng)"/>
           ))}
         </svg>
-        <span className="font-mono text-xs uppercase tracking-[0.25em] font-bold text-white">PM Prism</span>
+        <span className="font-mono text-xs uppercase tracking-[0.25em] font-bold" style={{ color:'#5a5048' }}>PM Prism</span>
       </div>
     );
   }
@@ -817,18 +818,18 @@ function PrismWordmark({ size = 'hero' }: { size?: 'hero' | 'nav' }) {
       <svg className="absolute pointer-events-none" style={{ width:'115%', height:'220%', left:'-7%', top:'-60%', zIndex:0 }} viewBox="0 0 500 200" preserveAspectRatio="none">
         <defs>
           <filter id="hg" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          <linearGradient id="gf" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#a8c8ff" stopOpacity="0.08"/><stop offset="100%" stopColor="#c4aaff" stopOpacity="0.05"/></linearGradient>
+          <linearGradient id="gf" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#7c3aed" stopOpacity="0.07"/><stop offset="100%" stopColor="#4f46e5" stopOpacity="0.04"/></linearGradient>
         </defs>
-        <line x1="0" y1="100" x2="175" y2="100" stroke="white" strokeWidth="2" opacity="0.35" filter="url(#hg)"/>
-        <polygon points="250,15 155,185 345,185" fill="url(#gf)" stroke="rgba(180,210,255,0.22)" strokeWidth="1.2"/>
-        <line x1="250" y1="15" x2="155" y2="185" stroke="rgba(220,235,255,0.28)" strokeWidth="0.8"/>
+        <line x1="0" y1="100" x2="175" y2="100" stroke="#7a6a60" strokeWidth="2" opacity="0.2" filter="url(#hg)"/>
+        <polygon points="250,15 155,185 345,185" fill="url(#gf)" stroke="rgba(90,70,120,0.15)" strokeWidth="1.2"/>
+        <line x1="250" y1="15" x2="155" y2="185" stroke="rgba(90,70,120,0.12)" strokeWidth="0.8"/>
         {[{color:'#ff2050',y:48},{color:'#ff7700',y:68},{color:'#ffe500',y:88},{color:'#00e055',y:108},{color:'#0099ff',y:128},{color:'#5533ff',y:148},{color:'#cc00ff',y:168}].map((b,i)=>(
-          <line key={i} x1="325" y1="100" x2="510" y2={b.y} stroke={b.color} strokeWidth="1.8" opacity="0.65" filter="url(#hg)"/>
+          <line key={i} x1="325" y1="100" x2="510" y2={b.y} stroke={b.color} strokeWidth="1.8" opacity="0.7" filter="url(#hg)"/>
         ))}
       </svg>
       <h1 className="relative font-black uppercase leading-[0.88] tracking-[-0.02em]" style={{ fontSize:'clamp(52px, 9vw, 100px)', zIndex:1 }}>
-        <span className="text-white/90">PM </span>
-        <span className="bg-gradient-to-r from-violet-300 via-cyan-200 to-blue-300 bg-clip-text text-transparent">Prism</span>
+        <span style={{ color:'#3d3530' }}>PM </span>
+        <span className="bg-clip-text text-transparent" style={{ backgroundImage:'linear-gradient(to right, #8b68c0, #7a58b0, #6d4fa0)' }}>Prism</span>
       </h1>
     </div>
   );
@@ -1027,7 +1028,7 @@ function QuestionCatalog({ onSelect, inline = false }: { onSelect: (q: string) =
                   isActive
                     ? isT
                       ? 'bg-violet-600/25 border-violet-400/55 text-violet-300'
-                      : 'bg-cyan-600/20 border-cyan-400/50 text-cyan-300'
+                      : 'bg-violet-600/20 border-violet-400/45 text-violet-300'
                     : isT
                       ? 'bg-violet-950/20 border-violet-900/40 text-slate-500 hover:border-violet-700/50 hover:text-slate-300'
                       : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
@@ -1392,6 +1393,7 @@ export default function PMPrism() {
   const [bottomChatInput, setBottomChatInput] = useState('');
   const [bottomChatSending, setBottomChatSending] = useState(false);
 
+
   function closeDict() {
     setDictClosing(true);
   }
@@ -1573,7 +1575,32 @@ export default function PMPrism() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07091A] text-white relative overflow-x-hidden">
+    <div data-prism className="min-h-screen text-white relative overflow-x-hidden" style={{ background: '#f5f4f0' }}>
+      <style>{`
+        [data-prism] .text-white                { color: #2e2a27 !important; }
+        [data-prism] .text-slate-200            { color: #3d3935 !important; }
+        [data-prism] .text-slate-300            { color: #4f4b47 !important; }
+        [data-prism] .text-slate-400            { color: #6a6560 !important; }
+        [data-prism] .text-slate-500            { color: #86817c !important; }
+        [data-prism] .text-slate-600            { color: rgba(0,0,0,0.32) !important; }
+        [data-prism] .text-slate-700            { color: rgba(0,0,0,0.22) !important; }
+        [data-prism] .placeholder-slate-600::placeholder { color: rgba(0,0,0,0.28) !important; }
+        [data-prism] .placeholder-slate-700::placeholder { color: rgba(0,0,0,0.2) !important; }
+        [data-prism] [class*="border-white/"]   { border-color: rgba(0,0,0,0.08) !important; }
+        [data-prism] [class*="bg-white/2"],
+        [data-prism] [class*="bg-white/3"]      { background-color: rgba(0,0,0,0.03) !important; }
+        [data-prism] [class*="bg-white/5"],
+        [data-prism] [class*="bg-white/6"]      { background-color: rgba(0,0,0,0.04) !important; }
+        [data-prism] [class*="bg-white/8"]      { background-color: rgba(0,0,0,0.05) !important; }
+        [data-prism] [class*="bg-white/10"],
+        [data-prism] [class*="bg-white/12"]     { background-color: rgba(0,0,0,0.07) !important; }
+        [data-prism] .text-violet-300           { color: #9178c8 !important; }
+        [data-prism] .text-violet-400           { color: #7d62b8 !important; }
+        [data-prism] .text-violet-500           { color: #6d52a8 !important; }
+        [data-prism] .text-red-200              { color: #a05060 !important; }
+        [data-prism] .text-red-400              { color: #8c3040 !important; }
+        [data-prism] .text-emerald-400          { color: #2d7a5a !important; }
+      `}</style>
       <div className="fixed inset-0 pointer-events-none z-0">
         {STARS_BG.map(s => (
           <div key={s.id} className="absolute rounded-full bg-white" style={{
@@ -1583,9 +1610,9 @@ export default function PMPrism() {
         ))}
       </div>
 
-      <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/5">
+      <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b" style={{ borderColor:'rgba(0,0,0,0.07)' }}>
         <PrismWordmark size="nav"/>
-        <Link to="/" className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-300 transition-colors"><ChevronLeft size={12}/>Portfolio</Link>
+        <Link to="/" className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-700 transition-colors"><ChevronLeft size={12}/>Portfolio</Link>
       </nav>
 
       {/* Hero — collapses after submit */}
@@ -1604,7 +1631,7 @@ export default function PMPrism() {
             <PrismWordmark size="hero"/>
           </div>
           <p className="text-slate-400 text-base mx-auto mt-16 whitespace-nowrap">
-            Bring any product question — Prism refracts it through every framework lens
+            Bring any product question — Prism refracts it through the sharpest framework lens
           </p>
         </div>
       </div>
@@ -1615,9 +1642,9 @@ export default function PMPrism() {
         style={submitted ? {
           position: 'sticky',
           top: 0,
-          backgroundColor: 'rgba(7,9,26,0.94)',
+          backgroundColor: 'rgba(245,244,240,0.96)',
           backdropFilter: 'blur(18px)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid rgba(0,0,0,0.07)',
           paddingTop: '12px',
           paddingBottom: '12px',
         } : undefined}
@@ -1627,8 +1654,12 @@ export default function PMPrism() {
           <div className="relative z-10 max-w-7xl mx-auto px-6 pb-8">
             {/* 1. Question box — narrowed 25% */}
             <div className="px-[12.5%]">
-            <div className={`rounded-2xl border transition-all duration-500 mb-5 ${questionLoaded ? 'border-violet-400/80 bg-violet-950/25' : input ? 'border-violet-500/60 bg-violet-950/18' : 'border-violet-700/55 bg-violet-950/14'}`}
-              style={questionLoaded ? { boxShadow:'0 0 28px rgba(139,92,246,0.30)' } : { boxShadow:'0 0 20px rgba(139,92,246,0.12), 0 0 0 1px rgba(139,92,246,0.10) inset' }}
+            <div className={`rounded-2xl border transition-all duration-500 mb-5`}
+              style={{
+                borderColor: questionLoaded ? '#8b68c0' : input ? 'rgba(139,104,192,0.5)' : 'rgba(0,0,0,0.09)',
+                backgroundColor: questionLoaded ? 'rgba(139,104,192,0.06)' : input ? 'rgba(139,104,192,0.04)' : 'transparent',
+                boxShadow: questionLoaded ? '0 0 24px rgba(139,104,192,0.14)' : 'none',
+              }}
             >
               <textarea
                 ref={textareaRef}
@@ -1643,7 +1674,7 @@ export default function PMPrism() {
                 onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
               />
               {/* Always-visible lens pills — single-select */}
-              <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-t border-white/5">
+              <div className="flex flex-wrap items-center gap-2 px-5 pt-3 pb-6 border-t border-white/5">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600 shrink-0">Lens:</span>
                 {FRAMEWORKS.map(f => {
                   const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
@@ -1700,7 +1731,8 @@ export default function PMPrism() {
                 <button
                   onClick={handleSubmit}
                   disabled={!input.trim() || loadingFrameworks.length > 0}
-                  className="px-5 py-2 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity"
+                  className="px-5 py-2 font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity border"
+                  style={{ borderColor: 'rgba(139,104,192,0.45)', color: '#7a58b0', backgroundColor: 'rgba(139,104,192,0.06)' }}
                 >
                   {loadingFrameworks.length > 0 ? 'Analyzing...' : 'Analyze →'}
                 </button>
@@ -1715,8 +1747,8 @@ export default function PMPrism() {
                 <span className="text-slate-500 text-xs">— click any lens to explore it, then analyze</span>
                 <div className={`ml-auto text-slate-500 text-lg transition-transform duration-300 ${lensesOpen ? 'rotate-45' : ''}`}>+</div>
               </button>
-              <div className={lensesOpen ? 'p-5' : 'hidden'}>
-                  <div className="flex flex-wrap gap-2 justify-center">
+              <div className={lensesOpen ? 'pt-5 px-5 pb-8' : 'hidden'}>
+                  <div className="flex flex-wrap gap-2 justify-center mb-6">
                     {FRAMEWORKS.map(f => {
                       const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
                       const isFocused = focusedLens === f.id;
@@ -1813,7 +1845,7 @@ export default function PMPrism() {
                 <div className={`ml-auto text-slate-500 text-lg transition-transform duration-300 ${lensesOpen ? 'rotate-45' : ''}`}>+</div>
               </button>
               <div className={lensesOpen ? 'p-5' : 'hidden'}>
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-wrap gap-2 justify-center mb-6">
                   {FRAMEWORKS.map(f => {
                     const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
                     const isFocused = focusedLens === f.id;
@@ -1848,7 +1880,8 @@ export default function PMPrism() {
                   setLensesOpen(false);
                 }}
                 disabled={(pendingFrameworks.length === 0 && !focusedLens) || loadingFrameworks.length > 0}
-                className="px-5 py-2 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity"
+                className="px-5 py-2 font-mono text-xs uppercase tracking-wide font-bold rounded-lg disabled:opacity-20 hover:opacity-90 transition-opacity border"
+                style={{ borderColor: 'rgba(139,104,192,0.45)', color: '#7a58b0', backgroundColor: 'rgba(139,104,192,0.06)' }}
               >
                 {loadingFrameworks.length > 0 ? 'Analyzing...' :
                   pendingFrameworks[0] ? `Analyze with ${FRAMEWORKS.find(f => f.id === pendingFrameworks[0])?.label} →` :
@@ -1873,7 +1906,7 @@ export default function PMPrism() {
               width: '3.5rem',
               height: '3.5rem',
               background: (dictOpen && !dictClosing)
-                ? 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)'
+                ? 'linear-gradient(135deg, #7a58b0 0%, #8b68c0 100%)'
                 : 'linear-gradient(135deg, #0f766e 0%, #0891b2 100%)',
               border: '2px solid rgba(255,255,255,0.22)',
               boxShadow: (dictOpen && !dictClosing)
@@ -1909,7 +1942,7 @@ export default function PMPrism() {
             >
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/8 sticky top-0" style={{ backgroundColor:'rgba(9,11,28,0.97)' }}>
                 <div>
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-teal-400 font-bold">Question Catalog</div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-violet-400 font-bold">Question Catalog</div>
                   <div className="text-slate-600 text-xs mt-0.5">{QUESTION_BANK.reduce((n,c)=>n+c.questions.length,0)} questions</div>
                 </div>
                 <button onClick={closeDict} className="text-slate-600 hover:text-slate-300 text-xl leading-none transition-colors">×</button>
