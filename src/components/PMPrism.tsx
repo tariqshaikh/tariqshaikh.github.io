@@ -1589,7 +1589,7 @@ export default function PMPrism() {
         [data-prism] .text-slate-500            { color: #86817c !important; }
         [data-prism] .text-slate-600            { color: rgba(0,0,0,0.32) !important; }
         [data-prism] .text-slate-700            { color: rgba(0,0,0,0.22) !important; }
-        [data-prism] .placeholder-slate-600::placeholder { color: rgba(0,0,0,0.28) !important; }
+        [data-prism] .placeholder-slate-600::placeholder { color: rgba(0,0,0,0.42) !important; }
         [data-prism] .placeholder-slate-700::placeholder { color: rgba(0,0,0,0.2) !important; }
         [data-prism] [class*="border-white/"]   { border-color: rgba(0,0,0,0.08) !important; }
         [data-prism] [class*="bg-white/2"],
