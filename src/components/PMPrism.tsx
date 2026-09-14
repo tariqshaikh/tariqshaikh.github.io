@@ -1245,50 +1245,50 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
           <div className="absolute inset-0 bg-black/75 backdrop-blur-sm"/>
           <div
             className="relative z-10 w-full max-w-2xl lg:max-w-6xl max-h-[88vh] rounded-2xl border flex flex-col"
-            style={{ backgroundColor:'#07091A', borderColor:`${modal.color}35` }}
+            style={{ backgroundColor:'#f0ede8', borderColor:`${modal.color}30` }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header — full width */}
-            <div className="flex items-center justify-between px-6 py-4 border-b shrink-0" style={{ borderColor:`${modal.color}20` }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b shrink-0" style={{ borderColor:'rgba(0,0,0,0.07)', backgroundColor:'rgba(0,0,0,0.02)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: modal.color }}/>
                 <div>
-                  <div className="font-mono text-[9px] uppercase tracking-widest mb-0.5" style={{ color: modal.color, opacity: 0.8 }}>
+                  <div className="font-mono text-[9px] uppercase tracking-widest mb-0.5" style={{ color: modal.color, opacity: 0.85 }}>
                     {schema.description.split(':')[0]} · Deep Analysis
                   </div>
-                  <div className="font-mono text-sm font-black uppercase tracking-wider text-white">{modal.branch.label}</div>
+                  <div className="font-mono text-sm font-black uppercase tracking-wider" style={{ color:'#1a1714' }}>{modal.branch.label}</div>
                 </div>
               </div>
-              <button onClick={closeModal} className="text-slate-500 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/8 text-xl leading-none">×</button>
+              <button onClick={closeModal} className="w-8 h-8 flex items-center justify-center rounded-lg text-xl leading-none transition-colors" style={{ color:'rgba(0,0,0,0.35)' }} onMouseEnter={e=>(e.currentTarget.style.backgroundColor='rgba(0,0,0,0.06)')} onMouseLeave={e=>(e.currentTarget.style.backgroundColor='transparent')}>×</button>
             </div>
 
             {/* Body — single column mobile, two columns desktop */}
             <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
 
               {/* Left panel: insight + elaboration */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-5 min-h-0 lg:border-r scrollbar-hide" style={{ borderColor:`${modal.color}18` }}>
-                <div className="rounded-xl px-4 py-3 border-l-2" style={{ backgroundColor:`${modal.color}0d`, borderLeftColor: modal.color }}>
-                  <p className="text-slate-300 text-sm leading-relaxed italic">{modal.branch.insight}</p>
+              <div className="flex-1 overflow-y-auto p-6 space-y-5 min-h-0 lg:border-r scrollbar-hide" style={{ borderColor:'rgba(0,0,0,0.07)' }}>
+                <div className="rounded-xl px-4 py-3 border-l-2" style={{ backgroundColor:`${modal.color}10`, borderLeftColor: modal.color }}>
+                  <p className="text-sm leading-relaxed italic" style={{ color:'#4f4b47' }}>{modal.branch.insight}</p>
                 </div>
                 {elaborating && (
                   <div className="flex items-center gap-2 py-2">
                     <div className="flex gap-1">{[0,1,2].map(k=><div key={k} className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor:modal.color, animationDelay:`${k*0.15}s` }}/>)}</div>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">Going deeper…</span>
+                    <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color:'rgba(0,0,0,0.4)' }}>Going deeper…</span>
                   </div>
                 )}
                 {elaboration && (
-                  <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{elaboration}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color:'#2e2a27' }}>{elaboration}</p>
                 )}
                 {/* On mobile: chat history sits here inline */}
                 {chatHistory.length > 0 && (
-                  <div className="lg:hidden space-y-3 pt-2 border-t" style={{ borderColor:`${modal.color}15` }}>
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-slate-600 pt-1">Follow-up</div>
+                  <div className="lg:hidden space-y-3 pt-2 border-t" style={{ borderColor:'rgba(0,0,0,0.07)' }}>
+                    <div className="font-mono text-[9px] uppercase tracking-widest pt-1" style={{ color:'rgba(0,0,0,0.35)' }}>Follow-up</div>
                     {chatHistory.map((msg, i) => (
                       <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         {msg.role === 'user' ? (
-                          <div className="max-w-[82%] px-4 py-2.5 rounded-2xl rounded-br-sm text-sm text-white" style={{ backgroundColor:`${modal.color}28`, border:`1px solid ${modal.color}35` }}>{msg.content}</div>
+                          <div className="max-w-[82%] px-4 py-2.5 rounded-2xl rounded-br-sm text-sm" style={{ color:'#1a1714', backgroundColor:`${modal.color}18`, border:`1px solid ${modal.color}30` }}>{msg.content}</div>
                         ) : (
-                          <p className="text-slate-300 text-sm leading-relaxed">{msg.content}</p>
+                          <p className="text-sm leading-relaxed" style={{ color:'#3d3935' }}>{msg.content}</p>
                         )}
                       </div>
                     ))}
@@ -1300,20 +1300,20 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
               </div>
 
               {/* Right panel: chat — desktop only layout */}
-              <div className="hidden lg:flex lg:w-96 xl:w-[26rem] flex-col border-t lg:border-t-0" style={{ borderColor:`${modal.color}18` }}>
-                <div className="px-4 py-3 border-b shrink-0" style={{ borderColor:`${modal.color}12` }}>
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-slate-600">Ask a follow-up</span>
+              <div className="hidden lg:flex lg:w-96 xl:w-[26rem] flex-col border-t lg:border-t-0" style={{ borderColor:'rgba(0,0,0,0.07)', backgroundColor:'rgba(0,0,0,0.02)' }}>
+                <div className="px-4 py-3 border-b shrink-0" style={{ borderColor:'rgba(0,0,0,0.06)' }}>
+                  <span className="font-mono text-[9px] uppercase tracking-widest" style={{ color:'rgba(0,0,0,0.35)' }}>Ask a follow-up</span>
                 </div>
                 <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 scrollbar-hide">
                   {chatHistory.length === 0 && !chatLoading && (
-                    <p className="text-slate-600 text-xs text-center mt-8 leading-relaxed">Ask anything about this branch — dig into the details, challenge the insight, or explore what it means for your product.</p>
+                    <p className="text-xs text-center mt-8 leading-relaxed" style={{ color:'rgba(0,0,0,0.35)' }}>Ask anything about this branch — dig into the details, challenge the insight, or explore what it means for your product.</p>
                   )}
                   {chatHistory.map((msg, i) => (
                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       {msg.role === 'user' ? (
-                        <div className="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-sm text-sm text-white" style={{ backgroundColor:`${modal.color}28`, border:`1px solid ${modal.color}35` }}>{msg.content}</div>
+                        <div className="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-sm text-sm" style={{ color:'#1a1714', backgroundColor:`${modal.color}18`, border:`1px solid ${modal.color}30` }}>{msg.content}</div>
                       ) : (
-                        <div className="max-w-[90%] text-slate-300 text-sm leading-relaxed">{msg.content}</div>
+                        <div className="max-w-[90%] text-sm leading-relaxed" style={{ color:'#3d3935' }}>{msg.content}</div>
                       )}
                     </div>
                   ))}
@@ -1324,20 +1324,21 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
                   )}
                 </div>
                 {/* Chat input inside right panel */}
-                <div className="px-4 pb-4 pt-3 border-t shrink-0" style={{ borderColor:`${modal.color}18` }}>
+                <div className="px-4 pb-4 pt-3 border-t shrink-0" style={{ borderColor:'rgba(0,0,0,0.07)' }}>
                   <div className="flex gap-2">
                     <input
                       value={chatInput}
                       onChange={e => setChatInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
                       placeholder="Ask about this branch…"
-                      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 outline-none focus:border-white/25 transition-colors"
+                      className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors"
+                      style={{ backgroundColor:'rgba(255,255,255,0.6)', border:'1px solid rgba(0,0,0,0.1)', color:'#1a1714' }}
                     />
                     <button
                       onClick={sendChat}
                       disabled={!chatInput.trim() || chatLoading || elaborating}
                       className="px-4 py-2.5 rounded-xl font-mono text-[10px] uppercase tracking-wider font-bold border disabled:opacity-30 transition-all hover:opacity-85"
-                      style={{ backgroundColor:`${modal.color}22`, borderColor:`${modal.color}45`, color: modal.color }}
+                      style={{ backgroundColor:`${modal.color}18`, borderColor:`${modal.color}40`, color: modal.color }}
                     >
                       {chatLoading ? '…' : 'Ask →'}
                     </button>
@@ -1347,20 +1348,21 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
             </div>
 
             {/* Mobile-only chat input at the bottom */}
-            <div className="lg:hidden px-4 pb-4 pt-3 border-t shrink-0" style={{ borderColor:`${modal.color}18` }}>
+            <div className="lg:hidden px-4 pb-4 pt-3 border-t shrink-0" style={{ borderColor:'rgba(0,0,0,0.07)' }}>
               <div className="flex gap-2">
                 <input
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
                   placeholder="Ask a follow-up about this branch…"
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 outline-none focus:border-white/25 transition-colors"
+                  className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors"
+                  style={{ backgroundColor:'rgba(255,255,255,0.6)', border:'1px solid rgba(0,0,0,0.1)', color:'#1a1714' }}
                 />
                 <button
                   onClick={sendChat}
                   disabled={!chatInput.trim() || chatLoading || elaborating}
                   className="px-4 py-2.5 rounded-xl font-mono text-[10px] uppercase tracking-wider font-bold border disabled:opacity-30 transition-all hover:opacity-85"
-                  style={{ backgroundColor:`${modal.color}22`, borderColor:`${modal.color}45`, color: modal.color }}
+                  style={{ backgroundColor:`${modal.color}18`, borderColor:`${modal.color}40`, color: modal.color }}
                 >
                   {chatLoading ? '…' : 'Ask →'}
                 </button>
