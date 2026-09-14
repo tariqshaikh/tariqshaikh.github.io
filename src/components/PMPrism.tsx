@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { logVisit } from '../lib/analytics';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -1008,11 +1008,11 @@ function QuestionCatalog({ onSelect, inline = false }: { onSelect: (q: string) =
       <div className="space-y-2">
         {/* Group header */}
         <div className="flex items-center gap-2.5 px-1">
-          <div className="h-px flex-1" style={{ background: isT ? 'linear-gradient(to right, rgba(109,40,217,0.4), transparent)' : 'linear-gradient(to right, rgba(14,116,144,0.3), transparent)' }}/>
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em] shrink-0" style={{ color: isT ? 'rgba(139,92,246,0.7)' : 'rgba(34,211,238,0.55)' }}>
+          <div className="h-px flex-1" style={{ background: isT ? 'linear-gradient(to right, rgba(139,104,192,0.25), transparent)' : 'linear-gradient(to right, rgba(0,0,0,0.08), transparent)' }}/>
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] shrink-0" style={{ color: isT ? 'rgba(139,104,192,0.8)' : 'rgba(0,0,0,0.3)' }}>
             {isT ? '✦ Tariq\'s Lens' : 'Classic PM'}
           </span>
-          <div className="h-px flex-1" style={{ background: isT ? 'linear-gradient(to left, rgba(109,40,217,0.4), transparent)' : 'linear-gradient(to left, rgba(14,116,144,0.3), transparent)' }}/>
+          <div className="h-px flex-1" style={{ background: isT ? 'linear-gradient(to left, rgba(139,104,192,0.25), transparent)' : 'linear-gradient(to left, rgba(0,0,0,0.08), transparent)' }}/>
         </div>
         {/* Pills */}
         <div className="flex flex-wrap justify-center gap-1.5">
@@ -1026,13 +1026,18 @@ function QuestionCatalog({ onSelect, inline = false }: { onSelect: (q: string) =
                   isT ? 'rounded-lg' : 'rounded-full'
                 } ${
                   isActive
-                    ? isT
-                      ? 'bg-violet-600/25 border-violet-400/55 text-violet-300'
-                      : 'bg-violet-600/20 border-violet-400/45 text-violet-300'
+                    ? ''
                     : isT
-                      ? 'bg-violet-950/20 border-violet-900/40 text-slate-500 hover:border-violet-700/50 hover:text-slate-300'
-                      : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                      ? 'text-slate-500 hover:text-[#7a58b0]'
+                      : 'bg-white/3 text-slate-500 hover:text-slate-300'
                 }`}
+                style={isActive ? {
+                  borderColor: 'rgba(139,104,192,0.5)',
+                  color: '#7a58b0',
+                  backgroundColor: 'rgba(139,104,192,0.07)',
+                } : {
+                  borderColor: 'rgba(0,0,0,0.1)',
+                }}
               >
                 {c.label}
               </button>
@@ -1656,9 +1661,13 @@ export default function PMPrism() {
             <div className="px-[12.5%]">
             <div className={`rounded-2xl border transition-all duration-500 mb-5`}
               style={{
-                borderColor: questionLoaded ? '#8b68c0' : input ? 'rgba(139,104,192,0.5)' : 'rgba(0,0,0,0.09)',
-                backgroundColor: questionLoaded ? 'rgba(139,104,192,0.06)' : input ? 'rgba(139,104,192,0.04)' : 'transparent',
-                boxShadow: questionLoaded ? '0 0 24px rgba(139,104,192,0.14)' : 'none',
+                borderColor: questionLoaded ? '#8b68c0' : input ? 'rgba(139,104,192,0.45)' : 'rgba(0,0,0,0.11)',
+                backgroundColor: 'rgba(255,255,255,0.6)',
+                boxShadow: questionLoaded
+                  ? '0 2px 16px rgba(139,104,192,0.12), 0 1px 3px rgba(0,0,0,0.04)'
+                  : input
+                  ? '0 2px 12px rgba(139,104,192,0.07), 0 1px 3px rgba(0,0,0,0.03)'
+                  : '0 1px 8px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)',
               }}
             >
               <textarea
@@ -1742,10 +1751,13 @@ export default function PMPrism() {
 
             {/* 2. PM Lenses card */}
             <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-4 border-b border-white/6 flex items-center gap-3 hover:bg-white/[0.02] transition-colors text-left">
+              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-4 border-b border-white/6 flex items-center gap-3 transition-colors text-left" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
                 <div className="font-mono text-xs uppercase tracking-widest text-slate-200 font-bold">PM Lenses</div>
                 <span className="text-slate-500 text-xs">— click any lens to explore it, then analyze</span>
-                <div className={`ml-auto text-slate-500 text-lg transition-transform duration-300 ${lensesOpen ? 'rotate-45' : ''}`}>+</div>
+                <div className="ml-auto flex items-center gap-1.5 text-slate-500">
+                  <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'rgba(0,0,0,0.3)' }}>{lensesOpen ? 'collapse' : 'expand'}</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${lensesOpen ? 'rotate-180' : ''}`} style={{ color: 'rgba(0,0,0,0.35)' }}/>
+                </div>
               </button>
               <div className={lensesOpen ? 'pt-5 px-5 pb-8' : 'hidden'}>
                   <div className="flex flex-wrap gap-2 justify-center mb-6">
@@ -1839,10 +1851,13 @@ export default function PMPrism() {
             </div>
             {/* PM Lenses card — collapsed by default in post-submit */}
             <div className="rounded-2xl border border-white/10 overflow-hidden mt-3" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors text-left">
+              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-3 flex items-center gap-3 transition-colors text-left" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
                 <div className="font-mono text-xs uppercase tracking-widest text-slate-400 font-bold">PM Lenses</div>
                 <span className="text-slate-600 text-xs">— explore frameworks</span>
-                <div className={`ml-auto text-slate-500 text-lg transition-transform duration-300 ${lensesOpen ? 'rotate-45' : ''}`}>+</div>
+                <div className="ml-auto flex items-center gap-1.5 text-slate-500">
+                  <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'rgba(0,0,0,0.3)' }}>{lensesOpen ? 'collapse' : 'expand'}</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${lensesOpen ? 'rotate-180' : ''}`} style={{ color: 'rgba(0,0,0,0.35)' }}/>
+                </div>
               </button>
               <div className={lensesOpen ? 'p-5' : 'hidden'}>
                 <div className="flex flex-wrap gap-2 justify-center mb-6">
