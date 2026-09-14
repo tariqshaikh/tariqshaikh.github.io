@@ -925,7 +925,7 @@ function LensCard({ frameworkId }: { frameworkId: string }) {
   if (!info) return null;
   return (
     <div className="rounded-2xl border overflow-hidden transition-colors duration-300" style={{ borderColor:`${info.color}25`, backgroundColor:`${info.color}08` }}>
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer">
         <div className="flex items-center gap-3">
           <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-black" style={{ backgroundColor:`${info.color}20`, color:info.color }}>
             {info.name[0]}
@@ -1051,7 +1051,7 @@ function QuestionCatalog({ onSelect, inline = false }: { onSelect: (q: string) =
   return (
     <div className={inline ? '' : 'rounded-2xl border border-white/6'}>
       {!inline && (
-        <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/2 transition-colors rounded-2xl">
+        <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/2 transition-colors rounded-2xl cursor-pointer">
           <div>
             <div className="font-mono text-xs uppercase tracking-widest text-slate-400 font-bold">Question Catalog</div>
             <div className="text-slate-600 text-sm mt-0.5">{totalQ} questions — classic PM &amp; Tariq's lens</div>
@@ -1758,7 +1758,7 @@ export default function PMPrism() {
 
             {/* 2. PM Lenses card */}
             <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-4 border-b border-white/6 flex items-center gap-3 transition-colors text-left" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
+              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-4 border-b border-white/6 flex items-center gap-3 transition-colors text-left cursor-pointer" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
                 <div className="font-mono text-xs uppercase tracking-widest text-slate-200 font-bold">PM Lenses</div>
                 <span className="text-slate-500 text-xs">— click any lens to explore it, then analyze</span>
                 <div className="ml-auto flex items-center gap-1.5 text-slate-500">
@@ -1860,7 +1860,7 @@ export default function PMPrism() {
             </div>
             {/* PM Lenses card — collapsed by default in post-submit */}
             <div className="rounded-2xl border border-white/10 overflow-hidden mt-3" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-3 flex items-center gap-3 transition-colors text-left" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
+              <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-3 flex items-center gap-3 transition-colors text-left cursor-pointer" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
                 <div className="font-mono text-xs uppercase tracking-widest text-slate-400 font-bold">PM Lenses</div>
                 <span className="text-slate-600 text-xs">— explore frameworks</span>
                 <div className="ml-auto flex items-center gap-1.5 text-slate-500">
