@@ -1678,7 +1678,7 @@ export default function PMPrism() {
                   setInput(v.length === 1 ? v.toUpperCase() : v);
                 }}
                 placeholder="What product problem are you working through?"
-                className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden"
+                className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden" style={{ color: '#1a1714' }}
                 style={{ height: 120 }}
                 onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
               />
