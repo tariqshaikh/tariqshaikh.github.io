@@ -1056,10 +1056,15 @@ function QuestionCatalog({ onSelect, inline = false }: { onSelect: (q: string) =
             <div className="font-mono text-xs uppercase tracking-widest text-slate-400 font-bold">Question Catalog</div>
             <div className="text-slate-600 text-sm mt-0.5">{totalQ} questions — classic PM &amp; Tariq's lens</div>
           </div>
-          <div className={`text-slate-500 text-lg transition-transform duration-200 ${open ? 'rotate-45' : ''}`}>+</div>
+          <ChevronDown size={15} className={`text-slate-500 transition-transform duration-400 ${open ? 'rotate-180' : ''}`} style={{ transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)' }}/>
         </button>
       )}
-      {(open || inline) && (
+      <div style={{
+        maxHeight: (open || inline) ? '1400px' : '0px',
+        opacity: (open || inline) ? 1 : 0,
+        overflow: 'hidden',
+        transition: 'max-height 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease',
+      }}>
         <div className={inline ? '' : 'border-t border-white/6'}>
           <div className="px-4 pt-4 pb-3 space-y-3">
             <PillGroup cats={classicGroups} group="classic"/>
@@ -1090,7 +1095,7 @@ function QuestionCatalog({ onSelect, inline = false }: { onSelect: (q: string) =
             })}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -1680,8 +1685,8 @@ export default function PMPrism() {
                   setInput(v.length === 1 ? v.toUpperCase() : v);
                 }}
                 placeholder="What product problem are you working through?"
-                className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden" style={{ color: '#1a1714' }}
-                style={{ height: 120 }}
+                className="w-full bg-transparent text-white placeholder-slate-600 text-base leading-relaxed p-5 resize-none outline-none overflow-hidden"
+                style={{ color: '#1a1714', height: 120 }}
                 onKeyDown={e => { if (e.key==='Enter' && (e.metaKey||e.ctrlKey) && loadingFrameworks.length === 0) handleSubmit(); }}
               />
               {/* Always-visible lens pills — single-select */}
@@ -1761,7 +1766,8 @@ export default function PMPrism() {
                   <ChevronDown size={14} className={`transition-transform duration-300 ${lensesOpen ? 'rotate-180' : ''}`} style={{ color: 'rgba(0,0,0,0.35)' }}/>
                 </div>
               </button>
-              <div className={lensesOpen ? 'pt-5 px-5 pb-8' : 'hidden'}>
+              <div style={{ maxHeight: lensesOpen ? '800px' : '0px', opacity: lensesOpen ? 1 : 0, overflow: 'hidden', transition: 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease' }}>
+                <div className="pt-5 px-5 pb-8">
                   <div className="flex flex-wrap gap-2 justify-center mb-6">
                     {FRAMEWORKS.map(f => {
                       const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
@@ -1783,6 +1789,7 @@ export default function PMPrism() {
                   {focusedLens && LENS_INFO[focusedLens] && (
                     <LensDetail info={LENS_INFO[focusedLens]} schema={FRAMEWORK_SCHEMAS[focusedLens]} />
                   )}
+                </div>
                 </div>
             </div>
           </div>
@@ -1861,28 +1868,30 @@ export default function PMPrism() {
                   <ChevronDown size={14} className={`transition-transform duration-300 ${lensesOpen ? 'rotate-180' : ''}`} style={{ color: 'rgba(0,0,0,0.35)' }}/>
                 </div>
               </button>
-              <div className={lensesOpen ? 'p-5' : 'hidden'}>
-                <div className="flex flex-wrap gap-2 justify-center mb-6">
-                  {FRAMEWORKS.map(f => {
-                    const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
-                    const isFocused = focusedLens === f.id;
-                    return (
-                      <button
-                        key={f.id}
-                        onClick={() => setFocusedLens(f.id)}
-                        className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 ${
-                          isFocused ? 'scale-105' : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
-                        }`}
-                        style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70`, color } : undefined}
-                      >
-                        {f.label}
-                      </button>
-                    );
-                  })}
+              <div style={{ maxHeight: lensesOpen ? '800px' : '0px', opacity: lensesOpen ? 1 : 0, overflow: 'hidden', transition: 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease' }}>
+                <div className="p-5">
+                  <div className="flex flex-wrap gap-2 justify-center mb-6">
+                    {FRAMEWORKS.map(f => {
+                      const color = FRAMEWORK_COLORS[f.id] ?? '#8b5cf6';
+                      const isFocused = focusedLens === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          onClick={() => setFocusedLens(f.id)}
+                          className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 ${
+                            isFocused ? 'scale-105' : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                          }`}
+                          style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70`, color } : undefined}
+                        >
+                          {f.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {focusedLens && LENS_INFO[focusedLens] && (
+                    <LensDetail info={LENS_INFO[focusedLens]} schema={FRAMEWORK_SCHEMAS[focusedLens]} />
+                  )}
                 </div>
-                {focusedLens && LENS_INFO[focusedLens] && (
-                  <LensDetail info={LENS_INFO[focusedLens]} schema={FRAMEWORK_SCHEMAS[focusedLens]} />
-                )}
               </div>
             </div>
             <div className="flex justify-center mt-3">
