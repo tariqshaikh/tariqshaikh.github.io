@@ -60,15 +60,15 @@ const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
  * renders with no place names at all.
  */
 const TILES = {
-  street: {
-    label: 'Street',
-    url: `${ESRI}/World_Street_Map/MapServer/tile/{z}/{y}/{x}`,
-    attr: 'Tiles © Esri',
-  },
   minimal: {
     label: 'Minimal',
     url: `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
     overlay: `${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,
+    attr: 'Tiles © Esri',
+  },
+  street: {
+    label: 'Street',
+    url: `${ESRI}/World_Street_Map/MapServer/tile/{z}/{y}/{x}`,
     attr: 'Tiles © Esri',
   },
   terrain: {
@@ -248,7 +248,7 @@ const NeighborhoodMap: React.FC<Props> = ({ destination, neighborhoods, activeIn
   // Remember the chosen style across destinations and visits.
   const [tileMode, setTileMode] = useState<TileMode>(() => {
     const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(TILE_PREF_KEY) : null;
-    return saved && saved in TILES ? (saved as TileMode) : 'street';
+    return saved && saved in TILES ? (saved as TileMode) : 'minimal';
   });
   const [inView, setInView] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
