@@ -16,6 +16,7 @@ import {
   serverTimestamp, updateDoc, getDoc, getDocs
 } from 'firebase/firestore';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import NeighborhoodMap from './NeighborhoodMap';
 
 // monthlyData uses 3-letter keys; spell them out wherever we label a selection,
 // so "OCT" can't be misread as anything other than the month being viewed.
@@ -1329,6 +1330,7 @@ export default function Waves() {
   const fetchGenRef = useRef(0);
   const [activeFoodCat, setActiveFoodCat] = useState(0);
   const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
+  const [activeNeighborhood, setActiveNeighborhood] = useState<number | null>(null);
   const [extrasLoaded, setExtrasLoaded] = useState(false);
   
   const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null);
@@ -2986,9 +2988,25 @@ Return ONLY a JSON object, no markdown, no explanation:
                 <p className="text-slate-500 text-xs mt-1">Where to base yourself and what to expect</p>
               </div>
             </div>
+            <NeighborhoodMap
+              destination={destination}
+              neighborhoods={data.neighborhoods}
+              activeIndex={activeNeighborhood}
+              onSelect={setActiveNeighborhood}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {(showAllNeighborhoods ? data.neighborhoods : data.neighborhoods.slice(0, 4)).map((hood, i) => (
-                <div key={i} className="bg-white border border-black/[0.13] rounded-[2.5rem] p-8 hover:border-[#0891B2]/25 transition-all group">
+                <div
+                  key={i}
+                  onMouseEnter={() => setActiveNeighborhood(i)}
+                  onMouseLeave={() => setActiveNeighborhood(null)}
+                  className={`bg-white border rounded-[2.5rem] p-8 transition-all group ${
+                    activeNeighborhood === i
+                      ? 'border-[#0891B2]/50 shadow-[0_0_0_3px_rgba(8,145,178,0.08)]'
+                      : 'border-black/[0.13] hover:border-[#0891B2]/25'
+                  }`}
+                >
                   <div className="flex items-start justify-between mb-6">
                     <h4 className="text-2xl text-[#0A1A2E] font-serif group-hover:text-[#0891B2] transition-colors">{hood.name}</h4>
                     <span className="px-3 py-1 bg-teal-500/10 border border-teal-400/50 rounded-full text-[9px] uppercase tracking-widest text-[#0891B2] font-bold shrink-0">{hood.vibe}</span>
