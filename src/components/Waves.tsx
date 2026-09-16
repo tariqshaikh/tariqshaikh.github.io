@@ -17,6 +17,14 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
+// monthlyData uses 3-letter keys; spell them out wherever we label a selection,
+// so "OCT" can't be misread as anything other than the month being viewed.
+const MONTH_NAMES: Record<string, string> = {
+  JAN: 'January', FEB: 'February', MAR: 'March', APR: 'April',
+  MAY: 'May', JUN: 'June', JUL: 'July', AUG: 'August',
+  SEP: 'September', OCT: 'October', NOV: 'November', DEC: 'December',
+};
+
 // --- Types ---
 interface TripMember {
   userId: string;
@@ -2168,28 +2176,32 @@ Return ONLY a JSON object, no markdown, no explanation:
 
         {/* Year-Round Flights & Climate - COLLABORATIVE WORKSPACE */}
         <section id="flights" className="mb-24 scroll-mt-16">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#0891B2]/10 flex items-center justify-center text-[#0891B2]">
-                <Calendar size={24} />
-              </div>
-              <div>
-                <h2 className="text-3xl text-[#0A1A2E] font-serif tracking-tight">Trip Pulse</h2>
-                <p className="text-slate-500 text-xs">A 12-month seasonality and cost breakdown.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest font-bold">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#0891B2] shadow-[0_0_10px_rgba(8,145,178,0.4)]"></span>
-                <span className="text-slate-700">Ideal Window</span>
-              </div>
-            </div>
-          </div>
-
           <div className="bg-[#F7F2E8]/50 border border-black/[0.13] rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
 
             <div className="relative z-10">
+              {/* Box title — lives inside the card so it clearly labels everything
+                  below it (airports, months, climate) rather than floating above. */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 mb-10 border-b border-black/[0.09]">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-[#0891B2]/10 flex items-center justify-center text-[#0891B2] shrink-0">
+                    <Calendar size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl text-[#0A1A2E] font-serif tracking-tight leading-none">Trip Pulse</h2>
+                    <p className="text-slate-500 text-xs mt-1.5">
+                      A 12-month seasonality and cost breakdown — pick a month to see what it's like.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest font-bold shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#0891B2] shadow-[0_0_10px_rgba(8,145,178,0.4)]"></span>
+                    <span className="text-slate-700">Ideal Window</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Airport Selector */}
               {data.airports && data.airports.length > 0 && (
                 <div className="mb-10 space-y-5">
@@ -2267,6 +2279,30 @@ Return ONLY a JSON object, no markdown, no explanation:
                 </div>
               )}
 
+              {/* Chart axis label — the bars are dollar amounts with nothing naming
+                  the metric, and the dots under each bar need a key. */}
+              <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 mb-8">
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">
+                    Round-Trip Flight Cost by Month
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-1">Tap any month for its full breakdown</p>
+                </div>
+                <div className="flex items-center gap-3 text-[9px] uppercase tracking-widest font-bold text-slate-500">
+                  <span>Crowds</span>
+                  {([
+                    ['bg-emerald-400', 'Quiet'],
+                    ['bg-amber-400', 'Moderate'],
+                    ['bg-rose-400', 'Busy'],
+                  ] as const).map(([dotClass, label]) => (
+                    <span key={label} className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               {/* Chart */}
               {(() => {
                 const selectedAp = data.airports?.find(a => a.iata === selectedAirportIata) ?? data.airports?.[0];
@@ -2334,10 +2370,30 @@ Return ONLY a JSON object, no markdown, no explanation:
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="mt-8 bg-[#FDFAF5] border border-black/[0.13] rounded-3xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6"
+                            className="mt-8 bg-[#FDFAF5] border border-black/[0.13] rounded-3xl p-6"
                           >
+                            {/* Month header — without this, the temperature reads as today's weather */}
+                            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 pb-5 mb-6 border-b border-black/[0.09]">
+                              <div className="flex items-baseline gap-2.5">
+                                <span className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Viewing</span>
+                                <h3 className="text-2xl text-[#0A1A2E] font-serif tracking-tight leading-none">
+                                  {MONTH_NAMES[item.month] ?? item.month}
+                                </h3>
+                                {item.isIdeal && (
+                                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#0891B2]/10 text-[#0891B2] text-[9px] font-bold uppercase tracking-widest">
+                                    <Sparkles size={9} /> Ideal
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-slate-500 flex items-center gap-1.5">
+                                <Info size={10} />
+                                Typical for this month · not current conditions
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div>
-                              <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Temperature</p>
+                              <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-2 font-bold">Avg Temperature</p>
                               <div className="flex items-center gap-2">
                                 {weatherIcon}
                                 <span className="text-2xl text-[#0A1A2E] font-light">{item.temp}°F</span>
@@ -2370,7 +2426,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                             {monthEvents.length > 0 && (
                               <div className="col-span-full border-t border-black/[0.09] pt-4">
                                 <p className="text-[9px] uppercase tracking-widest text-slate-500 mb-3 font-bold flex items-center gap-2">
-                                  <Star size={10} className="text-amber-700" /> Events This Month
+                                  <Star size={10} className="text-amber-700" /> Events in {MONTH_NAMES[item.month] ?? item.month}
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                   {monthEvents.map((event, idx) => (
@@ -2379,6 +2435,7 @@ Return ONLY a JSON object, no markdown, no explanation:
                                 </div>
                               </div>
                             )}
+                            </div>
                           </motion.div>
 
                           {/* Best Value Month */}
