@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "homebase": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "scripts/homebaseMcp.mjs"
+      ],
+      "env": {}
+    }
+  }
+}

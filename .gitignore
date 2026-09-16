@@ -7,3 +7,6 @@ coverage/
 .env*
 !.env.example
 src/data/redfin_market_tracker.csv
+src/data/homebase.db
+src/data/homebase.db-wal
+src/data/homebase.db-shm
