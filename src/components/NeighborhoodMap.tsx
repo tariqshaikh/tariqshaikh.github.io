@@ -45,40 +45,47 @@ interface Pin extends Coords {
 const NOMINATIM_DELAY_MS = 1100;
 const TILE_PREF_KEY = 'nbhd_map_style';
 
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
+
 /**
- * All keyless and free. Note the coordinate order differs by provider — Esri
- * serves {z}/{y}/{x}, CARTO serves {z}/{x}/{y}. Attribution is per-provider
- * because these aren't all OSM-derived.
+ * All keyless. Esri serves tiles as {z}/{y}/{x} — note the row/col order.
  *
- * CARTO layers are used over Esri's gray canvases because Esri splits labels
- * into a separate reference layer, so its bases render with no place names —
- * useless for orienting yourself in a city.
+ * CARTO's basemaps were used here initially and had to be removed: they return
+ * HTTP 200 with a valid PNG that has "API KEY REQUIRED" watermarked across it,
+ * so a status-code check passes while the map is visibly broken. Verify tiles
+ * by looking at them.
+ *
+ * Esri's canvas styles split labels into a separate transparent "Reference"
+ * layer, so Minimal and Dark stack two layers via `overlay` — the base alone
+ * renders with no place names at all.
  */
 const TILES = {
   street: {
     label: 'Street',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    url: `${ESRI}/World_Street_Map/MapServer/tile/{z}/{y}/{x}`,
     attr: 'Tiles © Esri',
   },
   minimal: {
     label: 'Minimal',
-    url: 'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
-    attr: '© OpenStreetMap contributors © CARTO',
+    url: `${ESRI}/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    overlay: `${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,
+    attr: 'Tiles © Esri',
   },
   terrain: {
     label: 'Terrain',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    url: `${ESRI}/World_Topo_Map/MapServer/tile/{z}/{y}/{x}`,
     attr: 'Tiles © Esri',
   },
   satellite: {
     label: 'Satellite',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    url: `${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
     attr: 'Tiles © Esri',
   },
   dark: {
     label: 'Dark',
-    url: 'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
-    attr: '© OpenStreetMap contributors © CARTO',
+    url: `${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    overlay: `${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,
+    attr: 'Tiles © Esri',
   },
 } as const;
 
@@ -373,6 +380,9 @@ const NeighborhoodMap: React.FC<Props> = ({ destination, neighborhoods, activeIn
           style={{ height: '100%', width: '100%' }}
         >
           <TileLayer key={tileMode} url={tile.url} attribution={tile.attr} maxZoom={19} />
+          {'overlay' in tile && tile.overlay && (
+            <TileLayer key={`${tileMode}-labels`} url={tile.overlay} maxZoom={19} />
+          )}
           <ZoomControl position="bottomright" />
           <FitPins pins={pins} />
           <PanTo pin={activePin} />
