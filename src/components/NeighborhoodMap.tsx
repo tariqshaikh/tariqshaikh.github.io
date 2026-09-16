@@ -43,16 +43,46 @@ interface Pin extends Coords {
 }
 
 const NOMINATIM_DELAY_MS = 1100;
+const TILE_PREF_KEY = 'nbhd_map_style';
+
+/**
+ * All keyless and free. Note the coordinate order differs by provider — Esri
+ * serves {z}/{y}/{x}, CARTO serves {z}/{x}/{y}. Attribution is per-provider
+ * because these aren't all OSM-derived.
+ *
+ * CARTO layers are used over Esri's gray canvases because Esri splits labels
+ * into a separate reference layer, so its bases render with no place names —
+ * useless for orienting yourself in a city.
+ */
 const TILES = {
   street: {
+    label: 'Street',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
     attr: 'Tiles © Esri',
   },
+  minimal: {
+    label: 'Minimal',
+    url: 'https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
+    attr: '© OpenStreetMap contributors © CARTO',
+  },
+  terrain: {
+    label: 'Terrain',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    attr: 'Tiles © Esri',
+  },
   satellite: {
+    label: 'Satellite',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attr: 'Tiles © Esri',
   },
-};
+  dark: {
+    label: 'Dark',
+    url: 'https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png',
+    attr: '© OpenStreetMap contributors © CARTO',
+  },
+} as const;
+
+type TileMode = keyof typeof TILES;
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
@@ -208,7 +238,11 @@ function PanTo({ pin }: { pin: Pin | null }) {
 const NeighborhoodMap: React.FC<Props> = ({ destination, neighborhoods, activeIndex = null, onSelect }) => {
   const [pins, setPins] = useState<Pin[]>([]);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done'>('idle');
-  const [tileMode, setTileMode] = useState<'street' | 'satellite'>('street');
+  // Remember the chosen style across destinations and visits.
+  const [tileMode, setTileMode] = useState<TileMode>(() => {
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(TILE_PREF_KEY) : null;
+    return saved && saved in TILES ? (saved as TileMode) : 'street';
+  });
   const [inView, setInView] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
   const runId = useRef(0);
@@ -309,18 +343,21 @@ const NeighborhoodMap: React.FC<Props> = ({ destination, neighborhoods, activeIn
             {status === 'loading' && <span className="animate-pulse"> · locating…</span>}
           </p>
         </div>
-        <div className="flex gap-1.5">
-          {(['street', 'satellite'] as const).map(mode => (
+        <div className="flex flex-wrap gap-1.5">
+          {(Object.keys(TILES) as TileMode[]).map(mode => (
             <button
               key={mode}
-              onClick={() => setTileMode(mode)}
+              onClick={() => {
+                setTileMode(mode);
+                try { localStorage.setItem(TILE_PREF_KEY, mode); } catch { /* private mode */ }
+              }}
               className={`px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-bold border transition-all ${
                 tileMode === mode
                   ? 'bg-[#0891B2]/10 border-[#0891B2]/30 text-[#0891B2]'
                   : 'bg-white border-black/[0.13] text-slate-500 hover:text-[#0A1A2E]'
               }`}
             >
-              {mode}
+              {TILES[mode].label}
             </button>
           ))}
         </div>
@@ -335,7 +372,7 @@ const NeighborhoodMap: React.FC<Props> = ({ destination, neighborhoods, activeIn
           scrollWheelZoom={false}
           style={{ height: '100%', width: '100%' }}
         >
-          <TileLayer key={tileMode} url={tile.url} attribution={tile.attr} />
+          <TileLayer key={tileMode} url={tile.url} attribution={tile.attr} maxZoom={19} />
           <ZoomControl position="bottomright" />
           <FitPins pins={pins} />
           <PanTo pin={activePin} />
@@ -367,7 +404,7 @@ const NeighborhoodMap: React.FC<Props> = ({ destination, neighborhoods, activeIn
       </div>
 
       <p className="text-[9px] text-slate-500 mt-2">
-        Map data © OpenStreetMap contributors · {tile.attr}
+        {tile.attr} · geocoding © OpenStreetMap contributors
       </p>
     </div>
   );
