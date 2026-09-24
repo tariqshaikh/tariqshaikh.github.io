@@ -63,7 +63,10 @@ async function geminiChat(
     parts: [{ text: m.content }],
   }));
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+    // gemini-2.5-flash was retired ("no longer available to new users") and
+    // returned 404, so every call silently fell through to the Groq fallback,
+    // which has a much tighter rate limit.
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
