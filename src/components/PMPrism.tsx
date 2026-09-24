@@ -1059,11 +1059,21 @@ function QuestionCatalog({ onSelect, inline = false }: { onSelect: (q: string) =
           <ChevronDown size={15} className={`text-slate-500 transition-transform duration-400 ${open ? 'rotate-180' : ''}`} style={{ transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)' }}/>
         </button>
       )}
+      {/* Collapse wrapper. The max-height is only a vehicle for the expand
+          animation, so it has to clear the tallest category — Philosophy runs
+          30 questions at roughly 2,200px. The old 1,400px cap combined with
+          overflow:hidden silently clipped every category, including the modal,
+          where the outer panel's own scroll could never reach past it.
+
+          Inline (modal) skips the animation entirely: the panel scrolls itself,
+          so capping height here is what broke scrolling. */}
       <div style={{
-        maxHeight: (open || inline) ? '1400px' : '0px',
+        maxHeight: inline ? 'none' : open ? '4000px' : '0px',
         opacity: (open || inline) ? 1 : 0,
-        overflow: 'hidden',
-        transition: 'max-height 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease',
+        overflow: inline ? 'visible' : 'hidden',
+        transition: inline
+          ? undefined
+          : 'max-height 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease',
       }}>
         <div className={inline ? '' : 'border-t border-white/6'}>
           <div className="px-4 pt-4 pb-3 space-y-3">
