@@ -6,7 +6,13 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: './',
+    // Must be absolute, not './'. The site is served from the domain root, and
+    // the SPA redirect in index.html calls history.replaceState before the
+    // browser parses the module tag. With './', a route like /admin/visitors
+    // resolves assets against /admin/ and 404s, so every two-segment route
+    // (/orbit/dashboard, /homebase/:town, /waves/:tripId) rendered a blank page
+    // on direct load or refresh.
+    base: '/',
     plugins: [react(), tailwindcss()],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''),
