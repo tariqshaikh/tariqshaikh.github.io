@@ -58,6 +58,7 @@ export default function VisitorInsights() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
   const navigate = useNavigate();
 
@@ -69,10 +70,13 @@ export default function VisitorInsights() {
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(user => {
       setAuthLoading(false);
+      setAuthEmail(user?.email ?? null);
       if (user && user.email?.toLowerCase() === 'tshaikh92@gmail.com') {
         setIsAdmin(true);
       } else if (user) {
-        navigate('/');
+        // Previously navigate('/') — a signed-in non-admin got bounced to the
+        // portfolio with no explanation. Fall through to the message instead so
+        // it's clear which account is active.
       } else {
         navigate('/login?redirect=/admin/visitors');
       }
@@ -96,7 +100,35 @@ export default function VisitorInsights() {
       <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600">Checking access...</span>
     </div>
   );
-  if (!isAdmin) return null;
+  // Previously `return null`, which rendered a blank white page whenever auth
+  // resolved to a non-admin — no message, nothing in the console, no way to
+  // tell an access problem from a crash. Show the actual state instead.
+  if (!isAdmin) return (
+    <div className="min-h-screen bg-[#07091A] flex flex-col items-center justify-center gap-5 px-6 text-center">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-violet-400 font-bold">
+        Visitor Insights
+      </div>
+      <p className="text-slate-400 text-sm max-w-sm leading-relaxed">
+        {authEmail
+          ? <>Signed in as <span className="text-slate-200">{authEmail}</span>, which isn't the admin account for this dashboard.</>
+          : <>You need to sign in as the admin account to view visitor analytics.</>}
+      </p>
+      <div className="flex items-center gap-3">
+        <Link
+          to="/login?redirect=/admin/visitors"
+          className="px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[10px] font-bold uppercase tracking-widest transition-colors"
+        >
+          {authEmail ? 'Switch account' : 'Sign in'}
+        </Link>
+        <Link
+          to="/"
+          className="px-5 py-2.5 rounded-lg border border-white/10 text-slate-400 hover:text-white hover:border-white/25 text-[10px] font-bold uppercase tracking-widest transition-colors"
+        >
+          Back to portfolio
+        </Link>
+      </div>
+    </div>
+  );
 
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
   const todayLogs = logs.filter(l => l.timestamp?.toDate() >= todayStart);
