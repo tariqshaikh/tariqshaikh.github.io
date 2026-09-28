@@ -28,6 +28,23 @@
   body {
     @apply bg-slate-50 text-slate-900 font-sans antialiased;
   }
+
+  /* Tailwind v4's preflight leaves buttons on the browser default cursor, so
+     every button in the app showed an arrow instead of a pointer unless it
+     happened to carry `cursor-pointer`. Only 45 of 263 did. Setting it once
+     here beats sprinkling the utility across 17 files — and it can still be
+     overridden per element. Disabled controls keep the not-allowed cue. */
+  button,
+  summary,
+  [role='button'],
+  label[for] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role='button'][aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 }
 
 .glass {
