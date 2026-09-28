@@ -1290,6 +1290,124 @@ interface Branch { label: string; insight: string; points: string[]; keyTension?
 interface PressureTest { weakness: string; blindSpot: string; sharperAngle: string; }
 interface MindMapData { branches: Branch[]; provocation: string; followUps?: string[]; pressureTest?: PressureTest; }
 
+// ─── Model prose rendering ────────────────────────────────────────────────────
+// Elaborations and chat replies come back as loose markdown, and the model
+// reaches for LaTeX whenever a formula appears — `\[ \frac{\text{a}}{\text{b}} \]`
+// rendered as literal characters. It also emits non-breaking hyphens (U+2011)
+// and narrow spaces, which is why text like "North‑Star" looked mis-spaced.
+// The prompts now discourage all of that; this is the safety net for when the
+// model ignores them, plus the markdown renderer the output always needed.
+
+const LATEX_SYMBOLS: Record<string, string> = {
+  times: '×', cdot: '·', div: '÷', approx: '≈', neq: '≠', le: '≤', ge: '≥',
+  leq: '≤', geq: '≥', pm: '±', rightarrow: '→', to: '→', leftarrow: '←',
+  Delta: 'Δ', delta: 'δ', alpha: 'α', beta: 'β', sigma: 'σ', mu: 'μ', percent: '%',
+};
+
+function cleanModelText(raw: string): string {
+  let t = raw;
+  const hadMath = /\\\[|\\\(|\$\$|\\frac|\\text\{/.test(t);
+
+  // Strip math delimiters, keeping the expression inside.
+  t = t.replace(/\\\[|\\\]|\\\(|\\\)|\$\$/g, '');
+  // Unwrap \text{...} first, innermost outward. \frac's arguments are usually
+  // themselves \text{...}, and a nested brace stops \frac from matching at all —
+  // which silently fused numerator and denominator into one run of words.
+  for (let i = 0; i < 4; i++) {
+    const before = t;
+    t = t.replace(/\\(?:text|textbf|textit|mathrm|mathbf|operatorname)\s*\{([^{}]*)\}/g, '$1');
+    if (t === before) break;
+  }
+  // Now \frac{a}{b} -> (a) / (b), with plain arguments.
+  for (let i = 0; i < 4; i++) {
+    const before = t;
+    t = t.replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, '($1) / ($2)');
+    if (t === before) break;
+  }
+  // Known symbols; drop any other stray command.
+  t = t.replace(/\\([a-zA-Z]+)/g, (_m, w: string) => LATEX_SYMBOLS[w] ?? '');
+  // Only clear leftover braces if this actually looked like math, so ordinary
+  // prose containing braces is left alone.
+  if (hadMath) t = t.replace(/[{}]/g, '');
+
+  // Typographic characters that break word spacing in our font stack.
+  t = t.replace(/‑/g, '-').replace(/[    ]/g, ' ');
+  // Collapse runaway blank lines and trailing spaces.
+  t = t.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n');
+  return t.trim();
+}
+
+/** Renders **bold** and *italic*; everything else passes through as text. */
+function inlineMarkdown(text: string, keyPrefix: string): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  const re = /\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m[1] !== undefined) out.push(<strong key={`${keyPrefix}-b${i}`} className="font-semibold">{m[1]}</strong>);
+    else if (m[2] !== undefined) out.push(<em key={`${keyPrefix}-i${i}`}>{m[2]}</em>);
+    else out.push(<code key={`${keyPrefix}-c${i}`} className="font-mono text-[0.92em] px-1 py-0.5 rounded bg-black/[0.06]">{m[3]}</code>);
+    last = m.index + m[0].length;
+    i++;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+const LIST_ITEM = /^\s*(?:(\d+)[.)]|[-*•])\s+(.*)$/;
+
+function RichText({ text, className = '', color }: { text: string; className?: string; color?: string }) {
+  const cleaned = cleanModelText(text);
+  const blocks = cleaned.split(/\n\s*\n/).filter(b => b.trim());
+
+  return (
+    <div className={`space-y-3 ${className}`} style={color ? { color } : undefined}>
+      {blocks.map((block, bi) => {
+        const lines = block.split('\n').filter(l => l.trim());
+
+        // A block that is entirely one bolded line reads as a sub-heading.
+        if (lines.length === 1) {
+          const solo = lines[0].trim().match(/^\*\*(.+)\*\*$/);
+          if (solo) {
+            return (
+              <p key={bi} className="font-semibold text-[0.95rem] pt-1">
+                {inlineMarkdown(solo[1], `h${bi}`)}
+              </p>
+            );
+          }
+        }
+
+        // All lines are list items -> render a real list.
+        if (lines.length && lines.every(l => LIST_ITEM.test(l))) {
+          const ordered = /^\s*\d+[.)]/.test(lines[0]);
+          const items = lines.map(l => l.match(LIST_ITEM)![2]);
+          const Tag = ordered ? 'ol' : 'ul';
+          return (
+            <Tag key={bi} className={`space-y-1.5 pl-5 ${ordered ? 'list-decimal' : 'list-disc'}`}>
+              {items.map((it, ii) => (
+                <li key={ii} className="leading-relaxed pl-1">{inlineMarkdown(it, `${bi}-${ii}`)}</li>
+              ))}
+            </Tag>
+          );
+        }
+
+        return (
+          <p key={bi} className="leading-relaxed">
+            {lines.map((l, li) => (
+              <React.Fragment key={li}>
+                {li > 0 && ' '}
+                {inlineMarkdown(l, `${bi}-${li}`)}
+              </React.Fragment>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 function MindMap({ data, question, frameworkId }: { data: MindMapData; question: string; frameworkId: string }) {
   const schema = FRAMEWORK_SCHEMAS[frameworkId] || FRAMEWORK_SCHEMAS['product-sense'];
   const [modal, setModal] = useState<{ branch: Branch; color: string } | null>(null);
@@ -1310,7 +1428,13 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
     setElaborating(true);
     try {
       const text = await llmChat(
-        `You are Prism, a world-class PM thinking partner. The user analyzed a question using the ${schema.description.split(':')[0]} framework. Elaborate deeply on the "${branch.label}" branch. Go 3 levels deeper: expose the non-obvious, cite real examples from Figma, Stripe, Notion, Linear, Duolingo or similar, give a concrete mental model, and end with one sharp action the PM should take this week. 4-6 focused paragraphs. No generic advice.`,
+        `You are Prism, a world-class PM thinking partner. The user analyzed a question using the ${schema.description.split(':')[0]} framework. Elaborate deeply on the "${branch.label}" branch. Go 3 levels deeper: expose the non-obvious, cite real examples from Figma, Stripe, Notion, Linear, Duolingo or similar, give a concrete mental model, and end with one sharp action the PM should take this week. 4-6 focused paragraphs. No generic advice.
+
+FORMATTING — this renders in a plain web panel, not a maths renderer:
+- Never use LaTeX or maths notation. No \\[ \\], no $$, no \\frac, no \\text. Write any formula in words or simple arithmetic, e.g. "annual miles per vehicle ÷ cost per mile".
+- Plain prose paragraphs separated by a blank line. **Bold** is allowed for emphasis and short lead-ins; numbered or bulleted lists are fine.
+- No markdown headings (#). No tables.
+- Use ordinary hyphens and spaces — no non-breaking hyphens or narrow spaces.`,
         [{ role: 'user', content: `Original question: ${question}\n\nBranch: ${branch.label}\nInsight: ${branch.insight}\nPoints: ${branch.points.join('; ')}\n\nGo deeper.` }],
         { maxTokens: 900 }
       );
@@ -1332,7 +1456,9 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
     setTimeout(() => chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: 'smooth' }), 50);
     try {
       const reply = await llmChat(
-        `You are Prism, a PM thinking partner. The user is doing a deep dive into the "${modal.branch.label}" branch of a ${schema.description.split(':')[0]} analysis of: "${question}". Your elaboration so far: "${elaboration.slice(0,400)}...". Answer follow-up questions sharply and concisely. No fluff.`,
+        `You are Prism, a PM thinking partner. The user is doing a deep dive into the "${modal.branch.label}" branch of a ${schema.description.split(':')[0]} analysis of: "${question}". Your elaboration so far: "${elaboration.slice(0,400)}...". Answer follow-up questions sharply and concisely. No fluff.
+
+FORMATTING: plain prose, no LaTeX or maths notation (no \\[ \\], $$, \\frac, \\text) — write formulas as words or simple arithmetic. **Bold** and simple lists are fine. No markdown headings. Ordinary hyphens and spaces only.`,
         nextHistory,
         { maxTokens: 500 }
       );
@@ -1466,7 +1592,7 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
                   </div>
                 )}
                 {elaboration && (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color:'#2e2a27' }}>{elaboration}</p>
+                  <RichText text={elaboration} className="text-sm" color="#2e2a27" />
                 )}
                 {/* On mobile: chat history sits here inline */}
                 {chatHistory.length > 0 && (
@@ -1477,7 +1603,7 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
                         {msg.role === 'user' ? (
                           <div className="max-w-[82%] px-4 py-2.5 rounded-2xl rounded-br-sm text-sm" style={{ color:'#1a1714', backgroundColor:`${modal.color}18`, border:`1px solid ${modal.color}30` }}>{msg.content}</div>
                         ) : (
-                          <p className="text-sm leading-relaxed" style={{ color:'#3d3935' }}>{msg.content}</p>
+                          <RichText text={msg.content} className="text-sm" color="#3d3935" />
                         )}
                       </div>
                     ))}
@@ -1502,7 +1628,7 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
                       {msg.role === 'user' ? (
                         <div className="max-w-[85%] px-4 py-2.5 rounded-2xl rounded-br-sm text-sm" style={{ color:'#1a1714', backgroundColor:`${modal.color}18`, border:`1px solid ${modal.color}30` }}>{msg.content}</div>
                       ) : (
-                        <div className="max-w-[90%] text-sm leading-relaxed" style={{ color:'#3d3935' }}>{msg.content}</div>
+                        <div className="max-w-[90%]"><RichText text={msg.content} className="text-sm" color="#3d3935" /></div>
                       )}
                     </div>
                   ))}
@@ -2238,7 +2364,9 @@ export default function PMPrism() {
                                   ? 'bg-violet-600/20 text-violet-100 rounded-tr-sm'
                                   : 'bg-white/6 text-slate-300 rounded-tl-sm'
                               }`}>
-                                {msg.content}
+                                {msg.role === 'assistant'
+                                  ? <RichText text={msg.content} />
+                                  : msg.content}
                               </div>
                             </div>
                           ))}
