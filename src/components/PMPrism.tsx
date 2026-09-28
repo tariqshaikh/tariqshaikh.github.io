@@ -189,6 +189,7 @@ const FRAMEWORKS = [
   { id: 'strategy', label: 'Where to Play' },
   { id: 'star', label: 'STAR Method' },
   { id: 'case-study', label: 'Zero to Launch' },
+  { id: 'proven-better-new', label: 'Proven, Better, New' },
 ];
 
 const BRANCH_COLORS = ['#7c3aed', '#0891b2', '#059669', '#ca8a04', '#dc2626', '#db2777', '#2563eb', '#9333ea', '#0e7490'];
@@ -212,6 +213,7 @@ const FRAMEWORK_COLORS: Record<string, string> = {
   'strategy':      '#3b82f6',
   'star':          '#a855f7',
   'case-study':    '#14b8a6',
+  'proven-better-new': '#f97316',
 };
 
 const STARS_BG = Array.from({ length: 70 }, (_, i) => ({
@@ -228,6 +230,16 @@ const STARS_BG = Array.from({ length: 70 }, (_, i) => ({
 interface FrameworkSchema { branches: string[]; description: string; instruction: string; }
 
 const FRAMEWORK_SCHEMAS: Record<string, FrameworkSchema> = {
+  'proven-better-new': {
+    branches: ['Proven', 'Better', 'New', 'Sequence & Ratio', 'Inversion Risk'],
+    description: 'Proven, Better, New (Mark Pincus): borrow what already works, make it dramatically better, then add exactly one bold new thing',
+    instruction:
+      'Proven: name the specific existing product, mechanic or workflow whose demand is already validated, and say what to borrow wholesale instead of redesigning. ' +
+      'Better: the improvement must be obvious enough to need zero user education — Pincus\'s bar is that 10 out of 10 people say they would use it. State the exact pain removed, not a vague "nicer UX". ' +
+      'New: exactly ONE bold hypothesis that differentiates. If the answer implies more than one, say which to cut and why. ' +
+      'Sequence & Ratio: what ships first, and roughly how much of the product should be proven vs better vs new. ' +
+      'Inversion Risk: where this plan is secretly leading with New — Pincus\'s core warning is that people start with the novel, skip the proven, and then wonder why nobody wants it. Be specific about which part is unvalidated.',
+  },
   'star': {
     branches: ['Situation', 'Task', 'Action', 'Result'],
     description: 'STAR (Situation → Task → Action → Result): a behavioral storytelling framework',
@@ -279,6 +291,20 @@ const FRAMEWORK_SCHEMAS: Record<string, FrameworkSchema> = {
 interface LensInfo { name: string; origin: string; when: string; bestFor: string[]; notFor: string; color: string; }
 
 const LENS_INFO: Record<string, LensInfo> = {
+  'proven-better-new': {
+    name: 'Proven, Better, New',
+    origin:
+      "Mark Pincus, founder of Zynga, where it became the product religion: copy what already works, make it dramatically better, then add one bold new thing. Zynga's biggest franchises began as deliberate copies of proven games — Words With Friends from Scrabble, FarmVille from Farm Town — ruthlessly reworked for social and mobile before anything novel was layered on top. Pincus frames the underlying discipline as \"your instincts are right 95% of the time, but your ideas are wrong 75% of the time,\" and sets the bar for Better at 10 out of 10 people saying they'd use it. Detailed in his 2026 book Life at the Speed of Play.",
+    when: 'When you are evaluating a new product, feature or bet — especially one that feels exciting precisely because it is original. Use it to check you are anchored to already-validated demand before spending your innovation budget.',
+    bestFor: [
+      'Pressure-testing a new product idea',
+      '0-to-1 bets that feel too novel',
+      'Deciding what to copy versus invent',
+      'Cutting scope down to a single bold hypothesis',
+    ],
+    notFor: 'Behavioral interview answers, or optimising a mature product where the proven baseline is already your own.',
+    color: '#ea580c',
+  },
   'product-sense': {
     name: 'Product Sense',
     origin: 'Evolved from design thinking and user research. Popularized as a core PM competency at Google and Meta, where interviews test whether candidates can build and use deep user empathy.',
