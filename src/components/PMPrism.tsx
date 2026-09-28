@@ -179,18 +179,21 @@ const MOCK_MIND_MAPS: Record<string, MindMapData> = {
   },
 };
 
+// `source` is the attribution shown under each lens name when browsing. Every
+// one is drawn from that lens's own `origin` text in LENS_INFO — nothing here
+// is invented, and all 11 are filled so the row never shows a gap.
 const FRAMEWORKS = [
-  { id: 'product-sense', label: 'Product Sense' },
-  { id: 'jtbd', label: 'Jobs to Be Done' },
-  { id: 'circles', label: 'CIRCLES' },
-  { id: 'north-star', label: 'North Star' },
-  { id: 'sizing', label: 'Opportunity Sizing' },
-  { id: 'competitive', label: 'Landscape & Competition' },
-  { id: 'strategy', label: 'Where to Play' },
-  { id: 'star', label: 'STAR Method' },
-  { id: 'case-study', label: 'Zero to Launch' },
-  { id: 'proven-better-new', label: 'Proven, Better, New' },
-  { id: 'kano', label: 'Kano Model' },
+  { id: 'product-sense', label: 'Product Sense', source: 'Google · Meta' },
+  { id: 'jtbd', label: 'Jobs to Be Done', source: 'Clayton Christensen' },
+  { id: 'circles', label: 'CIRCLES', source: 'Lewis Lin' },
+  { id: 'north-star', label: 'North Star', source: 'Sean Ellis' },
+  { id: 'sizing', label: 'Opportunity Sizing', source: 'McKinsey · Bain' },
+  { id: 'competitive', label: 'Landscape & Competition', source: 'Five Forces · Blue Ocean' },
+  { id: 'strategy', label: 'Where to Play', source: 'Roger Martin' },
+  { id: 'star', label: 'STAR Method', source: 'Amazon · McKinsey' },
+  { id: 'case-study', label: 'Zero to Launch', source: 'Harvard Business School' },
+  { id: 'proven-better-new', label: 'Proven, Better, New', source: 'Mark Pincus' },
+  { id: 'kano', label: 'Kano Model', source: 'Noriaki Kano' },
 ];
 
 const BRANCH_COLORS = ['#7c3aed', '#0891b2', '#059669', '#ca8a04', '#dc2626', '#db2777', '#2563eb', '#9333ea', '#0e7490'];
@@ -1957,12 +1960,22 @@ export default function PMPrism() {
                         <button
                           key={f.id}
                           onClick={() => setFocusedLens(f.id)}
-                          className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 ${
-                            isFocused ? 'scale-105' : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                          className={`flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-2xl font-mono border transition-all duration-200 ${
+                            isFocused ? 'scale-105' : 'bg-white/3 border-white/10 hover:border-white/20'
                           }`}
-                          style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70`, color } : undefined}
+                          style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70` } : undefined}
                         >
-                          {f.label}
+                          <span
+                            className={`text-xs uppercase tracking-wider font-bold ${isFocused ? '' : 'text-slate-500'}`}
+                            style={isFocused ? { color } : undefined}
+                          >
+                            {f.label}
+                          </span>
+                          {/* Attribution — who the framework came from. Sourced from
+                              each lens's own origin text; all 11 are populated. */}
+                          <span className="text-[10px] tracking-normal normal-case text-slate-600 font-normal">
+                            {f.source}
+                          </span>
                         </button>
                       );
                     })}
@@ -2059,12 +2072,22 @@ export default function PMPrism() {
                         <button
                           key={f.id}
                           onClick={() => setFocusedLens(f.id)}
-                          className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-wider font-bold border transition-all duration-200 ${
-                            isFocused ? 'scale-105' : 'bg-white/3 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
+                          className={`flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-2xl font-mono border transition-all duration-200 ${
+                            isFocused ? 'scale-105' : 'bg-white/3 border-white/10 hover:border-white/20'
                           }`}
-                          style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70`, color } : undefined}
+                          style={isFocused ? { backgroundColor:`${color}25`, borderColor:`${color}70` } : undefined}
                         >
-                          {f.label}
+                          <span
+                            className={`text-xs uppercase tracking-wider font-bold ${isFocused ? '' : 'text-slate-500'}`}
+                            style={isFocused ? { color } : undefined}
+                          >
+                            {f.label}
+                          </span>
+                          {/* Attribution — who the framework came from. Sourced from
+                              each lens's own origin text; all 11 are populated. */}
+                          <span className="text-[10px] tracking-normal normal-case text-slate-600 font-normal">
+                            {f.source}
+                          </span>
                         </button>
                       );
                     })}
