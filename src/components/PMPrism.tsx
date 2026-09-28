@@ -725,6 +725,17 @@ function suggestFrameworks(input: string): string[] {
       'rollout', 'end-to-end', 'step by step', 'zero to one', 'design and launch',
       'take to market', 'product launch', 'ship a', 'launch a', 'build and ship',
     ]],
+    // Fires on questions about novelty and unvalidated demand — exactly where
+    // Pincus's warning applies (leading with New, skipping Proven).
+    ['proven-better-new', [
+      'proven', 'unproven', 'novel', 'is this a good idea', 'good idea', 'worth building',
+      'never been done', 'nobody has built', 'no one has built', 'nobody has done',
+      'first of its kind', 'original idea', 'net new', 'brand new', 'greenfield',
+      'reinvent', 'disrupt', 'validate demand', 'validate the idea', 'derisk', 'de-risk',
+      'product market fit', 'product-market fit', 'pmf', 'copy', 'clone', 'me too',
+      'differentiated enough', 'too similar', 'already exists', 'ai-native', 'ai native',
+      'new product', 'new app', 'new idea', 'should i build', 'should we build',
+    ]],
   ];
 
   for (const [fw, keywords] of rules) {
