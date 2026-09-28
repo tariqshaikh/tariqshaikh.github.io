@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { logVisit } from '../lib/analytics';
@@ -1420,6 +1421,29 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
 
   function closeModal() { setModal(null); setElaboration(''); setChatHistory([]); setChatInput(''); }
 
+  // Freeze the page behind the modal. Without this the body kept scrolling
+  // under the overlay, so scrolling inside the panel dragged the page too.
+  // Compensating for the scrollbar width stops the layout jumping on open.
+  useEffect(() => {
+    if (!modal) return;
+    const { overflow, paddingRight } = document.body.style;
+    const gap = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (gap > 0) document.body.style.paddingRight = `${gap}px`;
+    return () => {
+      document.body.style.overflow = overflow;
+      document.body.style.paddingRight = paddingRight;
+    };
+  }, [modal]);
+
+  // Escape closes the modal — expected of any overlay, and cheap to support.
+  useEffect(() => {
+    if (!modal) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeModal(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [modal]);
+
   async function openModal(branch: Branch, color: string) {
     setModal({ branch, color });
     setElaboration('');
@@ -1436,7 +1460,9 @@ FORMATTING — this renders in a plain web panel, not a maths renderer:
 - No markdown headings (#). No tables.
 - Use ordinary hyphens and spaces — no non-breaking hyphens or narrow spaces.`,
         [{ role: 'user', content: `Original question: ${question}\n\nBranch: ${branch.label}\nInsight: ${branch.insight}\nPoints: ${branch.points.join('; ')}\n\nGo deeper.` }],
-        { maxTokens: 900 }
+        // 900 truncated mid-sentence: the prompt asks for 4-6 paragraphs at
+        // three levels of depth plus a closing action, which doesn't fit.
+        { maxTokens: 1800 }
       );
       setElaboration(text);
     } catch {
@@ -1554,8 +1580,13 @@ FORMATTING: plain prose, no LaTeX or maths notation (no \\[ \\], $$, \\frac, \\t
         )}
       </div>
 
-      {/* Elaborate modal */}
-      {modal && (
+      {/* Elaborate modal.
+          Portalled to document.body on purpose. This component renders inside
+          `<div className="relative z-10 ...">`, and z-index only competes within
+          a stacking context — so the page's `fixed z-50` catalog button and
+          catalog panel painted straight over a z-[200] child of that z-10
+          wrapper. Escaping to the body root is the fix; bumping numbers is not. */}
+      {modal && createPortal((
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 lg:p-8" onClick={closeModal}>
           <div className="absolute inset-0 bg-black/75 backdrop-blur-sm"/>
           <div
@@ -1685,7 +1716,7 @@ FORMATTING: plain prose, no LaTeX or maths notation (no \\[ \\], $$, \\frac, \\t
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
     </div>
   );
 }
