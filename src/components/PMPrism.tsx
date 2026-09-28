@@ -53,10 +53,13 @@ async function llmChat(
   throw new Error('No AI provider available');
 }
 
+const GEMINI_MAX_RETRIES = 1;
+
 async function geminiChat(
   systemPrompt: string,
   messages: { role: 'user' | 'assistant'; content: string }[],
-  opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {}
+  opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {},
+  attempt = 0
 ): Promise<string> {
   const { maxTokens = 1000, jsonMode = false, onRateLimit } = opts;
   const contents = messages.map(m => ({
@@ -76,6 +79,13 @@ async function geminiChat(
         contents,
         generationConfig: {
           maxOutputTokens: maxTokens,
+          // gemini-3.x flash models think by default, and the thinking is billed
+          // against maxOutputTokens. Measured on an elaboration request: 1,204
+          // tokens went to hidden reasoning and only 693 reached the user, which
+          // hit MAX_TOKENS while burning ~3x the quota. Disabling it returned
+          // finishReason STOP, 657 total tokens, and roughly double the delivered
+          // text in 6s instead of 15s. Set a positive budget here to re-enable.
+          thinkingConfig: { thinkingBudget: 0 },
           ...(jsonMode ? { responseMimeType: 'application/json' } : {}),
         },
       }),
@@ -84,12 +94,17 @@ async function geminiChat(
   const json = await res.json();
   if (json.error) {
     const msg: string = json.error.message || 'API error';
+    // Retry a rate limit at most GEMINI_MAX_RETRIES times, then throw so the
+    // Groq fallback in llmChat can take over. This used to recurse with no cap,
+    // so a sustained 429 left the UI spinning indefinitely: no error surfaced
+    // and the fallback was never reached, because nothing was ever thrown.
     if (json.error.code === 429) {
+      if (attempt >= GEMINI_MAX_RETRIES) throw new Error('gemini_rate_limit');
       const match = msg.match(/retry in ([\d.]+)s/i);
-      const secs = match ? Math.ceil(parseFloat(match[1])) : 15;
+      const secs = Math.min(match ? Math.ceil(parseFloat(match[1])) : 15, 20);
       onRateLimit?.(secs);
       await new Promise(r => setTimeout(r, secs * 1000));
-      return geminiChat(systemPrompt, messages, opts);
+      return geminiChat(systemPrompt, messages, opts, attempt + 1);
     }
     throw new Error(msg);
   }
