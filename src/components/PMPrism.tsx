@@ -190,6 +190,7 @@ const FRAMEWORKS = [
   { id: 'star', label: 'STAR Method' },
   { id: 'case-study', label: 'Zero to Launch' },
   { id: 'proven-better-new', label: 'Proven, Better, New' },
+  { id: 'kano', label: 'Kano Model' },
 ];
 
 const BRANCH_COLORS = ['#7c3aed', '#0891b2', '#059669', '#ca8a04', '#dc2626', '#db2777', '#2563eb', '#9333ea', '#0e7490'];
@@ -214,6 +215,7 @@ const FRAMEWORK_COLORS: Record<string, string> = {
   'star':          '#a855f7',
   'case-study':    '#14b8a6',
   'proven-better-new': '#f97316',
+  'kano':              '#84cc16',
 };
 
 const STARS_BG = Array.from({ length: 70 }, (_, i) => ({
@@ -230,6 +232,18 @@ const STARS_BG = Array.from({ length: 70 }, (_, i) => ({
 interface FrameworkSchema { branches: string[]; description: string; instruction: string; }
 
 const FRAMEWORK_SCHEMAS: Record<string, FrameworkSchema> = {
+  'kano': {
+    branches: ['Must-Have', 'Performance', 'Delighter', 'Indifferent', 'Reverse', 'Decay Over Time'],
+    description: 'Kano Model (Noriaki Kano, 1984): classify features by how their presence or absence actually moves customer satisfaction',
+    instruction:
+      'Sort the features or options implied by the question into Kano categories, and be willing to put specific things in the unflattering ones. ' +
+      'Must-Have: absence causes anger, presence earns no credit — table stakes for the category. ' +
+      'Performance: satisfaction scales roughly linearly with how much you deliver, so this is where to compete on degree. ' +
+      'Delighter: unexpected, produces outsized affection, but nobody would have asked for it. ' +
+      'Indifferent: users genuinely do not care — name at least one thing here, because every roadmap has some and teams hate admitting it. ' +
+      'Reverse: some segment actively dislikes this; say which segment and why. ' +
+      'Decay Over Time: Kano categories are not fixed — today\'s delighter becomes tomorrow\'s must-have as competitors copy it. Name which items are already sliding and roughly how fast.',
+  },
   'proven-better-new': {
     branches: ['Proven', 'Better', 'New', 'Sequence & Ratio', 'Inversion Risk'],
     description: 'Proven, Better, New (Mark Pincus): borrow what already works, make it dramatically better, then add exactly one bold new thing',
@@ -293,6 +307,14 @@ const FRAMEWORK_SCHEMAS: Record<string, FrameworkSchema> = {
 // model made of it. Keyed by framework id, then by the exact branch label in
 // FRAMEWORK_SCHEMAS — a mismatch just renders nothing.
 const BRANCH_DEFINITIONS: Record<string, Record<string, string>> = {
+  'kano': {
+    'Must-Have': 'Absence causes anger; presence earns no credit. The price of entry to the category.',
+    'Performance': 'Satisfaction scales with how much you deliver — the axis worth competing on.',
+    'Delighter': 'Unexpected, disproportionate affection. Nobody would have thought to ask for it.',
+    'Indifferent': "Users genuinely don't care. Every roadmap has some; naming them is the hard part.",
+    'Reverse': 'Present, and some segment actively dislikes it. Say which segment and why.',
+    'Decay Over Time': "Categories move. Today's delighter is tomorrow's must-have once rivals copy it.",
+  },
   'proven-better-new': {
     'Proven': 'The existing product or mechanic whose demand is already validated — what you can borrow rather than invent.',
     'Better': 'The one improvement so obvious it needs no explaining. Not "nicer" — measurably less painful.',
@@ -369,6 +391,19 @@ const BRANCH_DEFINITIONS: Record<string, Record<string, string>> = {
 interface LensInfo { name: string; origin: string; when: string; bestFor: string[]; notFor: string; color: string; }
 
 const LENS_INFO: Record<string, LensInfo> = {
+  'kano': {
+    name: 'Kano Model',
+    origin: "Professor Noriaki Kano, 1984, published with Nobuhiko Seraku, Fumio Takahashi and Shin-ichi Tsuji in the Journal of the Japanese Society for Quality Control. Kano's insight was that satisfaction isn't linear with effort: some features only generate anger by their absence, while others produce affection nobody thought to ask for. The original paper named three categories; indifferent and reverse were added as the model matured.",
+    when: 'When you have more things you could build than capacity to build them, and need to argue about which actually move satisfaction rather than which sound good.',
+    bestFor: [
+      'Prioritising a feature list or backlog',
+      'Deciding what to cut from a scope',
+      'Separating table stakes from differentiators',
+      'Explaining why a "great" feature landed flat',
+    ],
+    notFor: 'Behavioural interview answers, market sizing, or questions with only one obvious thing to build.',
+    color: '#65a30d',
+  },
   'proven-better-new': {
     name: 'Proven, Better, New',
     origin:
@@ -802,6 +837,17 @@ function suggestFrameworks(input: string): string[] {
       'post-mortem', 'go to market', 'from idea to', 'full plan', 'gtm', 'launch strategy',
       'rollout', 'end-to-end', 'step by step', 'zero to one', 'design and launch',
       'take to market', 'product launch', 'ship a', 'launch a', 'build and ship',
+    ]],
+    // Fires on prioritisation and scope-cutting questions — "which of these
+    // actually moves satisfaction" rather than "what should we build".
+    ['kano', [
+      'kano', 'prioritize', 'prioritise', 'prioritization', 'prioritisation',
+      'which features', 'which feature', 'feature list', 'backlog', 'must have',
+      'must-have', 'nice to have', 'nice-to-have', 'table stakes', 'delight',
+      'delighter', 'satisfaction', 'what to cut', 'what should we cut', 'cut scope',
+      'trim', 'mvp', 'minimum viable', 'rank', 'ranking', 'trade off features',
+      'too many features', 'feature creep', 'bloat', 'what matters most',
+      'biggest impact', 'diminishing returns',
     ]],
     // Fires on questions about novelty and unvalidated demand — exactly where
     // Pincus's warning applies (leading with New, skipping Proven).
