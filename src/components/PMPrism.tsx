@@ -287,6 +287,84 @@ const FRAMEWORK_SCHEMAS: Record<string, FrameworkSchema> = {
   },
 };
 
+// ─── Branch definitions ───────────────────────────────────────────────────────
+// Static, per-branch explainer shown under each card's heading, above the
+// AI-generated insight. Tells you what the box is for before you read what the
+// model made of it. Keyed by framework id, then by the exact branch label in
+// FRAMEWORK_SCHEMAS — a mismatch just renders nothing.
+const BRANCH_DEFINITIONS: Record<string, Record<string, string>> = {
+  'proven-better-new': {
+    'Proven': 'The existing product or mechanic whose demand is already validated — what you can borrow rather than invent.',
+    'Better': 'The one improvement so obvious it needs no explaining. Not "nicer" — measurably less painful.',
+    'New': 'The single bold bet that makes this yours. Exactly one; more than one is a scope problem.',
+    'Sequence & Ratio': 'What ships first, and how much of the product should be borrowed versus invented.',
+    'Inversion Risk': "Where you're quietly leading with New — the part nobody has validated yet.",
+  },
+  'star': {
+    'Situation': 'The context — where you were and what was at stake, with enough detail to feel real.',
+    'Task': 'What you specifically owned. Your responsibility, not the team\'s.',
+    'Action': 'What you actually did, step by step. The part interviewers score hardest.',
+    'Result': "The outcome with numbers where you have them, plus what you'd do differently.",
+  },
+  'circles': {
+    'Comprehend': 'Restate the problem and ask your clarifying questions before solving anything.',
+    'Identify Customer': 'Pick specific user segments. Naming one beats covering everyone.',
+    'Report Needs': "Turn that user's goals into concrete needs you could build against.",
+    'Cut Priorities': "Choose which needs you're serving — and say out loud which you're dropping.",
+    'List Solutions': 'Generate several genuinely different ideas before judging any of them.',
+    'Evaluate Tradeoffs': 'Compare the options on impact, effort and risk, showing the reasoning.',
+    'Summarize': 'Make the recommendation and say why, in a few sentences.',
+  },
+  'jtbd': {
+    'Functional Job': "The practical task they're trying to get done.",
+    'Emotional Job': 'How they want to feel — or stop feeling — while doing it.',
+    'Social Job': 'How they want to be perceived by others for using this.',
+    'Struggling Moment': 'The specific trigger that sent them looking for a solution.',
+  },
+  'north-star': {
+    'North Star Metric': 'The single number that best captures value actually delivered to users.',
+    'Input Metrics': 'The two or three levers that directly move the north star.',
+    'Guardrail Metrics': 'What must not get worse while you chase the north star.',
+    'Leading Indicators': 'Early signals that appear before the north star itself moves.',
+  },
+  'sizing': {
+    'Total Addressable Market': 'Everyone who could conceivably buy, ignoring your constraints.',
+    'Serviceable Market': 'The slice you could realistically reach with this product and these channels.',
+    'Obtainable Share': 'What you could actually capture, given competition and execution.',
+    'Key Assumptions': 'The numbers you made up. Name them explicitly.',
+    'How to Validate': 'The cheapest test that would tell you an assumption is wrong.',
+  },
+  'competitive': {
+    'Market Landscape': "Who is in this market and how it's structured today.",
+    'Player Positioning': "Where each competitor sits, and what they're betting on.",
+    'Moats & Defensibility': 'What would stop a well-funded rival simply copying this.',
+    'Market Gaps': 'The needs nobody currently serves well.',
+    'Where to Win': "The specific position you'd take, and why it's winnable.",
+  },
+  'strategy': {
+    'Where to Play': "The markets, segments and channels you're choosing — and refusing.",
+    'How to Win': 'Why you beat the alternatives in that chosen arena.',
+    'Required Capabilities': 'What you would need to be genuinely good at for this to work.',
+    '3-Year Vision': 'What the product looks like if this strategy actually succeeds.',
+    '12-Month Bets': "The concrete things you'd commit to this year.",
+  },
+  'product-sense': {
+    'Who is the User': 'The specific person — narrow enough that someone could disagree.',
+    'What They Truly Need': 'The underlying need, not the feature they asked for.',
+    'What Success Looks Like': "How you'd know you had actually helped them.",
+    'The Non-Obvious Insight': 'The thing about this user that most people get wrong.',
+    'Risks & Failure Modes': 'How this goes wrong, and who it fails.',
+  },
+  'case-study': {
+    'Problem Space': 'The problem worth solving, and why now.',
+    'Target User': "Who you're building for first.",
+    'Opportunity': 'Why this is worth doing — size, timing, strategic fit.',
+    'Solution Approach': 'What you would build, and the shape of the v1.',
+    'Key Tradeoffs': "What you're deliberately not doing, and what that costs.",
+    'Success Criteria': 'The metrics and thresholds that define having done this well.',
+  },
+};
+
 // ─── Lens info ────────────────────────────────────────────────────────────────
 interface LensInfo { name: string; origin: string; when: string; bestFor: string[]; notFor: string; color: string; }
 
@@ -1236,6 +1314,13 @@ function MindMap({ data, question, frameworkId }: { data: MindMapData; question:
                 <span className="font-mono text-sm font-black" style={{ color, opacity: 0.4 }}>{String(i+1).padStart(2,'0')}</span>
                 <span className="font-mono text-sm font-black uppercase tracking-widest" style={{ color }}>{b.label}</span>
               </div>
+              {/* Static definition of the branch, so you know what this box is
+                  for before reading what the model made of it. */}
+              {BRANCH_DEFINITIONS[frameworkId]?.[b.label] && (
+                <p className="text-slate-500 text-xs leading-relaxed -mt-2">
+                  {BRANCH_DEFINITIONS[frameworkId][b.label]}
+                </p>
+              )}
               <p className="text-slate-200 text-base leading-relaxed">{b.insight}</p>
               <ul className="space-y-2.5 pt-3 border-t flex-1" style={{ borderColor:`${color}20` }}>
                 {b.points.map((p,j)=>(
