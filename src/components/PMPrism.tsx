@@ -2128,11 +2128,13 @@ export default function PMPrism() {
           transition: 'max-height 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, padding 0.5s ease',
         }}
       >
-        <div style={{ paddingTop: '8rem', paddingBottom: '2.5rem' }}>
+        {/* Was 8rem top / 2.5rem bottom with a 4rem wordmark-to-tagline gap.
+            Trimmed to lift the whole page up by roughly 70px. */}
+        <div style={{ paddingTop: '5.5rem', paddingBottom: '2rem' }}>
           <div className="flex justify-center mb-6">
             <PrismWordmark size="hero"/>
           </div>
-          <p className="text-slate-400 text-base mx-auto mt-16 whitespace-nowrap">
+          <p className="text-slate-400 text-base mx-auto mt-10 whitespace-nowrap">
             Bring any product question — Prism refracts it through the sharpest framework lens
           </p>
         </div>
