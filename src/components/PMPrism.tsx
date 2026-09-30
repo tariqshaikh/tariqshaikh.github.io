@@ -41,23 +41,52 @@ async function groqChat(
   return text;
 }
 
+/**
+ * Appended to the system prompt whenever jsonMode is on.
+ *
+ * Gemini is held to JSON by `responseMimeType`, but Groq has no equivalent we
+ * can safely use — `response_format: json_object` makes a near-miss a hard
+ * failure with no content (see groqChat). With nothing enforcing shape, Groq
+ * answered a vague prompt conversationally ("Sure thing! Please share the
+ * problem...") — zero braces, so extractJson threw "No JSON object found".
+ * The same prompt also produced `{"error": "Please provide..."}`, which parses
+ * fine but has no branches, so the failure surfaced two different ways.
+ *
+ * Refusing to ask for clarification is the load-bearing half: the trigger is a
+ * question the model considers under-specified, not malformed JSON.
+ */
+const JSON_ONLY_DIRECTIVE =
+  '\n\nOutput ONLY the raw JSON object described above. No preamble, no questions back to the user, ' +
+  'no code fences. If the input is vague or incomplete, do NOT ask for clarification and do NOT return ' +
+  'an error object — make reasonable assumptions, state them inside the JSON, and still return the full object.';
+
 async function llmChat(
   systemPrompt: string,
   messages: { role: 'user' | 'assistant'; content: string }[],
   opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {}
 ): Promise<string> {
+  const prompt = opts.jsonMode ? systemPrompt + JSON_ONLY_DIRECTIVE : systemPrompt;
   // Gemini primary (1500 req/day free) — Groq fallback (8k TPM, exhausts fast)
+  let geminiErr = '';
   if (GEMINI_API_KEY) {
-    try { return await geminiChat(systemPrompt, messages, opts); } catch { /* fall through */ }
+    try { return await geminiChat(prompt, messages, opts); }
+    catch (e) {
+      // Keep the reason. Swallowing it entirely meant a Groq-side failure gave
+      // no hint that Gemini had already gone down (503s during demand spikes
+      // look identical to Groq simply being the only provider configured).
+      geminiErr = e instanceof Error ? e.message : 'unknown';
+      console.warn('[Prism] Gemini failed, falling back to Groq:', geminiErr);
+    }
   }
   if (GROQ_API_KEY) {
-    try { return await groqChat(systemPrompt, messages, opts); }
+    try { return await groqChat(prompt, messages, opts); }
     catch (e) {
       if (e instanceof Error && e.message === 'groq_rate_limit') opts.onRateLimit?.(-1);
+      if (e instanceof Error && geminiErr) e.message = `${e.message} (Gemini also failed: ${geminiErr})`;
       throw e;
     }
   }
-  throw new Error('No AI provider available');
+  throw new Error(geminiErr ? `No provider available (Gemini: ${geminiErr})` : 'No AI provider available');
 }
 
 const GEMINI_MAX_RETRIES = 1;
@@ -154,6 +183,25 @@ function extractJson(raw: string): unknown {
     // Throws on its own if the slice still isn't valid — callers handle it.
     return JSON.parse(cleaned.slice(first, last + 1));
   }
+}
+
+/**
+ * Turn a raw provider/parse error into something a user can act on.
+ *
+ * The previous copy appended "Try again or select fewer lenses" to everything,
+ * which was wrong twice over: lenses are single-select now, and the advice
+ * pointed away from the real causes — a provider outage, or a prompt the model
+ * read as an intro rather than a question.
+ */
+function describeFailure(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes('rate_limit') || m.includes('rate limit') || m.includes('quota'))
+    return 'both AI providers are rate limited right now. Wait a minute and try again.';
+  if (m.includes('503') || m.includes('unavailable') || m.includes('high demand') || m.includes('overloaded'))
+    return 'the AI providers are temporarily overloaded. Try again in a moment.';
+  if (m.includes('no json object found') || m.includes('no usable branches'))
+    return 'the model replied conversationally instead of analyzing. This usually means the prompt reads as an intro rather than a question — paste the actual problem and the questions you want worked through.';
+  return `${msg}. Try again in a moment.`;
 }
 
 function normalizeMindMap(raw: unknown): MindMapData | null {
@@ -1985,7 +2033,10 @@ export default function PMPrism() {
           parsed = await callGroq();
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : '';
-          if (msg.includes('failed_generation') || msg.includes('Failed to generate JSON') || msg.includes('Empty response')) {
+          // 'No JSON object found' means the model replied in prose instead of
+          // JSON — a one-off generation miss, and retryable like the others.
+          if (msg.includes('failed_generation') || msg.includes('Failed to generate JSON')
+              || msg.includes('Empty response') || msg.includes('No JSON object found')) {
             await new Promise(r => setTimeout(r, 800));
             parsed = await callGroq();
           } else {
@@ -2031,7 +2082,7 @@ export default function PMPrism() {
         });
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Unknown error';
-        setError(`Analysis failed: ${msg}. Try again or select fewer lenses.`);
+        setError(`Analysis failed: ${describeFailure(msg)}`);
         setRateLimitMsg('');
       } finally {
         setLoadingFrameworks(prev => prev.filter(f => f !== frameworkId));
