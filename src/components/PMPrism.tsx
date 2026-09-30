@@ -2246,13 +2246,6 @@ export default function PMPrism() {
             </div>
             </div>{/* end question box narrow wrapper */}
 
-            {/* PM Lenses and the Question Catalog sit side by side from lg up.
-                The lenses card opens by default and renders a LensDetail for the
-                focused lens, which is tall enough that a stacked catalog fell
-                below the fold on load. Two columns keeps both visible without
-                collapsing anything. Below lg they stack, lenses first. */}
-            <div className="lg:grid lg:grid-cols-2 lg:gap-5 lg:items-start">
-
             {/* 2. PM Lenses card */}
             <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
               <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-4 border-b border-white/6 flex items-center gap-3 transition-colors text-left cursor-pointer" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
@@ -2300,8 +2293,8 @@ export default function PMPrism() {
                 </div>
             </div>
 
-            {/* Question catalog — right column at lg, stacked underneath below that */}
-            <div className="mt-4 lg:mt-0 pb-24 lg:pb-0">
+            {/* Question catalog — stacked under the lenses card, full width */}
+            <div className="mt-4 pb-24">
               <QuestionCatalog onSelect={q => {
                 setInput(q);
                 setQuestionLoaded(true);
@@ -2310,8 +2303,6 @@ export default function PMPrism() {
                 setTimeout(() => textareaRef.current?.focus(), 100);
               }}/>
             </div>
-
-            </div>{/* end lenses + catalog grid */}
           </div>
         )}
 
