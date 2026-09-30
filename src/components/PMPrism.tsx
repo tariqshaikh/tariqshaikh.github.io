@@ -119,13 +119,57 @@ function _prismKey(q: string, fw: string): string {
   for (let i = 0; i < s.length; i++) h = ((h * 31) + s.charCodeAt(i)) >>> 0;
   return `prism_v2_${h.toString(36)}`;
 }
+/**
+ * Coerce whatever came back from the model — or out of localStorage — into a
+ * shape the renderer can survive.
+ *
+ * The render did `b.points.map(...)` with no guard, so a single branch missing
+ * `points` threw during render and blanked the whole page. Cached entries were
+ * especially dangerous: they bypassed even the label-enforcement step and went
+ * straight into state, so one bad entry white-screened that question forever.
+ */
+function normalizeMindMap(raw: unknown): MindMapData | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const d = raw as Record<string, unknown>;
+  const rawBranches = Array.isArray(d.branches) ? d.branches : [];
+
+  const branches: Branch[] = rawBranches
+    .filter((b): b is Record<string, unknown> => !!b && typeof b === 'object')
+    .map(b => ({
+      label: typeof b.label === 'string' ? b.label : '',
+      insight: typeof b.insight === 'string' ? b.insight : '',
+      points: Array.isArray(b.points) ? b.points.filter((p): p is string => typeof p === 'string') : [],
+      keyTension: typeof b.keyTension === 'string' ? b.keyTension : undefined,
+    }))
+    // A branch with no label and nothing to say isn't worth a card.
+    .filter(b => b.label || b.insight || b.points.length);
+
+  if (!branches.length) return null;
+
+  const pt = d.pressureTest as Record<string, unknown> | undefined;
+  return {
+    branches,
+    provocation: typeof d.provocation === 'string' ? d.provocation : '',
+    followUps: Array.isArray(d.followUps) ? d.followUps.filter((f): f is string => typeof f === 'string') : undefined,
+    pressureTest: pt && typeof pt === 'object' ? {
+      weakness: typeof pt.weakness === 'string' ? pt.weakness : '',
+      blindSpot: typeof pt.blindSpot === 'string' ? pt.blindSpot : '',
+      sharperAngle: typeof pt.sharperAngle === 'string' ? pt.sharperAngle : '',
+    } : undefined,
+  };
+}
+
 function prismCacheGet(q: string, fw: string): MindMapData | null {
   try {
     const raw = localStorage.getItem(_prismKey(q, fw));
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
     if (Date.now() - ts > 6 * 3600 * 1000) { localStorage.removeItem(_prismKey(q, fw)); return null; }
-    return data as MindMapData;
+    // Validate on the way out. Entries written before this existed may be
+    // malformed; drop them rather than handing a render-crashing object back.
+    const clean = normalizeMindMap(data);
+    if (!clean) { localStorage.removeItem(_prismKey(q, fw)); return null; }
+    return clean;
   } catch { return null; }
 }
 function prismCacheSet(q: string, fw: string, data: MindMapData): void {
@@ -1306,6 +1350,44 @@ interface Branch { label: string; insight: string; points: string[]; keyTension?
 interface PressureTest { weakness: string; blindSpot: string; sharperAngle: string; }
 interface MindMapData { branches: Branch[]; provocation: string; followUps?: string[]; pressureTest?: PressureTest; }
 
+// ─── Error boundary ───────────────────────────────────────────────────────────
+// A throw inside MindMap used to unmount the whole page and leave a white
+// screen with nothing in the UI to explain it. Model output is untrusted input;
+// it should be able to fail without taking the app down.
+class MindMapErrorBoundary extends React.Component<
+  { children: React.ReactNode; onReset: () => void },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: Error) { return { error }; }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[Prism] mind map render failed:', error, info.componentStack);
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <div className="max-w-2xl mx-auto my-12 rounded-2xl border border-red-500/25 bg-red-500/[0.06] px-8 py-7 text-center">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-red-400 font-bold mb-3">
+          Couldn't render this analysis
+        </div>
+        <p className="text-slate-400 text-sm leading-relaxed mb-5">
+          The response came back in a shape Prism couldn't display. Running it again usually fixes it.
+        </p>
+        <p className="font-mono text-[10px] text-slate-600 mb-5 break-words">{this.state.error.message}</p>
+        <button
+          onClick={() => { this.setState({ error: null }); this.props.onReset(); }}
+          className="px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[10px] font-bold uppercase tracking-widest transition-colors"
+        >
+          Start over
+        </button>
+      </div>
+    );
+  }
+}
+
 // ─── Model prose rendering ────────────────────────────────────────────────────
 // Elaborations and chat replies come back as loose markdown, and the model
 // reaches for LaTeX whenever a formula appears — `\[ \frac{\text{a}}{\text{b}} \]`
@@ -1539,7 +1621,7 @@ FORMATTING: plain prose, no LaTeX or maths notation (no \\[ \\], $$, \\frac, \\t
               )}
               <p className="text-slate-200 text-base leading-relaxed">{b.insight}</p>
               <ul className="space-y-2.5 pt-3 border-t flex-1" style={{ borderColor:`${color}20` }}>
-                {b.points.map((p,j)=>(
+                {(b.points ?? []).map((p,j)=>(
                   <li key={j} className="text-slate-400 text-sm flex gap-2.5 leading-relaxed">
                     <span style={{ color }} className="shrink-0 mt-1 font-bold text-base leading-none">·</span><span>{p}</span>
                   </li>
@@ -1811,7 +1893,7 @@ export default function PMPrism() {
 
     try {
       const fw = FRAMEWORKS.find(f => f.id === activeTab);
-      const ctx = currentData.branches.map(b => `${b.label}: ${b.insight}\n${b.points.join('; ')}`).join('\n\n');
+      const ctx = currentData.branches.map(b => `${b.label}: ${b.insight}\n${(b.points ?? []).join('; ')}`).join('\n\n');
       const sys = `You are Prism, a sharp PM thinking partner. The user analyzed this question using the ${fw?.label ?? activeTab} framework: "${submittedQuestion}"\n\nAnalysis:\n${ctx}\n\nAnswer concisely and directly, grounded in what this specific analysis revealed. Max 3 short paragraphs. Be opinionated.`;
       const reply = await llmChat(sys, withUser, { maxTokens: 400 });
       setBottomChats(c => ({ ...c, [activeTab]: [...withUser, { role: 'assistant', content: reply }] }));
@@ -1877,13 +1959,17 @@ export default function PMPrism() {
             throw e;
           }
         }
+        // Coerce to a safe shape before anything renders it. A branch missing
+        // `points` used to throw during render and blank the page.
+        const safe = normalizeMindMap(parsed);
+        if (!safe) throw new Error('Model returned no usable branches');
+
         // Enforce schema branch labels — LLM often substitutes its own labels
         const schemaBranches = (FRAMEWORK_SCHEMAS[frameworkId] ?? FRAMEWORK_SCHEMAS['product-sense']).branches;
-        if (parsed.branches) {
-          parsed.branches = parsed.branches.map((b, i) => ({ ...b, label: schemaBranches[i] ?? b.label }));
-        }
-        prismCacheSet(question, frameworkId, parsed);
-        setMindMaps(prev => ({ ...prev, [frameworkId]: parsed }));
+        safe.branches = safe.branches.map((b, i) => ({ ...b, label: schemaBranches[i] ?? b.label }));
+
+        prismCacheSet(question, frameworkId, safe);
+        setMindMaps(prev => ({ ...prev, [frameworkId]: safe }));
 
         // Critic pass — runs after main analysis, non-blocking
         runCriticPass(question, frameworkId, parsed).then(pressureTest => {
@@ -2112,6 +2198,13 @@ export default function PMPrism() {
             </div>
             </div>{/* end question box narrow wrapper */}
 
+            {/* PM Lenses and the Question Catalog sit side by side from lg up.
+                The lenses card opens by default and renders a LensDetail for the
+                focused lens, which is tall enough that a stacked catalog fell
+                below the fold on load. Two columns keeps both visible without
+                collapsing anything. Below lg they stack, lenses first. */}
+            <div className="lg:grid lg:grid-cols-2 lg:gap-5 lg:items-start">
+
             {/* 2. PM Lenses card */}
             <div className="rounded-2xl border border-white/10 overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
               <button onClick={() => setLensesOpen(o => !o)} className="w-full px-5 py-4 border-b border-white/6 flex items-center gap-3 transition-colors text-left cursor-pointer" style={{ backgroundColor: lensesOpen ? 'rgba(0,0,0,0.03)' : 'rgba(139,104,192,0.04)' }}>
@@ -2158,19 +2251,19 @@ export default function PMPrism() {
                 </div>
                 </div>
             </div>
-          </div>
-        )}
 
-        {/* Question catalog — pre-submit only */}
-        {!submitted && (
-          <div className="relative z-10 max-w-7xl mx-auto px-6 mt-4 pb-24">
-            <QuestionCatalog onSelect={q => {
-              setInput(q);
-              setQuestionLoaded(true);
-              setTimeout(() => setQuestionLoaded(false), 900);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              setTimeout(() => textareaRef.current?.focus(), 100);
-            }}/>
+            {/* Question catalog — right column at lg, stacked underneath below that */}
+            <div className="mt-4 lg:mt-0 pb-24 lg:pb-0">
+              <QuestionCatalog onSelect={q => {
+                setInput(q);
+                setQuestionLoaded(true);
+                setTimeout(() => setQuestionLoaded(false), 900);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => textareaRef.current?.focus(), 100);
+              }}/>
+            </div>
+
+            </div>{/* end lenses + catalog grid */}
           </div>
         )}
 
@@ -2303,17 +2396,24 @@ export default function PMPrism() {
             title="Question Catalog"
             className="fixed z-50 flex flex-col items-center justify-center gap-1 rounded-full transition-all duration-200 hover:scale-110 active:scale-95"
             style={{
-              top: '5.5rem',
-              left: '1.25rem',
+              // Bottom-right: the conventional home for a floating action, out
+              // of the reading path and thumb-reachable. Nothing else is fixed
+              // down here, so there's no collision.
+              bottom: '1.5rem',
+              right: '1.25rem',
               width: '3.5rem',
               height: '3.5rem',
+              // Prism's palette is violet. This was teal-to-cyan, which is the
+              // Waves palette and read as a control from another product.
               background: (dictOpen && !dictClosing)
-                ? 'linear-gradient(135deg, #7a58b0 0%, #8b68c0 100%)'
-                : 'linear-gradient(135deg, #0f766e 0%, #0891b2 100%)',
+                ? 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)'
+                : 'linear-gradient(135deg, #7a58b0 0%, #8b68c0 100%)',
               border: '2px solid rgba(255,255,255,0.22)',
+              // Glow roughly halved. At 0 0 64px on a cream background it read
+              // as an unread-notification badge rather than a utility.
               boxShadow: (dictOpen && !dictClosing)
-                ? '0 0 32px rgba(20,184,166,0.9), 0 0 64px rgba(20,184,166,0.35), 0 4px 20px rgba(0,0,0,0.6)'
-                : '0 0 22px rgba(13,148,136,0.7), 0 4px 20px rgba(0,0,0,0.5)',
+                ? '0 0 16px rgba(139,92,246,0.55), 0 0 32px rgba(139,92,246,0.18), 0 4px 14px rgba(0,0,0,0.4)'
+                : '0 0 11px rgba(122,88,176,0.5), 0 4px 14px rgba(0,0,0,0.35)',
               animation: 'dict-fly-in 0.9s cubic-bezier(0.16,1,0.3,1)',
             }}
           >
@@ -2323,13 +2423,15 @@ export default function PMPrism() {
                 <rect key={`${row}-${col}`} x={col*6+0.5} y={row*6+0.5} width="4.5" height="4.5" rx="1" fill="white" opacity={0.9}/>
               )))}
             </svg>
-            <span className="font-mono text-[6px] uppercase tracking-wide text-white font-bold leading-none" style={{ opacity:0.92 }}>Catalog</span>
+            {/* Was text-[6px] — about half the smallest legible size, so it was
+                texture rather than a label. 9px actually reads. */}
+            <span className="font-mono text-[9px] uppercase tracking-wide text-white font-bold leading-none" style={{ opacity:0.92 }}>Catalog</span>
           </button>
 
           {/* Expanded panel */}
           {(dictOpen || dictClosing) && (
             <div
-              className="fixed top-20 left-16 z-50 max-h-[80vh] overflow-y-auto rounded-2xl border shadow-2xl"
+              className="fixed bottom-24 right-5 z-50 max-h-[80vh] overflow-y-auto rounded-2xl border shadow-2xl"
               style={{
                 width: 'min(46rem, calc(100vw - 5rem))',
                 backgroundColor:'rgba(9,11,28,0.97)',
@@ -2382,7 +2484,9 @@ export default function PMPrism() {
           {error && <div className="text-center text-red-400 text-sm py-8">{error}</div>}
           {mindMaps[activeTab] && !loadingFrameworks.includes(activeTab) && (
             <>
-              <MindMap key={activeTab} data={mindMaps[activeTab]} question={submittedQuestion} frameworkId={activeTab}/>
+              <MindMapErrorBoundary key={activeTab} onReset={reset}>
+                <MindMap data={mindMaps[activeTab]} question={submittedQuestion} frameworkId={activeTab}/>
+              </MindMapErrorBoundary>
               {loadingFrameworks.length === 0 && (() => {
                 const data = mindMaps[activeTab];
                 if (!data) return null;
@@ -2485,14 +2589,19 @@ export default function PMPrism() {
 
       <style>{`
         @keyframes prism-twinkle { from { opacity: 0.04; } to { opacity: 0.3; } }
+        /* Offsets are measured from the button's resting position, so they had
+           to be recomputed when it moved from top-left to bottom-right.
+           Button centre now sits at (100vw - 3rem, 100vh - 3.25rem), so the
+           viewport centre is that far back in both axes. */
         @keyframes dict-fly-in {
-          0%   { opacity:0; transform: translate(calc(50vw - 3rem), calc(50vh - 7.5rem)) scale(1.6); }
+          0%   { opacity:0; transform: translate(calc(3rem - 50vw), calc(3.25rem - 50vh)) scale(1.6); }
           22%  { opacity:1; }
-          80%  { transform: translate(4px, 4px) scale(1.07); }
+          80%  { transform: translate(-4px, -4px) scale(1.07); }
           100% { opacity:1; transform: translate(0,0) scale(1); }
         }
-        @keyframes dict-panel-in  { from { opacity: 0; transform: scale(0.95) translateX(-8px); } to { opacity: 1; transform: scale(1) translateX(0); } }
-        @keyframes dict-panel-out { from { opacity: 1; transform: scale(1) translateX(0); } to { opacity: 0; transform: scale(0.95) translateX(-8px); } }
+        /* Panel now hangs off the right edge, so it slides in from the right. */
+        @keyframes dict-panel-in  { from { opacity: 0; transform: scale(0.95) translateX(8px); } to { opacity: 1; transform: scale(1) translateX(0); } }
+        @keyframes dict-panel-out { from { opacity: 1; transform: scale(1) translateX(0); } to { opacity: 0; transform: scale(0.95) translateX(8px); } }
         @keyframes q-flash { 0%,100% { background-color: transparent; } 40% { background-color: rgba(139,92,246,0.2); } }
         @keyframes suggest-dot { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
         @keyframes suggest-in { from { opacity: 0; transform: translateY(5px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
