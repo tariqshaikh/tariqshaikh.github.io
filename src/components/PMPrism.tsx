@@ -21,7 +21,14 @@ async function groqChat(
       model: 'openai/gpt-oss-120b',
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
       max_tokens: maxTokens,
-      ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
+      // Deliberately not sending response_format: json_object. Groq validates
+      // the generation server-side and, on a near-miss, returns "Failed to
+      // generate JSON. Please adjust your prompt" with no content at all — so
+      // a recoverable response became a hard failure with nothing to salvage,
+      // and with Gemini rate-limited there was no other provider left. The
+      // system prompt already demands raw JSON and extractJson parses it
+      // leniently on our side, which rescues output Groq would have discarded.
+      // `jsonMode` is still honoured for Gemini, which handles it reliably.
     }),
   });
   const json = await res.json();
@@ -128,6 +135,27 @@ function _prismKey(q: string, fw: string): string {
  * especially dangerous: they bypassed even the label-enforcement step and went
  * straight into state, so one bad entry white-screened that question forever.
  */
+/**
+ * Pull a JSON object out of a model response.
+ *
+ * Models wrap JSON in code fences, prefix it with "Here's the analysis:", or
+ * add a trailing note. Relying on a provider's strict JSON mode turned those
+ * near-misses into hard failures with no content returned at all, so we parse
+ * defensively instead: strip fences, then fall back to the outermost braces.
+ */
+function extractJson(raw: string): unknown {
+  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const first = cleaned.indexOf('{');
+    const last = cleaned.lastIndexOf('}');
+    if (first === -1 || last <= first) throw new Error('No JSON object found in response');
+    // Throws on its own if the slice still isn't valid — callers handle it.
+    return JSON.parse(cleaned.slice(first, last + 1));
+  }
+}
+
 function normalizeMindMap(raw: unknown): MindMapData | null {
   if (!raw || typeof raw !== 'object') return null;
   const d = raw as Record<string, unknown>;
@@ -1948,8 +1976,7 @@ export default function PMPrism() {
           { maxTokens: 4000, jsonMode: true, onRateLimit: (secs) => setRateLimitMsg(secs < 0 ? 'Groq rate limited — switching to Gemini...' : `Rate limited — retrying in ${secs}s...`) }
         );
         setRateLimitMsg('');
-        const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-        return JSON.parse(cleaned) as MindMapData;
+        return extractJson(raw) as MindMapData;
       };
 
       try {
