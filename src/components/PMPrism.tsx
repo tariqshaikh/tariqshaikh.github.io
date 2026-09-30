@@ -1961,8 +1961,25 @@ export default function PMPrism() {
         }
         // Coerce to a safe shape before anything renders it. A branch missing
         // `points` used to throw during render and blank the page.
-        const safe = normalizeMindMap(parsed);
-        if (!safe) throw new Error('Model returned no usable branches');
+        //
+        // A response can parse as JSON and still carry nothing renderable —
+        // empty branches, or branches under a different key. That's a one-off
+        // bad generation rather than a broken lens, so retry once (which may
+        // also land on the other provider) before surfacing an error, and
+        // describe what actually came back so the failure is diagnosable.
+        let safe = normalizeMindMap(parsed);
+        if (!safe) {
+          console.warn('[Prism] unusable response, retrying', { frameworkId, received: parsed });
+          await new Promise(r => setTimeout(r, 600));
+          const retry = await callGroq();
+          safe = normalizeMindMap(retry);
+          if (!safe) {
+            console.error('[Prism] retry also unusable', { frameworkId, received: retry });
+            const keys = retry && typeof retry === 'object' ? Object.keys(retry).join(', ') : typeof retry;
+            const n = Array.isArray((retry as MindMapData)?.branches) ? (retry as MindMapData).branches.length : 'none';
+            throw new Error(`Model returned no usable branches (keys: ${keys || 'empty'}; branches: ${n})`);
+          }
+        }
 
         // Enforce schema branch labels — LLM often substitutes its own labels
         const schemaBranches = (FRAMEWORK_SCHEMAS[frameworkId] ?? FRAMEWORK_SCHEMAS['product-sense']).branches;
