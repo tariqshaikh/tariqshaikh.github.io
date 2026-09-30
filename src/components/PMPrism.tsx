@@ -1926,12 +1926,18 @@ export default function PMPrism() {
       if (cached) {
         setMindMaps(prev => ({ ...prev, [frameworkId]: cached }));
         setLoadingFrameworks(prev => prev.filter(f => f !== frameworkId));
-        runCriticPass(question, frameworkId, cached).then(pressureTest => {
-          if (pressureTest) setMindMaps(prev => {
-            const existing = prev[frameworkId];
-            return existing ? { ...prev, [frameworkId]: { ...existing, pressureTest } } : prev;
+        // Only run the critic if this cached entry doesn't already have one.
+        // It used to re-run on every cache hit and the result was never saved,
+        // so a "cached" analysis still cost an API request each time it was
+        // viewed — the single biggest source of avoidable requests.
+        if (!cached.pressureTest) {
+          runCriticPass(question, frameworkId, cached).then(pressureTest => {
+            if (!pressureTest) return;
+            const withTest = { ...cached, pressureTest };
+            prismCacheSet(question, frameworkId, withTest);
+            setMindMaps(prev => (prev[frameworkId] ? { ...prev, [frameworkId]: withTest } : prev));
           });
-        });
+        }
         return;
       }
 
@@ -1988,15 +1994,13 @@ export default function PMPrism() {
         prismCacheSet(question, frameworkId, safe);
         setMindMaps(prev => ({ ...prev, [frameworkId]: safe }));
 
-        // Critic pass — runs after main analysis, non-blocking
-        runCriticPass(question, frameworkId, parsed).then(pressureTest => {
-          if (pressureTest) {
-            setMindMaps(prev => {
-              const existing = prev[frameworkId];
-              if (!existing) return prev;
-              return { ...prev, [frameworkId]: { ...existing, pressureTest } };
-            });
-          }
+        // Critic pass — runs after the main analysis, non-blocking. Persist the
+        // result so revisiting this question costs no further requests.
+        runCriticPass(question, frameworkId, safe).then(pressureTest => {
+          if (!pressureTest) return;
+          const withTest = { ...safe, pressureTest };
+          prismCacheSet(question, frameworkId, withTest);
+          setMindMaps(prev => (prev[frameworkId] ? { ...prev, [frameworkId]: withTest } : prev));
         });
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Unknown error';
