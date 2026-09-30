@@ -66,38 +66,60 @@ async function llmChat(
   opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {}
 ): Promise<string> {
   const prompt = opts.jsonMode ? systemPrompt + JSON_ONLY_DIRECTIVE : systemPrompt;
-  // Gemini primary (1500 req/day free) — Groq fallback (8k TPM, exhausts fast)
-  let geminiErr = '';
+  // Walk the Gemini ladder first, then Groq. Each Gemini model is a separate
+  // quota bucket, so a model that's out for the day costs one fast 429 before
+  // the next one serves the request.
+  const errs: string[] = [];
   if (GEMINI_API_KEY) {
-    try { return await geminiChat(prompt, messages, opts); }
-    catch (e) {
-      // Keep the reason. Swallowing it entirely meant a Groq-side failure gave
-      // no hint that Gemini had already gone down (503s during demand spikes
-      // look identical to Groq simply being the only provider configured).
-      geminiErr = e instanceof Error ? e.message : 'unknown';
-      console.warn('[Prism] Gemini failed, falling back to Groq:', geminiErr);
+    for (const model of GEMINI_MODELS) {
+      try { return await geminiChat(prompt, messages, { ...opts, model }); }
+      catch (e) {
+        // Keep the reason. Swallowing it entirely meant a Groq-side failure
+        // gave no hint that Gemini had already gone down.
+        const m = e instanceof Error ? e.message : 'unknown';
+        errs.push(`${model}: ${m}`);
+        console.warn(`[Prism] ${model} failed, trying next provider:`, m);
+      }
     }
   }
   if (GROQ_API_KEY) {
+    // Everything on the Gemini ladder is out — tell the UI before the slower
+    // fallback runs, so a long wait isn't silent.
+    if (errs.length) opts.onRateLimit?.(-1);
     try { return await groqChat(prompt, messages, opts); }
     catch (e) {
-      if (e instanceof Error && e.message === 'groq_rate_limit') opts.onRateLimit?.(-1);
-      if (e instanceof Error && geminiErr) e.message = `${e.message} (Gemini also failed: ${geminiErr})`;
+      if (e instanceof Error && errs.length) e.message = `${e.message} (Gemini: ${errs.join('; ')})`;
       throw e;
     }
   }
-  throw new Error(geminiErr ? `No provider available (Gemini: ${geminiErr})` : 'No AI provider available');
+  throw new Error(errs.length ? `No provider available (${errs.join('; ')})` : 'No AI provider available');
 }
 
-const GEMINI_MAX_RETRIES = 1;
+/**
+ * Gemini models to try, in order. Each is its own free-tier quota bucket.
+ *
+ * Measured against this key on 2026-09-30 with concurrent bursts, reading the
+ * QuotaFailure violation the API returns:
+ *
+ *   gemini-3.6-flash        GenerateRequestsPerDayPerProjectPerModel = 20
+ *   gemini-3.5-flash        only the per-minute cap (5) ever fired
+ *   gemini-3-flash-preview  only the per-minute cap (5) ever fired
+ *
+ * Google gives newer point releases a 20-request-per-DAY free cap, so 3.6
+ * exhausted itself almost immediately and every analyse fell through to Groq,
+ * which has no JSON enforcement — that's what surfaced as "No JSON object
+ * found". 3.6 is deliberately not in this list; it is not deprecated, just
+ * too small to rely on. Re-probe before adding a newer model: 3.7 and 3.8
+ * exist but are newer still, so they likely carry the same 20/day cap.
+ */
+const GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3-flash-preview'];
 
 async function geminiChat(
   systemPrompt: string,
   messages: { role: 'user' | 'assistant'; content: string }[],
-  opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void } = {},
-  attempt = 0
+  opts: { maxTokens?: number; jsonMode?: boolean; onRateLimit?: (secs: number) => void; model?: string } = {}
 ): Promise<string> {
-  const { maxTokens = 1000, jsonMode = false, onRateLimit } = opts;
+  const { maxTokens = 1000, jsonMode = false, model = GEMINI_MODELS[0] } = opts;
   const contents = messages.map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
@@ -105,8 +127,8 @@ async function geminiChat(
   const res = await fetch(
     // gemini-2.5-flash was retired ("no longer available to new users") and
     // returned 404, so every call silently fell through to the Groq fallback,
-    // which has a much tighter rate limit.
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`,
+    // which has a much tighter rate limit. Model now comes from GEMINI_MODELS.
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -130,17 +152,18 @@ async function geminiChat(
   const json = await res.json();
   if (json.error) {
     const msg: string = json.error.message || 'API error';
-    // Retry a rate limit at most GEMINI_MAX_RETRIES times, then throw so the
-    // Groq fallback in llmChat can take over. This used to recurse with no cap,
-    // so a sustained 429 left the UI spinning indefinitely: no error surfaced
-    // and the fallback was never reached, because nothing was ever thrown.
+    // Fail fast on a 429 so llmChat can move to the next model, which has its
+    // own quota bucket and usually answers immediately. This used to sleep up
+    // to 20s and retry the same model — pointless when the daily cap is what
+    // was hit, and it showed the user a "retrying in 20s" spinner before
+    // failing anyway. (Earlier still it recursed with no cap at all, so a
+    // sustained 429 spun forever and the fallback was never reached.)
     if (json.error.code === 429) {
-      if (attempt >= GEMINI_MAX_RETRIES) throw new Error('gemini_rate_limit');
-      const match = msg.match(/retry in ([\d.]+)s/i);
-      const secs = Math.min(match ? Math.ceil(parseFloat(match[1])) : 15, 20);
-      onRateLimit?.(secs);
-      await new Promise(r => setTimeout(r, secs * 1000));
-      return geminiChat(systemPrompt, messages, opts, attempt + 1);
+      const quota = json.error.details
+        ?.flatMap((d: { violations?: { quotaId?: string; quotaValue?: string }[] }) => d.violations ?? [])
+        ?.map((v: { quotaId?: string; quotaValue?: string }) => `${v.quotaId}=${v.quotaValue}`)
+        .join(',');
+      throw new Error(quota ? `rate limited (${quota})` : 'rate limited');
     }
     throw new Error(msg);
   }
@@ -195,6 +218,10 @@ function extractJson(raw: string): unknown {
  */
 function describeFailure(msg: string): string {
   const m = msg.toLowerCase();
+  // A per-DAY quota is worth calling out separately — "wait a minute" is wrong
+  // advice when the bucket resets at midnight Pacific.
+  if (m.includes('perday'))
+    return 'the daily free quota on every available model is used up. It resets at midnight Pacific.';
   if (m.includes('rate_limit') || m.includes('rate limit') || m.includes('quota'))
     return 'both AI providers are rate limited right now. Wait a minute and try again.';
   if (m.includes('503') || m.includes('unavailable') || m.includes('high demand') || m.includes('overloaded'))
@@ -2021,7 +2048,9 @@ export default function PMPrism() {
         const raw = await llmChat(
           buildSystemPrompt(frameworkId),
           [{ role: 'user', content: question }],
-          { maxTokens: 4000, jsonMode: true, onRateLimit: (secs) => setRateLimitMsg(secs < 0 ? 'Groq rate limited — switching to Gemini...' : `Rate limited — retrying in ${secs}s...`) }
+          // onRateLimit(-1) now fires when the whole Gemini ladder is out and
+          // we're falling back to Groq — it used to mean the reverse.
+          { maxTokens: 4000, jsonMode: true, onRateLimit: (secs) => setRateLimitMsg(secs < 0 ? 'Gemini quota reached — switching to backup model...' : `Rate limited — retrying in ${secs}s...`) }
         );
         setRateLimitMsg('');
         return extractJson(raw) as MindMapData;
