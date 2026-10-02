@@ -351,6 +351,7 @@ const FRAMEWORKS = [
   { id: 'circles', label: 'CIRCLES', source: 'Lewis Lin' },
   { id: 'north-star', label: 'North Star', source: 'Sean Ellis' },
   { id: 'sizing', label: 'Opportunity Sizing', source: 'McKinsey · Bain' },
+  { id: 'rice', label: 'RICE Scoring', source: 'Sean McBride · Intercom' },
   { id: 'competitive', label: 'Landscape & Competition', source: 'Five Forces · Blue Ocean' },
   { id: 'strategy', label: 'Where to Play', source: 'Roger Martin' },
   { id: 'star', label: 'STAR Method', source: 'Amazon · McKinsey' },
@@ -376,6 +377,7 @@ const FRAMEWORK_COLORS: Record<string, string> = {
   'circles':       '#059669',
   'north-star':    '#f59e0b',
   'sizing':        '#ef4444',
+  'rice':          '#6366f1',
   'competitive':   '#ec4899',
   'strategy':      '#3b82f6',
   'star':          '#a855f7',
@@ -398,6 +400,18 @@ const STARS_BG = Array.from({ length: 70 }, (_, i) => ({
 interface FrameworkSchema { branches: string[]; description: string; instruction: string; }
 
 const FRAMEWORK_SCHEMAS: Record<string, FrameworkSchema> = {
+  'rice': {
+    branches: ['Candidates', 'Reach', 'Impact', 'Confidence', 'Effort', 'Score & Ranking', 'Where the Math Lies'],
+    description: 'RICE (Sean McBride, Intercom, 2016): score each option on (Reach × Impact × Confidence) ÷ Effort so a small win for everyone can be compared against a big win for a few',
+    instruction:
+      'First, Candidates: list the 3-5 specific options being compared. If the question does not enumerate them, derive them from it and say so — every later branch refers back to these by name. ' +
+      'Reach: how many people each option affects per time period, with the period stated (e.g. "~40k new job seekers/quarter"). Use real-ish numbers and name where they would come from. ' +
+      'Impact: score each on RICE\'s fixed scale — 3 massive, 2 high, 1 medium, 0.5 low, 0.25 minimal — and justify the number per option rather than asserting it. ' +
+      'Confidence: a percentage per option — 100% high, 80% medium, 50% low — and critically, say WHAT EVIDENCE would move it up. Confidence is the branch teams fake most. ' +
+      'Effort: person-months across product, design and engineering. Note that this is the only denominator, so an underestimate here distorts everything. ' +
+      'Score & Ranking: compute (R × I × C) / E per candidate, show the arithmetic, and rank them. State plainly if the winner is uncomfortable. ' +
+      'Where the Math Lies: the most important branch — name where this particular ranking misleads. RICE systematically favours cheap, measurable, incremental work and punishes big strategic bets, anything with a long payback, and anything serving a small but critical segment. Say which candidate is unfairly buried by the formula and whether you would override the ranking.',
+  },
   'kano': {
     branches: ['Must-Have', 'Performance', 'Delighter', 'Indifferent', 'Reverse', 'Decay Over Time'],
     description: 'Kano Model (Noriaki Kano, 1984): classify features by how their presence or absence actually moves customer satisfaction',
@@ -473,6 +487,15 @@ const FRAMEWORK_SCHEMAS: Record<string, FrameworkSchema> = {
 // model made of it. Keyed by framework id, then by the exact branch label in
 // FRAMEWORK_SCHEMAS — a mismatch just renders nothing.
 const BRANCH_DEFINITIONS: Record<string, Record<string, string>> = {
+  'rice': {
+    'Candidates': 'The specific options being compared. RICE only ranks — it needs a list to rank.',
+    'Reach': 'How many people this affects, per stated time period. Count, not a feeling.',
+    'Impact': "Per-user magnitude on RICE's fixed scale: 3 massive, 2 high, 1 medium, 0.5 low, 0.25 minimal.",
+    'Confidence': 'How much you trust your own Reach and Impact numbers. 100% high, 80% medium, 50% low.',
+    'Effort': 'Person-months across product, design and engineering. The only thing in the denominator.',
+    'Score & Ranking': '(Reach × Impact × Confidence) ÷ Effort, computed and ordered. Show the arithmetic.',
+    'Where the Math Lies': 'Where the ranking misleads — the formula quietly favours cheap, certain, incremental work.',
+  },
   'kano': {
     'Must-Have': 'Absence causes anger; presence earns no credit. The price of entry to the category.',
     'Performance': 'Satisfaction scales with how much you deliver — the axis worth competing on.',
@@ -557,6 +580,20 @@ const BRANCH_DEFINITIONS: Record<string, Record<string, string>> = {
 interface LensInfo { name: string; origin: string; when: string; bestFor: string[]; notFor: string; color: string; }
 
 const LENS_INFO: Record<string, LensInfo> = {
+  'rice': {
+    name: 'RICE Scoring',
+    origin:
+      "Sean McBride, a product manager at Intercom, created RICE in 2016 and published it on the Inside Intercom blog. The team was not short of ideas or short of opinions — it lacked a way to compare a small improvement affecting everybody against a large improvement affecting a handful of accounts, and its decisions were hard to reconstruct a month later. RICE's contribution is less the arithmetic than the discipline it imposes: Confidence forces you to admit how much of your own estimate is invented, and putting Effort in the denominator means a cheap idea can beat a glamorous one on the same page.",
+    when: "When you have several concrete options, finite capacity, and need a defensible ordering rather than a debate about which one sounds most exciting.",
+    bestFor: [
+      'Ranking a shortlist of competing features',
+      'Defending a roadmap order to stakeholders',
+      'Comparing a broad small win against a narrow big one',
+      'Forcing hidden confidence and effort assumptions into the open',
+    ],
+    notFor: 'Open-ended design or user-empathy questions, behavioural stories, or genuinely strategic bets — RICE reliably undervalues anything expensive, uncertain, or slow to pay back.',
+    color: '#4f46e5',
+  },
   'kano': {
     name: 'Kano Model',
     origin: "Professor Noriaki Kano, 1984, published with Nobuhiko Seraku, Fumio Takahashi and Shin-ichi Tsuji in the Journal of the Japanese Society for Quality Control. Kano's insight was that satisfaction isn't linear with effort: some features only generate anger by their absence, while others produce affection nobody thought to ask for. The original paper named three categories; indifferent and reverse were added as the model matured.",
@@ -1025,6 +1062,23 @@ function suggestFrameworks(input: string): string[] {
       'product market fit', 'product-market fit', 'pmf', 'copy', 'clone', 'me too',
       'differentiated enough', 'too similar', 'already exists', 'ai-native', 'ai native',
       'new product', 'new app', 'new idea', 'should i build', 'should we build',
+    ]],
+    // Fires on "rank these against each other given finite capacity". Overlaps
+    // Kano on prioritisation vocabulary by design — Kano asks which features
+    // move satisfaction, RICE asks which ones survive the effort budget — so a
+    // generic "how should we prioritise" question offers both.
+    ['rice', [
+      'rice', 'rice score', 'score', 'scoring', 'stack rank', 'stack-rank',
+      'rank', 'ranking', 'prioritize', 'prioritise', 'prioritization', 'prioritisation',
+      'which first', 'what first', 'build first', 'ship first', 'do first',
+      'in what order', 'order of', 'sequence', 'roi', 'return on investment',
+      'cost benefit', 'cost-benefit', 'effort', 'level of effort', 'estimate the effort',
+      'quick win', 'quick wins', 'low hanging fruit', 'low-hanging fruit',
+      'bang for', 'highest impact', 'impact vs effort', 'effort vs',
+      'limited resources', 'limited capacity', 'capacity', 'bandwidth', 'headcount',
+      'engineering time', 'one engineer', 'two engineers', 'sprint',
+      'this quarter', 'next quarter', 'justify the roadmap', 'defend the roadmap',
+      'which features', 'which feature', 'backlog', 'trade off between',
     ]],
   ];
 
