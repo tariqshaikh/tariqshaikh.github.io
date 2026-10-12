@@ -1,6 +1,7 @@
 {
   "absecon-highlands": {
     "name": "Absecon Highlands",
+    "regionId": 37334,
     "months": [
       {
         "period": "2023-01",
@@ -342,6 +343,7 @@
   },
   "absecon": {
     "name": "Absecon",
+    "regionId": 14,
     "months": [
       {
         "period": "2023-01",
@@ -683,6 +685,7 @@
   },
   "allamuchy": {
     "name": "Allamuchy",
+    "regionId": 31113,
     "months": [
       {
         "period": "2023-05",
@@ -832,6 +835,7 @@
   },
   "allendale": {
     "name": "Allendale",
+    "regionId": 162,
     "months": [
       {
         "period": "2023-01",
@@ -1173,6 +1177,7 @@
   },
   "allenhurst": {
     "name": "Allenhurst",
+    "regionId": 168,
     "months": [
       {
         "period": "2023-01",
@@ -1514,6 +1519,7 @@
   },
   "allentown": {
     "name": "Allentown",
+    "regionId": 177,
     "months": [
       {
         "period": "2023-01",
@@ -1855,6 +1861,7 @@
   },
   "allenwood": {
     "name": "Allenwood",
+    "regionId": 21143,
     "months": [
       {
         "period": "2023-01",
@@ -2196,6 +2203,7 @@
   },
   "alloway": {
     "name": "Alloway",
+    "regionId": 21146,
     "months": [
       {
         "period": "2023-01",
@@ -2537,6 +2545,7 @@
   },
   "alpha": {
     "name": "Alpha",
+    "regionId": 262,
     "months": [
       {
         "period": "2023-01",
@@ -2878,6 +2887,7 @@
   },
   "alpine": {
     "name": "Alpine",
+    "regionId": 280,
     "months": [
       {
         "period": "2023-01",
@@ -3219,6 +3229,7 @@
   },
   "ampere-north": {
     "name": "Ampere North",
+    "regionId": 37068,
     "months": [
       {
         "period": "2023-01",
@@ -3560,6 +3571,7 @@
   },
   "anderson": {
     "name": "Anderson",
+    "regionId": 31403,
     "months": [
       {
         "period": "2023-01",
@@ -3893,6 +3905,7 @@
   },
   "andover": {
     "name": "Andover",
+    "regionId": 338,
     "months": [
       {
         "period": "2023-01",
@@ -4234,6 +4247,7 @@
   },
   "annandale": {
     "name": "Annandale",
+    "regionId": 21186,
     "months": [
       {
         "period": "2023-01",
@@ -4575,6 +4589,7 @@
   },
   "arrowhead-lake": {
     "name": "Arrowhead Lake",
+    "regionId": 36991,
     "months": [
       {
         "period": "2023-01",
@@ -4860,6 +4875,7 @@
   },
   "asbury-park": {
     "name": "Asbury Park",
+    "regionId": 501,
     "months": [
       {
         "period": "2023-01",
@@ -5201,6 +5217,7 @@
   },
   "asbury": {
     "name": "Asbury",
+    "regionId": 31435,
     "months": [
       {
         "period": "2023-01",
@@ -5526,6 +5543,7 @@
   },
   "ashland": {
     "name": "Ashland",
+    "regionId": 21220,
     "months": [
       {
         "period": "2023-01",
@@ -5867,6 +5885,7 @@
   },
   "atco": {
     "name": "Atco",
+    "regionId": 37139,
     "months": [
       {
         "period": "2023-01",
@@ -6208,6 +6227,7 @@
   },
   "atlantic-city": {
     "name": "Atlantic City",
+    "regionId": 538,
     "months": [
       {
         "period": "2023-01",
@@ -6549,6 +6569,7 @@
   },
   "atlantic-highlands": {
     "name": "Atlantic Highlands",
+    "regionId": 546,
     "months": [
       {
         "period": "2023-01",
@@ -6890,6 +6911,7 @@
   },
   "auburn": {
     "name": "Auburn",
+    "regionId": 38227,
     "months": [
       {
         "period": "2023-01",
@@ -7231,6 +7253,7 @@
   },
   "audubon": {
     "name": "Audubon",
+    "regionId": 575,
     "months": [
       {
         "period": "2023-01",
@@ -7572,6 +7595,7 @@
   },
   "avalon": {
     "name": "Avalon",
+    "regionId": 610,
     "months": [
       {
         "period": "2023-01",
@@ -7913,6 +7937,7 @@
   },
   "avenel": {
     "name": "Avenel",
+    "regionId": 21240,
     "months": [
       {
         "period": "2023-01",
@@ -8254,6 +8279,7 @@
   },
   "avon-by-the-sea": {
     "name": "Avon-By-the-Sea",
+    "regionId": 641,
     "months": [
       {
         "period": "2023-01",
@@ -8595,6 +8621,7 @@
   },
   "barclay": {
     "name": "Barclay",
+    "regionId": 31122,
     "months": [
       {
         "period": "2023-01",
@@ -8936,6 +8963,7 @@
   },
   "bargaintown": {
     "name": "Bargaintown",
+    "regionId": 36984,
     "months": [
       {
         "period": "2023-01",
@@ -9277,6 +9305,7 @@
   },
   "barnegat-light": {
     "name": "Barnegat Light",
+    "regionId": 832,
     "months": [
       {
         "period": "2023-01",
@@ -9618,6 +9647,7 @@
   },
   "barnegat": {
     "name": "Barnegat",
+    "regionId": 21288,
     "months": [
       {
         "period": "2023-01",
@@ -9959,6 +9989,7 @@
   },
   "barrington": {
     "name": "Barrington",
+    "regionId": 872,
     "months": [
       {
         "period": "2023-01",
@@ -10300,6 +10331,7 @@
   },
   "basking-ridge": {
     "name": "Basking Ridge",
+    "regionId": 37791,
     "months": [
       {
         "period": "2023-01",
@@ -10641,6 +10673,7 @@
   },
   "bay-head": {
     "name": "Bay Head",
+    "regionId": 952,
     "months": [
       {
         "period": "2023-01",
@@ -10982,6 +11015,7 @@
   },
   "bayonne": {
     "name": "Bayonne",
+    "regionId": 970,
     "months": [
       {
         "period": "2023-01",
@@ -11323,6 +11357,7 @@
   },
   "beach-haven-west": {
     "name": "Beach Haven West",
+    "regionId": 21342,
     "months": [
       {
         "period": "2023-01",
@@ -11664,6 +11699,7 @@
   },
   "beach-haven": {
     "name": "Beach Haven",
+    "regionId": 1052,
     "months": [
       {
         "period": "2023-01",
@@ -12005,6 +12041,7 @@
   },
   "beachwood": {
     "name": "Beachwood",
+    "regionId": 1121,
     "months": [
       {
         "period": "2023-01",
@@ -12346,6 +12383,7 @@
   },
   "beattystown": {
     "name": "Beattystown",
+    "regionId": 31548,
     "months": [
       {
         "period": "2023-01",
@@ -12687,6 +12725,7 @@
   },
   "beckett": {
     "name": "Beckett",
+    "regionId": 21365,
     "months": [
       {
         "period": "2023-01",
@@ -13028,6 +13067,7 @@
   },
   "bedminster": {
     "name": "Bedminster",
+    "regionId": 37786,
     "months": [
       {
         "period": "2023-01",
@@ -13369,6 +13409,7 @@
   },
   "beesleys-point": {
     "name": "Beesleys Point",
+    "regionId": 37382,
     "months": [
       {
         "period": "2023-01",
@@ -13710,6 +13751,7 @@
   },
   "belford": {
     "name": "Belford",
+    "regionId": 21377,
     "months": [
       {
         "period": "2023-01",
@@ -14051,6 +14093,7 @@
   },
   "belle-mead": {
     "name": "Belle Mead",
+    "regionId": 31566,
     "months": [
       {
         "period": "2023-01",
@@ -14392,6 +14435,7 @@
   },
   "belleplain": {
     "name": "Belleplain",
+    "regionId": 31569,
     "months": [
       {
         "period": "2023-01",
@@ -14701,6 +14745,7 @@
   },
   "bellmawr": {
     "name": "Bellmawr",
+    "regionId": 1257,
     "months": [
       {
         "period": "2023-01",
@@ -15042,6 +15087,7 @@
   },
   "belmar": {
     "name": "Belmar",
+    "regionId": 1306,
     "months": [
       {
         "period": "2023-01",
@@ -15383,6 +15429,7 @@
   },
   "belvidere": {
     "name": "Belvidere",
+    "regionId": 1330,
     "months": [
       {
         "period": "2023-01",
@@ -15724,6 +15771,7 @@
   },
   "bergenfield": {
     "name": "Bergenfield",
+    "regionId": 1381,
     "months": [
       {
         "period": "2023-01",
@@ -16065,6 +16113,7 @@
   },
   "berlin": {
     "name": "Berlin",
+    "regionId": 1452,
     "months": [
       {
         "period": "2023-01",
@@ -16406,6 +16455,7 @@
   },
   "bernardsville": {
     "name": "Bernardsville",
+    "regionId": 1489,
     "months": [
       {
         "period": "2023-01",
@@ -16747,6 +16797,7 @@
   },
   "beverly": {
     "name": "Beverly",
+    "regionId": 1532,
     "months": [
       {
         "period": "2023-01",
@@ -17088,6 +17139,7 @@
   },
   "blackwells-mills": {
     "name": "Blackwells Mills",
+    "regionId": 31652,
     "months": [
       {
         "period": "2023-01",
@@ -17429,6 +17481,7 @@
   },
   "blackwood": {
     "name": "Blackwood",
+    "regionId": 21462,
     "months": [
       {
         "period": "2023-01",
@@ -17770,6 +17823,7 @@
   },
   "blairstown": {
     "name": "Blairstown",
+    "regionId": 31658,
     "months": [
       {
         "period": "2023-01",
@@ -18111,6 +18165,7 @@
   },
   "blawenburg": {
     "name": "Blawenburg",
+    "regionId": 31660,
     "months": [
       {
         "period": "2023-01",
@@ -18444,6 +18499,7 @@
   },
   "bloomingdale": {
     "name": "Bloomingdale",
+    "regionId": 1676,
     "months": [
       {
         "period": "2023-01",
@@ -18785,6 +18841,7 @@
   },
   "bloomsbury": {
     "name": "Bloomsbury",
+    "regionId": 1682,
     "months": [
       {
         "period": "2023-01",
@@ -19126,6 +19183,7 @@
   },
   "bogota": {
     "name": "Bogota",
+    "regionId": 1706,
     "months": [
       {
         "period": "2023-01",
@@ -19467,6 +19525,7 @@
   },
   "boonton": {
     "name": "Boonton",
+    "regionId": 1732,
     "months": [
       {
         "period": "2023-01",
@@ -19808,6 +19867,7 @@
   },
   "bordentown": {
     "name": "Bordentown",
+    "regionId": 1749,
     "months": [
       {
         "period": "2023-01",
@@ -20149,6 +20209,7 @@
   },
   "bound-brook": {
     "name": "Bound Brook",
+    "regionId": 1769,
     "months": [
       {
         "period": "2023-01",
@@ -20490,6 +20551,7 @@
   },
   "bradley-beach": {
     "name": "Bradley Beach",
+    "regionId": 1817,
     "months": [
       {
         "period": "2023-01",
@@ -20831,6 +20893,7 @@
   },
   "bradley-gardens": {
     "name": "Bradley Gardens",
+    "regionId": 31705,
     "months": [
       {
         "period": "2023-01",
@@ -21172,6 +21235,7 @@
   },
   "brainards": {
     "name": "Brainards",
+    "regionId": 31707,
     "months": [
       {
         "period": "2023-01",
@@ -21473,6 +21537,7 @@
   },
   "branchville": {
     "name": "Branchville",
+    "regionId": 1907,
     "months": [
       {
         "period": "2023-01",
@@ -21806,6 +21871,7 @@
   },
   "brass-castle": {
     "name": "Brass Castle",
+    "regionId": 21552,
     "months": [
       {
         "period": "2023-01",
@@ -22147,6 +22213,7 @@
   },
   "bridgeport": {
     "name": "Bridgeport",
+    "regionId": 38231,
     "months": [
       {
         "period": "2023-01",
@@ -22464,6 +22531,7 @@
   },
   "bridgeton": {
     "name": "Bridgeton",
+    "regionId": 1973,
     "months": [
       {
         "period": "2023-01",
@@ -22805,6 +22873,7 @@
   },
   "bridgeville": {
     "name": "Bridgeville",
+    "regionId": 31744,
     "months": [
       {
         "period": "2023-01",
@@ -23034,6 +23103,7 @@
   },
   "bridgewater-center": {
     "name": "Bridgewater Center",
+    "regionId": 37543,
     "months": [
       {
         "period": "2023-01",
@@ -23375,6 +23445,7 @@
   },
   "bridgewater": {
     "name": "Bridgewater",
+    "regionId": 35941,
     "months": [
       {
         "period": "2023-01",
@@ -23716,6 +23787,7 @@
   },
   "brielle": {
     "name": "Brielle",
+    "regionId": 2004,
     "months": [
       {
         "period": "2023-01",
@@ -24057,6 +24129,7 @@
   },
   "brigantine": {
     "name": "Brigantine",
+    "regionId": 2014,
     "months": [
       {
         "period": "2023-01",
@@ -24398,6 +24471,7 @@
   },
   "broadway": {
     "name": "Broadway",
+    "regionId": 31757,
     "months": [
       {
         "period": "2023-01",
@@ -24731,6 +24805,7 @@
   },
   "brookdale": {
     "name": "Brookdale",
+    "regionId": 31765,
     "months": [
       {
         "period": "2023-01",
@@ -25072,6 +25147,7 @@
   },
   "brookfield": {
     "name": "Brookfield",
+    "regionId": 31767,
     "months": [
       {
         "period": "2023-01",
@@ -25413,6 +25489,7 @@
   },
   "brooklawn": {
     "name": "Brooklawn",
+    "regionId": 2124,
     "months": [
       {
         "period": "2023-01",
@@ -25754,6 +25831,7 @@
   },
   "brookside": {
     "name": "Brookside",
+    "regionId": 37775,
     "months": [
       {
         "period": "2023-01",
@@ -26095,6 +26173,7 @@
   },
   "browns-mills": {
     "name": "Browns Mills",
+    "regionId": 21625,
     "months": [
       {
         "period": "2023-01",
@@ -26436,6 +26515,7 @@
   },
   "brownville": {
     "name": "Brownville",
+    "regionId": 21630,
     "months": [
       {
         "period": "2023-01",
@@ -26777,6 +26857,7 @@
   },
   "budd-lake": {
     "name": "Budd Lake",
+    "regionId": 21637,
     "months": [
       {
         "period": "2023-01",
@@ -27118,6 +27199,7 @@
   },
   "buena": {
     "name": "Buena",
+    "regionId": 2259,
     "months": [
       {
         "period": "2023-01",
@@ -27459,6 +27541,7 @@
   },
   "burleigh": {
     "name": "Burleigh",
+    "regionId": 31140,
     "months": [
       {
         "period": "2023-01",
@@ -27800,6 +27883,7 @@
   },
   "burlington": {
     "name": "Burlington",
+    "regionId": 2313,
     "months": [
       {
         "period": "2023-01",
@@ -28141,6 +28225,7 @@
   },
   "butler": {
     "name": "Butler",
+    "regionId": 2341,
     "months": [
       {
         "period": "2023-01",
@@ -28482,6 +28567,7 @@
   },
   "buttzville": {
     "name": "Buttzville",
+    "regionId": 31822,
     "months": [
       {
         "period": "2023-01",
@@ -28815,6 +28901,7 @@
   },
   "byram-center": {
     "name": "Byram Center",
+    "regionId": 31825,
     "months": [
       {
         "period": "2023-01",
@@ -29156,6 +29243,7 @@
   },
   "caldwell": {
     "name": "Caldwell",
+    "regionId": 2392,
     "months": [
       {
         "period": "2023-01",
@@ -29497,6 +29585,7 @@
   },
   "califon": {
     "name": "Califon",
+    "regionId": 2400,
     "months": [
       {
         "period": "2023-01",
@@ -29838,6 +29927,7 @@
   },
   "camden": {
     "name": "Camden",
+    "regionId": 2570,
     "months": [
       {
         "period": "2023-01",
@@ -30179,6 +30269,7 @@
   },
   "cape-may-court-house": {
     "name": "Cape May Court House",
+    "regionId": 21745,
     "months": [
       {
         "period": "2023-01",
@@ -30520,6 +30611,7 @@
   },
   "cape-may-point": {
     "name": "Cape May Point",
+    "regionId": 2668,
     "months": [
       {
         "period": "2023-01",
@@ -30861,6 +30953,7 @@
   },
   "cape-may": {
     "name": "Cape May",
+    "regionId": 2652,
     "months": [
       {
         "period": "2023-01",
@@ -31202,6 +31295,7 @@
   },
   "carlls-corner": {
     "name": "Carlls Corner",
+    "regionId": 36992,
     "months": [
       {
         "period": "2023-01",
@@ -31543,6 +31637,7 @@
   },
   "carlstadt": {
     "name": "Carlstadt",
+    "regionId": 2701,
     "months": [
       {
         "period": "2023-01",
@@ -31884,6 +31979,7 @@
   },
   "carneys-point": {
     "name": "Carneys Point",
+    "regionId": 21764,
     "months": [
       {
         "period": "2023-01",
@@ -32225,6 +32321,7 @@
   },
   "carteret": {
     "name": "Carteret",
+    "regionId": 2768,
     "months": [
       {
         "period": "2023-01",
@@ -32566,6 +32663,7 @@
   },
   "cedar-glen-lakes": {
     "name": "Cedar Glen Lakes",
+    "regionId": 21791,
     "months": [
       {
         "period": "2023-01",
@@ -32907,6 +33005,7 @@
   },
   "cedar-glen-west": {
     "name": "Cedar Glen West",
+    "regionId": 21792,
     "months": [
       {
         "period": "2023-01",
@@ -33248,6 +33347,7 @@
   },
   "cedar-knolls": {
     "name": "Cedar Knolls",
+    "regionId": 37692,
     "months": [
       {
         "period": "2023-01",
@@ -33589,6 +33689,7 @@
   },
   "cedarville": {
     "name": "Cedarville",
+    "regionId": 21810,
     "months": [
       {
         "period": "2023-01",
@@ -33930,6 +34031,7 @@
   },
   "centre-grove": {
     "name": "Centre Grove",
+    "regionId": 37303,
     "months": [
       {
         "period": "2023-01",
@@ -34271,6 +34373,7 @@
   },
   "chatham": {
     "name": "Chatham",
+    "regionId": 3129,
     "months": [
       {
         "period": "2023-01",
@@ -34612,6 +34715,7 @@
   },
   "cherry-hill-mall": {
     "name": "Cherry Hill Mall",
+    "regionId": 21871,
     "months": [
       {
         "period": "2023-01",
@@ -34953,6 +35057,7 @@
   },
   "chesilhurst": {
     "name": "Chesilhurst",
+    "regionId": 3267,
     "months": [
       {
         "period": "2023-01",
@@ -35294,6 +35399,7 @@
   },
   "chester": {
     "name": "Chester",
+    "regionId": 3274,
     "months": [
       {
         "period": "2023-01",
@@ -35635,6 +35741,7 @@
   },
   "clayton": {
     "name": "Clayton",
+    "regionId": 3482,
     "months": [
       {
         "period": "2023-01",
@@ -35976,6 +36083,7 @@
   },
   "clearbrook-park": {
     "name": "Clearbrook Park",
+    "regionId": 21940,
     "months": [
       {
         "period": "2023-01",
@@ -36317,6 +36425,7 @@
   },
   "clearbrook": {
     "name": "Clearbrook",
+    "regionId": 37747,
     "months": [
       {
         "period": "2023-01",
@@ -36658,6 +36767,7 @@
   },
   "clementon": {
     "name": "Clementon",
+    "regionId": 3500,
     "months": [
       {
         "period": "2023-01",
@@ -36999,6 +37109,7 @@
   },
   "cliffside-park": {
     "name": "Cliffside Park",
+    "regionId": 3533,
     "months": [
       {
         "period": "2023-01",
@@ -37340,6 +37451,7 @@
   },
   "cliffwood-beach": {
     "name": "Cliffwood Beach",
+    "regionId": 21964,
     "months": [
       {
         "period": "2023-01",
@@ -37681,6 +37793,7 @@
   },
   "clifton": {
     "name": "Clifton",
+    "regionId": 3564,
     "months": [
       {
         "period": "2023-01",
@@ -38022,6 +38135,7 @@
   },
   "clinton": {
     "name": "Clinton",
+    "regionId": 3570,
     "months": [
       {
         "period": "2023-01",
@@ -38363,6 +38477,7 @@
   },
   "closter": {
     "name": "Closter",
+    "regionId": 3589,
     "months": [
       {
         "period": "2023-01",
@@ -38704,6 +38819,7 @@
   },
   "clyde": {
     "name": "Clyde",
+    "regionId": 32077,
     "months": [
       {
         "period": "2023-06",
@@ -38877,6 +38993,7 @@
   },
   "collings-lakes": {
     "name": "Collings Lakes",
+    "regionId": 22003,
     "months": [
       {
         "period": "2023-01",
@@ -39218,6 +39335,7 @@
   },
   "collingswood": {
     "name": "Collingswood",
+    "regionId": 3715,
     "months": [
       {
         "period": "2023-01",
@@ -39559,6 +39677,7 @@
   },
   "cologne": {
     "name": "Cologne",
+    "regionId": 36977,
     "months": [
       {
         "period": "2023-01",
@@ -39900,6 +40019,7 @@
   },
   "colonia": {
     "name": "Colonia",
+    "regionId": 22015,
     "months": [
       {
         "period": "2023-01",
@@ -40241,6 +40361,7 @@
   },
   "columbia": {
     "name": "Columbia",
+    "regionId": 32112,
     "months": [
       {
         "period": "2024-02",
@@ -40454,6 +40575,7 @@
   },
   "concordia": {
     "name": "Concordia",
+    "regionId": 22035,
     "months": [
       {
         "period": "2023-01",
@@ -40795,6 +40917,7 @@
   },
   "connecticut-farms": {
     "name": "Connecticut Farms",
+    "regionId": 37834,
     "months": [
       {
         "period": "2023-01",
@@ -41136,6 +41259,7 @@
   },
   "cookstown": {
     "name": "Cookstown",
+    "regionId": 37341,
     "months": [
       {
         "period": "2023-01",
@@ -41453,6 +41577,7 @@
   },
   "corbin-city": {
     "name": "Corbin City",
+    "regionId": 3920,
     "months": [
       {
         "period": "2023-01",
@@ -41786,6 +41911,7 @@
   },
   "country-lake-estates": {
     "name": "Country Lake Estates",
+    "regionId": 22068,
     "months": [
       {
         "period": "2023-01",
@@ -42127,6 +42253,7 @@
   },
   "cranbury": {
     "name": "Cranbury",
+    "regionId": 22091,
     "months": [
       {
         "period": "2023-01",
@@ -42468,6 +42595,7 @@
   },
   "crandon-lakes": {
     "name": "Crandon Lakes",
+    "regionId": 22095,
     "months": [
       {
         "period": "2023-01",
@@ -42809,6 +42937,7 @@
   },
   "cranford": {
     "name": "Cranford",
+    "regionId": 37655,
     "months": [
       {
         "period": "2023-01",
@@ -43150,6 +43279,7 @@
   },
   "cream-ridge": {
     "name": "Cream Ridge",
+    "regionId": 37831,
     "months": [
       {
         "period": "2023-01",
@@ -43491,6 +43621,7 @@
   },
   "cresskill": {
     "name": "Cresskill",
+    "regionId": 4098,
     "months": [
       {
         "period": "2023-01",
@@ -43832,6 +43963,7 @@
   },
   "crestwood-village": {
     "name": "Crestwood Village",
+    "regionId": 22109,
     "months": [
       {
         "period": "2023-01",
@@ -44173,6 +44305,7 @@
   },
   "crosswicks": {
     "name": "Crosswicks",
+    "regionId": 37161,
     "months": [
       {
         "period": "2023-01",
@@ -44514,6 +44647,7 @@
   },
   "cumberland-hesstown": {
     "name": "Cumberland-Hesstown",
+    "regionId": 37234,
     "months": [
       {
         "period": "2023-01",
@@ -44823,6 +44957,7 @@
   },
   "dayton": {
     "name": "Dayton",
+    "regionId": 22158,
     "months": [
       {
         "period": "2023-01",
@@ -45164,6 +45299,7 @@
   },
   "deal": {
     "name": "Deal",
+    "regionId": 4348,
     "months": [
       {
         "period": "2023-01",
@@ -45505,6 +45641,7 @@
   },
   "deans": {
     "name": "Deans",
+    "regionId": 37819,
     "months": [
       {
         "period": "2023-01",
@@ -45846,6 +45983,7 @@
   },
   "deerfield-street": {
     "name": "Deerfield Street",
+    "regionId": 37105,
     "months": [
       {
         "period": "2023-01",
@@ -46123,6 +46261,7 @@
   },
   "delaware-park": {
     "name": "Delaware Park",
+    "regionId": 32232,
     "months": [
       {
         "period": "2023-01",
@@ -46464,6 +46603,7 @@
   },
   "delaware": {
     "name": "Delaware",
+    "regionId": 32226,
     "months": [
       {
         "period": "2023-01",
@@ -46757,6 +46897,7 @@
   },
   "delmont": {
     "name": "Delmont",
+    "regionId": 37370,
     "months": [
       {
         "period": "2023-01",
@@ -47002,6 +47143,7 @@
   },
   "demarest": {
     "name": "Demarest",
+    "regionId": 4548,
     "months": [
       {
         "period": "2023-01",
@@ -47343,6 +47485,7 @@
   },
   "dennisville": {
     "name": "Dennisville",
+    "regionId": 37035,
     "months": [
       {
         "period": "2023-01",
@@ -47684,6 +47827,7 @@
   },
   "diamond-beach": {
     "name": "Diamond Beach",
+    "regionId": 22215,
     "months": [
       {
         "period": "2023-01",
@@ -48025,6 +48169,7 @@
   },
   "dividing-creek": {
     "name": "Dividing Creek",
+    "regionId": 36953,
     "months": [
       {
         "period": "2023-01",
@@ -48366,6 +48511,7 @@
   },
   "dorchester": {
     "name": "Dorchester",
+    "regionId": 37045,
     "months": [
       {
         "period": "2023-01",
@@ -48691,6 +48837,7 @@
   },
   "dorothy": {
     "name": "Dorothy",
+    "regionId": 37258,
     "months": [
       {
         "period": "2023-01",
@@ -49032,6 +49179,7 @@
   },
   "dover-beaches-north": {
     "name": "Dover Beaches North",
+    "regionId": 22238,
     "months": [
       {
         "period": "2023-01",
@@ -49373,6 +49521,7 @@
   },
   "dover-beaches-south": {
     "name": "Dover Beaches South",
+    "regionId": 22240,
     "months": [
       {
         "period": "2023-01",
@@ -49714,6 +49863,7 @@
   },
   "dover": {
     "name": "Dover",
+    "regionId": 4682,
     "months": [
       {
         "period": "2023-01",
@@ -50055,6 +50205,7 @@
   },
   "dumont": {
     "name": "Dumont",
+    "regionId": 4760,
     "months": [
       {
         "period": "2023-01",
@@ -50396,6 +50547,7 @@
   },
   "dunellen": {
     "name": "Dunellen",
+    "regionId": 4785,
     "months": [
       {
         "period": "2023-01",
@@ -50737,6 +50889,7 @@
   },
   "dutch-neck": {
     "name": "Dutch Neck",
+    "regionId": 36935,
     "months": [
       {
         "period": "2023-01",
@@ -51006,6 +51159,7 @@
   },
   "east-franklin": {
     "name": "East Franklin",
+    "regionId": 32320,
     "months": [
       {
         "period": "2023-01",
@@ -51347,6 +51501,7 @@
   },
   "east-freehold": {
     "name": "East Freehold",
+    "regionId": 22309,
     "months": [
       {
         "period": "2023-01",
@@ -51688,6 +51843,7 @@
   },
   "east-millstone": {
     "name": "East Millstone",
+    "regionId": 32334,
     "months": [
       {
         "period": "2023-01",
@@ -52029,6 +52185,7 @@
   },
   "east-newark": {
     "name": "East Newark",
+    "regionId": 4996,
     "months": [
       {
         "period": "2023-01",
@@ -52370,6 +52527,7 @@
   },
   "east-orange": {
     "name": "East Orange",
+    "regionId": 5001,
     "months": [
       {
         "period": "2023-01",
@@ -52711,6 +52869,7 @@
   },
   "east-rocky-hill": {
     "name": "East Rocky Hill",
+    "regionId": 32338,
     "months": [
       {
         "period": "2023-01",
@@ -53052,6 +53211,7 @@
   },
   "east-rutherford": {
     "name": "East Rutherford",
+    "regionId": 5036,
     "months": [
       {
         "period": "2023-01",
@@ -53393,6 +53553,7 @@
   },
   "east-vineland": {
     "name": "East Vineland",
+    "regionId": 37238,
     "months": [
       {
         "period": "2023-01",
@@ -53734,6 +53895,7 @@
   },
   "eatontown": {
     "name": "Eatontown",
+    "regionId": 5113,
     "months": [
       {
         "period": "2023-01",
@@ -54075,6 +54237,7 @@
   },
   "echelon": {
     "name": "Echelon",
+    "regionId": 22363,
     "months": [
       {
         "period": "2023-01",
@@ -54416,6 +54579,7 @@
   },
   "edgewater": {
     "name": "Edgewater",
+    "regionId": 5164,
     "months": [
       {
         "period": "2023-01",
@@ -54757,6 +54921,7 @@
   },
   "edison": {
     "name": "Edison",
+    "regionId": 35780,
     "months": [
       {
         "period": "2023-01",
@@ -55098,6 +55263,7 @@
   },
   "egg-harbor-city": {
     "name": "Egg Harbor City",
+    "regionId": 5265,
     "months": [
       {
         "period": "2023-01",
@@ -55439,6 +55605,7 @@
   },
   "elizabeth": {
     "name": "Elizabeth",
+    "regionId": 5417,
     "months": [
       {
         "period": "2023-01",
@@ -55780,6 +55947,7 @@
   },
   "ellisburg": {
     "name": "Ellisburg",
+    "regionId": 31169,
     "months": [
       {
         "period": "2023-01",
@@ -56121,6 +56289,7 @@
   },
   "elmer": {
     "name": "Elmer",
+    "regionId": 5477,
     "months": [
       {
         "period": "2023-01",
@@ -56462,6 +56631,7 @@
   },
   "elmwood-park": {
     "name": "Elmwood Park",
+    "regionId": 5497,
     "months": [
       {
         "period": "2023-01",
@@ -56803,6 +56973,7 @@
   },
   "elwood": {
     "name": "Elwood",
+    "regionId": 31170,
     "months": [
       {
         "period": "2023-01",
@@ -57144,6 +57315,7 @@
   },
   "emerson": {
     "name": "Emerson",
+    "regionId": 5543,
     "months": [
       {
         "period": "2023-01",
@@ -57485,6 +57657,7 @@
   },
   "encore-at-monroe": {
     "name": "Encore at Monroe",
+    "regionId": 37594,
     "months": [
       {
         "period": "2023-01",
@@ -57826,6 +57999,7 @@
   },
   "englewood-cliffs": {
     "name": "Englewood Cliffs",
+    "regionId": 5552,
     "months": [
       {
         "period": "2023-01",
@@ -58167,6 +58341,7 @@
   },
   "englewood": {
     "name": "Englewood",
+    "regionId": 5544,
     "months": [
       {
         "period": "2023-01",
@@ -58508,6 +58683,7 @@
   },
   "english-creek": {
     "name": "English Creek",
+    "regionId": 37252,
     "months": [
       {
         "period": "2023-01",
@@ -58849,6 +59025,7 @@
   },
   "englishtown": {
     "name": "Englishtown",
+    "regionId": 5564,
     "months": [
       {
         "period": "2023-01",
@@ -59190,6 +59367,7 @@
   },
   "erma": {
     "name": "Erma",
+    "regionId": 22474,
     "months": [
       {
         "period": "2023-01",
@@ -59531,6 +59709,7 @@
   },
   "essex-fells": {
     "name": "Essex Fells",
+    "regionId": 5632,
     "months": [
       {
         "period": "2023-01",
@@ -59872,6 +60051,7 @@
   },
   "estell-manor": {
     "name": "Estell Manor",
+    "regionId": 5639,
     "months": [
       {
         "period": "2023-01",
@@ -60213,6 +60393,7 @@
   },
   "ewing": {
     "name": "Ewing",
+    "regionId": 22514,
     "months": [
       {
         "period": "2023-01",
@@ -60554,6 +60735,7 @@
   },
   "fair-haven": {
     "name": "Fair Haven",
+    "regionId": 5775,
     "months": [
       {
         "period": "2023-01",
@@ -60895,6 +61077,7 @@
   },
   "fair-lawn": {
     "name": "Fair Lawn",
+    "regionId": 5779,
     "months": [
       {
         "period": "2023-01",
@@ -61236,6 +61419,7 @@
   },
   "fairton": {
     "name": "Fairton",
+    "regionId": 22546,
     "months": [
       {
         "period": "2023-01",
@@ -61577,15 +61761,8 @@
   },
   "fairview": {
     "name": "Fairview",
+    "regionId": 5804,
     "months": [
-      {
-        "period": "2023-01",
-        "newListings": 10,
-        "homesSold": 7,
-        "daysOnMarket": 22,
-        "medianPrice": 560000,
-        "activeListings": 16
-      },
       {
         "period": "2023-01",
         "newListings": 14,
@@ -61593,14 +61770,6 @@
         "daysOnMarket": 80,
         "medianPrice": 680000,
         "activeListings": 30
-      },
-      {
-        "period": "2023-02",
-        "newListings": 9,
-        "homesSold": 11,
-        "daysOnMarket": 22,
-        "medianPrice": 565000,
-        "activeListings": 16
       },
       {
         "period": "2023-02",
@@ -61612,27 +61781,11 @@
       },
       {
         "period": "2023-03",
-        "newListings": 12,
-        "homesSold": 9,
-        "daysOnMarket": 21,
-        "medianPrice": 600000,
-        "activeListings": 17
-      },
-      {
-        "period": "2023-03",
         "newListings": 10,
         "homesSold": 12,
         "daysOnMarket": 98,
         "medianPrice": 537500,
         "activeListings": 25
-      },
-      {
-        "period": "2023-04",
-        "newListings": 10,
-        "homesSold": 10,
-        "daysOnMarket": 43,
-        "medianPrice": 595000,
-        "activeListings": 17
       },
       {
         "period": "2023-04",
@@ -61651,36 +61804,12 @@
         "activeListings": 22
       },
       {
-        "period": "2023-05",
-        "newListings": 12,
-        "homesSold": 6,
-        "daysOnMarket": 43,
-        "medianPrice": 565000,
-        "activeListings": 16
-      },
-      {
         "period": "2023-06",
         "newListings": 18,
         "homesSold": 8,
         "daysOnMarket": 83,
         "medianPrice": 638000,
         "activeListings": 27
-      },
-      {
-        "period": "2023-06",
-        "newListings": 9,
-        "homesSold": 8,
-        "daysOnMarket": 31,
-        "medianPrice": 672500,
-        "activeListings": 15
-      },
-      {
-        "period": "2023-07",
-        "newListings": 9,
-        "homesSold": 7,
-        "daysOnMarket": 20,
-        "medianPrice": 700000,
-        "activeListings": 14
       },
       {
         "period": "2023-07",
@@ -61692,27 +61821,11 @@
       },
       {
         "period": "2023-08",
-        "newListings": 9,
-        "homesSold": 11,
-        "daysOnMarket": 32,
-        "medianPrice": 670000,
-        "activeListings": 13
-      },
-      {
-        "period": "2023-08",
         "newListings": 21,
         "homesSold": 8,
         "daysOnMarket": 73,
         "medianPrice": 650000,
         "activeListings": 31
-      },
-      {
-        "period": "2023-09",
-        "newListings": 9,
-        "homesSold": 10,
-        "daysOnMarket": 34,
-        "medianPrice": 690000,
-        "activeListings": 13
       },
       {
         "period": "2023-09",
@@ -61731,22 +61844,6 @@
         "activeListings": 33
       },
       {
-        "period": "2023-10",
-        "newListings": 5,
-        "homesSold": 9,
-        "daysOnMarket": 32,
-        "medianPrice": 710000,
-        "activeListings": 9
-      },
-      {
-        "period": "2023-11",
-        "newListings": 4,
-        "homesSold": 10,
-        "daysOnMarket": 14,
-        "medianPrice": 822450,
-        "activeListings": 7
-      },
-      {
         "period": "2023-11",
         "newListings": 13,
         "homesSold": 9,
@@ -61763,36 +61860,12 @@
         "activeListings": 45
       },
       {
-        "period": "2023-12",
-        "newListings": 3,
-        "homesSold": 7,
-        "daysOnMarket": 15,
-        "medianPrice": 814900,
-        "activeListings": 4
-      },
-      {
-        "period": "2024-01",
-        "newListings": 7,
-        "homesSold": 8,
-        "daysOnMarket": 17,
-        "medianPrice": 730000,
-        "activeListings": 8
-      },
-      {
         "period": "2024-01",
         "newListings": 25,
         "homesSold": 15,
         "daysOnMarket": 90,
         "medianPrice": 667500,
         "activeListings": 46
-      },
-      {
-        "period": "2024-02",
-        "newListings": 7,
-        "homesSold": 4,
-        "daysOnMarket": 22,
-        "medianPrice": 712500,
-        "activeListings": 8
       },
       {
         "period": "2024-02",
@@ -61811,14 +61884,6 @@
         "activeListings": 48
       },
       {
-        "period": "2024-03",
-        "newListings": 13,
-        "homesSold": 6,
-        "daysOnMarket": 17,
-        "medianPrice": 678500,
-        "activeListings": 13
-      },
-      {
         "period": "2024-04",
         "newListings": 21,
         "homesSold": 17,
@@ -61827,36 +61892,12 @@
         "activeListings": 50
       },
       {
-        "period": "2024-04",
-        "newListings": 14,
-        "homesSold": 6,
-        "daysOnMarket": 15,
-        "medianPrice": 687500,
-        "activeListings": 17
-      },
-      {
         "period": "2024-05",
         "newListings": 23,
         "homesSold": 17,
         "daysOnMarket": 84,
         "medianPrice": 765000,
         "activeListings": 51
-      },
-      {
-        "period": "2024-05",
-        "newListings": 19,
-        "homesSold": 10,
-        "daysOnMarket": 14,
-        "medianPrice": 695000,
-        "activeListings": 20
-      },
-      {
-        "period": "2024-06",
-        "newListings": 20,
-        "homesSold": 11,
-        "daysOnMarket": 11,
-        "medianPrice": 720000,
-        "activeListings": 23
       },
       {
         "period": "2024-06",
@@ -61875,36 +61916,12 @@
         "activeListings": 44
       },
       {
-        "period": "2024-07",
-        "newListings": 21,
-        "homesSold": 14,
-        "daysOnMarket": 13,
-        "medianPrice": 742500,
-        "activeListings": 27
-      },
-      {
-        "period": "2024-08",
-        "newListings": 21,
-        "homesSold": 16,
-        "daysOnMarket": 15,
-        "medianPrice": 745000,
-        "activeListings": 29
-      },
-      {
         "period": "2024-08",
         "newListings": 18,
         "homesSold": 21,
         "daysOnMarket": 102,
         "medianPrice": 645000,
         "activeListings": 44
-      },
-      {
-        "period": "2024-09",
-        "newListings": 17,
-        "homesSold": 16,
-        "daysOnMarket": 15,
-        "medianPrice": 745000,
-        "activeListings": 24
       },
       {
         "period": "2024-09",
@@ -61923,28 +61940,12 @@
         "activeListings": 39
       },
       {
-        "period": "2024-10",
-        "newListings": 11,
-        "homesSold": 16,
-        "daysOnMarket": 17,
-        "medianPrice": 671450,
-        "activeListings": 20
-      },
-      {
         "period": "2024-11",
         "newListings": 13,
         "homesSold": 16,
         "daysOnMarket": 79,
         "medianPrice": 607500,
         "activeListings": 31
-      },
-      {
-        "period": "2024-11",
-        "newListings": 7,
-        "homesSold": 12,
-        "daysOnMarket": 22,
-        "medianPrice": 670000,
-        "activeListings": 18
       },
       {
         "period": "2024-12",
@@ -61955,28 +61956,12 @@
         "activeListings": 26
       },
       {
-        "period": "2024-12",
-        "newListings": 6,
-        "homesSold": 13,
-        "daysOnMarket": 22,
-        "medianPrice": 645000,
-        "activeListings": 12
-      },
-      {
         "period": "2025-01",
         "newListings": 12,
         "homesSold": 11,
         "daysOnMarket": 61,
         "medianPrice": 650000,
         "activeListings": 24
-      },
-      {
-        "period": "2025-01",
-        "newListings": 10,
-        "homesSold": 10,
-        "daysOnMarket": 51,
-        "medianPrice": 685000,
-        "activeListings": 14
       },
       {
         "period": "2025-02",
@@ -61987,36 +61972,12 @@
         "activeListings": 23
       },
       {
-        "period": "2025-02",
-        "newListings": 11,
-        "homesSold": 11,
-        "daysOnMarket": 49,
-        "medianPrice": 670000,
-        "activeListings": 16
-      },
-      {
         "period": "2025-03",
         "newListings": 20,
         "homesSold": 8,
         "daysOnMarket": 71,
         "medianPrice": 677500,
         "activeListings": 32
-      },
-      {
-        "period": "2025-03",
-        "newListings": 16,
-        "homesSold": 10,
-        "daysOnMarket": 16,
-        "medianPrice": 738750,
-        "activeListings": 19
-      },
-      {
-        "period": "2025-04",
-        "newListings": 14,
-        "homesSold": 12,
-        "daysOnMarket": 15,
-        "medianPrice": 818500,
-        "activeListings": 17
       },
       {
         "period": "2025-04",
@@ -62028,14 +61989,6 @@
       },
       {
         "period": "2025-05",
-        "newListings": 17,
-        "homesSold": 12,
-        "daysOnMarket": 15,
-        "medianPrice": 846000,
-        "activeListings": 21
-      },
-      {
-        "period": "2025-05",
         "newListings": 27,
         "homesSold": 8,
         "daysOnMarket": 85,
@@ -62044,27 +61997,11 @@
       },
       {
         "period": "2025-06",
-        "newListings": 15,
-        "homesSold": 12,
-        "daysOnMarket": 14,
-        "medianPrice": 788500,
-        "activeListings": 23
-      },
-      {
-        "period": "2025-06",
         "newListings": 23,
         "homesSold": 13,
         "daysOnMarket": 89,
         "medianPrice": 625000,
         "activeListings": 41
-      },
-      {
-        "period": "2025-07",
-        "newListings": 17,
-        "homesSold": 13,
-        "daysOnMarket": 15,
-        "medianPrice": 735000,
-        "activeListings": 23
       },
       {
         "period": "2025-07",
@@ -62083,22 +62020,6 @@
         "activeListings": 52
       },
       {
-        "period": "2025-08",
-        "newListings": 17,
-        "homesSold": 12,
-        "daysOnMarket": 27,
-        "medianPrice": 799950,
-        "activeListings": 23
-      },
-      {
-        "period": "2025-09",
-        "newListings": 13,
-        "homesSold": 11,
-        "daysOnMarket": 26,
-        "medianPrice": 799900,
-        "activeListings": 19
-      },
-      {
         "period": "2025-09",
         "newListings": 28,
         "homesSold": 12,
@@ -62113,22 +62034,6 @@
         "daysOnMarket": 67,
         "medianPrice": 750000,
         "activeListings": 48
-      },
-      {
-        "period": "2025-10",
-        "newListings": 9,
-        "homesSold": 13,
-        "daysOnMarket": 32,
-        "medianPrice": 800000,
-        "activeListings": 17
-      },
-      {
-        "period": "2025-11",
-        "newListings": 2,
-        "homesSold": 12,
-        "daysOnMarket": 27,
-        "medianPrice": 805000,
-        "activeListings": 9
       },
       {
         "period": "2025-11",
@@ -62147,22 +62052,6 @@
         "activeListings": 50
       },
       {
-        "period": "2025-12",
-        "newListings": 3,
-        "homesSold": 11,
-        "daysOnMarket": 32,
-        "medianPrice": 810000,
-        "activeListings": 5
-      },
-      {
-        "period": "2026-01",
-        "newListings": 4,
-        "homesSold": 6,
-        "daysOnMarket": 27,
-        "medianPrice": 802500,
-        "activeListings": 6
-      },
-      {
         "period": "2026-01",
         "newListings": 17,
         "homesSold": 15,
@@ -62179,28 +62068,12 @@
         "activeListings": 51
       },
       {
-        "period": "2026-02",
-        "newListings": 12,
-        "homesSold": 5,
-        "daysOnMarket": 22,
-        "medianPrice": 795000,
-        "activeListings": 14
-      },
-      {
         "period": "2026-03",
         "newListings": 28,
         "homesSold": 16,
         "daysOnMarket": 88,
         "medianPrice": 780000,
         "activeListings": 48
-      },
-      {
-        "period": "2026-03",
-        "newListings": 11,
-        "homesSold": 7,
-        "daysOnMarket": 12,
-        "medianPrice": 685000,
-        "activeListings": 14
       },
       {
         "period": "2026-04",
@@ -62211,14 +62084,6 @@
         "activeListings": 47
       },
       {
-        "period": "2026-04",
-        "newListings": 17,
-        "homesSold": 8,
-        "daysOnMarket": 14,
-        "medianPrice": 852500,
-        "activeListings": 19
-      },
-      {
         "period": "2026-05",
         "newListings": 26,
         "homesSold": 16,
@@ -62227,33 +62092,18 @@
         "activeListings": 51
       },
       {
-        "period": "2026-05",
-        "newListings": 12,
-        "homesSold": 11,
-        "daysOnMarket": 14,
-        "medianPrice": 800000,
-        "activeListings": 17
-      },
-      {
         "period": "2026-06",
         "newListings": 26,
         "homesSold": 16,
         "daysOnMarket": 90,
         "medianPrice": 672055,
         "activeListings": 49
-      },
-      {
-        "period": "2026-06",
-        "newListings": 13,
-        "homesSold": 13,
-        "daysOnMarket": 15,
-        "medianPrice": 799471,
-        "activeListings": 17
       }
     ]
   },
   "fanwood": {
     "name": "Fanwood",
+    "regionId": 5889,
     "months": [
       {
         "period": "2023-01",
@@ -62595,6 +62445,7 @@
   },
   "far-hills": {
     "name": "Far Hills",
+    "regionId": 5899,
     "months": [
       {
         "period": "2023-01",
@@ -62936,6 +62787,7 @@
   },
   "farmingdale": {
     "name": "Farmingdale",
+    "regionId": 5909,
     "months": [
       {
         "period": "2023-01",
@@ -63277,6 +63129,7 @@
   },
   "fieldsboro": {
     "name": "Fieldsboro",
+    "regionId": 6000,
     "months": [
       {
         "period": "2023-01",
@@ -63618,6 +63471,7 @@
   },
   "finderne": {
     "name": "Finderne",
+    "regionId": 32535,
     "months": [
       {
         "period": "2023-01",
@@ -63959,6 +63813,7 @@
   },
   "finesville": {
     "name": "Finesville",
+    "regionId": 32536,
     "months": [
       {
         "period": "2023-01",
@@ -64268,6 +64123,7 @@
   },
   "flagtown": {
     "name": "Flagtown",
+    "regionId": 37709,
     "months": [
       {
         "period": "2023-01",
@@ -64609,6 +64465,7 @@
   },
   "flanders": {
     "name": "Flanders",
+    "regionId": 37813,
     "months": [
       {
         "period": "2023-01",
@@ -64950,6 +64807,7 @@
   },
   "flemington": {
     "name": "Flemington",
+    "regionId": 6109,
     "months": [
       {
         "period": "2023-01",
@@ -65291,6 +65149,7 @@
   },
   "florence": {
     "name": "Florence",
+    "regionId": 31178,
     "months": [
       {
         "period": "2023-01",
@@ -65632,6 +65491,7 @@
   },
   "florham-park": {
     "name": "Florham Park",
+    "regionId": 6151,
     "months": [
       {
         "period": "2023-01",
@@ -65973,6 +65833,7 @@
   },
   "folsom": {
     "name": "Folsom",
+    "regionId": 6154,
     "months": [
       {
         "period": "2023-01",
@@ -66314,6 +66175,7 @@
   },
   "fords": {
     "name": "Fords",
+    "regionId": 22644,
     "months": [
       {
         "period": "2023-01",
@@ -66655,6 +66517,7 @@
   },
   "forked-river": {
     "name": "Forked River",
+    "regionId": 22650,
     "months": [
       {
         "period": "2023-01",
@@ -66996,6 +66859,7 @@
   },
   "forsgate": {
     "name": "Forsgate",
+    "regionId": 37618,
     "months": [
       {
         "period": "2023-01",
@@ -67337,6 +67201,7 @@
   },
   "fort-lee": {
     "name": "Fort Lee",
+    "regionId": 6283,
     "months": [
       {
         "period": "2023-01",
@@ -67678,6 +67543,7 @@
   },
   "fortescue": {
     "name": "Fortescue",
+    "regionId": 37063,
     "months": [
       {
         "period": "2023-01",
@@ -68019,6 +67885,7 @@
   },
   "franklin-center": {
     "name": "Franklin Center",
+    "regionId": 32629,
     "months": [
       {
         "period": "2023-01",
@@ -68360,6 +68227,7 @@
   },
   "franklin-lakes": {
     "name": "Franklin Lakes",
+    "regionId": 6433,
     "months": [
       {
         "period": "2023-01",
@@ -68701,6 +68569,7 @@
   },
   "franklin-park": {
     "name": "Franklin Park",
+    "regionId": 32634,
     "months": [
       {
         "period": "2023-01",
@@ -69042,6 +68911,7 @@
   },
   "franklin": {
     "name": "Franklin",
+    "regionId": 6420,
     "months": [
       {
         "period": "2023-01",
@@ -69383,6 +69253,7 @@
   },
   "franklinville": {
     "name": "Franklinville",
+    "regionId": 37287,
     "months": [
       {
         "period": "2023-01",
@@ -69724,6 +69595,7 @@
   },
   "freehold": {
     "name": "Freehold",
+    "regionId": 6496,
     "months": [
       {
         "period": "2023-01",
@@ -70065,6 +69937,7 @@
   },
   "frenchtown": {
     "name": "Frenchtown",
+    "regionId": 6526,
     "months": [
       {
         "period": "2023-01",
@@ -70406,6 +70279,7 @@
   },
   "gandys-beach": {
     "name": "Gandys Beach",
+    "regionId": 37157,
     "months": [
       {
         "period": "2023-01",
@@ -70747,6 +70621,7 @@
   },
   "garfield": {
     "name": "Garfield",
+    "regionId": 6627,
     "months": [
       {
         "period": "2023-01",
@@ -71088,6 +70963,7 @@
   },
   "garwood": {
     "name": "Garwood",
+    "regionId": 6634,
     "months": [
       {
         "period": "2023-01",
@@ -71429,6 +71305,7 @@
   },
   "germania": {
     "name": "Germania",
+    "regionId": 37098,
     "months": [
       {
         "period": "2023-01",
@@ -71674,6 +71551,7 @@
   },
   "gibbsboro": {
     "name": "Gibbsboro",
+    "regionId": 6684,
     "months": [
       {
         "period": "2023-01",
@@ -72015,6 +71893,7 @@
   },
   "gibbstown": {
     "name": "Gibbstown",
+    "regionId": 22792,
     "months": [
       {
         "period": "2023-01",
@@ -72356,6 +72235,7 @@
   },
   "gillette": {
     "name": "Gillette",
+    "regionId": 37659,
     "months": [
       {
         "period": "2023-01",
@@ -72697,6 +72577,7 @@
   },
   "glassboro": {
     "name": "Glassboro",
+    "regionId": 6749,
     "months": [
       {
         "period": "2023-01",
@@ -73038,6 +72919,7 @@
   },
   "glen-gardner": {
     "name": "Glen Gardner",
+    "regionId": 6798,
     "months": [
       {
         "period": "2023-01",
@@ -73379,6 +73261,7 @@
   },
   "glen-ridge": {
     "name": "Glen Ridge",
+    "regionId": 6809,
     "months": [
       {
         "period": "2023-01",
@@ -73720,6 +73603,7 @@
   },
   "glen-rock": {
     "name": "Glen Rock",
+    "regionId": 6818,
     "months": [
       {
         "period": "2023-01",
@@ -74061,6 +73945,7 @@
   },
   "glendora": {
     "name": "Glendora",
+    "regionId": 22825,
     "months": [
       {
         "period": "2023-01",
@@ -74402,6 +74287,7 @@
   },
   "gloucester-city": {
     "name": "Gloucester City",
+    "regionId": 6854,
     "months": [
       {
         "period": "2023-01",
@@ -74743,6 +74629,7 @@
   },
   "golden-triangle": {
     "name": "Golden Triangle",
+    "regionId": 22855,
     "months": [
       {
         "period": "2023-01",
@@ -75084,6 +74971,7 @@
   },
   "goshen": {
     "name": "Goshen",
+    "regionId": 37050,
     "months": [
       {
         "period": "2023-01",
@@ -75409,6 +75297,7 @@
   },
   "gouldtown": {
     "name": "Gouldtown",
+    "regionId": 37318,
     "months": [
       {
         "period": "2023-01",
@@ -75750,6 +75639,7 @@
   },
   "great-meadows": {
     "name": "Great Meadows",
+    "regionId": 31188,
     "months": [
       {
         "period": "2023-01",
@@ -76075,6 +75965,7 @@
   },
   "great-notch": {
     "name": "Great Notch",
+    "regionId": 37568,
     "months": [
       {
         "period": "2023-01",
@@ -76416,6 +76307,7 @@
   },
   "green-knoll": {
     "name": "Green Knoll",
+    "regionId": 32764,
     "months": [
       {
         "period": "2023-01",
@@ -76757,6 +76649,7 @@
   },
   "green-village": {
     "name": "Green Village",
+    "regionId": 37809,
     "months": [
       {
         "period": "2023-01",
@@ -77090,6 +76983,7 @@
   },
   "greentree": {
     "name": "Greentree",
+    "regionId": 22933,
     "months": [
       {
         "period": "2023-01",
@@ -77431,6 +77325,7 @@
   },
   "greenwich": {
     "name": "Greenwich",
+    "regionId": 32785,
     "months": [
       {
         "period": "2023-01",
@@ -77441,14 +77336,6 @@
         "activeListings": 8
       },
       {
-        "period": "2023-01",
-        "newListings": 2,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 4
-      },
-      {
         "period": "2023-02",
         "newListings": 7,
         "homesSold": 5,
@@ -77457,36 +77344,12 @@
         "activeListings": 9
       },
       {
-        "period": "2023-02",
-        "newListings": 2,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 5
-      },
-      {
         "period": "2023-03",
         "newListings": 18,
         "homesSold": 6,
         "daysOnMarket": 13,
         "medianPrice": 490000,
         "activeListings": 20
-      },
-      {
-        "period": "2023-03",
-        "newListings": 2,
-        "homesSold": 1,
-        "daysOnMarket": 359,
-        "medianPrice": 65000,
-        "activeListings": 4
-      },
-      {
-        "period": "2023-04",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 201,
-        "medianPrice": 160000,
-        "activeListings": 4
       },
       {
         "period": "2023-04",
@@ -77498,14 +77361,6 @@
       },
       {
         "period": "2023-05",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 201,
-        "medianPrice": 160000,
-        "activeListings": 4
-      },
-      {
-        "period": "2023-05",
         "newListings": 18,
         "homesSold": 12,
         "daysOnMarket": 14,
@@ -77514,27 +77369,11 @@
       },
       {
         "period": "2023-06",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 66,
-        "medianPrice": 238500,
-        "activeListings": 4
-      },
-      {
-        "period": "2023-06",
         "newListings": 8,
         "homesSold": 13,
         "daysOnMarket": 20,
         "medianPrice": 525000,
         "activeListings": 14
-      },
-      {
-        "period": "2023-07",
-        "newListings": 2,
-        "homesSold": 1,
-        "daysOnMarket": 89,
-        "medianPrice": 222000,
-        "activeListings": 5
       },
       {
         "period": "2023-07",
@@ -77553,22 +77392,6 @@
         "activeListings": 12
       },
       {
-        "period": "2023-08",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 89,
-        "medianPrice": 222000,
-        "activeListings": 4
-      },
-      {
-        "period": "2023-09",
-        "newListings": 1,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 4
-      },
-      {
         "period": "2023-09",
         "newListings": 7,
         "homesSold": 7,
@@ -77585,36 +77408,12 @@
         "activeListings": 8
       },
       {
-        "period": "2023-10",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 4
-      },
-      {
         "period": "2023-11",
         "newListings": 3,
         "homesSold": 4,
         "daysOnMarket": 22,
         "medianPrice": 530000,
         "activeListings": 8
-      },
-      {
-        "period": "2023-11",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 3
-      },
-      {
-        "period": "2023-12",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 88,
-        "medianPrice": 160000,
-        "activeListings": 4
       },
       {
         "period": "2023-12",
@@ -77631,22 +77430,6 @@
         "daysOnMarket": 36,
         "medianPrice": 485000,
         "activeListings": 5
-      },
-      {
-        "period": "2024-01",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 241,
-        "medianPrice": 210000,
-        "activeListings": 4
-      },
-      {
-        "period": "2024-02",
-        "newListings": 2,
-        "homesSold": 3,
-        "daysOnMarket": 272,
-        "medianPrice": 233000,
-        "activeListings": 4
       },
       {
         "period": "2024-02",
@@ -77658,14 +77441,6 @@
       },
       {
         "period": "2024-03",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 333,
-        "medianPrice": 246500,
-        "activeListings": 4
-      },
-      {
-        "period": "2024-03",
         "newListings": 4,
         "homesSold": 4,
         "daysOnMarket": 109,
@@ -77679,22 +77454,6 @@
         "daysOnMarket": 109,
         "medianPrice": 695000,
         "activeListings": 4
-      },
-      {
-        "period": "2024-04",
-        "newListings": 3,
-        "homesSold": 3,
-        "daysOnMarket": 272,
-        "medianPrice": 285000,
-        "activeListings": 5
-      },
-      {
-        "period": "2024-05",
-        "newListings": 3,
-        "homesSold": 2,
-        "daysOnMarket": 166,
-        "medianPrice": 352000,
-        "activeListings": 3
       },
       {
         "period": "2024-05",
@@ -77713,14 +77472,6 @@
         "activeListings": 12
       },
       {
-        "period": "2024-06",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 166,
-        "medianPrice": 352000,
-        "activeListings": 3
-      },
-      {
         "period": "2024-07",
         "newListings": 12,
         "homesSold": 4,
@@ -77729,36 +77480,12 @@
         "activeListings": 13
       },
       {
-        "period": "2024-07",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 3
-      },
-      {
-        "period": "2024-08",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 3
-      },
-      {
         "period": "2024-08",
         "newListings": 8,
         "homesSold": 4,
         "daysOnMarket": 16,
         "medianPrice": 611500,
         "activeListings": 13
-      },
-      {
-        "period": "2024-09",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 2
       },
       {
         "period": "2024-09",
@@ -77777,28 +77504,12 @@
         "activeListings": 10
       },
       {
-        "period": "2024-10",
-        "newListings": null,
-        "homesSold": 2,
-        "daysOnMarket": 102,
-        "medianPrice": 270000,
-        "activeListings": 2
-      },
-      {
         "period": "2024-11",
         "newListings": 6,
         "homesSold": 8,
         "daysOnMarket": 38,
         "medianPrice": 494500,
         "activeListings": 11
-      },
-      {
-        "period": "2024-11",
-        "newListings": 1,
-        "homesSold": 2,
-        "daysOnMarket": 102,
-        "medianPrice": 270000,
-        "activeListings": 3
       },
       {
         "period": "2024-12",
@@ -77809,36 +77520,12 @@
         "activeListings": 8
       },
       {
-        "period": "2024-12",
-        "newListings": 1,
-        "homesSold": 2,
-        "daysOnMarket": 102,
-        "medianPrice": 270000,
-        "activeListings": 3
-      },
-      {
         "period": "2025-01",
         "newListings": 7,
         "homesSold": 9,
         "daysOnMarket": 79,
         "medianPrice": 495000,
         "activeListings": 10
-      },
-      {
-        "period": "2025-01",
-        "newListings": 2,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 3
-      },
-      {
-        "period": "2025-02",
-        "newListings": 1,
-        "homesSold": 2,
-        "daysOnMarket": 153,
-        "medianPrice": 171250,
-        "activeListings": 3
       },
       {
         "period": "2025-02",
@@ -77857,36 +77544,12 @@
         "activeListings": 12
       },
       {
-        "period": "2025-03",
-        "newListings": 1,
-        "homesSold": 2,
-        "daysOnMarket": 153,
-        "medianPrice": 171250,
-        "activeListings": 2
-      },
-      {
         "period": "2025-04",
         "newListings": 12,
         "homesSold": 11,
         "daysOnMarket": 19,
         "medianPrice": 651000,
         "activeListings": 16
-      },
-      {
-        "period": "2025-04",
-        "newListings": null,
-        "homesSold": 2,
-        "daysOnMarket": 153,
-        "medianPrice": 171250,
-        "activeListings": 1
-      },
-      {
-        "period": "2025-05",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
       },
       {
         "period": "2025-05",
@@ -77905,14 +77568,6 @@
         "activeListings": 14
       },
       {
-        "period": "2025-06",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
-      },
-      {
         "period": "2025-07",
         "newListings": 6,
         "homesSold": 8,
@@ -77921,36 +77576,12 @@
         "activeListings": 10
       },
       {
-        "period": "2025-07",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
-      },
-      {
         "period": "2025-08",
         "newListings": 4,
         "homesSold": 7,
         "daysOnMarket": 20,
         "medianPrice": 550000,
         "activeListings": 9
-      },
-      {
-        "period": "2025-08",
-        "newListings": 1,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 2
-      },
-      {
-        "period": "2025-09",
-        "newListings": 1,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 2
       },
       {
         "period": "2025-09",
@@ -77969,22 +77600,6 @@
         "activeListings": 6
       },
       {
-        "period": "2025-10",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 11,
-        "medianPrice": 329000,
-        "activeListings": 2
-      },
-      {
-        "period": "2025-11",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 11,
-        "medianPrice": 329000,
-        "activeListings": null
-      },
-      {
         "period": "2025-11",
         "newListings": 5,
         "homesSold": 2,
@@ -78001,36 +77616,12 @@
         "activeListings": 5
       },
       {
-        "period": "2025-12",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 11,
-        "medianPrice": 329000,
-        "activeListings": null
-      },
-      {
         "period": "2026-01",
         "newListings": 5,
         "homesSold": 4,
         "daysOnMarket": 19,
         "medianPrice": 546000,
         "activeListings": 8
-      },
-      {
-        "period": "2026-01",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": null
-      },
-      {
-        "period": "2026-02",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 412,
-        "medianPrice": 275000,
-        "activeListings": 1
       },
       {
         "period": "2026-02",
@@ -78049,36 +77640,12 @@
         "activeListings": 19
       },
       {
-        "period": "2026-03",
-        "newListings": 1,
-        "homesSold": 2,
-        "daysOnMarket": 210,
-        "medianPrice": 300000,
-        "activeListings": 1
-      },
-      {
         "period": "2026-04",
         "newListings": 22,
         "homesSold": 12,
         "daysOnMarket": 17,
         "medianPrice": 692500,
         "activeListings": 23
-      },
-      {
-        "period": "2026-04",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 210,
-        "medianPrice": 300000,
-        "activeListings": 2
-      },
-      {
-        "period": "2026-05",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 7,
-        "medianPrice": 325000,
-        "activeListings": 1
       },
       {
         "period": "2026-05",
@@ -78095,19 +77662,12 @@
         "daysOnMarket": 28,
         "medianPrice": 681999,
         "activeListings": 18
-      },
-      {
-        "period": "2026-06",
-        "newListings": 2,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 2
       }
     ]
   },
   "grenloch": {
     "name": "Grenloch",
+    "regionId": 37366,
     "months": [
       {
         "period": "2023-01",
@@ -78449,6 +78009,7 @@
   },
   "griggstown": {
     "name": "Griggstown",
+    "regionId": 32794,
     "months": [
       {
         "period": "2023-01",
@@ -78790,6 +78351,7 @@
   },
   "groveville": {
     "name": "Groveville",
+    "regionId": 31193,
     "months": [
       {
         "period": "2023-01",
@@ -79131,6 +78693,7 @@
   },
   "guttenberg": {
     "name": "Guttenberg",
+    "regionId": 7302,
     "months": [
       {
         "period": "2023-01",
@@ -79472,6 +79035,7 @@
   },
   "hackensack": {
     "name": "Hackensack",
+    "regionId": 7312,
     "months": [
       {
         "period": "2023-01",
@@ -79813,6 +79377,7 @@
   },
   "hackettstown": {
     "name": "Hackettstown",
+    "regionId": 7319,
     "months": [
       {
         "period": "2023-01",
@@ -80154,6 +79719,7 @@
   },
   "haddon-heights": {
     "name": "Haddon Heights",
+    "regionId": 7341,
     "months": [
       {
         "period": "2023-01",
@@ -80495,6 +80061,7 @@
   },
   "haddonfield": {
     "name": "Haddonfield",
+    "regionId": 7331,
     "months": [
       {
         "period": "2023-01",
@@ -80836,6 +80403,7 @@
   },
   "hainesburg": {
     "name": "Hainesburg",
+    "regionId": 32814,
     "months": [
       {
         "period": "2023-01",
@@ -81161,6 +80729,7 @@
   },
   "haledon": {
     "name": "Haledon",
+    "regionId": 7405,
     "months": [
       {
         "period": "2023-01",
@@ -81502,6 +81071,7 @@
   },
   "hamburg": {
     "name": "Hamburg",
+    "regionId": 7453,
     "months": [
       {
         "period": "2023-01",
@@ -81843,6 +81413,7 @@
   },
   "hamilton-square": {
     "name": "Hamilton Square",
+    "regionId": 31196,
     "months": [
       {
         "period": "2023-01",
@@ -82184,6 +81755,7 @@
   },
   "hammonton": {
     "name": "Hammonton",
+    "regionId": 7499,
     "months": [
       {
         "period": "2023-01",
@@ -82525,6 +82097,7 @@
   },
   "hampton": {
     "name": "Hampton",
+    "regionId": 7508,
     "months": [
       {
         "period": "2023-01",
@@ -82866,6 +82439,7 @@
   },
   "hancocks-bridge": {
     "name": "Hancocks Bridge",
+    "regionId": 32848,
     "months": [
       {
         "period": "2023-01",
@@ -83199,6 +82773,7 @@
   },
   "harlingen": {
     "name": "Harlingen",
+    "regionId": 32870,
     "months": [
       {
         "period": "2023-01",
@@ -83468,6 +83043,7 @@
   },
   "harmony": {
     "name": "Harmony",
+    "regionId": 32876,
     "months": [
       {
         "period": "2023-01",
@@ -83793,6 +83369,7 @@
   },
   "harrington-park": {
     "name": "Harrington Park",
+    "regionId": 7687,
     "months": [
       {
         "period": "2023-01",
@@ -84134,6 +83711,7 @@
   },
   "harrison": {
     "name": "Harrison",
+    "regionId": 7704,
     "months": [
       {
         "period": "2023-01",
@@ -84475,6 +84053,7 @@
   },
   "harrisonville": {
     "name": "Harrisonville",
+    "regionId": 37107,
     "months": [
       {
         "period": "2023-01",
@@ -84800,6 +84379,7 @@
   },
   "harvey-cedars": {
     "name": "Harvey Cedars",
+    "regionId": 7751,
     "months": [
       {
         "period": "2023-01",
@@ -85141,6 +84721,7 @@
   },
   "hasbrouck-heights": {
     "name": "Hasbrouck Heights",
+    "regionId": 7763,
     "months": [
       {
         "period": "2023-01",
@@ -85482,6 +85063,7 @@
   },
   "haworth": {
     "name": "Haworth",
+    "regionId": 7800,
     "months": [
       {
         "period": "2023-01",
@@ -85823,6 +85405,7 @@
   },
   "hawthorne": {
     "name": "Hawthorne",
+    "regionId": 7806,
     "months": [
       {
         "period": "2023-01",
@@ -86164,6 +85747,7 @@
   },
   "heathcote": {
     "name": "Heathcote",
+    "regionId": 23114,
     "months": [
       {
         "period": "2023-01",
@@ -86505,6 +86089,7 @@
   },
   "heislerville": {
     "name": "Heislerville",
+    "regionId": 37177,
     "months": [
       {
         "period": "2023-01",
@@ -86790,6 +86375,7 @@
   },
   "helmetta": {
     "name": "Helmetta",
+    "regionId": 7886,
     "months": [
       {
         "period": "2023-01",
@@ -87131,6 +86717,7 @@
   },
   "hewitt": {
     "name": "Hewitt",
+    "regionId": 37779,
     "months": [
       {
         "period": "2023-01",
@@ -87472,6 +87059,7 @@
   },
   "hibernia": {
     "name": "Hibernia",
+    "regionId": 37679,
     "months": [
       {
         "period": "2023-07",
@@ -87733,6 +87321,7 @@
   },
   "high-bridge": {
     "name": "High Bridge",
+    "regionId": 8009,
     "months": [
       {
         "period": "2023-01",
@@ -88074,6 +87663,7 @@
   },
   "highland-lake": {
     "name": "Highland Lake",
+    "regionId": 23160,
     "months": [
       {
         "period": "2023-01",
@@ -88415,6 +88005,7 @@
   },
   "highland-lakes": {
     "name": "Highland Lakes",
+    "regionId": 35875,
     "months": [
       {
         "period": "2023-01",
@@ -88756,6 +88347,7 @@
   },
   "highland-park": {
     "name": "Highland Park",
+    "regionId": 8051,
     "months": [
       {
         "period": "2023-01",
@@ -89097,6 +88689,7 @@
   },
   "highlands": {
     "name": "Highlands",
+    "regionId": 8059,
     "months": [
       {
         "period": "2023-01",
@@ -89438,6 +89031,7 @@
   },
   "hightstown": {
     "name": "Hightstown",
+    "regionId": 8084,
     "months": [
       {
         "period": "2023-01",
@@ -89779,6 +89373,7 @@
   },
   "highway-nella": {
     "name": "Highway-Nella",
+    "regionId": 8229,
     "months": [
       {
         "period": "2023-01",
@@ -90112,6 +89707,7 @@
   },
   "hillsborough": {
     "name": "Hillsborough",
+    "regionId": 37767,
     "months": [
       {
         "period": "2023-01",
@@ -90453,6 +90049,7 @@
   },
   "hillsdale": {
     "name": "Hillsdale",
+    "regionId": 8153,
     "months": [
       {
         "period": "2023-01",
@@ -90794,6 +90391,7 @@
   },
   "ho-ho-kus": {
     "name": "Ho-Ho-Kus",
+    "regionId": 8255,
     "months": [
       {
         "period": "2023-01",
@@ -91135,6 +90733,7 @@
   },
   "hoboken": {
     "name": "Hoboken",
+    "regionId": 8238,
     "months": [
       {
         "period": "2023-01",
@@ -91476,6 +91075,7 @@
   },
   "holiday-city-south": {
     "name": "Holiday City South",
+    "regionId": 23219,
     "months": [
       {
         "period": "2023-01",
@@ -91817,6 +91417,7 @@
   },
   "holiday-city-berkeley": {
     "name": "Holiday City-Berkeley",
+    "regionId": 23218,
     "months": [
       {
         "period": "2023-01",
@@ -92158,6 +91759,7 @@
   },
   "holiday-heights": {
     "name": "Holiday Heights",
+    "regionId": 23220,
     "months": [
       {
         "period": "2023-01",
@@ -92499,6 +92101,7 @@
   },
   "hopatcong": {
     "name": "Hopatcong",
+    "regionId": 8413,
     "months": [
       {
         "period": "2023-01",
@@ -92840,6 +92443,7 @@
   },
   "hope": {
     "name": "Hope",
+    "regionId": 33031,
     "months": [
       {
         "period": "2023-01",
@@ -93125,6 +92729,7 @@
   },
   "hopelawn": {
     "name": "Hopelawn",
+    "regionId": 37800,
     "months": [
       {
         "period": "2023-01",
@@ -93466,6 +93071,7 @@
   },
   "hopewell": {
     "name": "Hopewell",
+    "regionId": 8474,
     "months": [
       {
         "period": "2023-01",
@@ -93807,6 +93413,7 @@
   },
   "hutchinson": {
     "name": "Hutchinson",
+    "regionId": 33060,
     "months": [
       {
         "period": "2023-01",
@@ -94108,6 +93715,7 @@
   },
   "interlaken": {
     "name": "Interlaken",
+    "regionId": 8737,
     "months": [
       {
         "period": "2023-01",
@@ -94449,6 +94057,7 @@
   },
   "iselin": {
     "name": "Iselin",
+    "regionId": 23338,
     "months": [
       {
         "period": "2023-01",
@@ -94790,6 +94399,7 @@
   },
   "island-heights": {
     "name": "Island Heights",
+    "regionId": 8813,
     "months": [
       {
         "period": "2023-01",
@@ -95131,6 +94741,7 @@
   },
   "jamesburg": {
     "name": "Jamesburg",
+    "regionId": 8884,
     "months": [
       {
         "period": "2023-01",
@@ -95472,6 +95083,7 @@
   },
   "jersey-city": {
     "name": "Jersey City",
+    "regionId": 9168,
     "months": [
       {
         "period": "2023-01",
@@ -95813,6 +95425,7 @@
   },
   "jobstown": {
     "name": "Jobstown",
+    "regionId": 37375,
     "months": [
       {
         "period": "2023-02",
@@ -96082,6 +95695,7 @@
   },
   "johnsonburg": {
     "name": "Johnsonburg",
+    "regionId": 33174,
     "months": [
       {
         "period": "2023-01",
@@ -96423,6 +96037,7 @@
   },
   "juliustown": {
     "name": "Juliustown",
+    "regionId": 33183,
     "months": [
       {
         "period": "2023-01",
@@ -96764,6 +96379,7 @@
   },
   "keansburg": {
     "name": "Keansburg",
+    "regionId": 9287,
     "months": [
       {
         "period": "2023-01",
@@ -97105,6 +96721,7 @@
   },
   "kearny": {
     "name": "Kearny",
+    "regionId": 9295,
     "months": [
       {
         "period": "2023-01",
@@ -97446,6 +97063,7 @@
   },
   "keasbey": {
     "name": "Keasbey",
+    "regionId": 37788,
     "months": [
       {
         "period": "2023-01",
@@ -97787,6 +97405,7 @@
   },
   "kendall-park": {
     "name": "Kendall Park",
+    "regionId": 23483,
     "months": [
       {
         "period": "2023-01",
@@ -98128,6 +97747,7 @@
   },
   "kenilworth": {
     "name": "Kenilworth",
+    "regionId": 9341,
     "months": [
       {
         "period": "2023-01",
@@ -98469,6 +98089,7 @@
   },
   "kenvil": {
     "name": "Kenvil",
+    "regionId": 31213,
     "months": [
       {
         "period": "2023-01",
@@ -98810,6 +98431,7 @@
   },
   "keyport": {
     "name": "Keyport",
+    "regionId": 9369,
     "months": [
       {
         "period": "2023-01",
@@ -99151,6 +98773,7 @@
   },
   "kingston-estates": {
     "name": "Kingston Estates",
+    "regionId": 33218,
     "months": [
       {
         "period": "2023-01",
@@ -99492,6 +99115,7 @@
   },
   "kingston": {
     "name": "Kingston",
+    "regionId": 33215,
     "months": [
       {
         "period": "2023-01",
@@ -99833,6 +99457,7 @@
   },
   "kinnelon": {
     "name": "Kinnelon",
+    "regionId": 9434,
     "months": [
       {
         "period": "2023-01",
@@ -100174,6 +99799,7 @@
   },
   "lake-como": {
     "name": "Lake Como",
+    "regionId": 9530,
     "months": [
       {
         "period": "2023-01",
@@ -100515,6 +100141,7 @@
   },
   "lake-hiawatha": {
     "name": "Lake Hiawatha",
+    "regionId": 37682,
     "months": [
       {
         "period": "2023-01",
@@ -100856,6 +100483,7 @@
   },
   "lake-hopatcong": {
     "name": "Lake Hopatcong",
+    "regionId": 37827,
     "months": [
       {
         "period": "2023-01",
@@ -101197,6 +100825,7 @@
   },
   "lake-mohawk": {
     "name": "Lake Mohawk",
+    "regionId": 23576,
     "months": [
       {
         "period": "2023-01",
@@ -101538,6 +101167,7 @@
   },
   "lake-telemark": {
     "name": "Lake Telemark",
+    "regionId": 23606,
     "months": [
       {
         "period": "2023-01",
@@ -101879,6 +101509,7 @@
   },
   "lakehurst": {
     "name": "Lakehurst",
+    "regionId": 9579,
     "months": [
       {
         "period": "2023-01",
@@ -102220,6 +101851,7 @@
   },
   "lakeside-beebe-run": {
     "name": "Lakeside-Beebe Run",
+    "regionId": 37208,
     "months": [
       {
         "period": "2023-01",
@@ -102537,6 +102169,7 @@
   },
   "lakewood": {
     "name": "Lakewood",
+    "regionId": 23620,
     "months": [
       {
         "period": "2023-01",
@@ -102878,6 +102511,7 @@
   },
   "lambertville": {
     "name": "Lambertville",
+    "regionId": 9794,
     "months": [
       {
         "period": "2023-01",
@@ -103219,6 +102853,7 @@
   },
   "lamington": {
     "name": "Lamington",
+    "regionId": 37670,
     "months": [
       {
         "period": "2023-01",
@@ -103312,6 +102947,7 @@
   },
   "landing": {
     "name": "Landing",
+    "regionId": 37821,
     "months": [
       {
         "period": "2023-01",
@@ -103653,6 +103289,7 @@
   },
   "laurel-heights": {
     "name": "Laurel Heights",
+    "regionId": 36965,
     "months": [
       {
         "period": "2023-01",
@@ -103954,6 +103591,7 @@
   },
   "laurel-lake": {
     "name": "Laurel Lake",
+    "regionId": 23651,
     "months": [
       {
         "period": "2023-01",
@@ -104295,6 +103933,7 @@
   },
   "laurel-springs": {
     "name": "Laurel Springs",
+    "regionId": 9954,
     "months": [
       {
         "period": "2023-01",
@@ -104636,6 +104275,7 @@
   },
   "laurence-harbor": {
     "name": "Laurence Harbor",
+    "regionId": 23672,
     "months": [
       {
         "period": "2023-01",
@@ -104977,6 +104617,7 @@
   },
   "lavallette": {
     "name": "Lavallette",
+    "regionId": 10007,
     "months": [
       {
         "period": "2023-01",
@@ -105318,6 +104959,7 @@
   },
   "lawnside": {
     "name": "Lawnside",
+    "regionId": 10015,
     "months": [
       {
         "period": "2023-01",
@@ -105659,6 +105301,7 @@
   },
   "lawrenceville": {
     "name": "Lawrenceville",
+    "regionId": 23692,
     "months": [
       {
         "period": "2023-01",
@@ -106000,6 +105643,7 @@
   },
   "layton": {
     "name": "Layton",
+    "regionId": 37628,
     "months": [
       {
         "period": "2023-01",
@@ -106341,6 +105985,7 @@
   },
   "lebanon": {
     "name": "Lebanon",
+    "regionId": 10082,
     "months": [
       {
         "period": "2023-01",
@@ -106682,6 +106327,7 @@
   },
   "ledgewood": {
     "name": "Ledgewood",
+    "regionId": 37554,
     "months": [
       {
         "period": "2023-01",
@@ -107023,6 +106669,7 @@
   },
   "leeds-point": {
     "name": "Leeds Point",
+    "regionId": 37352,
     "months": [
       {
         "period": "2023-01",
@@ -107348,6 +106995,7 @@
   },
   "leesburg": {
     "name": "Leesburg",
+    "regionId": 37388,
     "months": [
       {
         "period": "2023-01",
@@ -107689,6 +107337,7 @@
   },
   "leisure-knoll": {
     "name": "Leisure Knoll",
+    "regionId": 23721,
     "months": [
       {
         "period": "2023-01",
@@ -108030,6 +107679,7 @@
   },
   "leisure-village-east": {
     "name": "Leisure Village East",
+    "regionId": 23725,
     "months": [
       {
         "period": "2023-01",
@@ -108371,6 +108021,7 @@
   },
   "leisure-village-west": {
     "name": "Leisure Village West",
+    "regionId": 35637,
     "months": [
       {
         "period": "2023-01",
@@ -108712,6 +108363,7 @@
   },
   "leisure-village": {
     "name": "Leisure Village",
+    "regionId": 23724,
     "months": [
       {
         "period": "2023-01",
@@ -109053,6 +108705,7 @@
   },
   "leisuretowne": {
     "name": "Leisuretowne",
+    "regionId": 23723,
     "months": [
       {
         "period": "2023-01",
@@ -109394,6 +109047,7 @@
   },
   "leonardo": {
     "name": "Leonardo",
+    "regionId": 23734,
     "months": [
       {
         "period": "2023-01",
@@ -109735,6 +109389,7 @@
   },
   "leonia": {
     "name": "Leonia",
+    "regionId": 10204,
     "months": [
       {
         "period": "2023-01",
@@ -110076,6 +109731,7 @@
   },
   "liberty-corner": {
     "name": "Liberty Corner",
+    "regionId": 37816,
     "months": [
       {
         "period": "2023-01",
@@ -110417,6 +110073,7 @@
   },
   "lincoln-park": {
     "name": "Lincoln Park",
+    "regionId": 10278,
     "months": [
       {
         "period": "2023-01",
@@ -110758,6 +110415,7 @@
   },
   "lincroft": {
     "name": "Lincroft",
+    "regionId": 23754,
     "months": [
       {
         "period": "2023-01",
@@ -111099,6 +110757,7 @@
   },
   "linden": {
     "name": "Linden",
+    "regionId": 10296,
     "months": [
       {
         "period": "2023-01",
@@ -111440,6 +111099,7 @@
   },
   "lindenwold": {
     "name": "Lindenwold",
+    "regionId": 10320,
     "months": [
       {
         "period": "2023-01",
@@ -111781,6 +111441,7 @@
   },
   "linwood": {
     "name": "Linwood",
+    "regionId": 10335,
     "months": [
       {
         "period": "2023-01",
@@ -112122,6 +111783,7 @@
   },
   "little-ferry": {
     "name": "Little Ferry",
+    "regionId": 10381,
     "months": [
       {
         "period": "2023-01",
@@ -112463,6 +112125,7 @@
   },
   "little-silver": {
     "name": "Little Silver",
+    "regionId": 10402,
     "months": [
       {
         "period": "2023-01",
@@ -112804,6 +112467,7 @@
   },
   "llewellyn-park": {
     "name": "Llewellyn Park",
+    "regionId": 37168,
     "months": [
       {
         "period": "2023-01",
@@ -113145,6 +112809,7 @@
   },
   "loch-arbour": {
     "name": "Loch Arbour",
+    "regionId": 10458,
     "months": [
       {
         "period": "2023-01",
@@ -113462,6 +113127,7 @@
   },
   "lodi": {
     "name": "Lodi",
+    "regionId": 10469,
     "months": [
       {
         "period": "2023-01",
@@ -113803,6 +113469,7 @@
   },
   "long-branch": {
     "name": "Long Branch",
+    "regionId": 10520,
     "months": [
       {
         "period": "2023-01",
@@ -114144,6 +113811,7 @@
   },
   "long-valley": {
     "name": "Long Valley",
+    "regionId": 23853,
     "months": [
       {
         "period": "2023-01",
@@ -114485,6 +114153,7 @@
   },
   "longport": {
     "name": "Longport",
+    "regionId": 10540,
     "months": [
       {
         "period": "2023-01",
@@ -114826,6 +114495,7 @@
   },
   "lopatcong-overlook": {
     "name": "Lopatcong Overlook",
+    "regionId": 33475,
     "months": [
       {
         "period": "2023-01",
@@ -115167,6 +114837,7 @@
   },
   "lower-berkshire-valley": {
     "name": "Lower Berkshire Valley",
+    "regionId": 37552,
     "months": [
       {
         "period": "2023-01",
@@ -115508,6 +115179,7 @@
   },
   "lyons": {
     "name": "Lyons",
+    "regionId": 37740,
     "months": [
       {
         "period": "2023-01",
@@ -115849,6 +115521,7 @@
   },
   "macopin": {
     "name": "Macopin",
+    "regionId": 37608,
     "months": [
       {
         "period": "2023-01",
@@ -116190,6 +115863,7 @@
   },
   "madison-park": {
     "name": "Madison Park",
+    "regionId": 23952,
     "months": [
       {
         "period": "2023-01",
@@ -116531,6 +116205,7 @@
   },
   "madison": {
     "name": "Madison",
+    "regionId": 10822,
     "months": [
       {
         "period": "2023-01",
@@ -116872,6 +116547,7 @@
   },
   "magnolia": {
     "name": "Magnolia",
+    "regionId": 10850,
     "months": [
       {
         "period": "2023-01",
@@ -117213,6 +116889,7 @@
   },
   "malaga": {
     "name": "Malaga",
+    "regionId": 37282,
     "months": [
       {
         "period": "2023-01",
@@ -117554,6 +117231,7 @@
   },
   "manahawkin": {
     "name": "Manahawkin",
+    "regionId": 23981,
     "months": [
       {
         "period": "2023-01",
@@ -117895,6 +117573,7 @@
   },
   "manasquan": {
     "name": "Manasquan",
+    "regionId": 10954,
     "months": [
       {
         "period": "2023-01",
@@ -118236,6 +117915,7 @@
   },
   "mantoloking": {
     "name": "Mantoloking",
+    "regionId": 11049,
     "months": [
       {
         "period": "2023-01",
@@ -118577,6 +118257,7 @@
   },
   "manville": {
     "name": "Manville",
+    "regionId": 11106,
     "months": [
       {
         "period": "2023-01",
@@ -118918,6 +118599,7 @@
   },
   "margate-city": {
     "name": "Margate City",
+    "regionId": 11173,
     "months": [
       {
         "period": "2023-01",
@@ -119259,6 +118941,7 @@
   },
   "marksboro": {
     "name": "Marksboro",
+    "regionId": 33611,
     "months": [
       {
         "period": "2023-01",
@@ -119592,6 +119275,7 @@
   },
   "marlboro": {
     "name": "Marlboro",
+    "regionId": 37001,
     "months": [
       {
         "period": "2023-03",
@@ -119757,6 +119441,7 @@
   },
   "marlton": {
     "name": "Marlton",
+    "regionId": 24052,
     "months": [
       {
         "period": "2023-01",
@@ -120098,6 +119783,7 @@
   },
   "marmora": {
     "name": "Marmora",
+    "regionId": 37075,
     "months": [
       {
         "period": "2023-01",
@@ -120439,6 +120125,7 @@
   },
   "marshallville": {
     "name": "Marshallville",
+    "regionId": 37086,
     "months": [
       {
         "period": "2023-01",
@@ -120732,6 +120419,7 @@
   },
   "martinsville": {
     "name": "Martinsville",
+    "regionId": 33636,
     "months": [
       {
         "period": "2023-01",
@@ -121073,6 +120761,7 @@
   },
   "matawan": {
     "name": "Matawan",
+    "regionId": 11355,
     "months": [
       {
         "period": "2023-01",
@@ -121414,6 +121103,7 @@
   },
   "mauricetown": {
     "name": "Mauricetown",
+    "regionId": 36928,
     "months": [
       {
         "period": "2023-01",
@@ -121755,6 +121445,7 @@
   },
   "mays-landing": {
     "name": "Mays Landing",
+    "regionId": 24107,
     "months": [
       {
         "period": "2023-01",
@@ -122096,6 +121787,7 @@
   },
   "maywood": {
     "name": "Maywood",
+    "regionId": 11429,
     "months": [
       {
         "period": "2023-01",
@@ -122437,6 +122129,7 @@
   },
   "mcguire-afb": {
     "name": "McGuire AFB",
+    "regionId": 23943,
     "months": [
       {
         "period": "2023-01",
@@ -122474,6 +122167,7 @@
   },
   "mckee-city": {
     "name": "McKee City",
+    "regionId": 37055,
     "months": [
       {
         "period": "2023-01",
@@ -122815,6 +122509,7 @@
   },
   "medford-lakes": {
     "name": "Medford Lakes",
+    "regionId": 11523,
     "months": [
       {
         "period": "2023-01",
@@ -123156,6 +122851,7 @@
   },
   "mendham": {
     "name": "Mendham",
+    "regionId": 11557,
     "months": [
       {
         "period": "2023-01",
@@ -123497,6 +123193,7 @@
   },
   "menlo-park-terrace": {
     "name": "Menlo Park Terrace",
+    "regionId": 37646,
     "months": [
       {
         "period": "2023-01",
@@ -123838,6 +123535,7 @@
   },
   "mercerville": {
     "name": "Mercerville",
+    "regionId": 31245,
     "months": [
       {
         "period": "2023-01",
@@ -124179,6 +123877,7 @@
   },
   "merchantville": {
     "name": "Merchantville",
+    "regionId": 11606,
     "months": [
       {
         "period": "2023-01",
@@ -124520,6 +124219,7 @@
   },
   "metuchen": {
     "name": "Metuchen",
+    "regionId": 11649,
     "months": [
       {
         "period": "2023-01",
@@ -124861,6 +124561,7 @@
   },
   "mickleton": {
     "name": "Mickleton",
+    "regionId": 37148,
     "months": [
       {
         "period": "2023-01",
@@ -125202,6 +124903,7 @@
   },
   "middlebush": {
     "name": "Middlebush",
+    "regionId": 33696,
     "months": [
       {
         "period": "2023-01",
@@ -125543,6 +125245,7 @@
   },
   "middlesex": {
     "name": "Middlesex",
+    "regionId": 11707,
     "months": [
       {
         "period": "2023-01",
@@ -125884,6 +125587,7 @@
   },
   "midland-park": {
     "name": "Midland Park",
+    "regionId": 11766,
     "months": [
       {
         "period": "2023-01",
@@ -126225,6 +125929,7 @@
   },
   "milford": {
     "name": "Milford",
+    "regionId": 11802,
     "months": [
       {
         "period": "2023-01",
@@ -126566,6 +126271,7 @@
   },
   "millington": {
     "name": "Millington",
+    "regionId": 37721,
     "months": [
       {
         "period": "2023-01",
@@ -126907,6 +126613,7 @@
   },
   "millstone": {
     "name": "Millstone",
+    "regionId": 11892,
     "months": [
       {
         "period": "2023-01",
@@ -127248,6 +126955,7 @@
   },
   "milltown": {
     "name": "Milltown",
+    "regionId": 11901,
     "months": [
       {
         "period": "2023-01",
@@ -127589,6 +127297,7 @@
   },
   "millville": {
     "name": "Millville",
+    "regionId": 11914,
     "months": [
       {
         "period": "2023-01",
@@ -127930,6 +127639,7 @@
   },
   "milmay": {
     "name": "Milmay",
+    "regionId": 37262,
     "months": [
       {
         "period": "2023-01",
@@ -128271,6 +127981,7 @@
   },
   "mizpah": {
     "name": "Mizpah",
+    "regionId": 37192,
     "months": [
       {
         "period": "2023-01",
@@ -128604,6 +128315,7 @@
   },
   "money-island": {
     "name": "Money Island",
+    "regionId": 37170,
     "months": [
       {
         "period": "2023-01",
@@ -128729,6 +128441,7 @@
   },
   "monmouth-beach": {
     "name": "Monmouth Beach",
+    "regionId": 12037,
     "months": [
       {
         "period": "2023-01",
@@ -129070,6 +128783,7 @@
   },
   "monmouth-junction": {
     "name": "Monmouth Junction",
+    "regionId": 24265,
     "months": [
       {
         "period": "2023-01",
@@ -129411,6 +129125,7 @@
   },
   "monroe-manor": {
     "name": "Monroe Manor",
+    "regionId": 37664,
     "months": [
       {
         "period": "2023-01",
@@ -129752,6 +129467,7 @@
   },
   "montclair": {
     "name": "Montclair",
+    "regionId": 35939,
     "months": [
       {
         "period": "2023-01",
@@ -130093,6 +129809,7 @@
   },
   "montvale": {
     "name": "Montvale",
+    "regionId": 12165,
     "months": [
       {
         "period": "2023-01",
@@ -130434,6 +130151,7 @@
   },
   "montville": {
     "name": "Montville",
+    "regionId": 35825,
     "months": [
       {
         "period": "2023-01",
@@ -130775,6 +130493,7 @@
   },
   "moonachie": {
     "name": "Moonachie",
+    "regionId": 12189,
     "months": [
       {
         "period": "2023-01",
@@ -131116,6 +130835,7 @@
   },
   "moorestown-lenola": {
     "name": "Moorestown-Lenola",
+    "regionId": 24316,
     "months": [
       {
         "period": "2023-01",
@@ -131457,6 +131177,7 @@
   },
   "morganville": {
     "name": "Morganville",
+    "regionId": 24325,
     "months": [
       {
         "period": "2023-01",
@@ -131798,6 +131519,7 @@
   },
   "morris-plains": {
     "name": "Morris Plains",
+    "regionId": 12321,
     "months": [
       {
         "period": "2023-01",
@@ -132139,6 +131861,7 @@
   },
   "morristown": {
     "name": "Morristown",
+    "regionId": 12345,
     "months": [
       {
         "period": "2023-01",
@@ -132480,6 +132203,7 @@
   },
   "mount-arlington": {
     "name": "Mount Arlington",
+    "regionId": 12461,
     "months": [
       {
         "period": "2023-01",
@@ -132821,6 +132545,7 @@
   },
   "mount-ephraim": {
     "name": "Mount Ephraim",
+    "regionId": 12481,
     "months": [
       {
         "period": "2023-01",
@@ -133162,6 +132887,7 @@
   },
   "mount-hermon": {
     "name": "Mount Hermon",
+    "regionId": 33829,
     "months": [
       {
         "period": "2023-01",
@@ -133495,6 +133221,7 @@
   },
   "mount-hope": {
     "name": "Mount Hope",
+    "regionId": 37672,
     "months": [
       {
         "period": "2023-01",
@@ -133836,6 +133563,7 @@
   },
   "mount-royal": {
     "name": "Mount Royal",
+    "regionId": 37202,
     "months": [
       {
         "period": "2023-01",
@@ -134177,6 +133905,7 @@
   },
   "mount-tabor": {
     "name": "Mount Tabor",
+    "regionId": 37562,
     "months": [
       {
         "period": "2023-01",
@@ -134518,6 +134247,7 @@
   },
   "mountain-lake": {
     "name": "Mountain Lake",
+    "regionId": 33808,
     "months": [
       {
         "period": "2023-01",
@@ -134859,6 +134589,7 @@
   },
   "mountain-lakes": {
     "name": "Mountain Lakes",
+    "regionId": 12394,
     "months": [
       {
         "period": "2023-01",
@@ -135200,6 +134931,7 @@
   },
   "mountainside": {
     "name": "Mountainside",
+    "regionId": 12406,
     "months": [
       {
         "period": "2023-01",
@@ -135541,6 +135273,7 @@
   },
   "mullica-hill": {
     "name": "Mullica Hill",
+    "regionId": 24443,
     "months": [
       {
         "period": "2023-01",
@@ -135882,6 +135615,7 @@
   },
   "mystic-island": {
     "name": "Mystic Island",
+    "regionId": 24450,
     "months": [
       {
         "period": "2023-01",
@@ -136223,6 +135957,7 @@
   },
   "national-park": {
     "name": "National Park",
+    "regionId": 12744,
     "months": [
       {
         "period": "2023-01",
@@ -136564,6 +136299,7 @@
   },
   "navesink": {
     "name": "Navesink",
+    "regionId": 24462,
     "months": [
       {
         "period": "2023-01",
@@ -136905,6 +136641,7 @@
   },
   "neptune-city": {
     "name": "Neptune City",
+    "regionId": 12812,
     "months": [
       {
         "period": "2023-01",
@@ -137246,6 +136983,7 @@
   },
   "nesco": {
     "name": "Nesco",
+    "regionId": 36960,
     "months": [
       {
         "period": "2023-01",
@@ -137523,6 +137261,7 @@
   },
   "neshanic-station": {
     "name": "Neshanic Station",
+    "regionId": 37622,
     "months": [
       {
         "period": "2023-01",
@@ -137864,6 +137603,7 @@
   },
   "neshanic": {
     "name": "Neshanic",
+    "regionId": 37689,
     "months": [
       {
         "period": "2023-01",
@@ -138205,6 +137945,7 @@
   },
   "netcong": {
     "name": "Netcong",
+    "regionId": 12874,
     "months": [
       {
         "period": "2023-01",
@@ -138546,6 +138287,7 @@
   },
   "new-brunswick": {
     "name": "New Brunswick",
+    "regionId": 13201,
     "months": [
       {
         "period": "2023-01",
@@ -138887,6 +138629,7 @@
   },
   "new-egypt": {
     "name": "New Egypt",
+    "regionId": 24568,
     "months": [
       {
         "period": "2023-01",
@@ -139228,6 +138971,7 @@
   },
   "new-gretna": {
     "name": "New Gretna",
+    "regionId": 37199,
     "months": [
       {
         "period": "2023-01",
@@ -139553,6 +139297,7 @@
   },
   "new-milford": {
     "name": "New Milford",
+    "regionId": 13318,
     "months": [
       {
         "period": "2023-01",
@@ -139894,6 +139639,7 @@
   },
   "new-providence": {
     "name": "New Providence",
+    "regionId": 13364,
     "months": [
       {
         "period": "2023-01",
@@ -140235,6 +139981,7 @@
   },
   "new-vernon": {
     "name": "New Vernon",
+    "regionId": 37574,
     "months": [
       {
         "period": "2023-01",
@@ -140576,6 +140323,7 @@
   },
   "new-village": {
     "name": "New Village",
+    "regionId": 34006,
     "months": [
       {
         "period": "2023-01",
@@ -140909,6 +140657,7 @@
   },
   "newark": {
     "name": "Newark",
+    "regionId": 13136,
     "months": [
       {
         "period": "2023-01",
@@ -141250,6 +140999,7 @@
   },
   "newfield": {
     "name": "Newfield",
+    "regionId": 13247,
     "months": [
       {
         "period": "2023-01",
@@ -141591,6 +141341,7 @@
   },
   "newfoundland": {
     "name": "Newfoundland",
+    "regionId": 37578,
     "months": [
       {
         "period": "2023-01",
@@ -141932,6 +141683,7 @@
   },
   "newport": {
     "name": "Newport",
+    "regionId": 38282,
     "months": [
       {
         "period": "2023-01",
@@ -142273,6 +142025,7 @@
   },
   "newton": {
     "name": "Newton",
+    "regionId": 13396,
     "months": [
       {
         "period": "2023-01",
@@ -142614,6 +142367,7 @@
   },
   "newtonville": {
     "name": "Newtonville",
+    "regionId": 37358,
     "months": [
       {
         "period": "2023-01",
@@ -142907,6 +142661,7 @@
   },
   "north-arlington": {
     "name": "North Arlington",
+    "regionId": 13485,
     "months": [
       {
         "period": "2023-01",
@@ -143248,6 +143003,7 @@
   },
   "north-beach-haven": {
     "name": "North Beach Haven",
+    "regionId": 24650,
     "months": [
       {
         "period": "2023-01",
@@ -143589,6 +143345,7 @@
   },
   "north-bergen": {
     "name": "North Bergen",
+    "regionId": 35940,
     "months": [
       {
         "period": "2023-01",
@@ -143930,6 +143687,7 @@
   },
   "north-caldwell": {
     "name": "North Caldwell",
+    "regionId": 13559,
     "months": [
       {
         "period": "2023-01",
@@ -144271,6 +144029,7 @@
   },
   "north-cape-may": {
     "name": "North Cape May",
+    "regionId": 24662,
     "months": [
       {
         "period": "2023-01",
@@ -144612,6 +144371,7 @@
   },
   "north-haledon": {
     "name": "North Haledon",
+    "regionId": 13665,
     "months": [
       {
         "period": "2023-01",
@@ -144953,6 +144713,7 @@
   },
   "north-middletown": {
     "name": "North Middletown",
+    "regionId": 24695,
     "months": [
       {
         "period": "2023-01",
@@ -145294,6 +145055,7 @@
   },
   "north-plainfield": {
     "name": "North Plainfield",
+    "regionId": 13740,
     "months": [
       {
         "period": "2023-01",
@@ -145635,6 +145397,7 @@
   },
   "north-wildwood": {
     "name": "North Wildwood",
+    "regionId": 13815,
     "months": [
       {
         "period": "2023-01",
@@ -145976,6 +145739,7 @@
   },
   "northfield": {
     "name": "Northfield",
+    "regionId": 13632,
     "months": [
       {
         "period": "2023-01",
@@ -146317,6 +146081,7 @@
   },
   "northvale": {
     "name": "Northvale",
+    "regionId": 13790,
     "months": [
       {
         "period": "2023-01",
@@ -146658,6 +146423,7 @@
   },
   "norwood": {
     "name": "Norwood",
+    "regionId": 13856,
     "months": [
       {
         "period": "2023-01",
@@ -146999,6 +146765,7 @@
   },
   "nutley": {
     "name": "Nutley",
+    "regionId": 35824,
     "months": [
       {
         "period": "2023-01",
@@ -147340,6 +147107,7 @@
   },
   "oak-ridge": {
     "name": "Oak Ridge",
+    "regionId": 37804,
     "months": [
       {
         "period": "2023-01",
@@ -147681,6 +147449,7 @@
   },
   "oak-valley": {
     "name": "Oak Valley",
+    "regionId": 24779,
     "months": [
       {
         "period": "2023-01",
@@ -148022,6 +147791,7 @@
   },
   "oakhurst": {
     "name": "Oakhurst",
+    "regionId": 24752,
     "months": [
       {
         "period": "2023-01",
@@ -148363,6 +148133,7 @@
   },
   "oakland": {
     "name": "Oakland",
+    "regionId": 13917,
     "months": [
       {
         "period": "2023-01",
@@ -148704,6 +148475,7 @@
   },
   "oaklyn": {
     "name": "Oaklyn",
+    "regionId": 13929,
     "months": [
       {
         "period": "2023-01",
@@ -149045,6 +148817,7 @@
   },
   "ocean-acres": {
     "name": "Ocean Acres",
+    "regionId": 24799,
     "months": [
       {
         "period": "2023-01",
@@ -149386,6 +149159,7 @@
   },
   "ocean-city": {
     "name": "Ocean City",
+    "regionId": 14076,
     "months": [
       {
         "period": "2023-01",
@@ -149727,6 +149501,7 @@
   },
   "ocean-gate": {
     "name": "Ocean Gate",
+    "regionId": 14095,
     "months": [
       {
         "period": "2023-01",
@@ -150068,6 +149843,7 @@
   },
   "ocean-grove": {
     "name": "Ocean Grove",
+    "regionId": 24813,
     "months": [
       {
         "period": "2023-01",
@@ -150409,6 +150185,7 @@
   },
   "ocean-view": {
     "name": "Ocean View",
+    "regionId": 38285,
     "months": [
       {
         "period": "2023-01",
@@ -150750,6 +150527,7 @@
   },
   "oceanport": {
     "name": "Oceanport",
+    "regionId": 14120,
     "months": [
       {
         "period": "2023-01",
@@ -151091,6 +150869,7 @@
   },
   "oceanville": {
     "name": "Oceanville",
+    "regionId": 37277,
     "months": [
       {
         "period": "2023-01",
@@ -151432,6 +151211,7 @@
   },
   "ogdensburg": {
     "name": "Ogdensburg",
+    "regionId": 14146,
     "months": [
       {
         "period": "2023-01",
@@ -151773,6 +151553,7 @@
   },
   "old-bridge": {
     "name": "Old Bridge",
+    "regionId": 24831,
     "months": [
       {
         "period": "2023-01",
@@ -152114,6 +151895,7 @@
   },
   "old-tappan": {
     "name": "Old Tappan",
+    "regionId": 14195,
     "months": [
       {
         "period": "2023-01",
@@ -152455,6 +152237,7 @@
   },
   "oldwick": {
     "name": "Oldwick",
+    "regionId": 37731,
     "months": [
       {
         "period": "2023-01",
@@ -152796,6 +152579,7 @@
   },
   "olivet": {
     "name": "Olivet",
+    "regionId": 24844,
     "months": [
       {
         "period": "2023-01",
@@ -153137,6 +152921,7 @@
   },
   "oradell": {
     "name": "Oradell",
+    "regionId": 14231,
     "months": [
       {
         "period": "2023-01",
@@ -153478,6 +153263,7 @@
   },
   "othello": {
     "name": "Othello",
+    "regionId": 36939,
     "months": [
       {
         "period": "2024-02",
@@ -153683,6 +153469,7 @@
   },
   "oxford": {
     "name": "Oxford",
+    "regionId": 24875,
     "months": [
       {
         "period": "2023-01",
@@ -154024,6 +153811,7 @@
   },
   "packanack-lake": {
     "name": "Packanack Lake",
+    "regionId": 37727,
     "months": [
       {
         "period": "2023-01",
@@ -154365,6 +154153,7 @@
   },
   "palermo": {
     "name": "Palermo",
+    "regionId": 37227,
     "months": [
       {
         "period": "2023-01",
@@ -154706,6 +154495,7 @@
   },
   "palisades-park": {
     "name": "Palisades Park",
+    "regionId": 14436,
     "months": [
       {
         "period": "2023-01",
@@ -155047,6 +154837,7 @@
   },
   "palmyra": {
     "name": "Palmyra",
+    "regionId": 14448,
     "months": [
       {
         "period": "2023-01",
@@ -155388,6 +155179,7 @@
   },
   "panther-valley": {
     "name": "Panther Valley",
+    "regionId": 31279,
     "months": [
       {
         "period": "2023-01",
@@ -155729,6 +155521,7 @@
   },
   "paramus": {
     "name": "Paramus",
+    "regionId": 14484,
     "months": [
       {
         "period": "2023-01",
@@ -156070,6 +155863,7 @@
   },
   "park-ridge": {
     "name": "Park Ridge",
+    "regionId": 14533,
     "months": [
       {
         "period": "2023-01",
@@ -156411,6 +156205,7 @@
   },
   "parsippany": {
     "name": "Parsippany",
+    "regionId": 37598,
     "months": [
       {
         "period": "2023-01",
@@ -156752,6 +156547,7 @@
   },
   "passaic": {
     "name": "Passaic",
+    "regionId": 14646,
     "months": [
       {
         "period": "2023-01",
@@ -157093,6 +156889,7 @@
   },
   "paterson": {
     "name": "Paterson",
+    "regionId": 14759,
     "months": [
       {
         "period": "2023-01",
@@ -157434,6 +157231,7 @@
   },
   "paulsboro": {
     "name": "Paulsboro",
+    "regionId": 14807,
     "months": [
       {
         "period": "2023-01",
@@ -157775,6 +157573,7 @@
   },
   "peapack-&-gladstone": {
     "name": "Peapack & Gladstone",
+    "regionId": 14857,
     "months": [
       {
         "period": "2023-01",
@@ -158116,6 +157915,7 @@
   },
   "pedricktown": {
     "name": "Pedricktown",
+    "regionId": 34260,
     "months": [
       {
         "period": "2023-01",
@@ -158457,6 +158257,7 @@
   },
   "pemberton-heights": {
     "name": "Pemberton Heights",
+    "regionId": 25023,
     "months": [
       {
         "period": "2023-01",
@@ -158798,6 +158599,7 @@
   },
   "pemberton": {
     "name": "Pemberton",
+    "regionId": 14896,
     "months": [
       {
         "period": "2023-01",
@@ -159139,6 +158941,7 @@
   },
   "pennington": {
     "name": "Pennington",
+    "regionId": 14930,
     "months": [
       {
         "period": "2023-01",
@@ -159480,6 +159283,7 @@
   },
   "penns-grove": {
     "name": "Penns Grove",
+    "regionId": 14978,
     "months": [
       {
         "period": "2023-01",
@@ -159821,6 +159625,7 @@
   },
   "pennsauken": {
     "name": "Pennsauken",
+    "regionId": 25032,
     "months": [
       {
         "period": "2023-01",
@@ -160162,6 +159967,7 @@
   },
   "pennsville": {
     "name": "Pennsville",
+    "regionId": 25038,
     "months": [
       {
         "period": "2023-01",
@@ -160503,6 +160309,7 @@
   },
   "perth-amboy": {
     "name": "Perth Amboy",
+    "regionId": 15081,
     "months": [
       {
         "period": "2023-01",
@@ -160844,6 +160651,7 @@
   },
   "phillipsburg": {
     "name": "Phillipsburg",
+    "regionId": 15108,
     "months": [
       {
         "period": "2023-01",
@@ -161185,6 +160993,7 @@
   },
   "pine-beach": {
     "name": "Pine Beach",
+    "regionId": 15170,
     "months": [
       {
         "period": "2023-01",
@@ -161526,6 +161335,7 @@
   },
   "pine-brook": {
     "name": "Pine Brook",
+    "regionId": 37588,
     "months": [
       {
         "period": "2023-01",
@@ -161867,6 +161677,7 @@
   },
   "pine-hill": {
     "name": "Pine Hill",
+    "regionId": 15215,
     "months": [
       {
         "period": "2023-01",
@@ -162208,6 +162019,7 @@
   },
   "pine-lake-park": {
     "name": "Pine Lake Park",
+    "regionId": 31285,
     "months": [
       {
         "period": "2023-01",
@@ -162549,6 +162361,7 @@
   },
   "pine-ridge-at-crestwood": {
     "name": "Pine Ridge at Crestwood",
+    "regionId": 25103,
     "months": [
       {
         "period": "2023-01",
@@ -162890,6 +162703,7 @@
   },
   "pines-lake": {
     "name": "Pines Lake",
+    "regionId": 37632,
     "months": [
       {
         "period": "2023-01",
@@ -163231,6 +163045,7 @@
   },
   "pitman": {
     "name": "Pitman",
+    "regionId": 15295,
     "months": [
       {
         "period": "2023-01",
@@ -163572,6 +163387,7 @@
   },
   "plainfield": {
     "name": "Plainfield",
+    "regionId": 15325,
     "months": [
       {
         "period": "2023-01",
@@ -163913,6 +163729,7 @@
   },
   "plainsboro-center": {
     "name": "Plainsboro Center",
+    "regionId": 25136,
     "months": [
       {
         "period": "2023-01",
@@ -164254,6 +164071,7 @@
   },
   "pleasant-plains": {
     "name": "Pleasant Plains",
+    "regionId": 34384,
     "months": [
       {
         "period": "2023-01",
@@ -164563,6 +164381,7 @@
   },
   "pleasantdale": {
     "name": "Pleasantdale",
+    "regionId": 37183,
     "months": [
       {
         "period": "2023-01",
@@ -164904,6 +164723,7 @@
   },
   "pleasantville": {
     "name": "Pleasantville",
+    "regionId": 15433,
     "months": [
       {
         "period": "2023-01",
@@ -165245,6 +165065,7 @@
   },
   "pluckemin": {
     "name": "Pluckemin",
+    "regionId": 37751,
     "months": [
       {
         "period": "2023-01",
@@ -165570,6 +165391,7 @@
   },
   "point-pleasant-beach": {
     "name": "Point Pleasant Beach",
+    "regionId": 15482,
     "months": [
       {
         "period": "2023-01",
@@ -165911,6 +165733,7 @@
   },
   "point-pleasant": {
     "name": "Point Pleasant",
+    "regionId": 15477,
     "months": [
       {
         "period": "2023-01",
@@ -166252,6 +166075,7 @@
   },
   "pomona": {
     "name": "Pomona",
+    "regionId": 25180,
     "months": [
       {
         "period": "2023-01",
@@ -166593,6 +166417,7 @@
   },
   "pompton-lakes": {
     "name": "Pompton Lakes",
+    "regionId": 15521,
     "months": [
       {
         "period": "2023-01",
@@ -166934,6 +166759,7 @@
   },
   "pompton-plains": {
     "name": "Pompton Plains",
+    "regionId": 37758,
     "months": [
       {
         "period": "2023-01",
@@ -167275,6 +167101,7 @@
   },
   "port-colden": {
     "name": "Port Colden",
+    "regionId": 34417,
     "months": [
       {
         "period": "2023-01",
@@ -167560,6 +167387,7 @@
   },
   "port-elizabeth": {
     "name": "Port Elizabeth",
+    "regionId": 36945,
     "months": [
       {
         "period": "2023-01",
@@ -167901,6 +167729,7 @@
   },
   "port-monmouth": {
     "name": "Port Monmouth",
+    "regionId": 25205,
     "months": [
       {
         "period": "2023-01",
@@ -168242,6 +168071,7 @@
   },
   "port-morris": {
     "name": "Port Morris",
+    "regionId": 37699,
     "months": [
       {
         "period": "2023-01",
@@ -168559,6 +168389,7 @@
   },
   "port-murray": {
     "name": "Port Murray",
+    "regionId": 34436,
     "months": [
       {
         "period": "2023-01",
@@ -168852,6 +168683,7 @@
   },
   "port-norris": {
     "name": "Port Norris",
+    "regionId": 25219,
     "months": [
       {
         "period": "2023-01",
@@ -169193,6 +169025,7 @@
   },
   "port-reading": {
     "name": "Port Reading",
+    "regionId": 25225,
     "months": [
       {
         "period": "2023-01",
@@ -169534,6 +169367,7 @@
   },
   "port-republic": {
     "name": "Port Republic",
+    "regionId": 15626,
     "months": [
       {
         "period": "2023-01",
@@ -169875,6 +169709,7 @@
   },
   "pottersville": {
     "name": "Pottersville",
+    "regionId": 37739,
     "months": [
       {
         "period": "2023-01",
@@ -170208,6 +170043,7 @@
   },
   "preakness": {
     "name": "Preakness",
+    "regionId": 37763,
     "months": [
       {
         "period": "2023-01",
@@ -170549,6 +170385,7 @@
   },
   "presidential-lakes-estates": {
     "name": "Presidential Lakes Estates",
+    "regionId": 25238,
     "months": [
       {
         "period": "2023-01",
@@ -170890,6 +170727,7 @@
   },
   "princeton-junction": {
     "name": "Princeton Junction",
+    "regionId": 25249,
     "months": [
       {
         "period": "2023-01",
@@ -171231,6 +171069,7 @@
   },
   "princeton-meadows": {
     "name": "Princeton Meadows",
+    "regionId": 25251,
     "months": [
       {
         "period": "2023-01",
@@ -171572,6 +171411,7 @@
   },
   "princeton": {
     "name": "Princeton",
+    "regionId": 15686,
     "months": [
       {
         "period": "2023-01",
@@ -171913,6 +171753,7 @@
   },
   "prospect-park": {
     "name": "Prospect Park",
+    "regionId": 15750,
     "months": [
       {
         "period": "2023-01",
@@ -172254,6 +172095,7 @@
   },
   "quinton": {
     "name": "Quinton",
+    "regionId": 34480,
     "months": [
       {
         "period": "2023-01",
@@ -172595,6 +172437,7 @@
   },
   "rahway": {
     "name": "Rahway",
+    "regionId": 15819,
     "months": [
       {
         "period": "2023-01",
@@ -172936,6 +172779,7 @@
   },
   "rainbow-lakes": {
     "name": "Rainbow Lakes",
+    "regionId": 37797,
     "months": [
       {
         "period": "2023-01",
@@ -173277,6 +173121,7 @@
   },
   "ramblewood": {
     "name": "Ramblewood",
+    "regionId": 25299,
     "months": [
       {
         "period": "2023-01",
@@ -173618,6 +173463,7 @@
   },
   "ramsey": {
     "name": "Ramsey",
+    "regionId": 15862,
     "months": [
       {
         "period": "2023-01",
@@ -173959,6 +173805,7 @@
   },
   "ramtown": {
     "name": "Ramtown",
+    "regionId": 25310,
     "months": [
       {
         "period": "2023-01",
@@ -174300,6 +174147,7 @@
   },
   "raritan": {
     "name": "Raritan",
+    "regionId": 15927,
     "months": [
       {
         "period": "2023-01",
@@ -174641,6 +174489,7 @@
   },
   "red-bank": {
     "name": "Red Bank",
+    "regionId": 16034,
     "months": [
       {
         "period": "2023-01",
@@ -174982,6 +174831,7 @@
   },
   "regency-at-monroe": {
     "name": "Regency at Monroe",
+    "regionId": 37825,
     "months": [
       {
         "period": "2023-01",
@@ -175323,6 +175173,7 @@
   },
   "renaissance-at-monroe": {
     "name": "Renaissance at Monroe",
+    "regionId": 37613,
     "months": [
       {
         "period": "2023-01",
@@ -175664,6 +175515,7 @@
   },
   "richland": {
     "name": "Richland",
+    "regionId": 38295,
     "months": [
       {
         "period": "2023-01",
@@ -176005,6 +175857,7 @@
   },
   "richwood": {
     "name": "Richwood",
+    "regionId": 34545,
     "months": [
       {
         "period": "2023-01",
@@ -176346,6 +176199,7 @@
   },
   "ridgefield-park": {
     "name": "Ridgefield Park",
+    "regionId": 16148,
     "months": [
       {
         "period": "2023-01",
@@ -176687,6 +176541,7 @@
   },
   "ridgefield": {
     "name": "Ridgefield",
+    "regionId": 16142,
     "months": [
       {
         "period": "2023-01",
@@ -177028,6 +176883,7 @@
   },
   "ridgewood": {
     "name": "Ridgewood",
+    "regionId": 16161,
     "months": [
       {
         "period": "2023-01",
@@ -177369,6 +177225,7 @@
   },
   "ringoes": {
     "name": "Ringoes",
+    "regionId": 37132,
     "months": [
       {
         "period": "2023-01",
@@ -177710,6 +177567,7 @@
   },
   "ringwood": {
     "name": "Ringwood",
+    "regionId": 16205,
     "months": [
       {
         "period": "2023-01",
@@ -178051,6 +177909,7 @@
   },
   "rio-grande": {
     "name": "Rio Grande",
+    "regionId": 25412,
     "months": [
       {
         "period": "2023-01",
@@ -178392,6 +178251,7 @@
   },
   "river-edge": {
     "name": "River Edge",
+    "regionId": 16248,
     "months": [
       {
         "period": "2023-01",
@@ -178733,6 +178593,7 @@
   },
   "riverdale": {
     "name": "Riverdale",
+    "regionId": 16238,
     "months": [
       {
         "period": "2023-01",
@@ -179074,6 +178935,7 @@
   },
   "riverton": {
     "name": "Riverton",
+    "regionId": 16313,
     "months": [
       {
         "period": "2023-01",
@@ -179415,6 +179277,7 @@
   },
   "roadstown": {
     "name": "Roadstown",
+    "regionId": 37115,
     "months": [
       {
         "period": "2023-07",
@@ -179692,6 +179555,7 @@
   },
   "robbinsville-center": {
     "name": "Robbinsville Center",
+    "regionId": 37713,
     "months": [
       {
         "period": "2023-01",
@@ -180033,6 +179897,7 @@
   },
   "robbinsville": {
     "name": "Robbinsville",
+    "regionId": 34589,
     "months": [
       {
         "period": "2023-01",
@@ -180374,6 +180239,7 @@
   },
   "robertsville": {
     "name": "Robertsville",
+    "regionId": 34591,
     "months": [
       {
         "period": "2023-01",
@@ -180715,6 +180581,7 @@
   },
   "rockaway": {
     "name": "Rockaway",
+    "regionId": 16420,
     "months": [
       {
         "period": "2023-01",
@@ -181056,6 +180923,7 @@
   },
   "rockleigh": {
     "name": "Rockleigh",
+    "regionId": 16458,
     "months": [
       {
         "period": "2025-05",
@@ -181157,6 +181025,7 @@
   },
   "rocky-hill": {
     "name": "Rocky Hill",
+    "regionId": 16498,
     "months": [
       {
         "period": "2023-01",
@@ -181498,6 +181367,7 @@
   },
   "roebling": {
     "name": "Roebling",
+    "regionId": 31296,
     "months": [
       {
         "period": "2023-01",
@@ -181839,6 +181709,7 @@
   },
   "roosevelt": {
     "name": "Roosevelt",
+    "regionId": 16515,
     "months": [
       {
         "period": "2023-01",
@@ -182180,6 +182051,7 @@
   },
   "roseland": {
     "name": "Roseland",
+    "regionId": 16563,
     "months": [
       {
         "period": "2023-01",
@@ -182521,6 +182393,7 @@
   },
   "roselle-park": {
     "name": "Roselle Park",
+    "regionId": 16576,
     "months": [
       {
         "period": "2023-01",
@@ -182862,6 +182735,7 @@
   },
   "roselle": {
     "name": "Roselle",
+    "regionId": 16572,
     "months": [
       {
         "period": "2023-01",
@@ -183203,6 +183077,7 @@
   },
   "rosenhayn": {
     "name": "Rosenhayn",
+    "regionId": 25529,
     "months": [
       {
         "period": "2023-01",
@@ -183536,6 +183411,7 @@
   },
   "ross-corner": {
     "name": "Ross Corner",
+    "regionId": 34640,
     "months": [
       {
         "period": "2023-04",
@@ -183613,6 +183489,7 @@
   },
   "rossmoor": {
     "name": "Rossmoor",
+    "regionId": 25536,
     "months": [
       {
         "period": "2023-01",
@@ -183954,6 +183831,7 @@
   },
   "rumson": {
     "name": "Rumson",
+    "regionId": 16703,
     "months": [
       {
         "period": "2023-01",
@@ -184295,6 +184173,7 @@
   },
   "runnemede": {
     "name": "Runnemede",
+    "regionId": 16710,
     "months": [
       {
         "period": "2023-01",
@@ -184636,6 +184515,7 @@
   },
   "rutherford": {
     "name": "Rutherford",
+    "regionId": 16741,
     "months": [
       {
         "period": "2023-01",
@@ -184977,6 +184857,7 @@
   },
   "saddle-brook-township": {
     "name": "Saddle Brook Township",
+    "regionId": 35950,
     "months": [
       {
         "period": "2023-01",
@@ -185318,6 +185199,7 @@
   },
   "saddle-river": {
     "name": "Saddle River",
+    "regionId": 16766,
     "months": [
       {
         "period": "2023-01",
@@ -185659,6 +185541,7 @@
   },
   "salem": {
     "name": "Salem",
+    "regionId": 16784,
     "months": [
       {
         "period": "2023-01",
@@ -186000,6 +185883,7 @@
   },
   "sayreville": {
     "name": "Sayreville",
+    "regionId": 16859,
     "months": [
       {
         "period": "2023-01",
@@ -186341,6 +186225,7 @@
   },
   "sea-bright": {
     "name": "Sea Bright",
+    "regionId": 16966,
     "months": [
       {
         "period": "2023-01",
@@ -186682,6 +186567,7 @@
   },
   "sea-girt": {
     "name": "Sea Girt",
+    "regionId": 16987,
     "months": [
       {
         "period": "2023-01",
@@ -187023,6 +186909,7 @@
   },
   "sea-isle-city": {
     "name": "Sea Isle City",
+    "regionId": 17006,
     "months": [
       {
         "period": "2023-01",
@@ -187364,6 +187251,7 @@
   },
   "seabrook-farms": {
     "name": "Seabrook Farms",
+    "regionId": 25638,
     "months": [
       {
         "period": "2023-01",
@@ -187705,6 +187593,7 @@
   },
   "seaside-heights": {
     "name": "Seaside Heights",
+    "regionId": 17029,
     "months": [
       {
         "period": "2023-01",
@@ -188046,6 +187935,7 @@
   },
   "seaside-park": {
     "name": "Seaside Park",
+    "regionId": 17036,
     "months": [
       {
         "period": "2023-01",
@@ -188387,6 +188277,7 @@
   },
   "seaville": {
     "name": "Seaville",
+    "regionId": 37346,
     "months": [
       {
         "period": "2023-01",
@@ -188728,6 +188619,7 @@
   },
   "secaucus": {
     "name": "Secaucus",
+    "regionId": 17057,
     "months": [
       {
         "period": "2023-01",
@@ -189069,6 +188961,7 @@
   },
   "seeley": {
     "name": "Seeley",
+    "regionId": 37324,
     "months": [
       {
         "period": "2023-01",
@@ -189354,6 +189247,7 @@
   },
   "sewaren": {
     "name": "Sewaren",
+    "regionId": 25660,
     "months": [
       {
         "period": "2023-01",
@@ -189695,6 +189589,7 @@
   },
   "sewell": {
     "name": "Sewell",
+    "regionId": 36277,
     "months": [
       {
         "period": "2023-01",
@@ -190036,6 +189931,7 @@
   },
   "shark-river-hills": {
     "name": "Shark River Hills",
+    "regionId": 25665,
     "months": [
       {
         "period": "2023-01",
@@ -190377,6 +190273,7 @@
   },
   "sheppards-mill": {
     "name": "Sheppards Mill",
+    "regionId": 37029,
     "months": [
       {
         "period": "2023-01",
@@ -190510,6 +190407,7 @@
   },
   "shiloh": {
     "name": "Shiloh",
+    "regionId": 17159,
     "months": [
       {
         "period": "2023-01",
@@ -190851,6 +190749,7 @@
   },
   "ship-bottom": {
     "name": "Ship Bottom",
+    "regionId": 17175,
     "months": [
       {
         "period": "2023-01",
@@ -191192,6 +191091,7 @@
   },
   "short-hills": {
     "name": "Short Hills",
+    "regionId": 34746,
     "months": [
       {
         "period": "2023-01",
@@ -191533,6 +191433,7 @@
   },
   "shrewsbury": {
     "name": "Shrewsbury",
+    "regionId": 17245,
     "months": [
       {
         "period": "2023-01",
@@ -191874,6 +191775,7 @@
   },
   "sicklerville": {
     "name": "Sicklerville",
+    "regionId": 37313,
     "months": [
       {
         "period": "2023-01",
@@ -192215,6 +192117,7 @@
   },
   "silver-lake": {
     "name": "Silver Lake",
+    "regionId": 34761,
     "months": [
       {
         "period": "2023-01",
@@ -192225,52 +192128,12 @@
         "activeListings": 13
       },
       {
-        "period": "2023-01",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 68,
-        "medianPrice": 364200,
-        "activeListings": 2
-      },
-      {
-        "period": "2023-01",
-        "newListings": 7,
-        "homesSold": 8,
-        "daysOnMarket": 64,
-        "medianPrice": 342500,
-        "activeListings": 14
-      },
-      {
         "period": "2023-02",
         "newListings": 4,
         "homesSold": 7,
         "daysOnMarket": 37,
         "medianPrice": 500000,
         "activeListings": 10
-      },
-      {
-        "period": "2023-02",
-        "newListings": 4,
-        "homesSold": 1,
-        "daysOnMarket": 68,
-        "medianPrice": 364200,
-        "activeListings": 4
-      },
-      {
-        "period": "2023-02",
-        "newListings": 4,
-        "homesSold": 10,
-        "daysOnMarket": 88,
-        "medianPrice": 390475,
-        "activeListings": 12
-      },
-      {
-        "period": "2023-03",
-        "newListings": 4,
-        "homesSold": 9,
-        "daysOnMarket": 97,
-        "medianPrice": 400000,
-        "activeListings": 12
       },
       {
         "period": "2023-03",
@@ -192281,14 +192144,6 @@
         "activeListings": 13
       },
       {
-        "period": "2023-03",
-        "newListings": 4,
-        "homesSold": 2,
-        "daysOnMarket": 21,
-        "medianPrice": 405000,
-        "activeListings": 4
-      },
-      {
         "period": "2023-04",
         "newListings": 10,
         "homesSold": 3,
@@ -192297,60 +192152,12 @@
         "activeListings": 16
       },
       {
-        "period": "2023-04",
-        "newListings": 4,
-        "homesSold": 4,
-        "daysOnMarket": 88,
-        "medianPrice": 391225,
-        "activeListings": 9
-      },
-      {
-        "period": "2023-04",
-        "newListings": 4,
-        "homesSold": 3,
-        "daysOnMarket": 19,
-        "medianPrice": 475000,
-        "activeListings": 4
-      },
-      {
-        "period": "2023-05",
-        "newListings": 1,
-        "homesSold": 4,
-        "daysOnMarket": 15,
-        "medianPrice": 445000,
-        "activeListings": 2
-      },
-      {
-        "period": "2023-05",
-        "newListings": 6,
-        "homesSold": 5,
-        "daysOnMarket": 21,
-        "medianPrice": 282000,
-        "activeListings": 9
-      },
-      {
         "period": "2023-05",
         "newListings": 11,
         "homesSold": 2,
         "daysOnMarket": 49,
         "medianPrice": 603000,
         "activeListings": 16
-      },
-      {
-        "period": "2023-06",
-        "newListings": 7,
-        "homesSold": 6,
-        "daysOnMarket": 18,
-        "medianPrice": 276000,
-        "activeListings": 10
-      },
-      {
-        "period": "2023-06",
-        "newListings": 1,
-        "homesSold": 2,
-        "daysOnMarket": 10,
-        "medianPrice": 535000,
-        "activeListings": 1
       },
       {
         "period": "2023-06",
@@ -192369,52 +192176,12 @@
         "activeListings": 16
       },
       {
-        "period": "2023-07",
-        "newListings": 9,
-        "homesSold": 8,
-        "daysOnMarket": 22,
-        "medianPrice": 230000,
-        "activeListings": 13
-      },
-      {
-        "period": "2023-07",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 10,
-        "medianPrice": 415000,
-        "activeListings": 1
-      },
-      {
         "period": "2023-08",
         "newListings": 4,
         "homesSold": 11,
         "daysOnMarket": 66,
         "medianPrice": 435000,
         "activeListings": 12
-      },
-      {
-        "period": "2023-08",
-        "newListings": 7,
-        "homesSold": 5,
-        "daysOnMarket": 29,
-        "medianPrice": 270000,
-        "activeListings": 11
-      },
-      {
-        "period": "2023-08",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
-      },
-      {
-        "period": "2023-09",
-        "newListings": 8,
-        "homesSold": 4,
-        "daysOnMarket": 40,
-        "medianPrice": 282500,
-        "activeListings": 11
       },
       {
         "period": "2023-09",
@@ -192425,52 +192192,12 @@
         "activeListings": 8
       },
       {
-        "period": "2023-09",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
-      },
-      {
         "period": "2023-10",
         "newListings": 4,
         "homesSold": 8,
         "daysOnMarket": 55,
         "medianPrice": 455000,
         "activeListings": 7
-      },
-      {
-        "period": "2023-10",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 103,
-        "medianPrice": 220000,
-        "activeListings": 1
-      },
-      {
-        "period": "2023-10",
-        "newListings": 5,
-        "homesSold": 5,
-        "daysOnMarket": 80,
-        "medianPrice": 430000,
-        "activeListings": 12
-      },
-      {
-        "period": "2023-11",
-        "newListings": 9,
-        "homesSold": 6,
-        "daysOnMarket": 85,
-        "medianPrice": 410800,
-        "activeListings": 15
-      },
-      {
-        "period": "2023-11",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 103,
-        "medianPrice": 220000,
-        "activeListings": null
       },
       {
         "period": "2023-11",
@@ -192489,22 +192216,6 @@
         "activeListings": 12
       },
       {
-        "period": "2023-12",
-        "newListings": 6,
-        "homesSold": 6,
-        "daysOnMarket": 85,
-        "medianPrice": 410800,
-        "activeListings": 15
-      },
-      {
-        "period": "2023-12",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 103,
-        "medianPrice": 220000,
-        "activeListings": null
-      },
-      {
         "period": "2024-01",
         "newListings": 10,
         "homesSold": 3,
@@ -192513,36 +192224,12 @@
         "activeListings": 13
       },
       {
-        "period": "2024-01",
-        "newListings": 6,
-        "homesSold": 7,
-        "daysOnMarket": 89,
-        "medianPrice": 325000,
-        "activeListings": 11
-      },
-      {
         "period": "2024-02",
         "newListings": 6,
         "homesSold": 7,
         "daysOnMarket": 43,
         "medianPrice": 520000,
         "activeListings": 10
-      },
-      {
-        "period": "2024-02",
-        "newListings": 2,
-        "homesSold": 5,
-        "daysOnMarket": 91,
-        "medianPrice": 325000,
-        "activeListings": 11
-      },
-      {
-        "period": "2024-02",
-        "newListings": 1,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
       },
       {
         "period": "2024-03",
@@ -192553,52 +192240,12 @@
         "activeListings": 13
       },
       {
-        "period": "2024-03",
-        "newListings": 4,
-        "homesSold": 8,
-        "daysOnMarket": 91,
-        "medianPrice": 337000,
-        "activeListings": 11
-      },
-      {
-        "period": "2024-03",
-        "newListings": 1,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
-      },
-      {
-        "period": "2024-04",
-        "newListings": 5,
-        "homesSold": 4,
-        "daysOnMarket": 77,
-        "medianPrice": 389450,
-        "activeListings": 10
-      },
-      {
         "period": "2024-04",
         "newListings": 11,
         "homesSold": 5,
         "daysOnMarket": 36,
         "medianPrice": 520000,
         "activeListings": 17
-      },
-      {
-        "period": "2024-04",
-        "newListings": 2,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 2
-      },
-      {
-        "period": "2024-05",
-        "newListings": 7,
-        "homesSold": 7,
-        "daysOnMarket": 67,
-        "medianPrice": 395000,
-        "activeListings": 12
       },
       {
         "period": "2024-05",
@@ -192609,44 +192256,12 @@
         "activeListings": 18
       },
       {
-        "period": "2024-05",
-        "newListings": 2,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 3
-      },
-      {
         "period": "2024-06",
         "newListings": 9,
         "homesSold": 7,
         "daysOnMarket": 104,
         "medianPrice": 530000,
         "activeListings": 19
-      },
-      {
-        "period": "2024-06",
-        "newListings": 8,
-        "homesSold": 6,
-        "daysOnMarket": 32,
-        "medianPrice": 396625,
-        "activeListings": 11
-      },
-      {
-        "period": "2024-06",
-        "newListings": 3,
-        "homesSold": 1,
-        "daysOnMarket": 18,
-        "medianPrice": 495000,
-        "activeListings": 4
-      },
-      {
-        "period": "2024-07",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 56,
-        "medianPrice": 420750,
-        "activeListings": 3
       },
       {
         "period": "2024-07",
@@ -192657,44 +192272,12 @@
         "activeListings": 18
       },
       {
-        "period": "2024-07",
-        "newListings": 10,
-        "homesSold": 8,
-        "daysOnMarket": 32,
-        "medianPrice": 399125,
-        "activeListings": 15
-      },
-      {
         "period": "2024-08",
         "newListings": 7,
         "homesSold": 8,
         "daysOnMarket": 33,
         "medianPrice": 652500,
         "activeListings": 15
-      },
-      {
-        "period": "2024-08",
-        "newListings": 7,
-        "homesSold": 6,
-        "daysOnMarket": 22,
-        "medianPrice": 399125,
-        "activeListings": 12
-      },
-      {
-        "period": "2024-08",
-        "newListings": 1,
-        "homesSold": 3,
-        "daysOnMarket": 37,
-        "medianPrice": 350000,
-        "activeListings": 2
-      },
-      {
-        "period": "2024-09",
-        "newListings": null,
-        "homesSold": 2,
-        "daysOnMarket": 66,
-        "medianPrice": 348250,
-        "activeListings": 1
       },
       {
         "period": "2024-09",
@@ -192705,44 +192288,12 @@
         "activeListings": 14
       },
       {
-        "period": "2024-09",
-        "newListings": 5,
-        "homesSold": 5,
-        "daysOnMarket": 34,
-        "medianPrice": 400000,
-        "activeListings": 11
-      },
-      {
         "period": "2024-10",
         "newListings": 7,
         "homesSold": 7,
         "daysOnMarket": 45,
         "medianPrice": 595000,
         "activeListings": 14
-      },
-      {
-        "period": "2024-10",
-        "newListings": 1,
-        "homesSold": 5,
-        "daysOnMarket": 107,
-        "medianPrice": 340000,
-        "activeListings": 9
-      },
-      {
-        "period": "2024-10",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 37,
-        "medianPrice": 350000,
-        "activeListings": 2
-      },
-      {
-        "period": "2024-11",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 153,
-        "medianPrice": 395000,
-        "activeListings": 2
       },
       {
         "period": "2024-11",
@@ -192753,52 +192304,12 @@
         "activeListings": 12
       },
       {
-        "period": "2024-11",
-        "newListings": 2,
-        "homesSold": 5,
-        "daysOnMarket": 76,
-        "medianPrice": 340000,
-        "activeListings": 8
-      },
-      {
-        "period": "2024-12",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 153,
-        "medianPrice": 395000,
-        "activeListings": 2
-      },
-      {
-        "period": "2024-12",
-        "newListings": 1,
-        "homesSold": 7,
-        "daysOnMarket": 124,
-        "medianPrice": 318000,
-        "activeListings": 8
-      },
-      {
         "period": "2024-12",
         "newListings": 5,
         "homesSold": 11,
         "daysOnMarket": 32,
         "medianPrice": 595000,
         "activeListings": 10
-      },
-      {
-        "period": "2025-01",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 153,
-        "medianPrice": 395000,
-        "activeListings": 2
-      },
-      {
-        "period": "2025-01",
-        "newListings": 2,
-        "homesSold": 5,
-        "daysOnMarket": 124,
-        "medianPrice": 318000,
-        "activeListings": 6
       },
       {
         "period": "2025-01",
@@ -192817,22 +192328,6 @@
         "activeListings": 12
       },
       {
-        "period": "2025-02",
-        "newListings": 3,
-        "homesSold": 3,
-        "daysOnMarket": 152,
-        "medianPrice": 318000,
-        "activeListings": 5
-      },
-      {
-        "period": "2025-02",
-        "newListings": null,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 1
-      },
-      {
         "period": "2025-03",
         "newListings": 11,
         "homesSold": 3,
@@ -192841,60 +192336,12 @@
         "activeListings": 14
       },
       {
-        "period": "2025-03",
-        "newListings": 6,
-        "homesSold": 1,
-        "daysOnMarket": 3,
-        "medianPrice": 390000,
-        "activeListings": 7
-      },
-      {
-        "period": "2025-03",
-        "newListings": 1,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 2
-      },
-      {
-        "period": "2025-04",
-        "newListings": 7,
-        "homesSold": 4,
-        "daysOnMarket": 15,
-        "medianPrice": 339000,
-        "activeListings": 8
-      },
-      {
         "period": "2025-04",
         "newListings": 11,
         "homesSold": 2,
         "daysOnMarket": 113,
         "medianPrice": 802500,
         "activeListings": 14
-      },
-      {
-        "period": "2025-04",
-        "newListings": 2,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 3
-      },
-      {
-        "period": "2025-05",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 100,
-        "medianPrice": 403250,
-        "activeListings": 3
-      },
-      {
-        "period": "2025-05",
-        "newListings": 6,
-        "homesSold": 4,
-        "daysOnMarket": 15,
-        "medianPrice": 339000,
-        "activeListings": 9
       },
       {
         "period": "2025-05",
@@ -192906,35 +192353,11 @@
       },
       {
         "period": "2025-06",
-        "newListings": 3,
-        "homesSold": 5,
-        "daysOnMarket": 18,
-        "medianPrice": 288000,
-        "activeListings": 6
-      },
-      {
-        "period": "2025-06",
-        "newListings": 1,
-        "homesSold": 2,
-        "daysOnMarket": 100,
-        "medianPrice": 403250,
-        "activeListings": 3
-      },
-      {
-        "period": "2025-06",
         "newListings": 5,
         "homesSold": 7,
         "daysOnMarket": 67,
         "medianPrice": 480000,
         "activeListings": 14
-      },
-      {
-        "period": "2025-07",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 29,
-        "medianPrice": 383250,
-        "activeListings": 6
       },
       {
         "period": "2025-07",
@@ -192945,44 +192368,12 @@
         "activeListings": 12
       },
       {
-        "period": "2025-07",
-        "newListings": 3,
-        "homesSold": 2,
-        "daysOnMarket": 100,
-        "medianPrice": 403250,
-        "activeListings": 4
-      },
-      {
-        "period": "2025-08",
-        "newListings": 4,
-        "homesSold": 1,
-        "daysOnMarket": 14,
-        "medianPrice": 315000,
-        "activeListings": 5
-      },
-      {
         "period": "2025-08",
         "newListings": 6,
         "homesSold": 6,
         "daysOnMarket": 96,
         "medianPrice": 605000,
         "activeListings": 14
-      },
-      {
-        "period": "2025-08",
-        "newListings": 3,
-        "homesSold": 3,
-        "daysOnMarket": 44,
-        "medianPrice": 475000,
-        "activeListings": 6
-      },
-      {
-        "period": "2025-09",
-        "newListings": 5,
-        "homesSold": 2,
-        "daysOnMarket": 13,
-        "medianPrice": 430500,
-        "activeListings": 6
       },
       {
         "period": "2025-09",
@@ -192993,14 +192384,6 @@
         "activeListings": 13
       },
       {
-        "period": "2025-09",
-        "newListings": 4,
-        "homesSold": 3,
-        "daysOnMarket": 63,
-        "medianPrice": 430000,
-        "activeListings": 7
-      },
-      {
         "period": "2025-10",
         "newListings": 6,
         "homesSold": 1,
@@ -193009,52 +192392,12 @@
         "activeListings": 13
       },
       {
-        "period": "2025-10",
-        "newListings": 3,
-        "homesSold": 5,
-        "daysOnMarket": 63,
-        "medianPrice": 358000,
-        "activeListings": 5
-      },
-      {
-        "period": "2025-10",
-        "newListings": 2,
-        "homesSold": 5,
-        "daysOnMarket": 40,
-        "medianPrice": 330000,
-        "activeListings": 5
-      },
-      {
-        "period": "2025-11",
-        "newListings": 2,
-        "homesSold": 4,
-        "daysOnMarket": 50,
-        "medianPrice": 377500,
-        "activeListings": 5
-      },
-      {
-        "period": "2025-11",
-        "newListings": 3,
-        "homesSold": 4,
-        "daysOnMarket": 42,
-        "medianPrice": 349000,
-        "activeListings": 5
-      },
-      {
         "period": "2025-11",
         "newListings": 10,
         "homesSold": null,
         "daysOnMarket": null,
         "medianPrice": null,
         "activeListings": 20
-      },
-      {
-        "period": "2025-12",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 42,
-        "medianPrice": 297500,
-        "activeListings": 5
       },
       {
         "period": "2025-12",
@@ -193065,44 +192408,12 @@
         "activeListings": 20
       },
       {
-        "period": "2025-12",
-        "newListings": 3,
-        "homesSold": 3,
-        "daysOnMarket": 59,
-        "medianPrice": 330000,
-        "activeListings": 5
-      },
-      {
-        "period": "2026-01",
-        "newListings": 3,
-        "homesSold": 1,
-        "daysOnMarket": 15,
-        "medianPrice": 340000,
-        "activeListings": 4
-      },
-      {
         "period": "2026-01",
         "newListings": 11,
         "homesSold": 5,
         "daysOnMarket": 32,
         "medianPrice": 605000,
         "activeListings": 21
-      },
-      {
-        "period": "2026-01",
-        "newListings": 5,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 6
-      },
-      {
-        "period": "2026-02",
-        "newListings": 3,
-        "homesSold": 2,
-        "daysOnMarket": 57,
-        "medianPrice": 341250,
-        "activeListings": 4
       },
       {
         "period": "2026-02",
@@ -193113,36 +192424,12 @@
         "activeListings": 20
       },
       {
-        "period": "2026-02",
-        "newListings": 5,
-        "homesSold": null,
-        "daysOnMarket": null,
-        "medianPrice": null,
-        "activeListings": 7
-      },
-      {
-        "period": "2026-03",
-        "newListings": 7,
-        "homesSold": 2,
-        "daysOnMarket": 21,
-        "medianPrice": 407450,
-        "activeListings": 9
-      },
-      {
         "period": "2026-03",
         "newListings": 7,
         "homesSold": 6,
         "daysOnMarket": 51,
         "medianPrice": 587500,
         "activeListings": 23
-      },
-      {
-        "period": "2026-03",
-        "newListings": 2,
-        "homesSold": 3,
-        "daysOnMarket": 49,
-        "medianPrice": 340000,
-        "activeListings": 3
       },
       {
         "period": "2026-04",
@@ -193153,30 +192440,6 @@
         "activeListings": 20
       },
       {
-        "period": "2026-04",
-        "newListings": 8,
-        "homesSold": 3,
-        "daysOnMarket": 36,
-        "medianPrice": 365000,
-        "activeListings": 11
-      },
-      {
-        "period": "2026-04",
-        "newListings": 2,
-        "homesSold": 2,
-        "daysOnMarket": 74,
-        "medianPrice": 333750,
-        "activeListings": 3
-      },
-      {
-        "period": "2026-05",
-        "newListings": 8,
-        "homesSold": 4,
-        "daysOnMarket": 51,
-        "medianPrice": 386000,
-        "activeListings": 12
-      },
-      {
         "period": "2026-05",
         "newListings": 10,
         "homesSold": 5,
@@ -193185,41 +192448,18 @@
         "activeListings": 19
       },
       {
-        "period": "2026-05",
-        "newListings": 1,
-        "homesSold": 1,
-        "daysOnMarket": 49,
-        "medianPrice": 325000,
-        "activeListings": 2
-      },
-      {
-        "period": "2026-06",
-        "newListings": 9,
-        "homesSold": 3,
-        "daysOnMarket": 66,
-        "medianPrice": 406731,
-        "activeListings": 15
-      },
-      {
         "period": "2026-06",
         "newListings": 11,
         "homesSold": 7,
         "daysOnMarket": 49,
         "medianPrice": 484679,
         "activeListings": 19
-      },
-      {
-        "period": "2026-06",
-        "newListings": null,
-        "homesSold": 1,
-        "daysOnMarket": 38,
-        "medianPrice": 484679,
-        "activeListings": 1
       }
     ]
   },
   "silver-ridge": {
     "name": "Silver Ridge",
+    "regionId": 25722,
     "months": [
       {
         "period": "2023-01",
@@ -193561,6 +192801,7 @@
   },
   "singac": {
     "name": "Singac",
+    "regionId": 34772,
     "months": [
       {
         "period": "2023-01",
@@ -193902,6 +193143,7 @@
   },
   "six-mile-run": {
     "name": "Six Mile Run",
+    "regionId": 34777,
     "months": [
       {
         "period": "2023-01",
@@ -194243,6 +193485,7 @@
   },
   "skillman": {
     "name": "Skillman",
+    "regionId": 34778,
     "months": [
       {
         "period": "2023-01",
@@ -194584,6 +193827,7 @@
   },
   "smithville": {
     "name": "Smithville",
+    "regionId": 34788,
     "months": [
       {
         "period": "2023-01",
@@ -194925,6 +194169,7 @@
   },
   "society-hill": {
     "name": "Society Hill",
+    "regionId": 25764,
     "months": [
       {
         "period": "2023-01",
@@ -195266,6 +194511,7 @@
   },
   "somerdale": {
     "name": "Somerdale",
+    "regionId": 17512,
     "months": [
       {
         "period": "2023-01",
@@ -195607,6 +194853,7 @@
   },
   "somers-point": {
     "name": "Somers Point",
+    "regionId": 17534,
     "months": [
       {
         "period": "2023-01",
@@ -195948,6 +195195,7 @@
   },
   "somerset": {
     "name": "Somerset",
+    "regionId": 25771,
     "months": [
       {
         "period": "2023-01",
@@ -196289,6 +195537,7 @@
   },
   "somerville": {
     "name": "Somerville",
+    "regionId": 17539,
     "months": [
       {
         "period": "2023-01",
@@ -196630,6 +195879,7 @@
   },
   "south-amboy": {
     "name": "South Amboy",
+    "regionId": 17563,
     "months": [
       {
         "period": "2023-01",
@@ -196971,6 +196221,7 @@
   },
   "south-bound-brook": {
     "name": "South Bound Brook",
+    "regionId": 17606,
     "months": [
       {
         "period": "2023-01",
@@ -197312,6 +196563,7 @@
   },
   "south-dennis": {
     "name": "South Dennis",
+    "regionId": 36969,
     "months": [
       {
         "period": "2023-01",
@@ -197653,6 +196905,7 @@
   },
   "south-plainfield": {
     "name": "South Plainfield",
+    "regionId": 17747,
     "months": [
       {
         "period": "2023-01",
@@ -197994,6 +197247,7 @@
   },
   "south-river": {
     "name": "South River",
+    "regionId": 17755,
     "months": [
       {
         "period": "2023-01",
@@ -198335,6 +197589,7 @@
   },
   "south-seaville": {
     "name": "South Seaville",
+    "regionId": 37221,
     "months": [
       {
         "period": "2023-01",
@@ -198676,6 +197931,7 @@
   },
   "south-toms-river": {
     "name": "South Toms River",
+    "regionId": 17773,
     "months": [
       {
         "period": "2023-01",
@@ -199017,6 +198273,7 @@
   },
   "spotswood": {
     "name": "Spotswood",
+    "regionId": 17842,
     "months": [
       {
         "period": "2023-01",
@@ -199358,6 +198615,7 @@
   },
   "spring-lake-heights": {
     "name": "Spring Lake Heights",
+    "regionId": 17920,
     "months": [
       {
         "period": "2023-01",
@@ -199699,6 +198957,7 @@
   },
   "spring-lake": {
     "name": "Spring Lake",
+    "regionId": 17915,
     "months": [
       {
         "period": "2023-01",
@@ -200040,6 +199299,7 @@
   },
   "springdale": {
     "name": "Springdale",
+    "regionId": 25863,
     "months": [
       {
         "period": "2023-01",
@@ -200381,15 +199641,8 @@
   },
   "springfield": {
     "name": "Springfield",
+    "regionId": 35943,
     "months": [
-      {
-        "period": "2023-01",
-        "newListings": 11,
-        "homesSold": 8,
-        "daysOnMarket": 76,
-        "medianPrice": 475000,
-        "activeListings": 14
-      },
       {
         "period": "2023-01",
         "newListings": 39,
@@ -200397,14 +199650,6 @@
         "daysOnMarket": 27,
         "medianPrice": 520000,
         "activeListings": 50
-      },
-      {
-        "period": "2023-02",
-        "newListings": 9,
-        "homesSold": 6,
-        "daysOnMarket": 51,
-        "medianPrice": 441500,
-        "activeListings": 12
       },
       {
         "period": "2023-02",
@@ -200423,22 +199668,6 @@
         "activeListings": 46
       },
       {
-        "period": "2023-03",
-        "newListings": 8,
-        "homesSold": 4,
-        "daysOnMarket": 22,
-        "medianPrice": 356500,
-        "activeListings": 11
-      },
-      {
-        "period": "2023-04",
-        "newListings": 10,
-        "homesSold": 5,
-        "daysOnMarket": 50,
-        "medianPrice": 557000,
-        "activeListings": 17
-      },
-      {
         "period": "2023-04",
         "newListings": 35,
         "homesSold": 32,
@@ -200453,22 +199682,6 @@
         "daysOnMarket": 12,
         "medianPrice": 594000,
         "activeListings": 54
-      },
-      {
-        "period": "2023-05",
-        "newListings": 12,
-        "homesSold": 7,
-        "daysOnMarket": 50,
-        "medianPrice": 465000,
-        "activeListings": 19
-      },
-      {
-        "period": "2023-06",
-        "newListings": 16,
-        "homesSold": 12,
-        "daysOnMarket": 32,
-        "medianPrice": 487000,
-        "activeListings": 22
       },
       {
         "period": "2023-06",
@@ -200487,22 +199700,6 @@
         "activeListings": 51
       },
       {
-        "period": "2023-07",
-        "newListings": 11,
-        "homesSold": 10,
-        "daysOnMarket": 35,
-        "medianPrice": 475000,
-        "activeListings": 20
-      },
-      {
-        "period": "2023-08",
-        "newListings": 10,
-        "homesSold": 15,
-        "daysOnMarket": 35,
-        "medianPrice": 485000,
-        "activeListings": 19
-      },
-      {
         "period": "2023-08",
         "newListings": 36,
         "homesSold": 36,
@@ -200519,36 +199716,12 @@
         "activeListings": 53
       },
       {
-        "period": "2023-09",
-        "newListings": 5,
-        "homesSold": 11,
-        "daysOnMarket": 75,
-        "medianPrice": 375000,
-        "activeListings": 18
-      },
-      {
         "period": "2023-10",
         "newListings": 33,
         "homesSold": 30,
         "daysOnMarket": 18,
         "medianPrice": 570000,
         "activeListings": 48
-      },
-      {
-        "period": "2023-10",
-        "newListings": 4,
-        "homesSold": 12,
-        "daysOnMarket": 60,
-        "medianPrice": 395000,
-        "activeListings": 17
-      },
-      {
-        "period": "2023-11",
-        "newListings": 3,
-        "homesSold": 5,
-        "daysOnMarket": 141,
-        "medianPrice": 335000,
-        "activeListings": 9
       },
       {
         "period": "2023-11",
@@ -200567,36 +199740,12 @@
         "activeListings": 44
       },
       {
-        "period": "2023-12",
-        "newListings": 4,
-        "homesSold": 5,
-        "daysOnMarket": 50,
-        "medianPrice": 399000,
-        "activeListings": 9
-      },
-      {
         "period": "2024-01",
         "newListings": 33,
         "homesSold": 31,
         "daysOnMarket": 40,
         "medianPrice": 620000,
         "activeListings": 48
-      },
-      {
-        "period": "2024-01",
-        "newListings": 5,
-        "homesSold": 2,
-        "daysOnMarket": 131,
-        "medianPrice": 542000,
-        "activeListings": 8
-      },
-      {
-        "period": "2024-02",
-        "newListings": 10,
-        "homesSold": 2,
-        "daysOnMarket": 131,
-        "medianPrice": 542000,
-        "activeListings": 14
       },
       {
         "period": "2024-02",
@@ -200608,14 +199757,6 @@
       },
       {
         "period": "2024-03",
-        "newListings": 15,
-        "homesSold": 3,
-        "daysOnMarket": 67,
-        "medianPrice": 685000,
-        "activeListings": 19
-      },
-      {
-        "period": "2024-03",
         "newListings": 64,
         "homesSold": 42,
         "daysOnMarket": 20,
@@ -200624,27 +199765,11 @@
       },
       {
         "period": "2024-04",
-        "newListings": 17,
-        "homesSold": 5,
-        "daysOnMarket": 55,
-        "medianPrice": 430000,
-        "activeListings": 22
-      },
-      {
-        "period": "2024-04",
         "newListings": 70,
         "homesSold": 40,
         "daysOnMarket": 16,
         "medianPrice": 635000,
         "activeListings": 82
-      },
-      {
-        "period": "2024-05",
-        "newListings": 14,
-        "homesSold": 12,
-        "daysOnMarket": 39,
-        "medianPrice": 550500,
-        "activeListings": 23
       },
       {
         "period": "2024-05",
@@ -200663,14 +199788,6 @@
         "activeListings": 73
       },
       {
-        "period": "2024-06",
-        "newListings": 12,
-        "homesSold": 11,
-        "daysOnMarket": 39,
-        "medianPrice": 551000,
-        "activeListings": 19
-      },
-      {
         "period": "2024-07",
         "newListings": 37,
         "homesSold": 59,
@@ -200679,36 +199796,12 @@
         "activeListings": 60
       },
       {
-        "period": "2024-07",
-        "newListings": 8,
-        "homesSold": 11,
-        "daysOnMarket": 39,
-        "medianPrice": 570000,
-        "activeListings": 17
-      },
-      {
-        "period": "2024-08",
-        "newListings": 8,
-        "homesSold": 6,
-        "daysOnMarket": 50,
-        "medianPrice": 515000,
-        "activeListings": 16
-      },
-      {
         "period": "2024-08",
         "newListings": 43,
         "homesSold": 49,
         "daysOnMarket": 18,
         "medianPrice": 689200,
         "activeListings": 63
-      },
-      {
-        "period": "2024-09",
-        "newListings": 8,
-        "homesSold": 8,
-        "daysOnMarket": 52,
-        "medianPrice": 395000,
-        "activeListings": 19
       },
       {
         "period": "2024-09",
@@ -200727,22 +199820,6 @@
         "activeListings": 46
       },
       {
-        "period": "2024-10",
-        "newListings": 9,
-        "homesSold": 8,
-        "daysOnMarket": 50,
-        "medianPrice": 417500,
-        "activeListings": 16
-      },
-      {
-        "period": "2024-11",
-        "newListings": 10,
-        "homesSold": 8,
-        "daysOnMarket": 50,
-        "medianPrice": 417500,
-        "activeListings": 19
-      },
-      {
         "period": "2024-11",
         "newListings": 17,
         "homesSold": 39,
@@ -200757,22 +199834,6 @@
         "daysOnMarket": 20,
         "medianPrice": 585000,
         "activeListings": 29
-      },
-      {
-        "period": "2024-12",
-        "newListings": 10,
-        "homesSold": 8,
-        "daysOnMarket": 47,
-        "medianPrice": 417500,
-        "activeListings": 18
-      },
-      {
-        "period": "2025-01",
-        "newListings": 13,
-        "homesSold": 7,
-        "daysOnMarket": 67,
-        "medianPrice": 425000,
-        "activeListings": 22
       },
       {
         "period": "2025-01",
@@ -200791,22 +199852,6 @@
         "activeListings": 66
       },
       {
-        "period": "2025-02",
-        "newListings": 11,
-        "homesSold": 7,
-        "daysOnMarket": 67,
-        "medianPrice": 425000,
-        "activeListings": 19
-      },
-      {
-        "period": "2025-03",
-        "newListings": 11,
-        "homesSold": 9,
-        "daysOnMarket": 44,
-        "medianPrice": 450000,
-        "activeListings": 22
-      },
-      {
         "period": "2025-03",
         "newListings": 67,
         "homesSold": 30,
@@ -200823,36 +199868,12 @@
         "activeListings": 77
       },
       {
-        "period": "2025-04",
-        "newListings": 9,
-        "homesSold": 9,
-        "daysOnMarket": 21,
-        "medianPrice": 487000,
-        "activeListings": 22
-      },
-      {
-        "period": "2025-05",
-        "newListings": 11,
-        "homesSold": 12,
-        "daysOnMarket": 57,
-        "medianPrice": 497500,
-        "activeListings": 23
-      },
-      {
         "period": "2025-05",
         "newListings": 56,
         "homesSold": 54,
         "daysOnMarket": 14,
         "medianPrice": 679000,
         "activeListings": 83
-      },
-      {
-        "period": "2025-06",
-        "newListings": 13,
-        "homesSold": 11,
-        "daysOnMarket": 83,
-        "medianPrice": 508000,
-        "activeListings": 23
       },
       {
         "period": "2025-06",
@@ -200871,36 +199892,12 @@
         "activeListings": 72
       },
       {
-        "period": "2025-07",
-        "newListings": 11,
-        "homesSold": 13,
-        "daysOnMarket": 58,
-        "medianPrice": 540000,
-        "activeListings": 20
-      },
-      {
         "period": "2025-08",
         "newListings": 50,
         "homesSold": 50,
         "daysOnMarket": 22,
         "medianPrice": 675000,
         "activeListings": 77
-      },
-      {
-        "period": "2025-08",
-        "newListings": 8,
-        "homesSold": 10,
-        "daysOnMarket": 39,
-        "medianPrice": 591500,
-        "activeListings": 16
-      },
-      {
-        "period": "2025-09",
-        "newListings": 3,
-        "homesSold": 7,
-        "daysOnMarket": 36,
-        "medianPrice": 620000,
-        "activeListings": 11
       },
       {
         "period": "2025-09",
@@ -200912,27 +199909,11 @@
       },
       {
         "period": "2025-10",
-        "newListings": 7,
-        "homesSold": 4,
-        "daysOnMarket": 63,
-        "medianPrice": 556000,
-        "activeListings": 13
-      },
-      {
-        "period": "2025-10",
         "newListings": 35,
         "homesSold": 40,
         "daysOnMarket": 17,
         "medianPrice": 688500,
         "activeListings": 60
-      },
-      {
-        "period": "2025-11",
-        "newListings": 11,
-        "homesSold": 4,
-        "daysOnMarket": 90,
-        "medianPrice": 424750,
-        "activeListings": 16
       },
       {
         "period": "2025-11",
@@ -200951,22 +199932,6 @@
         "activeListings": 41
       },
       {
-        "period": "2025-12",
-        "newListings": 11,
-        "homesSold": 4,
-        "daysOnMarket": 76,
-        "medianPrice": 424750,
-        "activeListings": 17
-      },
-      {
-        "period": "2026-01",
-        "newListings": 10,
-        "homesSold": 5,
-        "daysOnMarket": 23,
-        "medianPrice": 415000,
-        "activeListings": 16
-      },
-      {
         "period": "2026-01",
         "newListings": 29,
         "homesSold": 26,
@@ -200981,22 +199946,6 @@
         "daysOnMarket": 28,
         "medianPrice": 657500,
         "activeListings": 58
-      },
-      {
-        "period": "2026-02",
-        "newListings": 8,
-        "homesSold": 8,
-        "daysOnMarket": 30,
-        "medianPrice": 459000,
-        "activeListings": 16
-      },
-      {
-        "period": "2026-03",
-        "newListings": 9,
-        "homesSold": 9,
-        "daysOnMarket": 40,
-        "medianPrice": 497000,
-        "activeListings": 17
       },
       {
         "period": "2026-03",
@@ -201015,36 +199964,12 @@
         "activeListings": 82
       },
       {
-        "period": "2026-04",
-        "newListings": 14,
-        "homesSold": 10,
-        "daysOnMarket": 25,
-        "medianPrice": 478500,
-        "activeListings": 21
-      },
-      {
-        "period": "2026-05",
-        "newListings": 15,
-        "homesSold": 9,
-        "daysOnMarket": 39,
-        "medianPrice": 625000,
-        "activeListings": 23
-      },
-      {
         "period": "2026-05",
         "newListings": 61,
         "homesSold": 46,
         "daysOnMarket": 16,
         "medianPrice": 696000,
         "activeListings": 85
-      },
-      {
-        "period": "2026-06",
-        "newListings": 15,
-        "homesSold": 10,
-        "daysOnMarket": 21,
-        "medianPrice": 611595,
-        "activeListings": 21
       },
       {
         "period": "2026-06",
@@ -201058,6 +199983,7 @@
   },
   "stanhope": {
     "name": "Stanhope",
+    "regionId": 17985,
     "months": [
       {
         "period": "2023-01",
@@ -201399,6 +200325,7 @@
   },
   "stewartsville": {
     "name": "Stewartsville",
+    "regionId": 34910,
     "months": [
       {
         "period": "2023-01",
@@ -201740,6 +200667,7 @@
   },
   "stirling": {
     "name": "Stirling",
+    "regionId": 37637,
     "months": [
       {
         "period": "2023-01",
@@ -202081,6 +201009,7 @@
   },
   "stockton": {
     "name": "Stockton",
+    "regionId": 18135,
     "months": [
       {
         "period": "2023-01",
@@ -202422,6 +201351,7 @@
   },
   "stone-harbor": {
     "name": "Stone Harbor",
+    "regionId": 18146,
     "months": [
       {
         "period": "2023-01",
@@ -202763,6 +201693,7 @@
   },
   "stonebridge": {
     "name": "Stonebridge",
+    "regionId": 37604,
     "months": [
       {
         "period": "2023-01",
@@ -203104,6 +202035,7 @@
   },
   "stratford": {
     "name": "Stratford",
+    "regionId": 18191,
     "months": [
       {
         "period": "2023-01",
@@ -203445,6 +202377,7 @@
   },
   "strathmere": {
     "name": "Strathmere",
+    "regionId": 25956,
     "months": [
       {
         "period": "2023-01",
@@ -203786,6 +202719,7 @@
   },
   "strathmore": {
     "name": "Strathmore",
+    "regionId": 25959,
     "months": [
       {
         "period": "2023-01",
@@ -204127,6 +203061,7 @@
   },
   "succasunna": {
     "name": "Succasunna",
+    "regionId": 31313,
     "months": [
       {
         "period": "2023-01",
@@ -204468,6 +203403,7 @@
   },
   "summit": {
     "name": "Summit",
+    "regionId": 18243,
     "months": [
       {
         "period": "2023-01",
@@ -204809,6 +203745,7 @@
   },
   "sunset-lake": {
     "name": "Sunset Lake",
+    "regionId": 37325,
     "months": [
       {
         "period": "2023-01",
@@ -205126,6 +204063,7 @@
   },
   "surf-city": {
     "name": "Surf City",
+    "regionId": 18294,
     "months": [
       {
         "period": "2023-01",
@@ -205467,6 +204405,7 @@
   },
   "sussex": {
     "name": "Sussex",
+    "regionId": 18305,
     "months": [
       {
         "period": "2023-01",
@@ -205808,6 +204747,7 @@
   },
   "swedesboro": {
     "name": "Swedesboro",
+    "regionId": 18343,
     "months": [
       {
         "period": "2023-01",
@@ -206149,6 +205089,7 @@
   },
   "sweetwater": {
     "name": "Sweetwater",
+    "regionId": 37295,
     "months": [
       {
         "period": "2023-01",
@@ -206490,6 +205431,7 @@
   },
   "ten-mile-run": {
     "name": "Ten Mile Run",
+    "regionId": 35000,
     "months": [
       {
         "period": "2023-01",
@@ -206831,6 +205773,7 @@
   },
   "tenafly": {
     "name": "Tenafly",
+    "regionId": 18484,
     "months": [
       {
         "period": "2023-01",
@@ -207172,6 +206115,7 @@
   },
   "the-hills": {
     "name": "The Hills",
+    "regionId": 37732,
     "months": [
       {
         "period": "2023-01",
@@ -207513,6 +206457,7 @@
   },
   "the-ponds": {
     "name": "The Ponds",
+    "regionId": 37771,
     "months": [
       {
         "period": "2023-01",
@@ -207854,6 +206799,7 @@
   },
   "thorofare": {
     "name": "Thorofare",
+    "regionId": 37081,
     "months": [
       {
         "period": "2023-01",
@@ -208195,6 +207141,7 @@
   },
   "three-bridges": {
     "name": "Three Bridges",
+    "regionId": 37790,
     "months": [
       {
         "period": "2023-01",
@@ -208440,6 +207387,7 @@
   },
   "tinton-falls": {
     "name": "Tinton Falls",
+    "regionId": 18609,
     "months": [
       {
         "period": "2023-01",
@@ -208781,6 +207729,7 @@
   },
   "titusville": {
     "name": "Titusville",
+    "regionId": 36920,
     "months": [
       {
         "period": "2023-01",
@@ -209106,6 +208055,7 @@
   },
   "toms-river": {
     "name": "Toms River",
+    "regionId": 26079,
     "months": [
       {
         "period": "2023-01",
@@ -209447,6 +208397,7 @@
   },
   "totowa": {
     "name": "Totowa",
+    "regionId": 18639,
     "months": [
       {
         "period": "2023-01",
@@ -209788,6 +208739,7 @@
   },
   "towaco": {
     "name": "Towaco",
+    "regionId": 37702,
     "months": [
       {
         "period": "2023-01",
@@ -210129,6 +209081,7 @@
   },
   "trenton": {
     "name": "Trenton",
+    "regionId": 18807,
     "months": [
       {
         "period": "2023-01",
@@ -210470,6 +209423,7 @@
   },
   "troy-hills": {
     "name": "Troy Hills",
+    "regionId": 37794,
     "months": [
       {
         "period": "2023-01",
@@ -210811,6 +209765,7 @@
   },
   "tuckahoe": {
     "name": "Tuckahoe",
+    "regionId": 37243,
     "months": [
       {
         "period": "2023-01",
@@ -211152,6 +210107,7 @@
   },
   "tuckerton": {
     "name": "Tuckerton",
+    "regionId": 18853,
     "months": [
       {
         "period": "2023-01",
@@ -211493,6 +210449,7 @@
   },
   "turnersville": {
     "name": "Turnersville",
+    "regionId": 26159,
     "months": [
       {
         "period": "2023-01",
@@ -211834,6 +210791,7 @@
   },
   "twin-rivers": {
     "name": "Twin Rivers",
+    "regionId": 26163,
     "months": [
       {
         "period": "2023-01",
@@ -212175,6 +211133,7 @@
   },
   "union-beach": {
     "name": "Union Beach",
+    "regionId": 18909,
     "months": [
       {
         "period": "2023-01",
@@ -212516,6 +211475,7 @@
   },
   "union-city": {
     "name": "Union City",
+    "regionId": 18931,
     "months": [
       {
         "period": "2023-01",
@@ -212857,6 +211817,7 @@
   },
   "union": {
     "name": "Union",
+    "regionId": 37783,
     "months": [
       {
         "period": "2023-01",
@@ -213198,6 +212159,7 @@
   },
   "upper-greenwood-lake": {
     "name": "Upper Greenwood Lake",
+    "regionId": 37806,
     "months": [
       {
         "period": "2023-01",
@@ -213539,6 +212501,7 @@
   },
   "upper-montclair": {
     "name": "Upper Montclair",
+    "regionId": 35134,
     "months": [
       {
         "period": "2023-01",
@@ -213880,6 +212843,7 @@
   },
   "upper-pohatcong": {
     "name": "Upper Pohatcong",
+    "regionId": 35136,
     "months": [
       {
         "period": "2023-01",
@@ -214221,6 +213185,7 @@
   },
   "upper-saddle-river": {
     "name": "Upper Saddle River",
+    "regionId": 19045,
     "months": [
       {
         "period": "2023-01",
@@ -214562,6 +213527,7 @@
   },
   "upper-stewartsville": {
     "name": "Upper Stewartsville",
+    "regionId": 35137,
     "months": [
       {
         "period": "2023-04",
@@ -214743,6 +213709,7 @@
   },
   "vauxhall": {
     "name": "Vauxhall",
+    "regionId": 37835,
     "months": [
       {
         "period": "2023-01",
@@ -215084,6 +214051,7 @@
   },
   "ventnor-city": {
     "name": "Ventnor City",
+    "regionId": 19150,
     "months": [
       {
         "period": "2023-01",
@@ -215425,6 +214393,7 @@
   },
   "vernon-center": {
     "name": "Vernon Center",
+    "regionId": 35177,
     "months": [
       {
         "period": "2023-01",
@@ -215766,6 +214735,7 @@
   },
   "vernon-valley": {
     "name": "Vernon Valley",
+    "regionId": 26269,
     "months": [
       {
         "period": "2023-01",
@@ -216107,6 +215077,7 @@
   },
   "victory-gardens": {
     "name": "Victory Gardens",
+    "regionId": 19223,
     "months": [
       {
         "period": "2023-01",
@@ -216448,6 +215419,7 @@
   },
   "victory-lakes": {
     "name": "Victory Lakes",
+    "regionId": 26283,
     "months": [
       {
         "period": "2023-01",
@@ -216789,6 +215761,7 @@
   },
   "vienna": {
     "name": "Vienna",
+    "regionId": 31323,
     "months": [
       {
         "period": "2023-01",
@@ -217130,6 +216103,7 @@
   },
   "villas": {
     "name": "Villas",
+    "regionId": 26290,
     "months": [
       {
         "period": "2023-01",
@@ -217471,6 +216445,7 @@
   },
   "vincentown": {
     "name": "Vincentown",
+    "regionId": 37297,
     "months": [
       {
         "period": "2023-01",
@@ -217812,6 +216787,7 @@
   },
   "vineland": {
     "name": "Vineland",
+    "regionId": 19265,
     "months": [
       {
         "period": "2023-01",
@@ -218153,6 +217129,7 @@
   },
   "vista-center": {
     "name": "Vista Center",
+    "regionId": 26301,
     "months": [
       {
         "period": "2023-01",
@@ -218494,6 +217471,7 @@
   },
   "voorhees": {
     "name": "Voorhees",
+    "regionId": 35197,
     "months": [
       {
         "period": "2023-01",
@@ -218835,6 +217813,7 @@
   },
   "waldwick": {
     "name": "Waldwick",
+    "regionId": 19331,
     "months": [
       {
         "period": "2023-01",
@@ -219176,6 +218155,7 @@
   },
   "wallington": {
     "name": "Wallington",
+    "regionId": 19346,
     "months": [
       {
         "period": "2023-01",
@@ -219517,6 +218497,7 @@
   },
   "wanamassa": {
     "name": "Wanamassa",
+    "regionId": 26329,
     "months": [
       {
         "period": "2023-01",
@@ -219858,6 +218839,7 @@
   },
   "wanaque": {
     "name": "Wanaque",
+    "regionId": 19408,
     "months": [
       {
         "period": "2023-01",
@@ -220199,6 +219181,7 @@
   },
   "waretown": {
     "name": "Waretown",
+    "regionId": 26337,
     "months": [
       {
         "period": "2023-01",
@@ -220540,6 +219523,7 @@
   },
   "warren": {
     "name": "Warren",
+    "regionId": 35942,
     "months": [
       {
         "period": "2023-01",
@@ -220881,6 +219865,7 @@
   },
   "washington-crossing": {
     "name": "Washington Crossing",
+    "regionId": 37004,
     "months": [
       {
         "period": "2023-01",
@@ -221222,6 +220207,7 @@
   },
   "washington": {
     "name": "Washington",
+    "regionId": 19516,
     "months": [
       {
         "period": "2023-01",
@@ -221563,6 +220549,7 @@
   },
   "watchung": {
     "name": "Watchung",
+    "regionId": 19588,
     "months": [
       {
         "period": "2023-01",
@@ -221904,6 +220891,7 @@
   },
   "watsessing": {
     "name": "Watsessing",
+    "regionId": 37118,
     "months": [
       {
         "period": "2023-01",
@@ -222245,6 +221233,7 @@
   },
   "wenonah": {
     "name": "Wenonah",
+    "regionId": 19698,
     "months": [
       {
         "period": "2023-01",
@@ -222586,6 +221575,7 @@
   },
   "west-belmar": {
     "name": "West Belmar",
+    "regionId": 26442,
     "months": [
       {
         "period": "2023-01",
@@ -222927,6 +221917,7 @@
   },
   "west-berlin": {
     "name": "West Berlin",
+    "regionId": 37089,
     "months": [
       {
         "period": "2023-01",
@@ -223268,6 +222259,7 @@
   },
   "west-caldwell": {
     "name": "West Caldwell",
+    "regionId": 35823,
     "months": [
       {
         "period": "2023-01",
@@ -223609,6 +222601,7 @@
   },
   "west-cape-may": {
     "name": "West Cape May",
+    "regionId": 19788,
     "months": [
       {
         "period": "2023-01",
@@ -223950,6 +222943,7 @@
   },
   "west-freehold": {
     "name": "West Freehold",
+    "regionId": 26491,
     "months": [
       {
         "period": "2023-01",
@@ -224291,6 +223285,7 @@
   },
   "west-long-branch": {
     "name": "West Long Branch",
+    "regionId": 19947,
     "months": [
       {
         "period": "2023-01",
@@ -224632,6 +223627,7 @@
   },
   "west-new-york": {
     "name": "West New York",
+    "regionId": 20004,
     "months": [
       {
         "period": "2023-01",
@@ -224973,6 +223969,7 @@
   },
   "west-park": {
     "name": "West Park",
+    "regionId": 37128,
     "months": [
       {
         "period": "2023-01",
@@ -225314,6 +224311,7 @@
   },
   "west-wildwood": {
     "name": "West Wildwood",
+    "regionId": 20137,
     "months": [
       {
         "period": "2023-01",
@@ -225655,6 +224653,7 @@
   },
   "westfield": {
     "name": "Westfield",
+    "regionId": 19891,
     "months": [
       {
         "period": "2023-01",
@@ -225996,6 +224995,7 @@
   },
   "westmont": {
     "name": "Westmont",
+    "regionId": 37270,
     "months": [
       {
         "period": "2023-01",
@@ -226337,6 +225337,7 @@
   },
   "weston": {
     "name": "Weston",
+    "regionId": 35341,
     "months": [
       {
         "period": "2023-01",
@@ -226678,6 +225679,7 @@
   },
   "westville": {
     "name": "Westville",
+    "regionId": 20117,
     "months": [
       {
         "period": "2023-01",
@@ -227019,6 +226021,7 @@
   },
   "westwood": {
     "name": "Westwood",
+    "regionId": 20151,
     "months": [
       {
         "period": "2023-01",
@@ -227360,6 +226363,7 @@
   },
   "wharton": {
     "name": "Wharton",
+    "regionId": 20179,
     "months": [
       {
         "period": "2023-01",
@@ -227701,6 +226705,7 @@
   },
   "whippany": {
     "name": "Whippany",
+    "regionId": 37754,
     "months": [
       {
         "period": "2023-01",
@@ -228042,6 +227047,7 @@
   },
   "white-horse": {
     "name": "White Horse",
+    "regionId": 26566,
     "months": [
       {
         "period": "2023-01",
@@ -228383,6 +227389,7 @@
   },
   "white-house-station": {
     "name": "White House Station",
+    "regionId": 26572,
     "months": [
       {
         "period": "2023-01",
@@ -228724,6 +227731,7 @@
   },
   "white-meadow-lake": {
     "name": "White Meadow Lake",
+    "regionId": 26576,
     "months": [
       {
         "period": "2023-01",
@@ -229065,6 +228073,7 @@
   },
   "whitesboro": {
     "name": "Whitesboro",
+    "regionId": 35660,
     "months": [
       {
         "period": "2023-01",
@@ -229406,6 +228415,7 @@
   },
   "whittingham": {
     "name": "Whittingham",
+    "regionId": 26604,
     "months": [
       {
         "period": "2023-01",
@@ -229747,6 +228757,7 @@
   },
   "wildwood-crest": {
     "name": "Wildwood Crest",
+    "regionId": 20320,
     "months": [
       {
         "period": "2023-01",
@@ -230088,6 +229099,7 @@
   },
   "wildwood": {
     "name": "Wildwood",
+    "regionId": 20315,
     "months": [
       {
         "period": "2023-01",
@@ -230429,6 +229441,7 @@
   },
   "williamstown": {
     "name": "Williamstown",
+    "regionId": 26617,
     "months": [
       {
         "period": "2023-01",
@@ -230770,6 +229783,7 @@
   },
   "windsor": {
     "name": "Windsor",
+    "regionId": 38322,
     "months": [
       {
         "period": "2023-06",
@@ -231023,6 +230037,7 @@
   },
   "wood-ridge": {
     "name": "Wood-Ridge",
+    "regionId": 20508,
     "months": [
       {
         "period": "2023-01",
@@ -231364,6 +230379,7 @@
   },
   "woodbine": {
     "name": "Woodbine",
+    "regionId": 20407,
     "months": [
       {
         "period": "2023-01",
@@ -231705,6 +230721,7 @@
   },
   "woodbridge": {
     "name": "Woodbridge",
+    "regionId": 26641,
     "months": [
       {
         "period": "2023-01",
@@ -232046,6 +231063,7 @@
   },
   "woodbury-heights": {
     "name": "Woodbury Heights",
+    "regionId": 20446,
     "months": [
       {
         "period": "2023-01",
@@ -232387,6 +231405,7 @@
   },
   "woodbury": {
     "name": "Woodbury",
+    "regionId": 20437,
     "months": [
       {
         "period": "2023-01",
@@ -232728,6 +231747,7 @@
   },
   "woodcliff-lake": {
     "name": "Woodcliff Lake",
+    "regionId": 20461,
     "months": [
       {
         "period": "2023-01",
@@ -233069,6 +232089,7 @@
   },
   "woodland-park": {
     "name": "Woodland Park",
+    "regionId": 35458,
     "months": [
       {
         "period": "2023-01",
@@ -233410,6 +232431,7 @@
   },
   "woodlynne": {
     "name": "Woodlynne",
+    "regionId": 20489,
     "months": [
       {
         "period": "2023-01",
@@ -233751,6 +232773,7 @@
   },
   "woodstown": {
     "name": "Woodstown",
+    "regionId": 20528,
     "months": [
       {
         "period": "2023-01",
@@ -234092,6 +233115,7 @@
   },
   "wrightstown": {
     "name": "Wrightstown",
+    "regionId": 20574,
     "months": [
       {
         "period": "2023-01",
@@ -234433,6 +233457,7 @@
   },
   "yardville": {
     "name": "Yardville",
+    "regionId": 31342,
     "months": [
       {
         "period": "2023-01",
@@ -234774,6 +233799,7 @@
   },
   "yorketown": {
     "name": "Yorketown",
+    "regionId": 26686,
     "months": [
       {
         "period": "2023-01",
