@@ -1,0 +1,25 @@
+{
+  "name": "Slop Bowl",
+  "short_name": "Slop Bowl",
+  "description": "Map what's in your pantry and see what you can actually build with it.",
+  "start_url": "/slopbowl",
+  "scope": "/slopbowl",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/slopbowl-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/slopbowl-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#ffffff"/>
+  <!-- bowl -->
+  <path d="M96 232 h320 a160 160 0 0 1 -320 0 z" fill="none" stroke="#111111" stroke-width="22" stroke-linejoin="round"/>
+  <!-- contents, one dot per role -->
+  <circle cx="186" cy="196" r="26" fill="#2563eb"/>
+  <circle cx="256" cy="168" r="26" fill="#dc2626"/>
+  <circle cx="326" cy="196" r="26" fill="#16a34a"/>
+  <circle cx="256" cy="232" r="20" fill="#d97706"/>
+</svg>

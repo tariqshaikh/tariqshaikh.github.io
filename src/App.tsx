@@ -13,6 +13,7 @@ import Orbit from './components/Orbit';
 import NetWorth from './components/NetWorth';
 import NetWorthHistory from './components/NetWorthHistory';
 import PMPrism from './components/PMPrism';
+import SlopBowl from './components/SlopBowl';
 import VisitorInsights from './components/VisitorInsights';
 import Login from './components/Login';
 import Waves from './components/Waves';
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/portfolio-v2" element={<PortfolioV2 />} />
         <Route path="/portfolio-v3" element={<PortfolioV3 />} />
         <Route path="/prism" element={<PMPrism />} />
+        <Route path="/slopbowl" element={<SlopBowl />} />
         <Route path="/orbit/dashboard" element={<Orbit />} />
         <Route path="/orbit/balance-sheet" element={<NetWorth />} />
         <Route path="/orbit/history" element={<NetWorthHistory />} />
