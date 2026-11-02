@@ -86,6 +86,10 @@ const ROLE_CENTRES: Record<Role, [number, number]> = {
 
 const BOWL = { x: 600, y: 505, rx: 218, ry: 92, depth: 128 };
 
+/** Fixed board size. The view fits this rect rather than live item bounds, so
+ *  dragging one ingredient never rescales the whole board. */
+const WORLD = { w: 1240, h: 1040 };
+
 /** Lay the bowl's contents out inside the rim — one column while it's sparse,
  *  two once it fills up, so a single ingredient doesn't sit lopsided. */
 function bowlSlots(n: number): { x: number; y: number }[] {
@@ -260,19 +264,42 @@ const SEED: Omit<Item, 'x' | 'y'>[] = [
   { id: 'lemon',    name: 'Lemon Juice',     roles: ['accent'],          flavors: ['neutral'],         stock: 'in',  macros: m(4, 0, 1, 0) },
 ];
 
-/** Cluster each role so the map reads as four neighbourhoods, not a hairball. */
-function seedLayout(items: Omit<Item, 'x' | 'y'>[]): Item[] {
-  const counts: Record<string, number> = {};
+const NODE_H = 34;
+const LANE_Y = 44;   // row pitch, comfortably clear of NODE_H
+const LANE_X = 215;  // column pitch, clear of the widest chip
+const PER_COL = 7;
+
+/**
+ * Cluster each role so the map reads as four neighbourhoods, not a hairball.
+ *
+ * Arranged in columns rather than on a circle. The circle looked tidier in
+ * principle but guaranteed collisions: chips are 78-160px wide and were being
+ * placed on a 70px radius, so anything with more than about four items —
+ * proteins and toppings especially — stacked on top of itself. A grid with a
+ * fixed pitch can't overlap no matter how many items a role holds.
+ */
+function layoutItems<T extends Omit<Item, 'x' | 'y'>>(items: T[]): (T & { x: number; y: number })[] {
+  const seen: Record<string, number> = {};
   return items.map(it => {
     const role = it.roles[0];
-    const n = counts[role] = (counts[role] ?? 0) + 1;
-    const total = items.filter(i => i.roles[0] === role).length;
+    const idx = seen[role] = (seen[role] ?? 0) + 1;
+    const i = idx - 1;
+    const total = items.filter(x => x.roles[0] === role).length;
+    const cols = Math.ceil(total / PER_COL);
+    const rows = Math.ceil(total / cols);
+    const col = Math.floor(i / rows);
+    const rowI = i % rows;
+    const inCol = Math.min(rows, total - col * rows);
     const [cx, cy] = ROLE_CENTRES[role];
-    const angle = (n / total) * Math.PI * 2;
-    const r = 70 + (total > 5 ? 45 : 0);
-    return { ...it, x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r * 0.8 };
+    return {
+      ...it,
+      x: cx + (col - (cols - 1) / 2) * LANE_X,
+      y: cy + (rowI - (inCol - 1) / 2) * LANE_Y,
+    };
   });
 }
+
+const seedLayout = (items: Omit<Item, 'x' | 'y'>[]): Item[] => layoutItems(items) as Item[];
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
@@ -441,6 +468,60 @@ const STOCK_PILL: Record<Stock, { label: string; title: string; cls: string }> =
 };
 
 /**
+ * Shows the current stock state, and opens into all three on hover so you can
+ * pick directly. It used to be a single pill that cycled In -> Low -> Out,
+ * which meant two taps to reach Out and no way to see the options existed.
+ *
+ * The open panel is absolutely positioned so widening it doesn't shove the
+ * row's other controls around, and it opens on click too — hover alone would
+ * leave this unusable on touch.
+ */
+function StockControl({ value, open, onOpen, onPick }: {
+  value: Stock;
+  open: boolean;
+  onOpen: (open: boolean) => void;
+  onPick: (s: Stock) => void;
+}) {
+  const pill = STOCK_PILL[value];
+  return (
+    <div
+      className="relative shrink-0"
+      onMouseEnter={() => onOpen(true)}
+      onMouseLeave={() => onOpen(false)}
+      onPointerDown={e => e.stopPropagation()}
+    >
+      <button
+        onClick={() => onOpen(!open)}
+        title={pill.title}
+        className={`rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors ${pill.cls} ${open ? 'opacity-0' : ''}`}
+      >
+        {pill.label}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-1/2 z-20 -translate-y-1/2 rounded-lg border border-neutral-200 bg-white px-1.5 py-1 shadow-md">
+          <div className="mb-0.5 text-center text-[8px] font-medium uppercase tracking-[0.12em] text-neutral-400">Stock</div>
+          <div className="flex gap-0.5">
+            {(['in', 'low', 'out'] as Stock[]).map(s => {
+              const p = STOCK_PILL[s];
+              const on = s === value;
+              return (
+                <button key={s} onClick={() => onPick(s)} title={p.title}
+                  className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+                    on ? p.cls : 'border-transparent text-neutral-400 hover:bg-neutral-50 hover:text-neutral-900'
+                  }`}>
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * Drag works on raw pointer events rather than HTML5 drag-and-drop: the drop
  * target is an SVG canvas under a pan/zoom transform, which the native API
  * handles badly on touch. A movement threshold keeps a plain tap meaning
@@ -459,15 +540,15 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
   // Scale controls. A 50-item pantry is a 2,400px scroll; filtering by role
   // and folding away what you don't have turns that into about nine rows.
   const [roleFilter, setRoleFilter] = useState<Role | 'all'>('all');
-  const [showOut, setShowOut] = useState(false);
+  const [stockOpen, setStockOpen] = useState<string | null>(null);
   const [ghost, setGhost] = useState<{ name: string; x: number; y: number; over: boolean } | null>(null);
   const press = useRef<{ id: string; name: string; x: number; y: number; dragging: boolean } | null>(null);
   const match = (i: Item) => i.name.toLowerCase().includes(q.trim().toLowerCase());
 
   useEffect(() => { onDragStateChange(!!ghost); }, [!!ghost]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cycle = (id: string) =>
-    setStore(s => ({ ...s, items: s.items.map(i => (i.id === id ? { ...i, stock: STOCK_NEXT[i.stock] } : i)) }));
+  const setStock = (id: string, stock: Stock) =>
+    setStore(s => ({ ...s, items: s.items.map(i => (i.id === id ? { ...i, stock } : i)) }));
 
   // Spread first: rebuilding the object field-by-field dropped `favorites`
   // entirely, so deleting one ingredient wiped every saved bowl. Favourites
@@ -481,16 +562,18 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
       bowl: s.bowl.filter(b => b !== id),
     }));
 
+  // Out-of-stock items stay in their section. They were folded into a drawer
+  // to save scroll, but hiding an ingredient you own just because you've run
+  // out makes it feel deleted — and the row is exactly where you go to mark
+  // it back in. Role filtering carries the scrolling problem on its own.
   const visible = store.items.filter(i => match(i) && (roleFilter === 'all' || i.roles[0] === roleFilter));
-  const inStock = visible.filter(i => i.stock !== 'out');
-  const outRows = visible.filter(i => i.stock === 'out');
 
   // Grouped under role headings when showing everything; a flat list once a
   // role is chosen, since repeating the heading you just filtered to is noise.
   const sections: { role: Role | null; rows: Item[] }[] =
     roleFilter === 'all'
-      ? ROLES.map(r => ({ role: r.id as Role | null, rows: inStock.filter(i => i.roles[0] === r.id) })).filter(s => s.rows.length)
-      : [{ role: null, rows: inStock }];
+      ? ROLES.map(r => ({ role: r.id as Role | null, rows: visible.filter(i => i.roles[0] === r.id) })).filter(s => s.rows.length)
+      : [{ role: null, rows: visible }];
 
   /** The map pane marks itself with data-slopbowl-drop, so hit-testing is a
    *  coordinate lookup and never has to know about the canvas transform. */
@@ -558,14 +641,12 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
           </div>
         </div>
 
-        <button
-          onPointerDown={e => e.stopPropagation()}
-          onClick={() => cycle(it.id)}
-          title={`${pill.title} — tap to change`}
-          className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors ${pill.cls}`}
-        >
-          {pill.label}
-        </button>
+        <StockControl
+          value={it.stock}
+          open={stockOpen === it.id}
+          onOpen={o => setStockOpen(o ? it.id : null)}
+          onPick={s => { setStock(it.id, s); setStockOpen(null); }}
+        />
 
         <button
           onPointerDown={e => e.stopPropagation()}
@@ -587,7 +668,10 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
   };
 
   return (
-    <aside className="flex h-full w-[320px] shrink-0 flex-col border-r border-neutral-200 bg-neutral-50/70">
+    // A third of the screen, not a sidebar — the pantry is the part you spend
+    // the most time in. Floor keeps the rows usable on a laptop; ceiling stops
+    // it becoming absurd on an ultrawide.
+    <aside className="flex h-full w-1/3 min-w-[320px] max-w-[560px] shrink-0 flex-col border-r border-neutral-200 bg-neutral-50/70">
       <div className="shrink-0 border-b border-neutral-200/80 px-4 pb-3 pt-4">
         <div className="mb-0.5 flex items-baseline justify-between">
           <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900">Pantry</h2>
@@ -648,20 +732,6 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
             {q.trim() ? `Nothing matching "${q.trim()}".` : 'Nothing here yet.'}
           </p>
         )}
-
-        {/* Out-of-stock is the biggest source of dead scroll in a big pantry,
-            and it's the part you least need to see. Folded away by default,
-            but counted so it never feels like something went missing. */}
-        {outRows.length > 0 && (
-          <div className="mt-1 border-t border-neutral-200/80 pt-2">
-            <button onClick={() => setShowOut(v => !v)}
-              className="mb-1 flex w-full items-center justify-between px-1.5 py-1 text-[11px] text-neutral-400 hover:text-neutral-900">
-              <span>{outRows.length} out of stock</span>
-              <ChevronDown size={13} className={`transition-transform ${showOut ? 'rotate-180' : ''}`} />
-            </button>
-            {showOut && <div className="space-y-0.5 opacity-70">{outRows.map(row)}</div>}
-          </div>
-        )}
       </div>
 
       <button onClick={onAdd}
@@ -701,7 +771,9 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
   incoming: boolean;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const [view, setView] = useState({ x: 0, y: 0, k: 1 });
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  const [zoom, setZoom] = useState(1);
   const [dragId, setDragId] = useState<string | null>(null);
   const drag = useRef<{ id: string | null; ox: number; oy: number; px: number; py: number; moved: boolean } | null>(null);
 
@@ -721,23 +793,30 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
     return p;
   }, [store.items, store.bowl]);
 
-  /** Frame everything on first paint — the clusters are too far apart to fit
-   *  a default viewport at 1:1. */
-  const fit = useCallback(() => {
-    const el = svgRef.current;
+  useEffect(() => {
+    const el = wrapRef.current;
     if (!el) return;
-    const r = el.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    const xs = store.items.map(i => i.x), ys = store.items.map(i => i.y);
-    const minX = Math.min(BOWL.x - BOWL.rx, ...xs) - 90;
-    const maxX = Math.max(BOWL.x + BOWL.rx, ...xs) + 90;
-    const minY = Math.min(BOWL.y - BOWL.ry, ...ys) - 60;
-    const maxY = Math.max(BOWL.y + BOWL.ry + BOWL.depth, ...ys) + 60;
-    const k = Math.min(r.width / (maxX - minX), r.height / (maxY - minY), 1.1);
-    setView({ k, x: (r.width - (maxX - minX) * k) / 2 - minX * k, y: (r.height - (maxY - minY) * k) / 2 - minY * k });
-  }, [store.items]);
+    const ro = new ResizeObserver(([e]) =>
+      setSize({ w: e.contentRect.width, h: e.contentRect.height }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-  useEffect(() => { fit(); /* once on mount; Reset view re-runs it */ }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  /**
+   * The view is derived, not free. Panning meant the board drifted off-centre
+   * and every session started somewhere different — too much optionality for
+   * what is really a fixed board. The bowl is pinned to the middle of the
+   * viewport and zoom scales around it, so the layout is identical every time
+   * you open it.
+   *
+   * baseFit comes from a fixed world rect rather than live item bounds, so
+   * dragging an ingredient can't make the whole board breathe.
+   */
+  const view = useMemo(() => {
+    const base = size.w && size.h ? Math.min(size.w / WORLD.w, size.h / WORLD.h) : 1;
+    const k = base * zoom;
+    return { k, x: size.w / 2 - BOWL.x * k, y: size.h / 2 - BOWL.y * k };
+  }, [size, zoom]);
 
   const toWorld = useCallback((cx: number, cy: number) => {
     const r = svgRef.current!.getBoundingClientRect();
@@ -760,13 +839,11 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
     const d = drag.current;
     if (!d) return;
     if (Math.abs(e.clientX - d.px) + Math.abs(e.clientY - d.py) > 4) d.moved = true;
-    if (d.id) {
-      const w = toWorld(e.clientX, e.clientY);
-      setStore(s => ({ ...s, items: s.items.map(i => (i.id === d.id ? { ...i, x: w.x - d.ox, y: w.y - d.oy } : i)) }));
-    } else {
-      setView(v => ({ ...v, x: v.x + (e.clientX - d.px), y: v.y + (e.clientY - d.py) }));
-      d.px = e.clientX; d.py = e.clientY;
-    }
+    // Only nodes move. Dragging the background used to pan the board, which
+    // is how it kept ending up off-centre.
+    if (!d.id) return;
+    const w = toWorld(e.clientX, e.clientY);
+    setStore(s => ({ ...s, items: s.items.map(i => (i.id === d.id ? { ...i, x: w.x - d.ox, y: w.y - d.oy } : i)) }));
   };
 
   const up = (id: string | null) => {
@@ -781,17 +858,12 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
     else if (byId[id].stock !== 'out') addToBowl(id);
   };
 
-  const wheel = (e: React.WheelEvent) => {
-    const r = svgRef.current!.getBoundingClientRect();
-    const mx = e.clientX - r.left, my = e.clientY - r.top;
-    setView(v => {
-      const k = Math.min(2.2, Math.max(0.35, v.k * (e.deltaY < 0 ? 1.08 : 0.926)));
-      return { k, x: mx - ((mx - v.x) / v.k) * k, y: my - ((my - v.y) / v.k) * k };
-    });
-  };
+  const ZOOM_MIN = 0.65, ZOOM_MAX = 2;
+  const nudgeZoom = (f: number) => setZoom(z => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z * f)));
+  const wheel = (e: React.WheelEvent) => nudgeZoom(e.deltaY < 0 ? 1.08 : 0.926);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-white">
+    <div ref={wrapRef} className="relative h-full w-full overflow-hidden bg-white">
       <svg ref={svgRef} className="h-full w-full touch-none select-none"
         onPointerDown={e => down(e, null)} onPointerMove={move} onPointerUp={() => up(null)} onWheel={wheel}>
         <g transform={`translate(${view.x},${view.y}) scale(${view.k})`}>
@@ -822,16 +894,26 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
             </text>
           </g>
 
-          {/* With the edges gone, the cluster headings are what tell you the
-              map has structure. */}
+          {/* With the edges gone, these headings are the only thing telling
+              you the map has structure, so they carry their role's colour and
+              sit on a tinted chip. Anchored to the cluster's actual top edge
+              rather than a fixed offset, so they follow dragged nodes. */}
           {ROLES.map(r => {
-            const [cx, cy] = ROLE_CENTRES[r.id];
+            const mine = store.items.filter(i => i.roles[0] === r.id && !store.bowl.includes(i.id));
+            if (!mine.length) return null;
+            const cx = mine.reduce((a, i) => a + i.x, 0) / mine.length;
+            const top = Math.min(...mine.map(i => i.y));
+            const w = r.label.length * 7.2 + 30;
             return (
-              <text key={r.id} x={cx} y={cy - 158} textAnchor="middle" pointerEvents="none"
-                fontSize={11} letterSpacing={2.2} fill="#c2c2c2"
-                style={{ fontFamily: 'ui-monospace, monospace' }}>
-                {r.label.toUpperCase()}
-              </text>
+              <g key={r.id} pointerEvents="none" transform={`translate(${cx},${top - 46})`}>
+                <rect x={-w / 2} y={-13} width={w} height={26} rx={13}
+                  fill={r.color} fillOpacity={0.09} stroke={r.color} strokeOpacity={0.22} strokeWidth={1} />
+                <circle cx={-w / 2 + 15} cy={0} r={3.5} fill={r.color} />
+                <text x={-w / 2 + 25} y={4} fontSize={11.5} fontWeight={600} letterSpacing={0.9} fill={r.color}
+                  style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
+                  {r.label}
+                </text>
+              </g>
             );
           })}
 
@@ -878,10 +960,28 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
           </span>
         ))}
       </div>
-      <button onClick={() => setView({ x: 0, y: 0, k: 1 })}
-        className="absolute bottom-3 right-4 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] uppercase tracking-wider text-neutral-500 hover:border-neutral-400 hover:text-neutral-900">
-        Reset view
-      </button>
+      <div className="absolute bottom-3 right-4 flex gap-2">
+        {/* Saved layouts predate the grid, so they still hold the old
+            overlapping circle positions. This re-runs the layout on demand. */}
+        <button
+          onClick={() => setStore(s => ({ ...s, items: layoutItems(s.items) }))}
+          title="Re-arrange everything into clean columns"
+          className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] uppercase tracking-wider text-neutral-500 hover:border-neutral-400 hover:text-neutral-900">
+          Tidy up
+        </button>
+        {/* Zoom only — there is no pan to reset, because the bowl is pinned
+            to the centre of the viewport at every zoom level. */}
+        <div className="flex items-center overflow-hidden rounded-full border border-neutral-200 bg-white">
+          <button onClick={() => nudgeZoom(1 / 1.15)} disabled={zoom <= ZOOM_MIN}
+            className="px-2.5 py-1.5 text-[13px] leading-none text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 disabled:text-neutral-200">−</button>
+          <button onClick={() => setZoom(1)} title="Reset zoom"
+            className="border-x border-neutral-200 px-2 py-1.5 text-[10px] tabular-nums text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900">
+            {Math.round(zoom * 100)}%
+          </button>
+          <button onClick={() => nudgeZoom(1.15)} disabled={zoom >= ZOOM_MAX}
+            className="px-2.5 py-1.5 text-[13px] leading-none text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 disabled:text-neutral-200">+</button>
+        </div>
+      </div>
     </div>
   );
 }

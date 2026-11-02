@@ -213,6 +213,35 @@ export default function Portfolio() {
                 </div>
               </div>
 
+              {/* Slop Bowl — spans the full width so a 5th card reads as
+                  deliberate instead of orphaned in the 2-col bento. */}
+              <div className="col-span-2 min-h-[150px] bg-[#101418] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between transition-all duration-300 hover:border-neutral-400/50 hover:shadow-[0_16px_40px_-8px_rgba(255,255,255,0.08)] relative overflow-hidden group border border-white/5">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-neutral-300 to-neutral-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-mono text-[8px] px-2 py-0.5 uppercase tracking-widest bg-amber-400/10 text-amber-300 border border-amber-400/20 font-bold rounded-full">Work in Progress</span>
+                    <span className="font-mono text-[9px] text-slate-500 font-bold">P.005</span>
+                  </div>
+                  <h3 className="text-[20px] leading-tight mb-1 text-white">
+                    <span className="font-serif font-bold italic">Slop</span><span className="font-sans font-black text-neutral-300 ml-1.5">Bowl</span>
+                  </h3>
+                  <p className="font-serif italic text-slate-500 text-[9px] mb-3 uppercase tracking-wider">Pantry Graph &amp; Meal Assembly</p>
+                  <div className="relative mb-3">
+                    <div className="absolute left-0 top-0 bottom-0 w-px bg-white/15" />
+                    <p className="text-xs leading-relaxed text-slate-300 pl-4">Map what&rsquo;s actually in your fridge, then build a bowl from it. Still being built &mdash; have a look anyway.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {['PWA', 'Graph UI', 'Offline'].map(tag => (
+                      <span key={tag} className="font-mono text-[7px] px-1.5 py-0.5 bg-white/5 text-slate-400 border border-white/10 tracking-widest uppercase font-bold">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  <Link to="/slopbowl" className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-br from-neutral-200 to-white text-black text-[8px] font-black uppercase tracking-[0.2em] rounded-sm hover:shadow-[0_0_16px_rgba(255,255,255,0.25)] transition-shadow">
+                    Launch <ChevronRight size={10} />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
 
