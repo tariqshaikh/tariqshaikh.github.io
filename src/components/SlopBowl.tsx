@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil, Sparkles } from 'lucide-react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
+import { llmChat, extractJson } from '../lib/llm';
 
 /**
  * Slop Bowl — map a pantry, then build a bowl out of what you actually have.
@@ -437,6 +438,57 @@ function layoutItems<T extends Omit<Item, 'x' | 'y'>>(items: T[]): (T & { x: num
 
 const seedLayout = (items: Omit<Item, 'x' | 'y'>[]): Item[] => layoutItems(items) as Item[];
 
+// ─── AI categorisation ───────────────────────────────────────────────────────
+
+/**
+ * Sorts a list of ingredient names into sections.
+ *
+ * Deliberately a suggestion, never a commitment: results land in the dialog
+ * as editable chips so a wrong guess costs one tap. The model is also told to
+ * answer for every name it's given — returning a partial list would silently
+ * drop ingredients the user typed, which is worse than guessing wrong.
+ */
+async function categorise(names: string[]): Promise<Record<string, Role[]>> {
+  // Section names alone aren't enough: "Crunch & Mix-ins" read as a catch-all
+  // and the model put feta and avocado in it. The examples fix that.
+  const HINT: Record<Role, string> = {
+    base: 'the foundation you build on — grains, oats, greens, yogurt, cottage cheese',
+    protein: 'the main protein — chicken, eggs, tofu, paneer, fish, beans, cheese',
+    vegetable: 'vegetables, raw or cooked — cucumber, peppers, tomatoes, squash, avocado',
+    fruit: 'fruit — berries, banana, mango, apple',
+    crunch: 'dry crunchy texture only — nuts, seeds, granola, crispy onions. NOT soft foods',
+    sauce: 'anything poured, drizzled or sprinkled — oils, dressings, hot sauce, honey, spices, citrus',
+  };
+
+  const sys =
+    `You sort food ingredients into pantry sections for a bowl-building app.\n\n` +
+    `Sections:\n` +
+    ROLES.map(r => `- ${r.id} (${r.label}): ${HINT[r.id]}`).join('\n') +
+    `\n\nReturn JSON: {"items":[{"name":"<exactly as given>","roles":["<section id>", ...]}]}\n` +
+    `Rules:\n` +
+    `- Include an entry for EVERY name given, in the same order, spelled exactly as given.\n` +
+    `- roles[0] is the primary section. Add a second only when the ingredient genuinely ` +
+    `serves two (Greek Yogurt is base then protein; Sweet Potato is vegetable then base).\n` +
+    `- Use only the section ids listed. If unsure, pick the closest one rather than inventing.`;
+
+  const raw = await llmChat(sys, [{ role: 'user', content: names.join('\n') }], {
+    maxTokens: 900,
+    jsonMode: true,
+  });
+
+  const parsed = extractJson(raw) as { items?: { name?: string; roles?: string[] }[] };
+  const valid = new Set(ROLES.map(r => r.id));
+  const out: Record<string, Role[]> = {};
+  for (const row of parsed?.items ?? []) {
+    if (!row?.name) continue;
+    const roles = (row.roles ?? []).filter((r): r is Role => valid.has(r as Role));
+    // Match case-insensitively — models love to title-case what you gave them.
+    const match = names.find(n => n.toLowerCase() === String(row.name).toLowerCase());
+    if (match && roles.length) out[match] = roles.slice(0, 2);
+  }
+  return out;
+}
+
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
 const KEY = 'slopbowl_v1';
@@ -668,7 +720,7 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
   setStore: React.Dispatch<React.SetStateAction<Store>>;
   addToBowl: (id: string) => void;
   toggleInBowl: (id: string) => void;
-  onAdd: () => void;
+  onAdd: (role: Role | null) => void;
   onEdit: (it: Item) => void;
   onDragStateChange: (dragging: boolean) => void;
 }) {
@@ -855,10 +907,15 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
         {sections.map(({ role, rows }) => (
           <section key={role ?? 'flat'} className="mb-4">
             {role && (
-              <h3 className="sticky top-0 z-10 mb-1.5 flex items-center gap-2 bg-neutral-50/95 px-1.5 py-1 backdrop-blur">
+              <h3 className="group/h sticky top-0 z-10 mb-1.5 flex items-center gap-2 bg-neutral-50/95 px-1.5 py-1 backdrop-blur">
                 <RoleDot role={role} size={7} />
                 <span className="text-[11px] font-semibold tracking-wide text-neutral-700">{ROLE_META[role].label}</span>
                 <span className="text-[10px] tabular-nums text-neutral-300">{rows.length}</span>
+                {/* Straight into this section — the quickest way to add. */}
+                <button onClick={() => onAdd(role)} title={`Add to ${ROLE_META[role].label}`}
+                  className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white hover:text-neutral-900 group-hover/h:text-neutral-500">
+                  <Plus size={13} />
+                </button>
               </h3>
             )}
             {/* One column while narrow, two once the rail is wide enough to
@@ -875,9 +932,9 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
         )}
       </div>
 
-      <button onClick={onAdd}
+      <button onClick={() => onAdd(null)}
         className="flex shrink-0 items-center justify-center gap-1.5 border-t border-neutral-200 py-3 text-[12px] font-medium text-neutral-600 transition-colors hover:bg-white hover:text-neutral-900">
-        <Plus size={14} /> Add Ingredient
+        <Plus size={14} /> Add Ingredients
       </button>
 
       {ghost && createPortal(
@@ -1438,6 +1495,7 @@ export default function SlopBowl() {
 
   const [dragging, setDragging] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
+  const [presetRole, setPresetRole] = useState<Role | null>(null);
 
   const toggleInBowl = useCallback((id: string) => {
     setStore(s => ({ ...s, bowl: s.bowl.includes(id) ? s.bowl.filter(b => b !== id) : [...s.bowl, id] }));
@@ -1468,8 +1526,8 @@ export default function SlopBowl() {
 
   const rail = (
     <PantryRail store={store} setStore={setStore} addToBowl={addToBowl} toggleInBowl={toggleInBowl}
-      onAdd={() => { setEditing(null); setAdding(true); }}
-      onEdit={it => { setEditing(it); setAdding(true); }}
+      onAdd={role => { setEditing(null); setPresetRole(role); setAdding(true); }}
+      onEdit={it => { setEditing(it); setPresetRole(null); setAdding(true); }}
       onDragStateChange={setDragging} />
   );
 
@@ -1610,13 +1668,18 @@ export default function SlopBowl() {
       {adding && (
         <ItemDialog
           item={editing}
-          onClose={() => { setAdding(false); setEditing(null); }}
-          onSave={it => setStore(s => ({
-            ...s,
-            items: s.items.some(x => x.id === it.id)
-              ? s.items.map(x => (x.id === it.id ? it : x))
-              : [...s.items, it],
-          }))}
+          presetRole={presetRole}
+          existingNames={store.items.map(i => i.name)}
+          onClose={() => { setAdding(false); setEditing(null); setPresetRole(null); }}
+          onSaveMany={made => setStore(s => {
+            let items = s.items;
+            for (const it of made) {
+              items = items.some(x => x.id === it.id)
+                ? items.map(x => (x.id === it.id ? it : x))
+                : [...items, it];
+            }
+            return { ...s, items };
+          })}
         />
       )}
     </div>
@@ -1627,82 +1690,186 @@ export default function SlopBowl() {
 
 /** One dialog for both add and edit. Editing keeps the item's id, position,
  *  stock and macros — only the fields on screen change, so a rename doesn't
- *  move the node or reset what you had in stock. */
-function ItemDialog({ item, onClose, onSave }: {
+ *  move the node or reset what you had in stock. *//**
+ * One dialog for three jobs: add one, add many, or edit an existing item.
+ *
+ * Bulk entry is the default for adding, because adding a shop's worth of
+ * ingredients one modal at a time is miserable. Names are parsed from lines
+ * or commas, then each gets its own section chips so a wrong AI guess costs
+ * one tap rather than a re-entry.
+ *
+ * Editing keeps the item's id, position, stock and macros — only the fields
+ * on screen change, so renaming doesn't move the node or reset its stock.
+ */
+function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
   item: Item | null;
+  /** Set when opened from a section's + button, so that section is preselected. */
+  presetRole: Role | null;
+  existingNames: string[];
   onClose: () => void;
-  onSave: (it: Item) => void;
+  onSaveMany: (items: Item[]) => void;
 }) {
-  const [name, setName] = useState(item?.name ?? '');
-  // Nothing preselected when adding. Defaulting roles to ['base'] meant every
-  // new ingredient arrived as a Base whether you meant it or not, and the old
-  // toggle refused to remove the last remaining pick — so tapping Base to
-  // clear it did nothing at all and read as broken. Validation moved to the
-  // submit button, where it can actually say what's missing.
-  const [roles, setRoles] = useState<Role[]>(item?.roles ?? []);
+  const editing = !!item;
+  const [text, setText] = useState(item?.name ?? '');
+  const [roles, setRoles] = useState<Record<string, Role[]>>(
+    item ? { [item.name]: item.roles } : {}
+  );
+  const [busy, setBusy] = useState(false);
+  const [aiError, setAiError] = useState('');
 
-  const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
-    set(arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
+  // Names parsed from the box: newline or comma separated, de-duplicated.
+  const names = useMemo(() => {
+    const seen = new Set<string>();
+    return text.split(/[\n,]/).map(s => s.trim()).filter(n => {
+      if (!n) return false;
+      const k = n.toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }, [text]);
 
-  const missing = !name.trim() ? 'Name it first'
-    : !roles.length ? 'Pick at least one role'
+  // Preselect the section the + was pressed on, for anything not yet set.
+  useEffect(() => {
+    if (!presetRole) return;
+    setRoles(prev => {
+      const next = { ...prev };
+      for (const n of names) if (!next[n]?.length) next[n] = [presetRole];
+      return next;
+    });
+  }, [names, presetRole]);
+
+  const toggleRole = (name: string, r: Role) =>
+    setRoles(prev => {
+      const cur = prev[name] ?? [];
+      return { ...prev, [name]: cur.includes(r) ? cur.filter(x => x !== r) : [...cur, r] };
+    });
+
+  const runAI = async () => {
+    if (!names.length) return;
+    setBusy(true); setAiError('');
+    try {
+      const guessed = await categorise(names);
+      // Only fill what the model actually answered for; never clear a choice
+      // the user already made.
+      setRoles(prev => {
+        const next = { ...prev };
+        for (const n of names) if (guessed[n]?.length) next[n] = guessed[n];
+        return next;
+      });
+      const missed = names.filter(n => !guessed[n]?.length);
+      if (missed.length) setAiError(`Couldn't place ${missed.length} of ${names.length} — set ${missed.length > 1 ? 'those' : 'that one'} yourself.`);
+    } catch (e) {
+      console.error('[SlopBowl] categorise failed', e);
+      setAiError('AI is unavailable right now. Pick sections manually.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const unset = names.filter(n => !roles[n]?.length);
+  const dupes = editing ? [] : names.filter(n => existingNames.some(e => e.toLowerCase() === n.toLowerCase()));
+  const missing = !names.length ? 'Type an ingredient'
+    : unset.length ? `Pick a section for ${unset.length === names.length ? (names.length > 1 ? 'each one' : 'it') : unset[0]}`
     : null;
 
   const submit = () => {
-    const n = name.trim();
     if (missing) return;
-    if (item) {
-      onSave({ ...item, name: n, roles });
-    } else {
-      const [cx, cy] = ROLE_CENTRES[roles[0]];
-      onSave({
-        id: `${n.toLowerCase().replace(/\s+/g, '-')}-${n.length}-${roles.join('')}`,
-        name: n, roles, stock: 'in',
-        x: cx + (n.length % 7) * 18 - 50,
-        y: cy + (n.length % 5) * 22 - 40,
-      });
-    }
+    const made: Item[] = names.map((n, idx) => {
+      const rs = roles[n];
+      if (editing && item) return { ...item, name: n, roles: rs };
+      const [cx, cy] = ROLE_CENTRES[rs[0]];
+      return {
+        id: `${n.toLowerCase().replace(/\s+/g, '-')}-${n.length}-${rs.join('')}-${idx}`,
+        name: n, roles: rs, stock: 'in' as Stock,
+        x: cx + ((n.length + idx) % 7) * 18 - 50,
+        y: cy + ((n.length + idx) % 5) * 22 - 40,
+      };
+    });
+    onSaveMany(made);
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-neutral-900/20 sm:items-center sm:p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-t-2xl border border-neutral-200 bg-white p-5 sm:rounded-2xl" onClick={e => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[13px] font-semibold">{item ? 'Edit Ingredient' : 'Add Ingredient'}</h2>
+      <div className="flex max-h-[85vh] w-full max-w-md flex-col rounded-t-2xl border border-neutral-200 bg-white sm:rounded-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-5 py-3.5">
+          <h2 className="text-[13px] font-semibold">
+            {editing ? 'Edit Ingredient' : presetRole ? `Add to ${ROLE_META[presetRole].label}` : 'Add Ingredients'}
+          </h2>
           <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900"><X size={16} /></button>
         </div>
 
-        <input autoFocus value={name} onChange={e => setName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && submit()} placeholder="Cottage cheese"
-          className="mb-4 w-full border-b border-neutral-300 pb-2 text-[14px] outline-none placeholder:text-neutral-300 focus:border-neutral-900" />
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          {editing ? (
+            <input
+              autoFocus value={text} onChange={e => setText(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()}
+              className="mb-4 w-full border-b border-neutral-300 pb-2 text-[14px] outline-none focus:border-neutral-900"
+            />
+          ) : (
+            <>
+              <textarea
+                autoFocus value={text} onChange={e => setText(e.target.value)}
+                rows={3}
+                placeholder={'Chickpeas, feta, tahini\nor one per line'}
+                className="w-full resize-y rounded-lg border border-neutral-200 px-3 py-2 text-[13.5px] outline-none placeholder:text-neutral-300 focus:border-neutral-900"
+              />
+              <div className="mb-4 mt-2 flex items-center justify-between">
+                <span className="text-[11px] text-neutral-400">
+                  {names.length ? `${names.length} ingredient${names.length > 1 ? 's' : ''}` : 'Separate with commas or new lines'}
+                </span>
+                <button onClick={runAI} disabled={!names.length || busy}
+                  className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-[11px] text-neutral-600 transition-colors hover:border-neutral-900 hover:text-neutral-900 disabled:border-neutral-100 disabled:text-neutral-300">
+                  <Sparkles size={12} /> {busy ? 'Sorting…' : 'Sort with AI'}
+                </button>
+              </div>
+              {aiError && <p className="-mt-2 mb-3 text-[11px] text-amber-700">{aiError}</p>}
+              {dupes.length > 0 && (
+                <p className="-mt-2 mb-3 text-[11px] text-amber-700">
+                  Already in your pantry: {dupes.join(', ')}. Adding again will create a duplicate.
+                </p>
+              )}
+            </>
+          )}
 
-        <p className="mb-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
-          Role <span className="normal-case tracking-normal">— first pick is primary</span>
-        </p>
-        <div className="mb-4 flex flex-wrap gap-1.5">
-          {ROLES.map(r => {
-            const i = roles.indexOf(r.id);
-            return (
-              <button key={r.id} onClick={() => toggle(roles, r.id, setRoles)}
-                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                  i > -1 ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
-                }`}>
-                <RoleDot role={r.id} size={5} /> {r.short}
-                {/* Order is meaningful — [0] is the primary role — so show it
-                    rather than just claiming it in the label above. */}
-                {i > -1 && (
-                  <span className="text-[9px] text-white/60">{i === 0 ? 'primary' : i + 1}</span>
-                )}
-              </button>
-            );
-          })}
+          {names.length === 0 && !editing && (
+            <p className="py-6 text-center text-[12px] text-neutral-300">Type above to get started.</p>
+          )}
+
+          {names.map(n => (
+            <div key={n} className="mb-3 border-t border-neutral-100 pt-3 first:border-t-0 first:pt-0">
+              {!editing && <div className="mb-1.5 text-[12.5px] font-medium">{n}</div>}
+              {editing && (
+                <p className="mb-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
+                  Section <span className="normal-case tracking-normal">— first pick is primary</span>
+                </p>
+              )}
+              <div className="flex flex-wrap gap-1.5">
+                {ROLES.map(r => {
+                  const i = (roles[n] ?? []).indexOf(r.id);
+                  return (
+                    <button key={r.id} onClick={() => toggleRole(n, r.id)}
+                      className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                        i > -1 ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
+                      }`}>
+                      <RoleDot role={r.id} size={5} /> {r.short}
+                      {i === 0 && <span className="text-[9px] text-white/60">primary</span>}
+                      {i > 0 && <span className="text-[9px] text-white/60">{i + 1}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
 
-        <button onClick={submit} disabled={!!missing}
-          className="w-full rounded-full bg-neutral-900 py-2.5 text-[12px] text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-400">
-          {missing ?? (item ? 'Save Changes' : 'Add to Pantry')}
-        </button>
+        <div className="shrink-0 border-t border-neutral-100 px-5 py-3.5">
+          <button onClick={submit} disabled={!!missing}
+            className="w-full rounded-full bg-neutral-900 py-2.5 text-[12px] text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-400">
+            {missing ?? (editing ? 'Save Changes' : `Add ${names.length} to Pantry`)}
+          </button>
+        </div>
       </div>
     </div>
   );
