@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil, Sparkles, AlertTriangle } from 'lucide-react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
@@ -515,15 +515,34 @@ const KEY = 'slopbowl_v1';
  * Changing a persisted enum needs a migration; this is it.
  */
 const LEGACY_ROLES: Record<string, Role> = {
-  topping: 'crunch',   // Toppings & Mix-ins -> Crunch & Mix-ins
-  accent: 'sauce',     // Accents & Enhancers -> Sauces & Seasonings
+  accent: 'sauce',     // Accents & Enhancers -> Sauces & Seasonings, 1:1
+  topping: 'crunch',   // last resort only — see BY_NAME below
 };
+
+/**
+ * `topping` can't be mapped by rule. The old Toppings & Mix-ins bucket is
+ * exactly what got split three ways, so it held vegetables, fruit AND crunch
+ * — mapping it wholesale to crunch put Fresh Berries and Sliced Cucumber in
+ * with the nuts. Everything that shipped in that bucket is known by name, so
+ * place those exactly and only fall back to crunch for ingredients the user
+ * added themselves, where crunch is the likeliest of the three.
+ */
+const BY_NAME: Record<string, Role> = {
+  'fresh berries': 'fruit',
+  'sliced cucumber': 'vegetable',
+  'roasted nuts': 'crunch',
+  'granola': 'crunch',
+  'seeds': 'crunch',
+};
+
 const VALID_ROLES = new Set<string>(ROLES.map(r => r.id));
 
-function migrateRoles(raw: unknown): Role[] {
+function migrateRoles(raw: unknown, name?: string): Role[] {
+  const known = BY_NAME[String(name ?? '').trim().toLowerCase()];
   const out: Role[] = [];
   for (const r of Array.isArray(raw) ? raw : []) {
-    const mapped = VALID_ROLES.has(r as string) ? (r as Role) : LEGACY_ROLES[r as string];
+    if (VALID_ROLES.has(r as string)) { if (!out.includes(r as Role)) out.push(r as Role); continue; }
+    const mapped = (r === 'topping' && known) ? known : LEGACY_ROLES[r as string];
     if (mapped && !out.includes(mapped)) out.push(mapped);
   }
   // An item with no recognisable role would be unrenderable; park it somewhere
@@ -535,7 +554,7 @@ function coerce(p: unknown): Store | null {
   const o = p as Partial<Store> | null;
   if (!o || !Array.isArray(o.items) || !o.items.length) return null;
   return {
-    items: o.items.map(i => ({ ...i, roles: migrateRoles(i?.roles) })),
+    items: o.items.map(i => ({ ...i, roles: migrateRoles(i?.roles, i?.name) })),
     extraLinks: o.extraLinks ?? [],
     cutLinks: o.cutLinks ?? [],
     bowl: o.bowl ?? [],
@@ -567,10 +586,16 @@ const userDoc = (uid: string) => doc(db, 'users', uid, 'slopBowl', 'main');
  * Writes are debounced because dragging a node rewrites x/y continuously;
  * sending every frame to Firestore would be thousands of writes per session.
  */
+type SyncState = 'idle' | 'saving' | 'saved' | 'error';
+
 function useSync(store: Store, setStore: React.Dispatch<React.SetStateAction<Store>>) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
-  const [saving, setSaving] = useState(false);
+  // A transient "saving…" was the only feedback, so a successful write looked
+  // identical to nothing happening. Tracked as a state with a timestamp now,
+  // so the header can say plainly whether your work is safe.
+  const [state, setState] = useState<SyncState>('idle');
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const loadedFor = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -599,19 +624,60 @@ function useSync(store: Store, setStore: React.Dispatch<React.SetStateAction<Sto
 
   // Push on change, debounced.
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* quota — memory still works */ }
-    if (!user || loadedFor.current !== user.uid) return;  // don't echo the pull back
-    setSaving(true);
+    let localOk = true;
+    try { localStorage.setItem(KEY, JSON.stringify(store)); }
+    catch { localOk = false; }   // quota — in memory it still works, but say so
+
+    if (!user || loadedFor.current !== user.uid) {
+      // Signed out, localStorage IS the save, so report on it honestly.
+      setState(localOk ? 'saved' : 'error');
+      if (localOk) setSavedAt(Date.now());
+      return;
+    }
+    setState('saving');
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       setDoc(userDoc(user.uid), store)
-        .catch(e => console.error('[SlopBowl] save failed', e))
-        .finally(() => setSaving(false));
+        .then(() => { setState('saved'); setSavedAt(Date.now()); })
+        .catch(e => { console.error('[SlopBowl] save failed', e); setState('error'); });
     }, 900);
     return () => { if (timer.current) clearTimeout(timer.current); };
   }, [store, user]);
 
-  return { user, ready, saving };
+  return { user, ready, state, savedAt };
+}
+
+/** "Saved", "Saved 2m ago", "Saving…" — plain enough to trust at a glance. */
+function SaveStatus({ state, savedAt, signedIn }: { state: SyncState; savedAt: number | null; signedIn: boolean }) {
+  const [, tick] = useState(0);
+  // Re-render on a timer so "just now" doesn't sit there going stale.
+  useEffect(() => {
+    const t = setInterval(() => tick(n => n + 1), 30_000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (state === 'idle') return null;
+
+  if (state === 'error') {
+    return (
+      <span className="flex items-center gap-1.5 text-[11px] text-red-600" title="Your changes are in this tab only">
+        <AlertTriangle size={12} /> Not saved
+      </span>
+    );
+  }
+  if (state === 'saving') {
+    return <span className="text-[11px] text-neutral-400">Saving…</span>;
+  }
+
+  const secs = savedAt ? Math.floor((Date.now() - savedAt) / 1000) : 0;
+  const when = secs < 60 ? 'just now' : secs < 3600 ? `${Math.floor(secs / 60)}m ago` : `${Math.floor(secs / 3600)}h ago`;
+  return (
+    <span className="flex items-center gap-1.5 text-[11px] text-neutral-400"
+      title={signedIn ? 'Saved to your account' : 'Saved in this browser — sign in to sync across devices'}>
+      <Check size={12} className="text-emerald-600" />
+      Saved {when}{!signedIn && <span className="hidden text-neutral-300 lg:inline">· this device</span>}
+    </span>
+  );
 }
 
 // ─── Route-scoped PWA manifest ───────────────────────────────────────────────
@@ -1521,7 +1587,7 @@ export default function SlopBowl() {
   const [adding, setAdding] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
 
-  const { user, ready, saving } = useSync(store, setStore);
+  const { user, ready, state: syncState, savedAt } = useSync(store, setStore);
 
   const ideas = useMemo(() => (tab === 'ideas' ? suggestBowls(store) : []), [tab, store]);
 
@@ -1583,8 +1649,7 @@ export default function SlopBowl() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Only a hint, not a spinner — saving shouldn't feel like a wait. */}
-          {saving && <span className="hidden text-[10px] text-neutral-300 sm:inline">saving…</span>}
+          <SaveStatus state={syncState} savedAt={savedAt} signedIn={!!user} />
 
           {user ? (
             <div className="flex items-center gap-2">
