@@ -753,10 +753,15 @@ function FolderTabs<T extends string>({ tabs, value, onChange }: {
 
 // ─── Pantry rail ─────────────────────────────────────────────────────────────
 
+/**
+ * Labels say "In Stock", not "In". A bare "In" meant nothing until you
+ * hovered it, which is the wrong way round for the control you use most.
+ * Spelled out on all three so no row is ambiguous on its own.
+ */
 const STOCK_PILL: Record<Stock, { label: string; title: string; cls: string }> = {
-  in:  { label: 'In',  title: 'In stock',                             cls: 'border-emerald-600/30 bg-emerald-50 text-emerald-700' },
-  low: { label: 'Low', title: 'Running low — still suggested, ranked lower', cls: 'border-amber-600/30 bg-amber-50 text-amber-700' },
-  out: { label: 'Out', title: 'Out — left out of suggested bowls',    cls: 'border-neutral-200 bg-neutral-50 text-neutral-400' },
+  in:  { label: 'In Stock',     title: 'In stock',                                   cls: 'border-emerald-600/30 bg-emerald-50 text-emerald-700' },
+  low: { label: 'Low Stock',    title: 'Running low — still suggested, ranked lower', cls: 'border-amber-600/30 bg-amber-50 text-amber-700' },
+  out: { label: 'Out of Stock', title: 'Out — left out of suggested bowls',          cls: 'border-neutral-200 bg-neutral-50 text-neutral-400' },
 };
 
 /**
@@ -792,15 +797,17 @@ function StockControl({ value, open, onOpen, onPick }: {
 
       {open && (
         <div className="absolute right-0 top-1/2 z-20 -translate-y-1/2 rounded-lg border border-neutral-200 bg-white px-1.5 py-1 shadow-md">
-          <div className="mb-0.5 text-center text-[8px] font-medium uppercase tracking-[0.12em] text-neutral-400">Stock</div>
-          <div className="flex gap-0.5">
+          <div className="mb-1 px-1 text-[8px] font-medium uppercase tracking-[0.12em] text-neutral-400">Stock</div>
+          {/* Stacked, not side by side — three spelled-out labels in a row
+              was too wide to sit over the row's other controls. */}
+          <div className="flex min-w-[104px] flex-col gap-0.5">
             {(['in', 'low', 'out'] as Stock[]).map(s => {
               const p = STOCK_PILL[s];
               const on = s === value;
               return (
                 <button key={s} onClick={() => onPick(s)} title={p.title}
-                  className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                    on ? p.cls : 'border-transparent text-neutral-400 hover:bg-neutral-50 hover:text-neutral-900'
+                  className={`rounded-md border px-2 py-1 text-left text-[10.5px] font-medium transition-colors ${
+                    on ? p.cls : 'border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900'
                   }`}>
                   {p.label}
                 </button>
@@ -976,9 +983,9 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
         <p className="mb-2 text-[11px] text-neutral-400">Drag an ingredient onto the bowl, or tap to add and remove it.</p>
         {/* What In / Low / Out actually do, because the pills alone don't say. */}
         <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-neutral-400">
-          <span><b className="font-medium text-emerald-700">In</b> — plenty</span>
-          <span><b className="font-medium text-amber-700">Low</b> — still suggested, ranked lower</span>
-          <span><b className="font-medium text-neutral-500">Out</b> — left out of bowls</span>
+          <span><b className="font-medium text-emerald-700">In Stock</b> — plenty</span>
+          <span><b className="font-medium text-amber-700">Low Stock</b> — still suggested, ranked lower</span>
+          <span><b className="font-medium text-neutral-500">Out of Stock</b> — left out of bowls</span>
         </div>
         <input
           value={q} onChange={e => setQ(e.target.value)} placeholder="Search your fridge"
