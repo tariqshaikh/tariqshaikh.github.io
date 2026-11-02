@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Plus, X, Trash2, PanelLeft, AlertTriangle, LogOut } from 'lucide-react';
+import { ChevronLeft, Plus, X, Trash2, PanelLeft, AlertTriangle, LogOut, Star, Check, Pencil } from 'lucide-react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
@@ -45,6 +46,17 @@ interface Item {
   y: number;
 }
 
+/** A bowl worth keeping. Stores ingredient ids plus the names at save time, so
+ *  a favourite still reads correctly after an ingredient is renamed or deleted
+ *  from the pantry — otherwise old favourites would quietly lose entries. */
+interface Favorite {
+  id: string;
+  name: string;
+  itemIds: string[];
+  itemNames: string[];
+  savedAt: number;
+}
+
 interface Store {
   items: Item[];
   /** Pairings the rules miss, and pairings they wrongly suggest. */
@@ -52,6 +64,7 @@ interface Store {
   cutLinks: [string, string][];
   /** The bowl currently being composed. */
   bowl: string[];
+  favorites: Favorite[];
 }
 
 const ROLES: { id: Role; label: string; short: string; color: string }[] = [
@@ -268,7 +281,13 @@ const KEY = 'slopbowl_v1';
 function coerce(p: unknown): Store | null {
   const o = p as Partial<Store> | null;
   if (!o || !Array.isArray(o.items) || !o.items.length) return null;
-  return { items: o.items, extraLinks: o.extraLinks ?? [], cutLinks: o.cutLinks ?? [], bowl: o.bowl ?? [] };
+  return {
+    items: o.items,
+    extraLinks: o.extraLinks ?? [],
+    cutLinks: o.cutLinks ?? [],
+    bowl: o.bowl ?? [],
+    favorites: o.favorites ?? [],   // absent in stores saved before favourites existed
+  };
 }
 
 function loadStore(): Store {
@@ -276,7 +295,7 @@ function loadStore(): Store {
     const raw = localStorage.getItem(KEY);
     if (raw) { const s = coerce(JSON.parse(raw)); if (s) return s; }
   } catch { /* fall through to seed */ }
-  return { items: seedLayout(SEED), extraLinks: [], cutLinks: [], bowl: [] };
+  return { items: seedLayout(SEED), extraLinks: [], cutLinks: [], bowl: [], favorites: [] };
 }
 
 /** One doc per user — the whole pantry is a few KB, far short of Firestore's
@@ -415,99 +434,198 @@ function FolderTabs<T extends string>({ tabs, value, onChange }: {
 
 // ─── Pantry rail ─────────────────────────────────────────────────────────────
 
-function PantryRail({ store, setStore, addToBowl, onAdd }: {
+const STOCK_PILL: Record<Stock, { label: string; title: string; cls: string }> = {
+  in:  { label: 'In',  title: 'In stock',                             cls: 'border-emerald-600/30 bg-emerald-50 text-emerald-700' },
+  low: { label: 'Low', title: 'Running low — still suggested, ranked lower', cls: 'border-amber-600/30 bg-amber-50 text-amber-700' },
+  out: { label: 'Out', title: 'Out — left out of suggested bowls',    cls: 'border-neutral-200 bg-neutral-50 text-neutral-400' },
+};
+
+/**
+ * Drag works on raw pointer events rather than HTML5 drag-and-drop: the drop
+ * target is an SVG canvas under a pan/zoom transform, which the native API
+ * handles badly on touch. A movement threshold keeps a plain tap meaning
+ * "add to bowl", so the rail stays usable without ever dragging.
+ */
+function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, onDragStateChange }: {
   store: Store;
   setStore: React.Dispatch<React.SetStateAction<Store>>;
   addToBowl: (id: string) => void;
+  toggleInBowl: (id: string) => void;
   onAdd: () => void;
+  onEdit: (it: Item) => void;
+  onDragStateChange: (dragging: boolean) => void;
 }) {
   const [q, setQ] = useState('');
+  const [ghost, setGhost] = useState<{ name: string; x: number; y: number; over: boolean } | null>(null);
+  const press = useRef<{ id: string; name: string; x: number; y: number; dragging: boolean } | null>(null);
   const match = (i: Item) => i.name.toLowerCase().includes(q.trim().toLowerCase());
+
+  useEffect(() => { onDragStateChange(!!ghost); }, [!!ghost]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cycle = (id: string) =>
     setStore(s => ({ ...s, items: s.items.map(i => (i.id === id ? { ...i, stock: STOCK_NEXT[i.stock] } : i)) }));
 
+  // Spread first: rebuilding the object field-by-field dropped `favorites`
+  // entirely, so deleting one ingredient wiped every saved bowl. Favourites
+  // keep the deleted item — they snapshot names and flag what's missing.
   const remove = (id: string) =>
     setStore(s => ({
+      ...s,
       items: s.items.filter(i => i.id !== id),
       extraLinks: s.extraLinks.filter(([a, b]) => a !== id && b !== id),
       cutLinks: s.cutLinks.filter(([a, b]) => a !== id && b !== id),
       bowl: s.bowl.filter(b => b !== id),
     }));
 
+  /** The map pane marks itself with data-slopbowl-drop, so hit-testing is a
+   *  coordinate lookup and never has to know about the canvas transform. */
+  const overDrop = (x: number, y: number) =>
+    !!document.elementFromPoint(x, y)?.closest('[data-slopbowl-drop]');
+
+  const onDown = (e: React.PointerEvent, it: Item) => {
+    if (it.stock === 'out') return;
+    (e.currentTarget as Element).setPointerCapture(e.pointerId);
+    press.current = { id: it.id, name: it.name, x: e.clientX, y: e.clientY, dragging: false };
+  };
+
+  const onMove = (e: React.PointerEvent) => {
+    const p = press.current;
+    if (!p) return;
+    if (!p.dragging && Math.hypot(e.clientX - p.x, e.clientY - p.y) < 6) return;
+    p.dragging = true;
+    setGhost({ name: p.name, x: e.clientX, y: e.clientY, over: overDrop(e.clientX, e.clientY) });
+  };
+
+  const onUp = (e: React.PointerEvent) => {
+    const p = press.current;
+    press.current = null;
+    setGhost(null);
+    if (!p) return;
+    // A tap toggles — tapping something already in the bowl takes it back out,
+    // so the rail behaves the same way the map nodes do. A drag only ever
+    // adds, and only if it finished over the map, so dropping on empty space
+    // cancels rather than surprising you.
+    if (p.dragging) { if (overDrop(e.clientX, e.clientY)) addToBowl(p.id); }
+    else toggleInBowl(p.id);
+  };
+
   return (
-    <aside className="flex h-full w-[268px] shrink-0 flex-col border-r border-neutral-200 bg-neutral-50/60">
-      <div className="shrink-0 px-4 pt-4">
-        <div className="mb-2.5 flex items-baseline justify-between">
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-900">Pantry</h2>
-          <span className="text-[10px] text-neutral-400">
-            {store.items.filter(i => i.stock !== 'out').length}/{store.items.length} on hand
+    <aside className="flex h-full w-[320px] shrink-0 flex-col border-r border-neutral-200 bg-neutral-50/70">
+      <div className="shrink-0 border-b border-neutral-200/80 px-4 pb-3 pt-4">
+        <div className="mb-0.5 flex items-baseline justify-between">
+          <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900">Pantry</h2>
+          <span className="text-[11px] tabular-nums text-neutral-400">
+            {store.items.filter(i => i.stock !== 'out').length} of {store.items.length}
           </span>
         </div>
+        <p className="mb-2 text-[11px] text-neutral-400">Drag an ingredient onto the bowl, or tap to add and remove it.</p>
+        {/* What In / Low / Out actually do, because the pills alone don't say. */}
+        <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-neutral-400">
+          <span><b className="font-medium text-emerald-700">In</b> — plenty</span>
+          <span><b className="font-medium text-amber-700">Low</b> — still suggested, ranked lower</span>
+          <span><b className="font-medium text-neutral-500">Out</b> — left out of bowls</span>
+        </div>
         <input
-          value={q} onChange={e => setQ(e.target.value)} placeholder="Search the fridge"
-          className="mb-1 w-full rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-[12px] outline-none placeholder:text-neutral-300 focus:border-neutral-900"
+          value={q} onChange={e => setQ(e.target.value)} placeholder="Search your fridge"
+          className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-neutral-300 focus:border-neutral-900"
         />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+      <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3">
         {ROLES.map(role => {
           const rows = store.items.filter(i => i.roles[0] === role.id && match(i));
           if (!rows.length) return null;
           return (
-            <section key={role.id} className="mb-3">
-              <h3 className="mb-1 flex items-center gap-1.5 px-2 text-[9.5px] uppercase tracking-[0.14em] text-neutral-400">
-                <RoleDot role={role.id} size={5} /> {role.label}
+            <section key={role.id} className="mb-4">
+              <h3 className="mb-1.5 flex items-center gap-2 px-1.5">
+                <RoleDot role={role.id} size={7} />
+                <span className="text-[11px] font-semibold tracking-wide text-neutral-700">{role.label}</span>
+                <span className="text-[10px] tabular-nums text-neutral-300">{rows.length}</span>
               </h3>
-              {rows.map(it => {
-                const out = it.stock === 'out';
-                const inBowl = store.bowl.includes(it.id);
-                return (
-                  <div key={it.id}
-                    className={`group flex items-center gap-1.5 rounded-md px-2 py-1 ${inBowl ? 'bg-neutral-900/5' : 'hover:bg-white'}`}>
-                    <button
-                      onClick={() => cycle(it.id)}
-                      title={`${it.stock === 'in' ? 'In stock' : it.stock === 'low' ? 'Low' : 'Out'} — tap to change`}
-                      className="shrink-0"
-                    >
-                      <span className={`block h-2 w-2 rounded-full border ${
-                        it.stock === 'in' ? 'border-neutral-900 bg-neutral-900'
-                        : it.stock === 'low' ? 'border-neutral-900 bg-white'
-                        : 'border-neutral-300 bg-white'}`} />
-                    </button>
 
-                    <button
-                      onClick={() => !out && addToBowl(it.id)}
-                      disabled={out}
-                      className={`flex-1 truncate text-left text-[12.5px] ${
-                        out ? 'cursor-not-allowed text-neutral-300 line-through' : 'text-neutral-800'
+              <div className="space-y-0.5">
+                {rows.map(it => {
+                  const out = it.stock === 'out';
+                  const inBowl = store.bowl.includes(it.id);
+                  const pill = STOCK_PILL[it.stock];
+                  return (
+                    <div
+                      key={it.id}
+                      onPointerDown={e => onDown(e, it)}
+                      onPointerMove={onMove}
+                      onPointerUp={onUp}
+                      onPointerCancel={() => { press.current = null; setGhost(null); }}
+                      className={`group relative flex touch-none items-center gap-2.5 rounded-lg border px-2.5 py-2 transition-all ${
+                        out
+                          ? 'cursor-not-allowed border-transparent'
+                          : inBowl
+                            ? 'cursor-grab border-neutral-900/15 bg-white shadow-sm active:cursor-grabbing'
+                            : 'cursor-grab border-transparent hover:border-neutral-200 hover:bg-white hover:shadow-sm active:cursor-grabbing'
                       }`}
-                      title={out ? 'Out of stock' : 'Add to bowl'}
                     >
-                      {it.name}
-                      {it.roles.length > 1 && (
-                        <span className="ml-1.5 text-[9px] uppercase tracking-wider text-neutral-400">
-                          +{ROLE_META[it.roles[1]].short}
-                        </span>
-                      )}
-                    </button>
+                      {inBowl && <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-neutral-900" />}
 
-                    <button onClick={() => remove(it.id)} title="Remove"
-                      className="shrink-0 text-neutral-300 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100">
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                );
-              })}
+                      <div className="min-w-0 flex-1">
+                        <div className={`truncate text-[13.5px] leading-tight ${out ? 'text-neutral-300 line-through' : 'text-neutral-900'}`}>
+                          {it.name}
+                        </div>
+                        <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-neutral-400">
+                          <span>{it.roles.map(r => ROLE_META[r].short).join(' · ')}</span>
+                          <span className="text-neutral-200">|</span>
+                          <span className="capitalize">{it.flavors.join(', ')}</span>
+                          {inBowl && <span className="font-medium text-neutral-900">· In bowl</span>}
+                        </div>
+                      </div>
+
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={() => cycle(it.id)}
+                        title={`${pill.title} — tap to change`}
+                        className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors ${pill.cls}`}
+                      >
+                        {pill.label}
+                      </button>
+
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={() => onEdit(it)} title="Edit"
+                        className="shrink-0 text-neutral-200 transition-colors hover:text-neutral-900 group-hover:text-neutral-400"
+                      >
+                        <Pencil size={13} />
+                      </button>
+
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={() => remove(it.id)} title="Remove"
+                        className="shrink-0 text-neutral-200 transition-colors hover:text-red-600 group-hover:text-neutral-400"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </section>
           );
         })}
       </div>
 
       <button onClick={onAdd}
-        className="flex shrink-0 items-center justify-center gap-1.5 border-t border-neutral-200 py-2.5 text-[11px] uppercase tracking-wider text-neutral-500 hover:bg-white hover:text-neutral-900">
-        <Plus size={13} /> Add ingredient
+        className="flex shrink-0 items-center justify-center gap-1.5 border-t border-neutral-200 py-3 text-[12px] font-medium text-neutral-600 transition-colors hover:bg-white hover:text-neutral-900">
+        <Plus size={14} /> Add Ingredient
       </button>
+
+      {ghost && createPortal(
+        <div
+          className={`pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-1.5 text-[12.5px] shadow-lg transition-colors ${
+            ghost.over ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300 bg-white text-neutral-500'
+          }`}
+          style={{ left: ghost.x, top: ghost.y }}
+        >
+          {ghost.name}
+        </div>,
+        document.body
+      )}
     </aside>
   );
 }
@@ -521,10 +639,12 @@ function PantryRail({ store, setStore, addToBowl, onAdd }: {
  * made it worse. The map earns its place through spatial grouping and the
  * bowl as a target, not through drawn connections.
  */
-function MapCanvas({ store, setStore, addToBowl }: {
+function MapCanvas({ store, setStore, addToBowl, incoming }: {
   store: Store;
   setStore: React.Dispatch<React.SetStateAction<Store>>;
   addToBowl: (id: string) => void;
+  /** Something is being dragged in from the pantry — light the bowl up. */
+  incoming: boolean;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [view, setView] = useState({ x: 0, y: 0, k: 1 });
@@ -629,13 +749,16 @@ function MapCanvas({ store, setStore, addToBowl }: {
               fill="#fafafa" stroke="#d4d4d4" strokeWidth={1.25} strokeLinejoin="round"
             />
             <ellipse cx={BOWL.x} cy={BOWL.y} rx={BOWL.rx} ry={BOWL.ry}
-              fill="#ffffff" stroke="#d4d4d4" strokeWidth={1.25} />
+              fill="#ffffff" stroke={incoming ? '#111111' : '#d4d4d4'} strokeWidth={incoming ? 2 : 1.25}
+              style={{ transition: 'stroke 160ms ease, stroke-width 160ms ease' }} />
             <ellipse cx={BOWL.x} cy={BOWL.y} rx={BOWL.rx - 11} ry={BOWL.ry - 7}
-              fill="none" stroke="#f0f0f0" strokeWidth={1} />
+              fill="none" stroke={incoming ? '#d4d4d4' : '#f0f0f0'} strokeWidth={1}
+              strokeDasharray={incoming ? '5 4' : undefined} />
             {store.bowl.length === 0 && (
-              <text x={BOWL.x} y={BOWL.y + 4} textAnchor="middle" fontSize={12} fill="#c9c9c9"
+              <text x={BOWL.x} y={BOWL.y + 4} textAnchor="middle" fontSize={12}
+                fill={incoming ? '#111111' : '#c9c9c9'}
                 style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
-                tap an ingredient to drop it in
+                {incoming ? 'Drop it in' : 'Tap or drag an ingredient in'}
               </text>
             )}
             <text x={BOWL.x} y={BOWL.y + BOWL.depth * 1.12 + 22} textAnchor="middle"
@@ -735,6 +858,27 @@ function BowlView({ store, setStore, addToBowl }: {
 
   const drop = (id: string) => setStore(s => ({ ...s, bowl: s.bowl.filter(b => b !== id) }));
 
+  const [savedNow, setSavedNow] = useState(false);
+  const key = store.bowl.slice().sort().join('~');
+  useEffect(() => { setSavedNow(false); }, [key]);
+
+  const saveFavorite = () => {
+    if (!items.length) return;
+    setStore(s => {
+      // Same ingredients, already saved — don't pile up duplicates.
+      if (s.favorites.some(f => f.itemIds.slice().sort().join('~') === key)) return s;
+      const fav: Favorite = {
+        id: `${key}-${s.favorites.length}`,
+        name: slotted.map(x => x.item.name).join(' + '),
+        itemIds: [...s.bowl],
+        itemNames: items.map(i => i.name),   // snapshot, so renames don't rewrite history
+        savedAt: Date.now(),
+      };
+      return { ...s, favorites: [fav, ...s.favorites] };
+    });
+    setSavedNow(true);
+  };
+
   const totals = items.reduce(
     (t, i) => i.macros
       ? { kcal: t.kcal + i.macros.kcal, protein: t.protein + i.macros.protein, carbs: t.carbs + i.macros.carbs, fat: t.fat + i.macros.fat }
@@ -761,10 +905,18 @@ function BowlView({ store, setStore, addToBowl }: {
           </p>
         ) : (
           <>
-            <div className="mb-5 flex items-baseline justify-between">
+            <div className="mb-5 flex items-start justify-between gap-4">
               <h2 className="text-[15px] font-medium">{slotted.map(s => s.item.name).join(' + ')}</h2>
-              <button onClick={() => setStore(s => ({ ...s, bowl: [] }))}
-                className="text-[10px] uppercase tracking-wider text-neutral-400 hover:text-neutral-900">Empty</button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button onClick={saveFavorite} disabled={savedNow}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] transition-colors ${
+                    savedNow ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-600 hover:border-neutral-900 hover:text-neutral-900'
+                  }`}>
+                  {savedNow ? <><Check size={12} /> Saved</> : <><Star size={12} /> Save Bowl</>}
+                </button>
+                <button onClick={() => setStore(s => ({ ...s, bowl: [] }))}
+                  className="text-[11px] text-neutral-400 hover:text-neutral-900">Empty</button>
+              </div>
             </div>
 
             {/* Nutrition */}
@@ -882,7 +1034,67 @@ function BowlView({ store, setStore, addToBowl }: {
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
-type Tab = 'map' | 'bowl' | 'ideas';
+function FavoritesView({ store, setStore, goToBowl }: {
+  store: Store;
+  setStore: React.Dispatch<React.SetStateAction<Store>>;
+  goToBowl: () => void;
+}) {
+  const have = useMemo(() => new Set(store.items.map(i => i.id)), [store.items]);
+
+  return (
+    <div className="h-full overflow-y-auto px-6 py-5">
+      {store.favorites.length === 0 ? (
+        <p className="pt-20 text-center text-[13px] text-neutral-400">
+          No saved bowls yet. Build one, then hit Save Bowl in Bowl Nutrition.
+        </p>
+      ) : (
+        <>
+          <p className="mb-4 text-[11px] text-neutral-400">
+            {store.favorites.length} saved {store.favorites.length === 1 ? 'bowl' : 'bowls'}.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {store.favorites.map(f => {
+              // An ingredient can be deleted from the pantry after a bowl was
+              // saved. Say so rather than quietly loading a smaller bowl.
+              const gone = f.itemIds.filter(id => !have.has(id));
+              return (
+                <div key={f.id} className="flex flex-col rounded-xl border border-neutral-200 p-4 transition-colors hover:border-neutral-400">
+                  <div className="mb-2 text-[13px] font-medium leading-snug">{f.name}</div>
+                  <ul className="mb-3 flex-1 space-y-0.5">
+                    {f.itemNames.map((n, i) => (
+                      <li key={i} className={`text-[11px] ${have.has(f.itemIds[i]) ? 'text-neutral-500' : 'text-neutral-300 line-through'}`}>
+                        {n}
+                      </li>
+                    ))}
+                  </ul>
+                  {gone.length > 0 && (
+                    <p className="mb-2 text-[10px] text-amber-700">
+                      {gone.length} ingredient{gone.length > 1 ? 's are' : ' is'} no longer in your pantry.
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => { setStore(s => ({ ...s, bowl: f.itemIds.filter(id => have.has(id)) })); goToBowl(); }}
+                      className="text-[10px] uppercase tracking-wider text-neutral-400 hover:text-neutral-900">
+                      Load Into Bowl →
+                    </button>
+                    <button
+                      onClick={() => setStore(s => ({ ...s, favorites: s.favorites.filter(x => x.id !== f.id) }))}
+                      title="Delete" className="text-neutral-200 hover:text-red-600">
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+type Tab = 'map' | 'bowl' | 'favorites' | 'ideas';
 
 export default function SlopBowl() {
   useScopedManifest();
@@ -901,8 +1113,18 @@ export default function SlopBowl() {
     setStore(s => (s.bowl.includes(id) ? s : { ...s, bowl: [...s.bowl, id] }));
   }, []);
 
+  const [dragging, setDragging] = useState(false);
+  const [editing, setEditing] = useState<Item | null>(null);
+
+  const toggleInBowl = useCallback((id: string) => {
+    setStore(s => ({ ...s, bowl: s.bowl.includes(id) ? s.bowl.filter(b => b !== id) : [...s.bowl, id] }));
+  }, []);
+
   const rail = (
-    <PantryRail store={store} setStore={setStore} addToBowl={addToBowl} onAdd={() => setAdding(true)} />
+    <PantryRail store={store} setStore={setStore} addToBowl={addToBowl} toggleInBowl={toggleInBowl}
+      onAdd={() => { setEditing(null); setAdding(true); }}
+      onEdit={it => { setEditing(it); setAdding(true); }}
+      onDragStateChange={setDragging} />
   );
 
   return (
@@ -973,6 +1195,7 @@ export default function SlopBowl() {
               tabs={[
                 { id: 'map', label: 'Map' },
                 { id: 'bowl', label: 'Bowl Nutrition', badge: store.bowl.length || undefined },
+                { id: 'favorites', label: 'Favorite Bowls', badge: store.favorites.length || undefined },
                 { id: 'ideas', label: 'What can I make' },
               ]}
               value={tab} onChange={setTab}
@@ -985,9 +1208,12 @@ export default function SlopBowl() {
             </div>
           )}
 
-          <main className="min-h-0 flex-1 overflow-hidden">
-            {tab === 'map' && <MapCanvas store={store} setStore={setStore} addToBowl={addToBowl} />}
+          {/* Marks the drop zone for pantry drags — hit-tested by coordinate,
+              so it works regardless of the canvas pan/zoom transform. */}
+          <main data-slopbowl-drop={tab === 'map' ? '' : undefined} className="min-h-0 flex-1 overflow-hidden">
+            {tab === 'map' && <MapCanvas store={store} setStore={setStore} addToBowl={addToBowl} incoming={dragging} />}
             {tab === 'bowl' && <BowlView store={store} setStore={setStore} addToBowl={addToBowl} />}
+            {tab === 'favorites' && <FavoritesView store={store} setStore={setStore} goToBowl={() => setTab('bowl')} />}
             {tab === 'ideas' && (
               <div className="h-full overflow-y-auto px-6 py-5">
                 {ideas.length === 0 ? (
@@ -1029,22 +1255,40 @@ export default function SlopBowl() {
         </div>
       </div>
 
-      {adding && <AddDialog onClose={() => setAdding(false)} onAdd={it => setStore(s => ({ ...s, items: [...s.items, it] }))} />}
+      {adding && (
+        <ItemDialog
+          item={editing}
+          onClose={() => { setAdding(false); setEditing(null); }}
+          onSave={it => setStore(s => ({
+            ...s,
+            items: s.items.some(x => x.id === it.id)
+              ? s.items.map(x => (x.id === it.id ? it : x))
+              : [...s.items, it],
+          }))}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Add dialog ──────────────────────────────────────────────────────────────
 
-function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (it: Item) => void }) {
-  const [name, setName] = useState('');
-  // Nothing preselected. Defaulting roles to ['base'] meant every new
-  // ingredient arrived as a Base whether you meant it or not, and the old
+/** One dialog for both add and edit. Editing keeps the item's id, position,
+ *  stock and macros — only the fields on screen change, so a rename doesn't
+ *  move the node or reset what you had in stock. */
+function ItemDialog({ item, onClose, onSave }: {
+  item: Item | null;
+  onClose: () => void;
+  onSave: (it: Item) => void;
+}) {
+  const [name, setName] = useState(item?.name ?? '');
+  // Nothing preselected when adding. Defaulting roles to ['base'] meant every
+  // new ingredient arrived as a Base whether you meant it or not, and the old
   // toggle refused to remove the last remaining pick — so tapping Base to
   // clear it did nothing at all and read as broken. Validation moved to the
   // submit button, where it can actually say what's missing.
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [flavors, setFlavors] = useState<Flavor[]>([]);
+  const [roles, setRoles] = useState<Role[]>(item?.roles ?? []);
+  const [flavors, setFlavors] = useState<Flavor[]>(item?.flavors ?? []);
 
   const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
     set(arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
@@ -1057,13 +1301,17 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (it: Item) 
   const submit = () => {
     const n = name.trim();
     if (missing) return;
-    const [cx, cy] = ROLE_CENTRES[roles[0]];
-    onAdd({
-      id: `${n.toLowerCase().replace(/\s+/g, '-')}-${n.length}-${roles.join('')}`,
-      name: n, roles, flavors, stock: 'in',
-      x: cx + (n.length % 7) * 18 - 50,
-      y: cy + (n.length % 5) * 22 - 40,
-    });
+    if (item) {
+      onSave({ ...item, name: n, roles, flavors });
+    } else {
+      const [cx, cy] = ROLE_CENTRES[roles[0]];
+      onSave({
+        id: `${n.toLowerCase().replace(/\s+/g, '-')}-${n.length}-${roles.join('')}`,
+        name: n, roles, flavors, stock: 'in',
+        x: cx + (n.length % 7) * 18 - 50,
+        y: cy + (n.length % 5) * 22 - 40,
+      });
+    }
     onClose();
   };
 
@@ -1071,7 +1319,7 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (it: Item) 
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-neutral-900/20 sm:items-center sm:p-4" onClick={onClose}>
       <div className="w-full max-w-sm rounded-t-2xl border border-neutral-200 bg-white p-5 sm:rounded-2xl" onClick={e => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[13px] font-semibold">Add ingredient</h2>
+          <h2 className="text-[13px] font-semibold">{item ? 'Edit Ingredient' : 'Add Ingredient'}</h2>
           <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900"><X size={16} /></button>
         </div>
 
@@ -1113,7 +1361,7 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (it: Item) 
 
         <button onClick={submit} disabled={!!missing}
           className="w-full rounded-full bg-neutral-900 py-2.5 text-[12px] text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-400">
-          {missing ?? 'Add to pantry'}
+          {missing ?? (item ? 'Save Changes' : 'Add to Pantry')}
         </button>
       </div>
     </div>
