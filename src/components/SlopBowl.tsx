@@ -81,14 +81,14 @@ const FLAVORS: Flavor[] = ['sweet', 'savory', 'neutral'];
  *  the bowl sitting in the gap between them. The view auto-fits on mount, so
  *  the extra spread costs nothing on screen. */
 const ROLE_CENTRES: Record<Role, [number, number]> = {
-  base: [200, 170], protein: [1000, 170], topping: [200, 840], accent: [1000, 840],
+  base: [250, 200], protein: [1010, 200], topping: [250, 940], accent: [1010, 940],
 };
 
-const BOWL = { x: 600, y: 505, rx: 218, ry: 92, depth: 128 };
+const BOWL = { x: 600, y: 550, rx: 218, ry: 92, depth: 128 };
 
 /** Fixed board size. The view fits this rect rather than live item bounds, so
  *  dragging one ingredient never rescales the whole board. */
-const WORLD = { w: 1240, h: 1040 };
+const WORLD = { w: 1260, h: 1220 };
 
 /** Lay the bowl's contents out inside the rim — one column while it's sparse,
  *  two once it fills up, so a single ingredient doesn't sit lopsided. */
@@ -270,22 +270,10 @@ const LANE_X = 268;  // column pitch; must exceed the widest chip + 2*JITTER_X
 const PER_COL = 7;
 const NODE_W_MAX = 176;  // longest ingredient name we expect to render
 
-/**
- * Deterministic per-item scatter, so a cluster reads as a cloud rather than a
- * ruled column. Derived from the id so it never changes between renders.
- *
- * Both spans are bounded by the pitch they sit in, and a test covering every
- * pair at 1/3/5/7/8/12/19 items enforces it:
- *
- *   vertical   LANE_Y - 2*JITTER_Y = 36px  >  NODE_H 34px
- *   horizontal LANE_X - 2*JITTER_X = 192px >  NODE_W_MAX 176px
- *
- * The horizontal bound is the one that bites. An earlier attempt used
- * LANE_X 230 with JITTER_X 46, which left only 138px between adjacent
- * columns and let wide chips in multi-column clusters collide.
- */
-const JITTER_X = 38;
-const JITTER_Y = 7;
+const ROW_PITCH = 52;   // vertical gap between rows
+const COL_PITCH = 196;  // horizontal gap within a row
+const JITTER_X = 9;
+const JITTER_Y = 8;
 
 function hashId(s: string): number {
   let h = 0;
@@ -294,6 +282,60 @@ function hashId(s: string): number {
 }
 const scatter = (id: string, salt: number, span: number) =>
   (((hashId(id + salt) % 1000) / 1000) - 0.5) * 2 * span;
+
+/**
+ * How many ingredients sit on each row of a cluster — a tapered profile like
+ * [1,2,2,1] rather than a uniform block, so the cluster has a rounded
+ * silhouette instead of a rectangular one.
+ *
+ * Only two fit per row: chips run to 176px and a cluster has roughly 490px
+ * of width before it reaches its neighbour. That cap is why jitter alone
+ * could never stop this looking like a column — the shape has to come from
+ * uneven row lengths and offset rows, not from nudging nodes around.
+ */
+function blobRows(n: number): number[] {
+  if (n <= 2) return n ? [n] : [];
+  const rows = Math.ceil(n / 2) + (n >= 5 ? 1 : 0);
+  const counts = Array(rows).fill(2);
+  let over = rows * 2 - n;
+  // Trim from the ends inward so the middle stays widest.
+  for (let lo = 0, hi = rows - 1; over > 0 && lo <= hi; lo++, hi--) {
+    if (counts[lo] > 1) { counts[lo]--; over--; }
+    if (over > 0 && hi !== lo && counts[hi] > 1) { counts[hi]--; over--; }
+  }
+  return counts;
+}
+
+/**
+ * Lay a cluster out as a cloud around its centre.
+ *
+ * Collision safety rests on one fact: two chips only overlap if they are
+ * close in BOTH axes. Rows are kept ROW_PITCH apart, so anything on a
+ * different row is safe at any horizontal offset — which is what buys the
+ * freedom to shove whole rows sideways. Within a row, COL_PITCH does the work.
+ *
+ *   rows    ROW_PITCH - 2*JITTER_Y = 36px  > NODE_H 34px
+ *   in-row  COL_PITCH - 2*JITTER_X = 178px > NODE_W_MAX 176px
+ */
+function cloudLayout(ids: string[], cx: number, cy: number): Record<string, { x: number; y: number }> {
+  const out: Record<string, { x: number; y: number }> = {};
+  const counts = blobRows(ids.length);
+  const rows = counts.length;
+  let k = 0;
+  counts.forEach((c, r) => {
+    // Shifting a whole row is free — rows can't collide vertically — and it's
+    // the main thing that stops the cluster reading as a straight column.
+    const rowShift = scatter(`${ids[k] ?? r}row${r}`, 3, COL_PITCH * 0.3);
+    for (let i = 0; i < c; i++, k++) {
+      const id = ids[k];
+      out[id] = {
+        x: cx + rowShift + (i - (c - 1) / 2) * COL_PITCH + scatter(id, 1, JITTER_X),
+        y: cy + (r - (rows - 1) / 2) * ROW_PITCH + scatter(id, 2, JITTER_Y),
+      };
+    }
+  });
+  return out;
+}
 
 /**
  * Cluster each role so the map reads as four neighbourhoods, not a hairball.
@@ -836,20 +878,9 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
       const resting = store.items
         .filter(i => i.roles[0] === r.id && !inBowl.has(i.id))
         .sort((a, b) => a.y - b.y || a.x - b.x);
-      const total = resting.length;
-      if (!total) continue;
-      const cols = Math.ceil(total / PER_COL);
-      const rows = Math.ceil(total / cols);
+      if (!resting.length) continue;
       const [cx, cy] = ROLE_CENTRES[r.id];
-      resting.forEach((it, i) => {
-        const col = Math.floor(i / rows);
-        const rowI = i % rows;
-        const inCol = Math.min(rows, total - col * rows);
-        p[it.id] = {
-          x: cx + (col - (cols - 1) / 2) * LANE_X + scatter(it.id, 1, JITTER_X),
-          y: cy + (rowI - (inCol - 1) / 2) * LANE_Y + scatter(it.id, 2, JITTER_Y),
-        };
-      });
+      Object.assign(p, cloudLayout(resting.map(i => i.id), cx, cy));
     }
 
     const slots = bowlSlots(store.bowl.length);
