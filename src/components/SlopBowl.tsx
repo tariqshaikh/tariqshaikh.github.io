@@ -24,7 +24,7 @@ import { auth, db, signInWithGoogle, logout } from '../firebase';
 
 // ─── Taxonomy ────────────────────────────────────────────────────────────────
 
-type Role = 'base' | 'protein' | 'topping' | 'accent';
+type Role = 'base' | 'protein' | 'vegetable' | 'fruit' | 'crunch' | 'sauce';
 type Stock = 'in' | 'low' | 'out';
 
 /** Rough per-serving figures. Good enough to compare bowls against each other,
@@ -66,10 +66,12 @@ interface Store {
 }
 
 const ROLES: { id: Role; label: string; short: string; color: string }[] = [
-  { id: 'base',    label: 'Bases',               short: 'Base',    color: '#2563eb' },
-  { id: 'protein', label: 'Proteins',            short: 'Protein', color: '#dc2626' },
-  { id: 'topping', label: 'Toppings & Mix-ins',  short: 'Topping', color: '#16a34a' },
-  { id: 'accent',  label: 'Accents & Enhancers', short: 'Accent',  color: '#d97706' },
+  { id: 'base',      label: 'Bases',               short: 'Base',   color: '#2563eb' },
+  { id: 'protein',   label: 'Proteins',            short: 'Protein', color: '#dc2626' },
+  { id: 'vegetable', label: 'Vegetables',          short: 'Veg',    color: '#16a34a' },
+  { id: 'fruit',     label: 'Fruits',              short: 'Fruit',  color: '#db2777' },
+  { id: 'crunch',    label: 'Crunch & Mix-ins',    short: 'Crunch', color: '#7c3aed' },
+  { id: 'sauce',     label: 'Sauces & Seasonings', short: 'Sauce',  color: '#d97706' },
 ];
 
 const ROLE_META = Object.fromEntries(ROLES.map(r => [r.id, r])) as Record<Role, typeof ROLES[number]>;
@@ -77,15 +79,20 @@ const ROLE_META = Object.fromEntries(ROLES.map(r => [r.id, r])) as Record<Role, 
 /** Pushed well apart so the four neighbourhoods read as separate places, with
  *  the bowl sitting in the gap between them. The view auto-fits on mount, so
  *  the extra spread costs nothing on screen. */
+// Three down each side with the bowl flanked in the middle. Clusters are
+// single-column now (see blobRows) so each is narrow enough that the middle
+// pair clears the bowl horizontally.
 const ROLE_CENTRES: Record<Role, [number, number]> = {
-  base: [250, 200], protein: [1010, 200], topping: [250, 940], accent: [1010, 940],
+  base:      [255, 230], protein: [945, 230],
+  vegetable: [255, 590], fruit:   [945, 590],
+  crunch:    [255, 950], sauce:   [945, 950],
 };
 
-const BOWL = { x: 600, y: 550, rx: 218, ry: 92, depth: 128 };
+const BOWL = { x: 600, y: 590, rx: 206, ry: 88, depth: 120 };
 
 /** Fixed board size. The view fits this rect rather than live item bounds, so
  *  dragging one ingredient never rescales the whole board. */
-const WORLD = { w: 1260, h: 1220 };
+const WORLD = { w: 1200, h: 1200 };
 
 /** Lay the bowl's contents out inside the rim — one column while it's sparse,
  *  two once it fills up, so a single ingredient doesn't sit lopsided. */
@@ -158,30 +165,47 @@ function suggestBowls(store: Store, limit = 9): Bowl[] {
   const ok = new Set(buildEdges(store).map(e => linkKey(e.a, e.b)));
   const fits = (a: Item, b: Item) => ok.has(linkKey(a.id, b.id));
   const avail = store.items.filter(i => i.stock !== 'out');
-  const forRole = (r: Role) => avail.filter(i => i.roles.includes(r));
   const out: Bowl[] = [];
 
-  for (const base of forRole('base')) {
-    const proteins = [...forRole('protein').filter(p => p.id !== base.id && fits(base, p)), null];
-    for (const protein of proteins) {
-      const toppings = [...forRole('topping').filter(t =>
-        t.id !== base.id && t.id !== protein?.id && fits(base, t) && (!protein || fits(protein, t))), null];
-      for (const topping of toppings) {
-        const accents = [...forRole('accent').filter(c =>
-          ![base.id, protein?.id, topping?.id].includes(c.id)
-          && fits(base, c) && (!protein || fits(protein, c)) && (!topping || fits(topping, c))), null];
-        for (const accent of accents) {
-          const parts = [
-            { item: base, slot: 'base' as Role },
-            protein && { item: protein, slot: 'protein' as Role },
-            topping && { item: topping, slot: 'topping' as Role },
-            accent && { item: accent, slot: 'accent' as Role },
-          ].filter(Boolean) as { item: Item; slot: Role }[];
-          if (parts.length < 3) continue;
-          out.push({ parts, score: parts.length * 10 - parts.filter(p => p.item.stock === 'low').length * 3 });
+  // Replaced four hardcoded nested loops, which stopped being workable at six
+  // roles. Two bounds matter here, and the first version got both wrong:
+  //
+  // MAX_PARTS — without it the walk returns maximal bowls, and every
+  // suggestion came back with one of everything: rice + yogurt + greens +
+  // berries + nuts + honey. A bowl is a base and a few things, not six.
+  //
+  // PER_BASE — a single global cap let the first base exhaust the budget
+  // depth-first, so all nine suggestions shared a base. Budgeting per base
+  // is what actually produces variety.
+  const MAX_PARTS = 4;
+  const PER_BASE = 60;
+  const rest = ROLES.map(r => r.id).filter(r => r !== 'base');
+
+  for (const base of avail.filter(i => i.roles.includes('base'))) {
+    const found: Bowl[] = [];
+    const walk = (from: number, chosen: { item: Item; slot: Role }[]): void => {
+      if (found.length >= PER_BASE) return;
+      if (chosen.length >= 3) {
+        found.push({
+          parts: [...chosen],
+          score: chosen.length * 10 - chosen.filter(c => c.item.stock === 'low').length * 3,
+        });
+        if (chosen.length >= MAX_PARTS) return;
+      }
+      for (let j = from; j < rest.length; j++) {
+        const role = rest[j];
+        const cands = avail.filter(i =>
+          i.roles.includes(role)
+          && !chosen.some(c => c.item.id === i.id)
+          && chosen.every(c => fits(c.item, i)));
+        for (const c of cands) {
+          walk(j + 1, [...chosen, { item: c, slot: role }]);
+          if (found.length >= PER_BASE) return;
         }
       }
-    }
+    };
+    walk(0, [{ item: base, slot: 'base' as Role }]);
+    out.push(...found);
   }
   out.sort((a, b) => b.score - a.score);
 
@@ -241,21 +265,31 @@ const SEED: Omit<Item, 'x' | 'y'>[] = [
   { id: 'oats',     name: 'Oats',            roles: ['base'],            stock: 'in',  macros: m(150, 5, 27, 3) },
   { id: 'yogurt',   name: 'Greek Yogurt',    roles: ['base', 'protein'], stock: 'in',  macros: m(100, 17, 6, 0.7) },
   { id: 'cottage',  name: 'Cottage Cheese',  roles: ['base', 'protein'], stock: 'in',  macros: m(110, 12, 5, 4.5) },
-  { id: 'greens',   name: 'Greens',          roles: ['base'],            stock: 'in',  macros: m(15, 1.5, 3, 0.2) },
+  { id: 'greens',   name: 'Greens',          roles: ['base', 'vegetable'], stock: 'in', macros: m(15, 1.5, 3, 0.2) },
+
   { id: 'chicken',  name: 'Grilled Chicken', roles: ['protein'],         stock: 'in',  macros: m(185, 35, 0, 4) },
   { id: 'eggs',     name: 'Eggs',            roles: ['protein'],         stock: 'in',  macros: m(140, 12, 1, 10) },
   { id: 'paneer',   name: 'Paneer',          roles: ['protein'],         stock: 'low', macros: m(150, 9, 2, 12) },
   { id: 'tofu',     name: 'Tofu',            roles: ['protein'],         stock: 'out', macros: m(76, 8, 2, 4.8) },
-  { id: 'berries',  name: 'Fresh Berries',   roles: ['topping'],         stock: 'in',  macros: m(40, 0.5, 10, 0.2) },
-  { id: 'cucumber', name: 'Sliced Cucumber', roles: ['topping'],         stock: 'in',  macros: m(16, 0.7, 4, 0.1) },
-  { id: 'nuts',     name: 'Roasted Nuts',    roles: ['topping'],         stock: 'in',  macros: m(170, 6, 6, 15) },
-  { id: 'granola',  name: 'Granola',         roles: ['topping'],         stock: 'low', macros: m(120, 3, 18, 5) },
-  { id: 'seeds',    name: 'Seeds',           roles: ['topping'],         stock: 'in',  macros: m(60, 2, 3, 5) },
-  { id: 'honey',    name: 'Honey',           roles: ['accent'],          stock: 'in',  macros: m(64, 0, 17, 0) },
-  { id: 'hothoney', name: 'Hot Honey',       roles: ['accent'],          stock: 'in',  macros: m(60, 0, 16, 0) },
-  { id: 'chili',    name: 'Chili Crisp',     roles: ['accent'],          stock: 'in',  macros: m(80, 1, 2, 8) },
-  { id: 'oliveoil', name: 'Olive Oil',       roles: ['accent'],          stock: 'in',  macros: m(119, 0, 0, 14) },
-  { id: 'lemon',    name: 'Lemon Juice',     roles: ['accent'],          stock: 'in',  macros: m(4, 0, 1, 0) },
+
+  { id: 'cucumber', name: 'Sliced Cucumber', roles: ['vegetable'],       stock: 'in',  macros: m(16, 0.7, 4, 0.1) },
+  { id: 'tomatoes', name: 'Cherry Tomatoes', roles: ['vegetable'],       stock: 'in',  macros: m(27, 1.3, 6, 0.3) },
+  { id: 'peppers',  name: 'Roasted Peppers', roles: ['vegetable'],       stock: 'low', macros: m(35, 1.2, 7, 0.4) },
+  { id: 'sweetpot', name: 'Sweet Potato',    roles: ['vegetable', 'base'], stock: 'in', macros: m(180, 4, 41, 0.3) },
+
+  { id: 'berries',  name: 'Fresh Berries',   roles: ['fruit'],           stock: 'in',  macros: m(40, 0.5, 10, 0.2) },
+  { id: 'banana',   name: 'Banana',          roles: ['fruit'],           stock: 'in',  macros: m(105, 1.3, 27, 0.4) },
+  { id: 'mango',    name: 'Mango',           roles: ['fruit'],           stock: 'out', macros: m(99, 1.4, 25, 0.6) },
+
+  { id: 'nuts',     name: 'Roasted Nuts',    roles: ['crunch'],          stock: 'in',  macros: m(170, 6, 6, 15) },
+  { id: 'granola',  name: 'Granola',         roles: ['crunch'],          stock: 'low', macros: m(120, 3, 18, 5) },
+  { id: 'seeds',    name: 'Seeds',           roles: ['crunch'],          stock: 'in',  macros: m(60, 2, 3, 5) },
+
+  { id: 'honey',    name: 'Honey',           roles: ['sauce'],           stock: 'in',  macros: m(64, 0, 17, 0) },
+  { id: 'hothoney', name: 'Hot Honey',       roles: ['sauce'],           stock: 'in',  macros: m(60, 0, 16, 0) },
+  { id: 'chili',    name: 'Chili Crisp',     roles: ['sauce'],           stock: 'in',  macros: m(80, 1, 2, 8) },
+  { id: 'oliveoil', name: 'Olive Oil',       roles: ['sauce'],           stock: 'in',  macros: m(119, 0, 0, 14) },
+  { id: 'lemon',    name: 'Lemon Juice',     roles: ['sauce'],           stock: 'in',  macros: m(4, 0, 1, 0) },
 ];
 
 const NODE_H = 34;
@@ -268,6 +302,10 @@ const ROW_PITCH = 52;   // vertical gap between rows
 const COL_PITCH = 196;  // horizontal gap within a row
 const JITTER_X = 9;
 const JITTER_Y = 8;
+/** How far a whole row can slide sideways. Free of collision risk — rows are
+ *  vertically separated — and with one item per row it's the entire reason a
+ *  cluster reads as a drifting cloud rather than a column. */
+const ROW_SHIFT = 62;
 
 function hashId(s: string): number {
   let h = 0;
@@ -288,16 +326,11 @@ const scatter = (id: string, salt: number, span: number) =>
  * uneven row lengths and offset rows, not from nudging nodes around.
  */
 function blobRows(n: number): number[] {
-  if (n <= 2) return n ? [n] : [];
-  const rows = Math.ceil(n / 2) + (n >= 5 ? 1 : 0);
-  const counts = Array(rows).fill(2);
-  let over = rows * 2 - n;
-  // Trim from the ends inward so the middle stays widest.
-  for (let lo = 0, hi = rows - 1; over > 0 && lo <= hi; lo++, hi--) {
-    if (counts[lo] > 1) { counts[lo]--; over--; }
-    if (over > 0 && hi !== lo && counts[hi] > 1) { counts[hi]--; over--; }
-  }
-  return counts;
+  // One per row. With six clusters instead of four there isn't room for
+  // two-wide rows — the middle pair would run into the bowl. The cloud now
+  // comes entirely from shifting each row sideways, which on a single column
+  // reads as a meandering stack rather than a ruled line.
+  return Array(Math.max(0, n)).fill(1);
 }
 
 /**
@@ -319,7 +352,7 @@ function cloudLayout(ids: string[], cx: number, cy: number): Record<string, { x:
   counts.forEach((c, r) => {
     // Shifting a whole row is free — rows can't collide vertically — and it's
     // the main thing that stops the cluster reading as a straight column.
-    const rowShift = scatter(`${ids[k] ?? r}row${r}`, 3, COL_PITCH * 0.3);
+    const rowShift = scatter(`${ids[k] ?? r}row${r}`, 3, ROW_SHIFT);
     for (let i = 0; i < c; i++, k++) {
       const id = ids[k];
       out[id] = {
