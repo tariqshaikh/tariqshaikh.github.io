@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Plus, X, Trash2, Crosshair, PanelLeft, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, Plus, X, Trash2, PanelLeft, AlertTriangle } from 'lucide-react';
 
 /**
  * Slop Bowl — map a pantry, then build a bowl out of what you actually have.
@@ -24,6 +24,11 @@ type Role = 'base' | 'protein' | 'topping' | 'accent';
 type Flavor = 'sweet' | 'savory' | 'neutral';
 type Stock = 'in' | 'low' | 'out';
 
+/** Rough per-serving figures. Good enough to compare bowls against each other,
+ *  not a nutrition label — see the caveat rendered in the Bowl Nutrition tab.
+ *  Optional because anything the user adds has no data until they supply it. */
+interface Macros { kcal: number; protein: number; carbs: number; fat: number }
+
 interface Item {
   id: string;
   name: string;
@@ -32,6 +37,7 @@ interface Item {
   roles: Role[];
   flavors: Flavor[];
   stock: Stock;
+  macros?: Macros;
   x: number;
   y: number;
 }
@@ -54,9 +60,34 @@ const ROLES: { id: Role; label: string; short: string; color: string }[] = [
 
 const ROLE_META = Object.fromEntries(ROLES.map(r => [r.id, r])) as Record<Role, typeof ROLES[number]>;
 const FLAVORS: Flavor[] = ['sweet', 'savory', 'neutral'];
+
+/** Pushed well apart so the four neighbourhoods read as separate places, with
+ *  the bowl sitting in the gap between them. The view auto-fits on mount, so
+ *  the extra spread costs nothing on screen. */
 const ROLE_CENTRES: Record<Role, [number, number]> = {
-  base: [300, 250], protein: [700, 230], topping: [300, 620], accent: [720, 620],
+  base: [200, 170], protein: [1000, 170], topping: [200, 840], accent: [1000, 840],
 };
+
+const BOWL = { x: 600, y: 505, rx: 218, ry: 92, depth: 128 };
+
+/** Lay the bowl's contents out inside the rim — one column while it's sparse,
+ *  two once it fills up, so a single ingredient doesn't sit lopsided. */
+function bowlSlots(n: number): { x: number; y: number }[] {
+  // Columns and row height both give way as the bowl fills, so contents stay
+  // inside the rim instead of spilling out the top. A 16-ingredient bowl is
+  // absurd, but it should look crowded rather than broken.
+  const perRow = n <= 3 ? 1 : n <= 8 ? 2 : 3;
+  const rows = Math.ceil(n / perRow);
+  const rowH = Math.min(31, ((BOWL.ry - 12) * 2) / Math.max(1, rows));
+  const colW = perRow === 3 ? 142 : 212;
+  const top = BOWL.y - ((rows - 1) * rowH) / 2;
+  return Array.from({ length: n }, (_, i) => {
+    const r = Math.floor(i / perRow);
+    const c = i % perRow;
+    const inRow = Math.min(perRow, n - r * perRow);
+    return { x: BOWL.x + (c - (inRow - 1) / 2) * colW, y: top + r * rowH };
+  });
+}
 
 // ─── Pairing rules ───────────────────────────────────────────────────────────
 
@@ -189,26 +220,28 @@ function bowlConflicts(items: Item[]): [Item, Item][] {
 // ─── Seed pantry ─────────────────────────────────────────────────────────────
 // An empty canvas teaches nothing, so first launch lands on a real fridge.
 
+const m = (kcal: number, protein: number, carbs: number, fat: number): Macros => ({ kcal, protein, carbs, fat });
+
 const SEED: Omit<Item, 'x' | 'y'>[] = [
-  { id: 'rice',     name: 'Jasmine Rice',    roles: ['base'],            flavors: ['neutral'],         stock: 'in' },
-  { id: 'oats',     name: 'Oats',            roles: ['base'],            flavors: ['neutral'],         stock: 'in' },
-  { id: 'yogurt',   name: 'Greek Yogurt',    roles: ['base', 'protein'], flavors: ['neutral'],         stock: 'in' },
-  { id: 'cottage',  name: 'Cottage Cheese',  roles: ['base', 'protein'], flavors: ['neutral'],         stock: 'in' },
-  { id: 'greens',   name: 'Greens',          roles: ['base'],            flavors: ['savory'],          stock: 'in' },
-  { id: 'chicken',  name: 'Grilled Chicken', roles: ['protein'],         flavors: ['savory'],          stock: 'in' },
-  { id: 'eggs',     name: 'Eggs',            roles: ['protein'],         flavors: ['savory'],          stock: 'in' },
-  { id: 'paneer',   name: 'Paneer',          roles: ['protein'],         flavors: ['savory'],          stock: 'low' },
-  { id: 'tofu',     name: 'Tofu',            roles: ['protein'],         flavors: ['neutral'],         stock: 'out' },
-  { id: 'berries',  name: 'Fresh Berries',   roles: ['topping'],         flavors: ['sweet'],           stock: 'in' },
-  { id: 'cucumber', name: 'Sliced Cucumber', roles: ['topping'],         flavors: ['savory'],          stock: 'in' },
-  { id: 'nuts',     name: 'Roasted Nuts',    roles: ['topping'],         flavors: ['neutral'],         stock: 'in' },
-  { id: 'granola',  name: 'Granola',         roles: ['topping'],         flavors: ['sweet'],           stock: 'low' },
-  { id: 'seeds',    name: 'Seeds',           roles: ['topping'],         flavors: ['neutral'],         stock: 'in' },
-  { id: 'honey',    name: 'Honey',           roles: ['accent'],          flavors: ['sweet'],           stock: 'in' },
-  { id: 'hothoney', name: 'Hot Honey',       roles: ['accent'],          flavors: ['sweet', 'savory'], stock: 'in' },
-  { id: 'chili',    name: 'Chili Crisp',     roles: ['accent'],          flavors: ['savory'],          stock: 'in' },
-  { id: 'oliveoil', name: 'Olive Oil',       roles: ['accent'],          flavors: ['savory'],          stock: 'in' },
-  { id: 'lemon',    name: 'Lemon Juice',     roles: ['accent'],          flavors: ['neutral'],         stock: 'in' },
+  { id: 'rice',     name: 'Jasmine Rice',    roles: ['base'],            flavors: ['neutral'],         stock: 'in',  macros: m(205, 4, 45, 0.4) },
+  { id: 'oats',     name: 'Oats',            roles: ['base'],            flavors: ['neutral'],         stock: 'in',  macros: m(150, 5, 27, 3) },
+  { id: 'yogurt',   name: 'Greek Yogurt',    roles: ['base', 'protein'], flavors: ['neutral'],         stock: 'in',  macros: m(100, 17, 6, 0.7) },
+  { id: 'cottage',  name: 'Cottage Cheese',  roles: ['base', 'protein'], flavors: ['neutral'],         stock: 'in',  macros: m(110, 12, 5, 4.5) },
+  { id: 'greens',   name: 'Greens',          roles: ['base'],            flavors: ['savory'],          stock: 'in',  macros: m(15, 1.5, 3, 0.2) },
+  { id: 'chicken',  name: 'Grilled Chicken', roles: ['protein'],         flavors: ['savory'],          stock: 'in',  macros: m(185, 35, 0, 4) },
+  { id: 'eggs',     name: 'Eggs',            roles: ['protein'],         flavors: ['savory'],          stock: 'in',  macros: m(140, 12, 1, 10) },
+  { id: 'paneer',   name: 'Paneer',          roles: ['protein'],         flavors: ['savory'],          stock: 'low', macros: m(150, 9, 2, 12) },
+  { id: 'tofu',     name: 'Tofu',            roles: ['protein'],         flavors: ['neutral'],         stock: 'out', macros: m(76, 8, 2, 4.8) },
+  { id: 'berries',  name: 'Fresh Berries',   roles: ['topping'],         flavors: ['sweet'],           stock: 'in',  macros: m(40, 0.5, 10, 0.2) },
+  { id: 'cucumber', name: 'Sliced Cucumber', roles: ['topping'],         flavors: ['savory'],          stock: 'in',  macros: m(16, 0.7, 4, 0.1) },
+  { id: 'nuts',     name: 'Roasted Nuts',    roles: ['topping'],         flavors: ['neutral'],         stock: 'in',  macros: m(170, 6, 6, 15) },
+  { id: 'granola',  name: 'Granola',         roles: ['topping'],         flavors: ['sweet'],           stock: 'low', macros: m(120, 3, 18, 5) },
+  { id: 'seeds',    name: 'Seeds',           roles: ['topping'],         flavors: ['neutral'],         stock: 'in',  macros: m(60, 2, 3, 5) },
+  { id: 'honey',    name: 'Honey',           roles: ['accent'],          flavors: ['sweet'],           stock: 'in',  macros: m(64, 0, 17, 0) },
+  { id: 'hothoney', name: 'Hot Honey',       roles: ['accent'],          flavors: ['sweet', 'savory'], stock: 'in',  macros: m(60, 0, 16, 0) },
+  { id: 'chili',    name: 'Chili Crisp',     roles: ['accent'],          flavors: ['savory'],          stock: 'in',  macros: m(80, 1, 2, 8) },
+  { id: 'oliveoil', name: 'Olive Oil',       roles: ['accent'],          flavors: ['savory'],          stock: 'in',  macros: m(119, 0, 0, 14) },
+  { id: 'lemon',    name: 'Lemon Juice',     roles: ['accent'],          flavors: ['neutral'],         stock: 'in',  macros: m(4, 0, 1, 0) },
 ];
 
 /** Cluster each role so the map reads as four neighbourhoods, not a hairball. */
@@ -304,11 +337,10 @@ function FolderTabs<T extends string>({ tabs, value, onChange }: {
 
 // ─── Pantry rail ─────────────────────────────────────────────────────────────
 
-function PantryRail({ store, setStore, addToBowl, setFocus, onAdd }: {
+function PantryRail({ store, setStore, addToBowl, onAdd }: {
   store: Store;
   setStore: React.Dispatch<React.SetStateAction<Store>>;
   addToBowl: (id: string) => void;
-  setFocus: (id: string) => void;
   onAdd: () => void;
 }) {
   const [q, setQ] = useState('');
@@ -382,10 +414,6 @@ function PantryRail({ store, setStore, addToBowl, setFocus, onAdd }: {
                       )}
                     </button>
 
-                    <button onClick={() => setFocus(it.id)} title="Show pairings on the map"
-                      className="shrink-0 text-neutral-300 opacity-0 transition-opacity hover:text-neutral-900 group-hover:opacity-100">
-                      <Crosshair size={12} />
-                    </button>
                     <button onClick={() => remove(it.id)} title="Remove"
                       className="shrink-0 text-neutral-300 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100">
                       <Trash2 size={12} />
@@ -419,20 +447,56 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [view, setView] = useState({ x: 0, y: 0, k: 1 });
+  const [dragId, setDragId] = useState<string | null>(null);
   const drag = useRef<{ id: string | null; ox: number; oy: number; px: number; py: number; moved: boolean } | null>(null);
 
   const edges = useMemo(() => buildEdges(store), [store]);
   const byId = useMemo(() => Object.fromEntries(store.items.map(i => [i.id, i])), [store.items]);
 
+  /**
+   * Where each node actually draws. Items in the bowl are placed by bowlSlots
+   * rather than by their own x/y, so their pantry position survives untouched
+   * and they glide home when removed. Edges read from here too, or they would
+   * detach from anything sitting in the bowl.
+   */
+  const pos = useMemo(() => {
+    const p: Record<string, { x: number; y: number }> = {};
+    for (const it of store.items) p[it.id] = { x: it.x, y: it.y };
+    const slots = bowlSlots(store.bowl.length);
+    store.bowl.forEach((id, i) => { if (p[id]) p[id] = slots[i]; });
+    return p;
+  }, [store.items, store.bowl]);
+
+  /** Frame everything on first paint — the clusters are too far apart to fit
+   *  a default viewport at 1:1. */
+  const fit = useCallback(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const xs = store.items.map(i => i.x), ys = store.items.map(i => i.y);
+    const minX = Math.min(BOWL.x - BOWL.rx, ...xs) - 90;
+    const maxX = Math.max(BOWL.x + BOWL.rx, ...xs) + 90;
+    const minY = Math.min(BOWL.y - BOWL.ry, ...ys) - 60;
+    const maxY = Math.max(BOWL.y + BOWL.ry + BOWL.depth, ...ys) + 60;
+    const k = Math.min(r.width / (maxX - minX), r.height / (maxY - minY), 1.1);
+    setView({ k, x: (r.width - (maxX - minX) * k) / 2 - minX * k, y: (r.height - (maxY - minY) * k) / 2 - minY * k });
+  }, [store.items]);
+
+  useEffect(() => { fit(); /* once on mount; Reset view re-runs it */ }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [hover, setHover] = useState<string | null>(null);
+  const active = focus ?? hover;
+
   const lit = useMemo(() => {
-    if (!focus) return null;
-    const s = new Set<string>([focus]);
+    if (!active) return null;
+    const s = new Set<string>([active]);
     for (const e of edges) {
-      if (e.a === focus && byId[e.b]?.stock !== 'out') s.add(e.b);
-      if (e.b === focus && byId[e.a]?.stock !== 'out') s.add(e.a);
+      if (e.a === active && byId[e.b]?.stock !== 'out') s.add(e.b);
+      if (e.b === active && byId[e.a]?.stock !== 'out') s.add(e.a);
     }
     return s;
-  }, [focus, edges, byId]);
+  }, [active, edges, byId]);
 
   const toWorld = useCallback((cx: number, cy: number) => {
     const r = svgRef.current!.getBoundingClientRect();
@@ -442,9 +506,13 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
   const down = (e: React.PointerEvent, id: string | null) => {
     (e.target as Element).setPointerCapture?.(e.pointerId);
     const w = toWorld(e.clientX, e.clientY);
-    drag.current = id
-      ? { id, ox: w.x - byId[id].x, oy: w.y - byId[id].y, px: e.clientX, py: e.clientY, moved: false }
+    // Items in the bowl are positioned by the bowl, so dragging them would
+    // fight the layout — they only accept a tap, to come back out.
+    const draggable = id !== null && !store.bowl.includes(id);
+    drag.current = draggable
+      ? { id, ox: w.x - byId[id!].x, oy: w.y - byId[id!].y, px: e.clientX, py: e.clientY, moved: false }
       : { id: null, ox: 0, oy: 0, px: e.clientX, py: e.clientY, moved: false };
+    setDragId(draggable ? id : null);
   };
 
   const move = (e: React.PointerEvent) => {
@@ -463,7 +531,10 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
   const up = (id: string | null) => {
     const d = drag.current;
     drag.current = null;
-    if (!d || d.moved || !id) return;
+    setDragId(null);
+    // A tap on a bowl item never starts a drag, so d.id is null there — only
+    // bail on genuine drags and on empty-canvas taps.
+    if (!d || (d.moved && d.id) || !id) return;
 
     if (linkMode) {
       if (!selected) return setSelected(id);
@@ -480,7 +551,9 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
       });
       return setSelected(null);
     }
-    if (byId[id].stock !== 'out') addToBowl(id);
+    // Tap transfers into the bowl, tap again sends it home.
+    if (store.bowl.includes(id)) setStore(s => ({ ...s, bowl: s.bowl.filter(b => b !== id) }));
+    else if (byId[id].stock !== 'out') addToBowl(id);
   };
 
   const wheel = (e: React.WheelEvent) => {
@@ -497,13 +570,40 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
       <svg ref={svgRef} className="h-full w-full touch-none select-none"
         onPointerDown={e => down(e, null)} onPointerMove={move} onPointerUp={() => up(null)} onWheel={wheel}>
         <g transform={`translate(${view.x},${view.y}) scale(${view.k})`}>
+          {/* The bowl. Drawn under the nodes so transferred ingredients sit in it. */}
+          <g pointerEvents="none">
+            <path
+              d={`M ${BOWL.x - BOWL.rx} ${BOWL.y} C ${BOWL.x - BOWL.rx + 10} ${BOWL.y + BOWL.depth * 1.5},
+                  ${BOWL.x + BOWL.rx - 10} ${BOWL.y + BOWL.depth * 1.5}, ${BOWL.x + BOWL.rx} ${BOWL.y} Z`}
+              fill="#fafafa" stroke="#d4d4d4" strokeWidth={1.25} strokeLinejoin="round"
+            />
+            <ellipse cx={BOWL.x} cy={BOWL.y} rx={BOWL.rx} ry={BOWL.ry}
+              fill="#ffffff" stroke="#d4d4d4" strokeWidth={1.25} />
+            <ellipse cx={BOWL.x} cy={BOWL.y} rx={BOWL.rx - 11} ry={BOWL.ry - 7}
+              fill="none" stroke="#f0f0f0" strokeWidth={1} />
+            {store.bowl.length === 0 && (
+              <text x={BOWL.x} y={BOWL.y + 4} textAnchor="middle" fontSize={12} fill="#c9c9c9"
+                style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
+                tap an ingredient to drop it in
+              </text>
+            )}
+            <text x={BOWL.x} y={BOWL.y + BOWL.depth * 1.12 + 22} textAnchor="middle"
+              fontSize={10} letterSpacing={2.4} fill="#b5b5b5"
+              style={{ fontFamily: 'ui-monospace, monospace' }}>
+              {store.bowl.length ? `BOWL · ${store.bowl.length}` : 'BOWL'}
+            </text>
+          </g>
+
           {edges.map(e => {
             const a = byId[e.a], b = byId[e.b];
             if (!a || !b) return null;
+            const pa = pos[e.a], pb = pos[e.b];
             const dim = a.stock === 'out' || b.stock === 'out';
             const on = lit ? lit.has(a.id) && lit.has(b.id) : false;
+            // Links between two things already in the bowl would just be scribble.
+            if (store.bowl.includes(e.a) && store.bowl.includes(e.b)) return null;
             return (
-              <line key={`${e.a}~${e.b}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+              <line key={`${e.a}~${e.b}`} x1={pa.x} y1={pa.y} x2={pb.x} y2={pb.y}
                 stroke={on ? '#111111' : '#ececec'} strokeWidth={on ? 1.4 : 1}
                 strokeDasharray={e.manual ? '4 3' : undefined}
                 opacity={dim ? 0.3 : on ? 0.9 : 0.75} />
@@ -515,12 +615,21 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
             const faded = lit ? !lit.has(it.id) : false;
             const sel = selected === it.id;
             const inBowl = store.bowl.includes(it.id);
+            const p = pos[it.id];
             const w = Math.max(78, it.name.length * 7.1 + 32);
             return (
-              <g key={it.id} transform={`translate(${it.x},${it.y})`} opacity={faded ? 0.22 : 1}
-                style={{ cursor: 'pointer' }}
+              <g key={it.id} transform={`translate(${p.x},${p.y})`} opacity={faded ? 0.22 : 1}
+                style={{
+                  cursor: 'pointer',
+                  // Glide into and out of the bowl, but never fight a drag.
+                  transition: dragId === it.id ? 'none' : 'transform 420ms cubic-bezier(0.22,1,0.36,1)',
+                }}
                 onPointerDown={e => { e.stopPropagation(); down(e, it.id); }}
-                onPointerUp={e => { e.stopPropagation(); up(it.id); }}>
+                onPointerUp={e => { e.stopPropagation(); up(it.id); }}
+                // Replaces the crosshair button that used to live in the pantry
+                // rail: hover an ingredient to see what it goes with.
+                onPointerEnter={() => !inBowl && !drag.current && setHover(it.id)}
+                onPointerLeave={() => setHover(h => (h === it.id ? null : h))}>
                 <rect x={-w / 2} y={-17} width={w} height={34} rx={17}
                   fill={inBowl ? '#111111' : '#ffffff'}
                   stroke={sel ? '#111111' : out ? '#d4d4d4' : '#dcdcdc'}
@@ -584,12 +693,29 @@ function BowlView({ store, setStore, addToBowl }: {
 
   const drop = (id: string) => setStore(s => ({ ...s, bowl: s.bowl.filter(b => b !== id) }));
 
+  const totals = items.reduce(
+    (t, i) => i.macros
+      ? { kcal: t.kcal + i.macros.kcal, protein: t.protein + i.macros.protein, carbs: t.carbs + i.macros.carbs, fat: t.fat + i.macros.fat }
+      : t,
+    { kcal: 0, protein: 0, carbs: 0, fat: 0 }
+  );
+  const unknown = items.filter(i => !i.macros);
+  // Energy split by macro, not by gram — 4/4/9 kcal per gram.
+  const fromP = totals.protein * 4, fromC = totals.carbs * 4, fromF = totals.fat * 9;
+  const energy = Math.max(1, fromP + fromC + fromF);
+  const split: [string, number, string][] = [
+    ['Protein', fromP / energy, '#dc2626'],
+    ['Carbs',   fromC / energy, '#2563eb'],
+    ['Fat',     fromF / energy, '#d97706'],
+  ];
+  const r1 = (n: number) => Math.round(n * 10) / 10;
+
   return (
     <div className="h-full overflow-y-auto px-6 py-6">
       <div className="mx-auto max-w-xl">
         {items.length === 0 ? (
           <p className="pt-20 text-center text-[13px] text-neutral-400">
-            Your bowl is empty. Add something from the pantry on the left, or tap a node on the map.
+            Your bowl is empty. Tap an ingredient on the map, or pick one from the pantry.
           </p>
         ) : (
           <>
@@ -597,6 +723,55 @@ function BowlView({ store, setStore, addToBowl }: {
               <h2 className="text-[15px] font-medium">{slotted.map(s => s.item.name).join(' + ')}</h2>
               <button onClick={() => setStore(s => ({ ...s, bowl: [] }))}
                 className="text-[10px] uppercase tracking-wider text-neutral-400 hover:text-neutral-900">Empty</button>
+            </div>
+
+            {/* Nutrition */}
+            <div className="mb-5 rounded-xl border border-neutral-200 p-4">
+              <div className="mb-3 flex items-end gap-6">
+                <div>
+                  <div className="text-[26px] leading-none font-medium">{Math.round(totals.kcal)}</div>
+                  <div className="mt-1 text-[9.5px] uppercase tracking-wider text-neutral-400">kcal</div>
+                </div>
+                {([['Protein', totals.protein], ['Carbs', totals.carbs], ['Fat', totals.fat]] as [string, number][]).map(([l, v]) => (
+                  <div key={l}>
+                    <div className="text-[15px] leading-none">{r1(v)}<span className="text-[10px] text-neutral-400">g</span></div>
+                    <div className="mt-1 text-[9.5px] uppercase tracking-wider text-neutral-400">{l}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mb-1.5 flex h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                {split.map(([l, frac, c]) => (
+                  <div key={l} style={{ width: `${frac * 100}%`, background: c }} title={`${l} ${Math.round(frac * 100)}%`} />
+                ))}
+              </div>
+              <div className="flex gap-3">
+                {split.map(([l, frac, c]) => (
+                  <span key={l} className="flex items-center gap-1 text-[9.5px] uppercase tracking-wider text-neutral-400">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: c }} />
+                    {l} {Math.round(frac * 100)}%
+                  </span>
+                ))}
+              </div>
+
+              <table className="mt-3.5 w-full border-t border-neutral-100 pt-2 text-[11px]">
+                <tbody>
+                  {items.map(i => (
+                    <tr key={i.id} className="text-neutral-500">
+                      <td className="py-0.5">{i.name}</td>
+                      <td className="w-14 py-0.5 text-right tabular-nums">{i.macros ? Math.round(i.macros.kcal) : '—'}</td>
+                      <td className="w-12 py-0.5 text-right tabular-nums text-neutral-400">{i.macros ? `${r1(i.macros.protein)}p` : ''}</td>
+                      <td className="w-12 py-0.5 text-right tabular-nums text-neutral-400">{i.macros ? `${r1(i.macros.carbs)}c` : ''}</td>
+                      <td className="w-12 py-0.5 text-right tabular-nums text-neutral-400">{i.macros ? `${r1(i.macros.fat)}f` : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <p className="mt-3 border-t border-neutral-100 pt-2 text-[10px] leading-relaxed text-neutral-400">
+                Rough per-serving estimates for comparing bowls, not a nutrition label.
+                {unknown.length > 0 && ` ${unknown.length} item${unknown.length > 1 ? 's have' : ' has'} no data and ${unknown.length > 1 ? 'are' : 'is'} excluded: ${unknown.map(i => i.name).join(', ')}.`}
+              </p>
             </div>
 
             <div className="mb-5 divide-y divide-neutral-100 rounded-xl border border-neutral-200">
@@ -684,16 +859,14 @@ export default function SlopBowl() {
 
   const ideas = useMemo(() => (tab === 'ideas' ? suggestBowls(store) : []), [tab, store]);
 
+  /** Deliberately does not change tab — the payoff is the ingredient landing in
+   *  the bowl on the canvas, so yanking the user to another view hides it. */
   const addToBowl = useCallback((id: string) => {
     setStore(s => (s.bowl.includes(id) ? s : { ...s, bowl: [...s.bowl, id] }));
-    setTab('bowl');
   }, []);
 
   const rail = (
-    <PantryRail
-      store={store} setStore={setStore} addToBowl={addToBowl} onAdd={() => setAdding(true)}
-      setFocus={id => { setFocus(id); setTab('map'); setRailOpen(false); }}
-    />
+    <PantryRail store={store} setStore={setStore} addToBowl={addToBowl} onAdd={() => setAdding(true)} />
   );
 
   return (
@@ -724,7 +897,7 @@ export default function SlopBowl() {
             <FolderTabs<Tab>
               tabs={[
                 { id: 'map', label: 'Map' },
-                { id: 'bowl', label: 'Bowl', badge: store.bowl.length || undefined },
+                { id: 'bowl', label: 'Bowl Nutrition', badge: store.bowl.length || undefined },
                 { id: 'ideas', label: 'What can I make' },
               ]}
               value={tab} onChange={t => { setTab(t); setFocus(null); }}
