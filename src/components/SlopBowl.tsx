@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil, Sparkles, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil, Sparkles, AlertTriangle, Search } from 'lucide-react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
@@ -98,7 +98,7 @@ const ROLE_META = new Proxy(ROLE_META_RAW, {
  */
 const CANVAS_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
-const BOWL = { x: 600, y: 590, rx: 206, ry: 88, depth: 120 };
+const BOWL = { x: 680, y: 590, rx: 206, ry: 88, depth: 120 };
 
 /**
  * Where the six clusters sit, and how big the board is.
@@ -113,7 +113,12 @@ function boardFor(wide: boolean): { centres: Record<Role, [number, number]>; wor
     // Centred on the bowl, not near it — cy must track BOWL.y or the ring
     // sits off-axis. Ry is sized so the bottom pair clears the bowl's full
     // depth (ry + depth), which a smaller radius did not.
-    const cx = BOWL.x, cy = BOWL.y, Rx = 400, Ry = 440;
+    // Rx must clear two things at once, both measured against a cluster's
+    // half-width (~212px once rows are two wide):
+    //   top/bottom pairs sit Rx apart      -> Rx > 2 * halfW   = 424
+    //   side clusters sit Rx from the bowl -> Rx > rx + halfW  = 418
+    // 400 failed both, which is what the geometry test flagged.
+    const cx = BOWL.x, cy = BOWL.y, Rx = 460, Ry = 440;
     const at = (deg: number): [number, number] => [
       cx + Rx * Math.cos((deg * Math.PI) / 180),
       cy - Ry * Math.sin((deg * Math.PI) / 180),
@@ -124,7 +129,7 @@ function boardFor(wide: boolean): { centres: Record<Role, [number, number]>; wor
         vegetable: at(180), fruit: at(0),    // sides
         crunch: at(240), sauce: at(300),     // bottom pair
       },
-      world: { w: 1200, h: 1160 },
+      world: { w: 1360, h: 1160 },
     };
   }
   return {
@@ -357,7 +362,7 @@ const JITTER_Y = 8;
 /** How far a whole row can slide sideways. Free of collision risk — rows are
  *  vertically separated — and with one item per row it's the entire reason a
  *  cluster reads as a drifting cloud rather than a column. */
-const ROW_SHIFT = 62;
+const ROW_SHIFT = 26;
 
 function hashId(s: string): number {
   let h = 0;
@@ -378,11 +383,24 @@ const scatter = (id: string, salt: number, span: number) =>
  * uneven row lengths and offset rows, not from nudging nodes around.
  */
 function blobRows(n: number): number[] {
-  // One per row. With six clusters instead of four there isn't room for
-  // two-wide rows — the middle pair would run into the bowl. The cloud now
-  // comes entirely from shifting each row sideways, which on a single column
-  // reads as a meandering stack rather than a ruled line.
-  return Array(Math.max(0, n)).fill(1);
+  // Tapered, max two per row: [1,2,2,1] rather than a column of six. A single
+  // column was a tall ruled line and made the board far longer than it needed
+  // to be; tapering gives each cluster a rounded silhouette and roughly halves
+  // its height.
+  //
+  // Two per row fits because the hexagon leaves ~400px between neighbouring
+  // clusters and a two-wide row is 372px. Three would be 568px and collide —
+  // this cap is load-bearing, not cosmetic.
+  if (n <= 0) return [];
+  if (n <= 2) return [n];
+  const rows = Math.ceil(n / 2) + (n >= 5 ? 1 : 0);
+  const counts = Array(rows).fill(2);
+  let over = rows * 2 - n;
+  for (let lo = 0, hi = rows - 1; over > 0 && lo <= hi; lo++, hi--) {
+    if (counts[lo] > 1) { counts[lo]--; over--; }
+    if (over > 0 && hi !== lo && counts[hi] > 1) { counts[hi]--; over--; }
+  }
+  return counts;
 }
 
 /**
@@ -537,6 +555,17 @@ const BY_NAME: Record<string, Role> = {
 
 const VALID_ROLES = new Set<string>(ROLES.map(r => r.id));
 
+/**
+ * "greek yogurt" -> "Greek Yogurt", so the pantry stays tidy however it was
+ * typed. Only words that start lowercase are touched, which leaves BBQ,
+ * McIntosh and the like alone rather than mangling them into Bbq.
+ */
+function titleCase(s: string): string {
+  return s.trim().replace(/\s+/g, ' ').split(' ')
+    .map(w => (/^[a-z]/.test(w) ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(' ');
+}
+
 function migrateRoles(raw: unknown, name?: string): Role[] {
   const known = BY_NAME[String(name ?? '').trim().toLowerCase()];
   const out: Role[] = [];
@@ -554,7 +583,9 @@ function coerce(p: unknown): Store | null {
   const o = p as Partial<Store> | null;
   if (!o || !Array.isArray(o.items) || !o.items.length) return null;
   return {
-    items: o.items.map(i => ({ ...i, roles: migrateRoles(i?.roles, i?.name) })),
+    // Title-case on load too, so pantries saved before this rule tidy up
+    // without anyone having to re-type anything.
+    items: o.items.map(i => ({ ...i, name: titleCase(String(i?.name ?? '')), roles: migrateRoles(i?.roles, i?.name) })),
     extraLinks: o.extraLinks ?? [],
     cutLinks: o.cutLinks ?? [],
     bowl: o.bowl ?? [],
@@ -1798,15 +1829,15 @@ export default function SlopBowl() {
 
 // ─── Add dialog ──────────────────────────────────────────────────────────────
 
-/** One dialog for both add and edit. Editing keeps the item's id, position,
- *  stock and macros — only the fields on screen change, so a rename doesn't
- *  move the node or reset what you had in stock. *//**
+/**
  * One dialog for three jobs: add one, add many, or edit an existing item.
  *
- * Bulk entry is the default for adding, because adding a shop's worth of
- * ingredients one modal at a time is miserable. Names are parsed from lines
- * or commas, then each gets its own section chips so a wrong AI guess costs
- * one tap rather than a re-entry.
+ * Adding is a search-style field with a +, not a textarea. A blank box gave
+ * no hint of the expected format and no feedback until you submitted; adding
+ * one at a time builds a visible list you can correct as you go. Pasting a
+ * comma-separated list still works — it splits on the way in.
+ *
+ * Names are title-cased so the pantry stays tidy however they were typed.
  *
  * Editing keeps the item's id, position, stock and macros — only the fields
  * on screen change, so renaming doesn't move the node or reset its stock.
@@ -1820,34 +1851,38 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
   onSaveMany: (items: Item[]) => void;
 }) {
   const editing = !!item;
-  const [text, setText] = useState(item?.name ?? '');
-  const [roles, setRoles] = useState<Record<string, Role[]>>(
-    item ? { [item.name]: item.roles } : {}
-  );
+  const [draft, setDraft] = useState('');
+  const [staged, setStaged] = useState<string[]>(item ? [item.name] : []);
+  const [roles, setRoles] = useState<Record<string, Role[]>>(item ? { [item.name]: item.roles } : {});
   const [busy, setBusy] = useState(false);
-  const [aiError, setAiError] = useState('');
+  const [note, setNote] = useState('');
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Names parsed from the box: newline or comma separated, de-duplicated.
-  const names = useMemo(() => {
-    const seen = new Set<string>();
-    return text.split(/[\n,]/).map(s => s.trim()).filter(n => {
-      if (!n) return false;
-      const k = n.toLowerCase();
-      if (seen.has(k)) return false;
-      seen.add(k);
-      return true;
-    });
-  }, [text]);
-
-  // Preselect the section the + was pressed on, for anything not yet set.
-  useEffect(() => {
-    if (!presetRole) return;
-    setRoles(prev => {
-      const next = { ...prev };
-      for (const n of names) if (!next[n]?.length) next[n] = [presetRole];
+  const addDraft = () => {
+    // One field, but a pasted "a, b, c" shouldn't become one ingredient.
+    const parts = draft.split(/[\n,]/).map(titleCase).filter(Boolean);
+    if (!parts.length) return;
+    setStaged(prev => {
+      const seen = new Set(prev.map(n => n.toLowerCase()));
+      const next = [...prev];
+      for (const n of parts) if (!seen.has(n.toLowerCase())) { next.push(n); seen.add(n.toLowerCase()); }
       return next;
     });
-  }, [names, presetRole]);
+    if (presetRole) {
+      setRoles(prev => {
+        const next = { ...prev };
+        for (const n of parts) if (!next[n]?.length) next[n] = [presetRole];
+        return next;
+      });
+    }
+    setDraft('');
+    inputRef.current?.focus();
+  };
+
+  const drop = (name: string) => {
+    setStaged(prev => prev.filter(n => n !== name));
+    setRoles(prev => { const next = { ...prev }; delete next[name]; return next; });
+  };
 
   const toggleRole = (name: string, r: Role) =>
     setRoles(prev => {
@@ -1856,36 +1891,36 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
     });
 
   const runAI = async () => {
-    if (!names.length) return;
-    setBusy(true); setAiError('');
+    if (!staged.length) return;
+    setBusy(true); setNote('');
     try {
-      const guessed = await categorise(names);
-      // Only fill what the model actually answered for; never clear a choice
-      // the user already made.
+      const guessed = await categorise(staged);
       setRoles(prev => {
         const next = { ...prev };
-        for (const n of names) if (guessed[n]?.length) next[n] = guessed[n];
+        for (const n of staged) if (guessed[n]?.length) next[n] = guessed[n];
         return next;
       });
-      const missed = names.filter(n => !guessed[n]?.length);
-      if (missed.length) setAiError(`Couldn't place ${missed.length} of ${names.length} — set ${missed.length > 1 ? 'those' : 'that one'} yourself.`);
+      const missed = staged.filter(n => !guessed[n]?.length);
+      if (missed.length) {
+        setNote(`Couldn't place ${missed.length} of ${staged.length} — set ${missed.length > 1 ? 'those' : 'that one'} yourself.`);
+      }
     } catch (e) {
       console.error('[SlopBowl] categorise failed', e);
-      setAiError('AI is unavailable right now. Pick sections manually.');
+      setNote('AI is unavailable right now. Pick sections manually.');
     } finally {
       setBusy(false);
     }
   };
 
-  const unset = names.filter(n => !roles[n]?.length);
-  const dupes = editing ? [] : names.filter(n => existingNames.some(e => e.toLowerCase() === n.toLowerCase()));
-  const missing = !names.length ? 'Type an ingredient'
-    : unset.length ? `Pick a section for ${unset.length === names.length ? (names.length > 1 ? 'each one' : 'it') : unset[0]}`
+  const unset = staged.filter(n => !roles[n]?.length);
+  const dupes = editing ? [] : staged.filter(n => existingNames.some(e => e.toLowerCase() === n.toLowerCase()));
+  const missing = !staged.length ? 'Add an ingredient'
+    : unset.length ? `Pick a section for ${unset.length === staged.length ? (staged.length > 1 ? 'each one' : 'it') : unset[0]}`
     : null;
 
   const submit = () => {
     if (missing) return;
-    const made: Item[] = names.map((n, idx) => {
+    onSaveMany(staged.map((n, idx) => {
       const rs = roles[n];
       if (editing && item) return { ...item, name: n, roles: rs };
       const [cx, cy] = ROLE_CENTRES[rs[0]];
@@ -1895,8 +1930,7 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
         x: cx + ((n.length + idx) % 7) * 18 - 50,
         y: cy + ((n.length + idx) % 5) * 22 - 40,
       };
-    });
-    onSaveMany(made);
+    }));
     onClose();
   };
 
@@ -1910,46 +1944,74 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
           <button onClick={onClose} className="text-neutral-400 hover:text-neutral-900"><X size={16} /></button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          {editing ? (
-            <input
-              autoFocus value={text} onChange={e => setText(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && submit()}
-              className="mb-4 w-full border-b border-neutral-300 pb-2 text-[14px] outline-none focus:border-neutral-900"
-            />
-          ) : (
-            <>
-              <textarea
-                autoFocus value={text} onChange={e => setText(e.target.value)}
-                rows={3}
-                placeholder={'Chickpeas, feta, tahini\nor one per line'}
-                className="w-full resize-y rounded-lg border border-neutral-200 px-3 py-2 text-[13.5px] outline-none placeholder:text-neutral-300 focus:border-neutral-900"
+        {!editing && (
+          <div className="shrink-0 border-b border-neutral-100 px-5 py-3">
+            <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-1 pl-3.5 pr-1.5 transition-colors focus-within:border-neutral-900">
+              <Search size={14} className="shrink-0 text-neutral-300" />
+              <input
+                ref={inputRef} autoFocus value={draft}
+                onChange={e => setDraft(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addDraft(); } }}
+                placeholder="Add an ingredient…"
+                className="min-w-0 flex-1 bg-transparent py-1 text-[13.5px] outline-none placeholder:text-neutral-300"
               />
-              <div className="mb-4 mt-2 flex items-center justify-between">
-                <span className="text-[11px] text-neutral-400">
-                  {names.length ? `${names.length} ingredient${names.length > 1 ? 's' : ''}` : 'Separate with commas or new lines'}
-                </span>
-                <button onClick={runAI} disabled={!names.length || busy}
-                  className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-[11px] text-neutral-600 transition-colors hover:border-neutral-900 hover:text-neutral-900 disabled:border-neutral-100 disabled:text-neutral-300">
+              <button onClick={addDraft} disabled={!draft.trim()} aria-label="Add ingredient"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-300">
+                <Plus size={15} />
+              </button>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-[11px] text-neutral-400">
+                {staged.length ? `${staged.length} to add` : 'Press Enter or + after each one'}
+              </span>
+              {staged.length > 0 && (
+                <button onClick={runAI} disabled={busy}
+                  className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-[11px] text-neutral-600 transition-colors hover:border-neutral-900 hover:text-neutral-900 disabled:text-neutral-300">
                   <Sparkles size={12} /> {busy ? 'Sorting…' : 'Sort with AI'}
                 </button>
-              </div>
-              {aiError && <p className="-mt-2 mb-3 text-[11px] text-amber-700">{aiError}</p>}
-              {dupes.length > 0 && (
-                <p className="-mt-2 mb-3 text-[11px] text-amber-700">
-                  Already in your pantry: {dupes.join(', ')}. Adding again will create a duplicate.
-                </p>
               )}
-            </>
+            </div>
+            {note && <p className="mt-2 text-[11px] text-amber-700">{note}</p>}
+            {dupes.length > 0 && (
+              <p className="mt-2 text-[11px] text-amber-700">
+                Already in your pantry: {dupes.join(', ')}. Adding again will create a duplicate.
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          {editing && (
+            <input
+              autoFocus value={staged[0] ?? ''}
+              onChange={e => {
+                const v = e.target.value;
+                setStaged(prev => {
+                  const old = prev[0];
+                  setRoles(r => ({ ...r, [v]: r[old] ?? [] }));
+                  return [v];
+                });
+              }}
+              className="mb-4 w-full border-b border-neutral-300 pb-2 text-[14px] outline-none focus:border-neutral-900"
+            />
           )}
 
-          {names.length === 0 && !editing && (
-            <p className="py-6 text-center text-[12px] text-neutral-300">Type above to get started.</p>
+          {staged.length === 0 && (
+            <p className="py-8 text-center text-[12px] text-neutral-300">Nothing added yet.</p>
           )}
 
-          {names.map(n => (
-            <div key={n} className="mb-3 border-t border-neutral-100 pt-3 first:border-t-0 first:pt-0">
-              {!editing && <div className="mb-1.5 text-[12.5px] font-medium">{n}</div>}
+          {staged.map(n => (
+            <div key={n} className="mb-3 rounded-xl border border-neutral-100 p-3 last:mb-0">
+              {!editing && (
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="truncate text-[13px] font-medium">{n}</span>
+                  <button onClick={() => drop(n)} aria-label={`Remove ${n}`}
+                    className="shrink-0 text-neutral-300 hover:text-red-600">
+                    <X size={13} />
+                  </button>
+                </div>
+              )}
               {editing && (
                 <p className="mb-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
                   Section <span className="normal-case tracking-normal">— first pick is primary</span>
@@ -1977,7 +2039,7 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
         <div className="shrink-0 border-t border-neutral-100 px-5 py-3.5">
           <button onClick={submit} disabled={!!missing}
             className="w-full rounded-full bg-neutral-900 py-2.5 text-[12px] text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-400">
-            {missing ?? (editing ? 'Save Changes' : `Add ${names.length} to Pantry`)}
+            {missing ?? (editing ? 'Save Changes' : `Add ${staged.length} to Pantry`)}
           </button>
         </div>
       </div>
