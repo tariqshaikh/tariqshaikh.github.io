@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, AlertTriangle, LogOut, Star, Check, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil } from 'lucide-react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
@@ -25,7 +25,6 @@ import { auth, db, signInWithGoogle, logout } from '../firebase';
 // ─── Taxonomy ────────────────────────────────────────────────────────────────
 
 type Role = 'base' | 'protein' | 'topping' | 'accent';
-type Flavor = 'sweet' | 'savory' | 'neutral';
 type Stock = 'in' | 'low' | 'out';
 
 /** Rough per-serving figures. Good enough to compare bowls against each other,
@@ -39,7 +38,6 @@ interface Item {
   /** [0] is primary; the rest secondary. Multi-role items are one node, never
    *  duplicated — Cottage Cheese is Base first, Protein second. */
   roles: Role[];
-  flavors: Flavor[];
   stock: Stock;
   macros?: Macros;
   x: number;
@@ -75,7 +73,6 @@ const ROLES: { id: Role; label: string; short: string; color: string }[] = [
 ];
 
 const ROLE_META = Object.fromEntries(ROLES.map(r => [r.id, r])) as Record<Role, typeof ROLES[number]>;
-const FLAVORS: Flavor[] = ['sweet', 'savory', 'neutral'];
 
 /** Pushed well apart so the four neighbourhoods read as separate places, with
  *  the bowl sitting in the gap between them. The view auto-fits on mount, so
@@ -111,13 +108,14 @@ function bowlSlots(n: number): { x: number; y: number }[] {
 
 // ─── Pairing rules ───────────────────────────────────────────────────────────
 
-/** Neutral goes with anything; otherwise a shared flavour is required. */
-function flavorsAgree(a: Item, b: Item): boolean {
-  if (a.flavors.includes('neutral') || b.flavors.includes('neutral')) return true;
-  return a.flavors.some(f => b.flavors.includes(f));
-}
-
-/** Two items pair only if they can occupy different slots in a bowl. */
+/**
+ * Two items pair only if they can occupy different slots in a bowl.
+ *
+ * This used to also require compatible flavours (sweet / savory / neutral),
+ * which is what kept Honey away from Grilled Chicken. That model is gone —
+ * role is now the only rule, so anything that fills a different slot pairs.
+ * Suggestions are consequently broader and no longer opinionated about taste.
+ */
 function rolesDiffer(a: Item, b: Item): boolean {
   return a.roles.some(r1 => b.roles.some(r2 => r1 !== r2));
 }
@@ -135,7 +133,7 @@ function buildEdges(store: Store): { a: string; b: string; manual: boolean }[] {
       const a = store.items[i], b = store.items[j];
       const k = linkKey(a.id, b.id);
       if (cut.has(k)) continue;
-      if (rolesDiffer(a, b) && flavorsAgree(a, b)) { out.push({ a: a.id, b: b.id, manual: false }); seen.add(k); }
+      if (rolesDiffer(a, b)) { out.push({ a: a.id, b: b.id, manual: false }); seen.add(k); }
     }
   }
   for (const [a, b] of store.extraLinks) {
@@ -228,14 +226,10 @@ function assignSlots(items: Item[]): { item: Item; slot: Role }[] {
   });
 }
 
-/** The rules, run backwards: which pairs in this bowl actually clash. */
-function bowlConflicts(items: Item[]): [Item, Item][] {
-  const bad: [Item, Item][] = [];
-  for (let i = 0; i < items.length; i++)
-    for (let j = i + 1; j < items.length; j++)
-      if (!flavorsAgree(items[i], items[j])) bad.push([items[i], items[j]]);
-  return bad;
-}
+// bowlConflicts lived here. It ran the flavour rules backwards to warn that
+// e.g. Chili Crisp and Fresh Berries don't belong in the same bowl. With
+// flavours gone there is nothing left to disagree about, so the warning and
+// its UI went with them.
 
 // ─── Seed pantry ─────────────────────────────────────────────────────────────
 // An empty canvas teaches nothing, so first launch lands on a real fridge.
@@ -243,25 +237,25 @@ function bowlConflicts(items: Item[]): [Item, Item][] {
 const m = (kcal: number, protein: number, carbs: number, fat: number): Macros => ({ kcal, protein, carbs, fat });
 
 const SEED: Omit<Item, 'x' | 'y'>[] = [
-  { id: 'rice',     name: 'Jasmine Rice',    roles: ['base'],            flavors: ['neutral'],         stock: 'in',  macros: m(205, 4, 45, 0.4) },
-  { id: 'oats',     name: 'Oats',            roles: ['base'],            flavors: ['neutral'],         stock: 'in',  macros: m(150, 5, 27, 3) },
-  { id: 'yogurt',   name: 'Greek Yogurt',    roles: ['base', 'protein'], flavors: ['neutral'],         stock: 'in',  macros: m(100, 17, 6, 0.7) },
-  { id: 'cottage',  name: 'Cottage Cheese',  roles: ['base', 'protein'], flavors: ['neutral'],         stock: 'in',  macros: m(110, 12, 5, 4.5) },
-  { id: 'greens',   name: 'Greens',          roles: ['base'],            flavors: ['savory'],          stock: 'in',  macros: m(15, 1.5, 3, 0.2) },
-  { id: 'chicken',  name: 'Grilled Chicken', roles: ['protein'],         flavors: ['savory'],          stock: 'in',  macros: m(185, 35, 0, 4) },
-  { id: 'eggs',     name: 'Eggs',            roles: ['protein'],         flavors: ['savory'],          stock: 'in',  macros: m(140, 12, 1, 10) },
-  { id: 'paneer',   name: 'Paneer',          roles: ['protein'],         flavors: ['savory'],          stock: 'low', macros: m(150, 9, 2, 12) },
-  { id: 'tofu',     name: 'Tofu',            roles: ['protein'],         flavors: ['neutral'],         stock: 'out', macros: m(76, 8, 2, 4.8) },
-  { id: 'berries',  name: 'Fresh Berries',   roles: ['topping'],         flavors: ['sweet'],           stock: 'in',  macros: m(40, 0.5, 10, 0.2) },
-  { id: 'cucumber', name: 'Sliced Cucumber', roles: ['topping'],         flavors: ['savory'],          stock: 'in',  macros: m(16, 0.7, 4, 0.1) },
-  { id: 'nuts',     name: 'Roasted Nuts',    roles: ['topping'],         flavors: ['neutral'],         stock: 'in',  macros: m(170, 6, 6, 15) },
-  { id: 'granola',  name: 'Granola',         roles: ['topping'],         flavors: ['sweet'],           stock: 'low', macros: m(120, 3, 18, 5) },
-  { id: 'seeds',    name: 'Seeds',           roles: ['topping'],         flavors: ['neutral'],         stock: 'in',  macros: m(60, 2, 3, 5) },
-  { id: 'honey',    name: 'Honey',           roles: ['accent'],          flavors: ['sweet'],           stock: 'in',  macros: m(64, 0, 17, 0) },
-  { id: 'hothoney', name: 'Hot Honey',       roles: ['accent'],          flavors: ['sweet', 'savory'], stock: 'in',  macros: m(60, 0, 16, 0) },
-  { id: 'chili',    name: 'Chili Crisp',     roles: ['accent'],          flavors: ['savory'],          stock: 'in',  macros: m(80, 1, 2, 8) },
-  { id: 'oliveoil', name: 'Olive Oil',       roles: ['accent'],          flavors: ['savory'],          stock: 'in',  macros: m(119, 0, 0, 14) },
-  { id: 'lemon',    name: 'Lemon Juice',     roles: ['accent'],          flavors: ['neutral'],         stock: 'in',  macros: m(4, 0, 1, 0) },
+  { id: 'rice',     name: 'Jasmine Rice',    roles: ['base'],            stock: 'in',  macros: m(205, 4, 45, 0.4) },
+  { id: 'oats',     name: 'Oats',            roles: ['base'],            stock: 'in',  macros: m(150, 5, 27, 3) },
+  { id: 'yogurt',   name: 'Greek Yogurt',    roles: ['base', 'protein'], stock: 'in',  macros: m(100, 17, 6, 0.7) },
+  { id: 'cottage',  name: 'Cottage Cheese',  roles: ['base', 'protein'], stock: 'in',  macros: m(110, 12, 5, 4.5) },
+  { id: 'greens',   name: 'Greens',          roles: ['base'],            stock: 'in',  macros: m(15, 1.5, 3, 0.2) },
+  { id: 'chicken',  name: 'Grilled Chicken', roles: ['protein'],         stock: 'in',  macros: m(185, 35, 0, 4) },
+  { id: 'eggs',     name: 'Eggs',            roles: ['protein'],         stock: 'in',  macros: m(140, 12, 1, 10) },
+  { id: 'paneer',   name: 'Paneer',          roles: ['protein'],         stock: 'low', macros: m(150, 9, 2, 12) },
+  { id: 'tofu',     name: 'Tofu',            roles: ['protein'],         stock: 'out', macros: m(76, 8, 2, 4.8) },
+  { id: 'berries',  name: 'Fresh Berries',   roles: ['topping'],         stock: 'in',  macros: m(40, 0.5, 10, 0.2) },
+  { id: 'cucumber', name: 'Sliced Cucumber', roles: ['topping'],         stock: 'in',  macros: m(16, 0.7, 4, 0.1) },
+  { id: 'nuts',     name: 'Roasted Nuts',    roles: ['topping'],         stock: 'in',  macros: m(170, 6, 6, 15) },
+  { id: 'granola',  name: 'Granola',         roles: ['topping'],         stock: 'low', macros: m(120, 3, 18, 5) },
+  { id: 'seeds',    name: 'Seeds',           roles: ['topping'],         stock: 'in',  macros: m(60, 2, 3, 5) },
+  { id: 'honey',    name: 'Honey',           roles: ['accent'],          stock: 'in',  macros: m(64, 0, 17, 0) },
+  { id: 'hothoney', name: 'Hot Honey',       roles: ['accent'],          stock: 'in',  macros: m(60, 0, 16, 0) },
+  { id: 'chili',    name: 'Chili Crisp',     roles: ['accent'],          stock: 'in',  macros: m(80, 1, 2, 8) },
+  { id: 'oliveoil', name: 'Olive Oil',       roles: ['accent'],          stock: 'in',  macros: m(119, 0, 0, 14) },
+  { id: 'lemon',    name: 'Lemon Juice',     roles: ['accent'],          stock: 'in',  macros: m(4, 0, 1, 0) },
 ];
 
 const NODE_H = 34;
@@ -703,8 +697,6 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
           </div>
           <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-neutral-400">
             <span>{it.roles.map(r => ROLE_META[r].short).join(' · ')}</span>
-            <span className="text-neutral-200">|</span>
-            <span className="capitalize">{it.flavors.join(', ')}</span>
             {inBowl && <span className="font-medium text-neutral-900">· In bowl</span>}
           </div>
         </div>
@@ -1008,7 +1000,11 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
             if (!mine.length) return null;
             const cx = mine.reduce((a, i) => a + pos[i.id].x, 0) / mine.length;
             const top = Math.min(...mine.map(i => pos[i.id].y));
-            const w = r.label.length * 7.2 + 30;
+            // Text starts 25px in (after the dot), so the width has to cover
+            // that lead-in plus the label plus a matching right margin. The
+            // old formula left short labels like "Bases" almost touching the
+            // right edge.
+            const w = r.label.length * 7.0 + 48;
             return (
               <g key={r.id} pointerEvents="none" transform={`translate(${cx},${top - 46})`}>
                 <rect x={-w / 2} y={-13} width={w} height={26} rx={13}
@@ -1124,7 +1120,6 @@ function BowlView({ store, setStore, addToBowl, saveFavorite, savedNow }: {
   const byId = useMemo(() => Object.fromEntries(store.items.map(i => [i.id, i])), [store.items]);
   const items = store.bowl.map(id => byId[id]).filter(Boolean);
   const slotted = assignSlots(items);
-  const clashes = bowlConflicts(items);
 
   const ok = useMemo(() => new Set(buildEdges(store).map(e => linkKey(e.a, e.b))), [store]);
   const nextUp = useMemo(() => {
@@ -1258,20 +1253,6 @@ function BowlView({ store, setStore, addToBowl, saveFavorite, savedNow }: {
                 );
               })}
             </div>
-
-            {clashes.length > 0 && (
-              <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50/50 px-4 py-3">
-                <p className="mb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-amber-700">
-                  <AlertTriangle size={12} /> Flavour clash
-                </p>
-                {clashes.map(([a, b], i) => (
-                  <p key={i} className="text-[12px] text-amber-900/80">
-                    {a.name} ({a.flavors.join('/')}) with {b.name} ({b.flavors.join('/')})
-                  </p>
-                ))}
-                <p className="mt-1.5 text-[11px] text-amber-700/70">Not a rule — just worth tasting before you commit.</p>
-              </div>
-            )}
 
             {nextUp.length > 0 && (
               <>
@@ -1579,26 +1560,24 @@ function ItemDialog({ item, onClose, onSave }: {
   // clear it did nothing at all and read as broken. Validation moved to the
   // submit button, where it can actually say what's missing.
   const [roles, setRoles] = useState<Role[]>(item?.roles ?? []);
-  const [flavors, setFlavors] = useState<Flavor[]>(item?.flavors ?? []);
 
   const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
     set(arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
 
   const missing = !name.trim() ? 'Name it first'
     : !roles.length ? 'Pick at least one role'
-    : !flavors.length ? 'Pick at least one flavour'
     : null;
 
   const submit = () => {
     const n = name.trim();
     if (missing) return;
     if (item) {
-      onSave({ ...item, name: n, roles, flavors });
+      onSave({ ...item, name: n, roles });
     } else {
       const [cx, cy] = ROLE_CENTRES[roles[0]];
       onSave({
         id: `${n.toLowerCase().replace(/\s+/g, '-')}-${n.length}-${roles.join('')}`,
-        name: n, roles, flavors, stock: 'in',
+        name: n, roles, stock: 'in',
         x: cx + (n.length % 7) * 18 - 50,
         y: cy + (n.length % 5) * 22 - 40,
       });
@@ -1638,16 +1617,6 @@ function ItemDialog({ item, onClose, onSave }: {
               </button>
             );
           })}
-        </div>
-
-        <p className="mb-1.5 text-[10px] uppercase tracking-wider text-neutral-400">Flavour</p>
-        <div className="mb-5 flex flex-wrap gap-1.5">
-          {FLAVORS.map(f => (
-            <button key={f} onClick={() => toggle(flavors, f, setFlavors)}
-              className={`rounded-full border px-2.5 py-1 text-[11px] capitalize transition-colors ${
-                flavors.includes(f) ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
-              }`}>{f}</button>
-          ))}
         </div>
 
         <button onClick={submit} disabled={!!missing}
