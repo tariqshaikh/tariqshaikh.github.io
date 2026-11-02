@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Plus, X, Trash2, PanelLeft, AlertTriangle, LogOut, Star, Check, Pencil } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, AlertTriangle, LogOut, Star, Check, Pencil } from 'lucide-react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
@@ -456,6 +456,10 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
   onDragStateChange: (dragging: boolean) => void;
 }) {
   const [q, setQ] = useState('');
+  // Scale controls. A 50-item pantry is a 2,400px scroll; filtering by role
+  // and folding away what you don't have turns that into about nine rows.
+  const [roleFilter, setRoleFilter] = useState<Role | 'all'>('all');
+  const [showOut, setShowOut] = useState(false);
   const [ghost, setGhost] = useState<{ name: string; x: number; y: number; over: boolean } | null>(null);
   const press = useRef<{ id: string; name: string; x: number; y: number; dragging: boolean } | null>(null);
   const match = (i: Item) => i.name.toLowerCase().includes(q.trim().toLowerCase());
@@ -476,6 +480,17 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
       cutLinks: s.cutLinks.filter(([a, b]) => a !== id && b !== id),
       bowl: s.bowl.filter(b => b !== id),
     }));
+
+  const visible = store.items.filter(i => match(i) && (roleFilter === 'all' || i.roles[0] === roleFilter));
+  const inStock = visible.filter(i => i.stock !== 'out');
+  const outRows = visible.filter(i => i.stock === 'out');
+
+  // Grouped under role headings when showing everything; a flat list once a
+  // role is chosen, since repeating the heading you just filtered to is noise.
+  const sections: { role: Role | null; rows: Item[] }[] =
+    roleFilter === 'all'
+      ? ROLES.map(r => ({ role: r.id as Role | null, rows: inStock.filter(i => i.roles[0] === r.id) })).filter(s => s.rows.length)
+      : [{ role: null, rows: inStock }];
 
   /** The map pane marks itself with data-slopbowl-drop, so hit-testing is a
    *  coordinate lookup and never has to know about the canvas transform. */
@@ -509,6 +524,68 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
     else toggleInBowl(p.id);
   };
 
+  /** One row, reused by the in-stock sections and the out-of-stock drawer. */
+  const row = (it: Item) => {
+    const out = it.stock === 'out';
+    const inBowl = store.bowl.includes(it.id);
+    const pill = STOCK_PILL[it.stock];
+    return (
+      <div
+        key={it.id}
+        onPointerDown={e => onDown(e, it)}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={() => { press.current = null; setGhost(null); }}
+        className={`group relative flex touch-none items-center gap-2.5 rounded-lg border px-2.5 py-2 transition-all ${
+          out
+            ? 'cursor-not-allowed border-transparent'
+            : inBowl
+              ? 'cursor-grab border-neutral-900/15 bg-white shadow-sm active:cursor-grabbing'
+              : 'cursor-grab border-transparent hover:border-neutral-200 hover:bg-white hover:shadow-sm active:cursor-grabbing'
+        }`}
+      >
+        {inBowl && <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-neutral-900" />}
+
+        <div className="min-w-0 flex-1">
+          <div className={`truncate text-[13.5px] leading-tight ${out ? 'text-neutral-300 line-through' : 'text-neutral-900'}`}>
+            {it.name}
+          </div>
+          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-neutral-400">
+            <span>{it.roles.map(r => ROLE_META[r].short).join(' · ')}</span>
+            <span className="text-neutral-200">|</span>
+            <span className="capitalize">{it.flavors.join(', ')}</span>
+            {inBowl && <span className="font-medium text-neutral-900">· In bowl</span>}
+          </div>
+        </div>
+
+        <button
+          onPointerDown={e => e.stopPropagation()}
+          onClick={() => cycle(it.id)}
+          title={`${pill.title} — tap to change`}
+          className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors ${pill.cls}`}
+        >
+          {pill.label}
+        </button>
+
+        <button
+          onPointerDown={e => e.stopPropagation()}
+          onClick={() => onEdit(it)} title="Edit"
+          className="shrink-0 text-neutral-200 transition-colors hover:text-neutral-900 group-hover:text-neutral-400"
+        >
+          <Pencil size={13} />
+        </button>
+
+        <button
+          onPointerDown={e => e.stopPropagation()}
+          onClick={() => remove(it.id)} title="Remove"
+          className="shrink-0 text-neutral-200 transition-colors hover:text-red-600 group-hover:text-neutral-400"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <aside className="flex h-full w-[320px] shrink-0 flex-col border-r border-neutral-200 bg-neutral-50/70">
       <div className="shrink-0 border-b border-neutral-200/80 px-4 pb-3 pt-4">
@@ -529,85 +606,62 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
           value={q} onChange={e => setQ(e.target.value)} placeholder="Search your fridge"
           className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-neutral-300 focus:border-neutral-900"
         />
+
+        {/* One tap to narrow to a role, which beats scrolling once the pantry
+            is big. Counts are of what's in stock, matching what's listed. */}
+        <div className="mt-2 flex flex-wrap gap-1">
+          {([['all', 'All'], ...ROLES.map(r => [r.id, r.label] as const)] as [Role | 'all', string][]).map(([id, label]) => {
+            const count = id === 'all'
+              ? store.items.filter(i => i.stock !== 'out' && match(i)).length
+              : store.items.filter(i => i.roles[0] === id && i.stock !== 'out' && match(i)).length;
+            const on = roleFilter === id;
+            return (
+              <button key={id} onClick={() => setRoleFilter(id)}
+                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] transition-colors ${
+                  on ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-400'
+                }`}>
+                {id !== 'all' && <RoleDot role={id} size={5} muted={on} />}
+                {label}
+                <span className={on ? 'text-white/50' : 'text-neutral-300'}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3">
-        {ROLES.map(role => {
-          const rows = store.items.filter(i => i.roles[0] === role.id && match(i));
-          if (!rows.length) return null;
-          return (
-            <section key={role.id} className="mb-4">
-              <h3 className="mb-1.5 flex items-center gap-2 px-1.5">
-                <RoleDot role={role.id} size={7} />
-                <span className="text-[11px] font-semibold tracking-wide text-neutral-700">{role.label}</span>
+        {sections.map(({ role, rows }) => (
+          <section key={role ?? 'flat'} className="mb-4">
+            {role && (
+              <h3 className="sticky top-0 z-10 mb-1.5 flex items-center gap-2 bg-neutral-50/95 px-1.5 py-1 backdrop-blur">
+                <RoleDot role={role} size={7} />
+                <span className="text-[11px] font-semibold tracking-wide text-neutral-700">{ROLE_META[role].label}</span>
                 <span className="text-[10px] tabular-nums text-neutral-300">{rows.length}</span>
               </h3>
+            )}
+            <div className="space-y-0.5">{rows.map(row)}</div>
+          </section>
+        ))}
 
-              <div className="space-y-0.5">
-                {rows.map(it => {
-                  const out = it.stock === 'out';
-                  const inBowl = store.bowl.includes(it.id);
-                  const pill = STOCK_PILL[it.stock];
-                  return (
-                    <div
-                      key={it.id}
-                      onPointerDown={e => onDown(e, it)}
-                      onPointerMove={onMove}
-                      onPointerUp={onUp}
-                      onPointerCancel={() => { press.current = null; setGhost(null); }}
-                      className={`group relative flex touch-none items-center gap-2.5 rounded-lg border px-2.5 py-2 transition-all ${
-                        out
-                          ? 'cursor-not-allowed border-transparent'
-                          : inBowl
-                            ? 'cursor-grab border-neutral-900/15 bg-white shadow-sm active:cursor-grabbing'
-                            : 'cursor-grab border-transparent hover:border-neutral-200 hover:bg-white hover:shadow-sm active:cursor-grabbing'
-                      }`}
-                    >
-                      {inBowl && <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r bg-neutral-900" />}
+        {!visible.length && (
+          <p className="px-2 pt-8 text-center text-[12px] text-neutral-400">
+            {q.trim() ? `Nothing matching "${q.trim()}".` : 'Nothing here yet.'}
+          </p>
+        )}
 
-                      <div className="min-w-0 flex-1">
-                        <div className={`truncate text-[13.5px] leading-tight ${out ? 'text-neutral-300 line-through' : 'text-neutral-900'}`}>
-                          {it.name}
-                        </div>
-                        <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-neutral-400">
-                          <span>{it.roles.map(r => ROLE_META[r].short).join(' · ')}</span>
-                          <span className="text-neutral-200">|</span>
-                          <span className="capitalize">{it.flavors.join(', ')}</span>
-                          {inBowl && <span className="font-medium text-neutral-900">· In bowl</span>}
-                        </div>
-                      </div>
-
-                      <button
-                        onPointerDown={e => e.stopPropagation()}
-                        onClick={() => cycle(it.id)}
-                        title={`${pill.title} — tap to change`}
-                        className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors ${pill.cls}`}
-                      >
-                        {pill.label}
-                      </button>
-
-                      <button
-                        onPointerDown={e => e.stopPropagation()}
-                        onClick={() => onEdit(it)} title="Edit"
-                        className="shrink-0 text-neutral-200 transition-colors hover:text-neutral-900 group-hover:text-neutral-400"
-                      >
-                        <Pencil size={13} />
-                      </button>
-
-                      <button
-                        onPointerDown={e => e.stopPropagation()}
-                        onClick={() => remove(it.id)} title="Remove"
-                        className="shrink-0 text-neutral-200 transition-colors hover:text-red-600 group-hover:text-neutral-400"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
+        {/* Out-of-stock is the biggest source of dead scroll in a big pantry,
+            and it's the part you least need to see. Folded away by default,
+            but counted so it never feels like something went missing. */}
+        {outRows.length > 0 && (
+          <div className="mt-1 border-t border-neutral-200/80 pt-2">
+            <button onClick={() => setShowOut(v => !v)}
+              className="mb-1 flex w-full items-center justify-between px-1.5 py-1 text-[11px] text-neutral-400 hover:text-neutral-900">
+              <span>{outRows.length} out of stock</span>
+              <ChevronDown size={13} className={`transition-transform ${showOut ? 'rotate-180' : ''}`} />
+            </button>
+            {showOut && <div className="space-y-0.5 opacity-70">{outRows.map(row)}</div>}
+          </div>
+        )}
       </div>
 
       <button onClick={onAdd}
