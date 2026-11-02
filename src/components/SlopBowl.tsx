@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Plus, X, Trash2, PanelLeft, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, Plus, X, Trash2, PanelLeft, AlertTriangle, LogOut } from 'lucide-react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db, signInWithGoogle, logout } from '../firebase';
 
 /**
  * Slop Bowl — map a pantry, then build a bowl out of what you actually have.
@@ -262,17 +265,81 @@ function seedLayout(items: Omit<Item, 'x' | 'y'>[]): Item[] {
 
 const KEY = 'slopbowl_v1';
 
+function coerce(p: unknown): Store | null {
+  const o = p as Partial<Store> | null;
+  if (!o || !Array.isArray(o.items) || !o.items.length) return null;
+  return { items: o.items, extraLinks: o.extraLinks ?? [], cutLinks: o.cutLinks ?? [], bowl: o.bowl ?? [] };
+}
+
 function loadStore(): Store {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const p = JSON.parse(raw);
-      if (Array.isArray(p?.items) && p.items.length) {
-        return { items: p.items, extraLinks: p.extraLinks ?? [], cutLinks: p.cutLinks ?? [], bowl: p.bowl ?? [] };
-      }
-    }
+    if (raw) { const s = coerce(JSON.parse(raw)); if (s) return s; }
   } catch { /* fall through to seed */ }
   return { items: seedLayout(SEED), extraLinks: [], cutLinks: [], bowl: [] };
+}
+
+/** One doc per user — the whole pantry is a few KB, far short of Firestore's
+ *  1MB limit, so splitting it into a collection would buy nothing. */
+const userDoc = (uid: string) => doc(db, 'users', uid, 'slopBowl', 'main');
+
+/**
+ * Signed out, the pantry lives in localStorage exactly as before. Signed in,
+ * Firestore becomes the source of truth and localStorage keeps working as an
+ * offline cache.
+ *
+ * First sign-in adopts whatever you built as a guest rather than overwriting
+ * it with a fresh seed — losing a pantry you'd just filled in would be a
+ * rotten reward for signing in.
+ *
+ * Writes are debounced because dragging a node rewrites x/y continuously;
+ * sending every frame to Firestore would be thousands of writes per session.
+ */
+function useSync(store: Store, setStore: React.Dispatch<React.SetStateAction<Store>>) {
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const loadedFor = useRef<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => onAuthStateChanged(auth, u => { setUser(u); if (!u) { loadedFor.current = null; setReady(true); } }), []);
+
+  // Pull on sign-in.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    setReady(false);
+    (async () => {
+      try {
+        const snap = await getDoc(userDoc(user.uid));
+        if (cancelled) return;
+        const remote = snap.exists() ? coerce(snap.data()) : null;
+        if (remote) setStore(remote);
+        else await setDoc(userDoc(user.uid), store);   // adopt the guest pantry
+      } catch (e) {
+        console.error('[SlopBowl] load failed, staying on local copy', e);
+      } finally {
+        if (!cancelled) { loadedFor.current = user.uid; setReady(true); }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Push on change, debounced.
+  useEffect(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* quota — memory still works */ }
+    if (!user || loadedFor.current !== user.uid) return;  // don't echo the pull back
+    setSaving(true);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      setDoc(userDoc(user.uid), store)
+        .catch(e => console.error('[SlopBowl] save failed', e))
+        .finally(() => setSaving(false));
+    }, 900);
+    return () => { if (timer.current) clearTimeout(timer.current); };
+  }, [store, user]);
+
+  return { user, ready, saving };
 }
 
 // ─── Route-scoped PWA manifest ───────────────────────────────────────────────
@@ -299,6 +366,17 @@ function useScopedManifest() {
 // ─── Atoms ───────────────────────────────────────────────────────────────────
 
 const STOCK_NEXT: Record<Stock, Stock> = { in: 'low', low: 'out', out: 'in' };
+
+function GoogleMark() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 48 48" aria-hidden>
+      <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-2.7-.4-4H24v7.3h12.1c-.2 1.8-1.6 4.6-4.5 6.5l6.9 5.3c4.1-3.8 6.6-9.4 6.6-15.1z" />
+      <path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-6.9-5.3c-1.8 1.3-4.3 2.2-7.6 2.2-5.8 0-10.7-3.8-12.5-9.1l-7.1 5.5C8 41.2 15.4 46 24 46z" />
+      <path fill="#FBBC05" d="M11.5 28.5c-.5-1.4-.7-2.9-.7-4.5s.3-3.1.7-4.5l-7.1-5.5C2.9 17 2 20.4 2 24s.9 7 2.4 10z" />
+      <path fill="#EA4335" d="M24 10.6c4.1 0 6.9 1.8 8.5 3.3l6.2-6C34.9 4.4 29.9 2 24 2 15.4 2 8 6.8 4.4 14l7.1 5.5c1.8-5.3 6.7-8.9 12.5-8.9z" />
+    </svg>
+  );
+}
 
 function RoleDot({ role, size = 7, muted = false }: { role: Role; size?: number; muted?: boolean }) {
   return (
@@ -813,9 +891,7 @@ export default function SlopBowl() {
   const [adding, setAdding] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
 
-  useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* quota — memory still works */ }
-  }, [store]);
+  const { user, ready, saving } = useSync(store, setStore);
 
   const ideas = useMemo(() => (tab === 'ideas' ? suggestBowls(store) : []), [tab, store]);
 
@@ -837,11 +913,50 @@ export default function SlopBowl() {
             <PanelLeft size={16} />
           </button>
           <h1 className="text-[15px] font-semibold tracking-tight">Slop Bowl</h1>
+          <span className="hidden rounded-full border border-neutral-200 px-2 py-0.5 text-[9px] uppercase tracking-wider text-neutral-400 sm:inline">
+            Work in progress
+          </span>
         </div>
-        <Link to="/" className="flex items-center gap-1 text-[11px] uppercase tracking-wider text-neutral-400 hover:text-neutral-900">
-          <ChevronLeft size={13} /> Portfolio
-        </Link>
+
+        <div className="flex items-center gap-3">
+          {/* Only a hint, not a spinner — saving shouldn't feel like a wait. */}
+          {saving && <span className="hidden text-[10px] text-neutral-300 sm:inline">saving…</span>}
+
+          {user ? (
+            <div className="flex items-center gap-2">
+              {user.photoURL
+                ? <img src={user.photoURL} alt="" className="h-6 w-6 rounded-full" referrerPolicy="no-referrer" />
+                : <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900 text-[10px] text-white">
+                    {(user.displayName ?? user.email ?? '?').charAt(0).toUpperCase()}
+                  </span>}
+              <span className="hidden max-w-[130px] truncate text-[11px] text-neutral-500 md:inline">
+                {user.displayName ?? user.email}
+              </span>
+              <button onClick={() => logout()} title="Sign out"
+                className="text-neutral-300 hover:text-neutral-900"><LogOut size={14} /></button>
+            </div>
+          ) : (
+            <button
+              onClick={() => signInWithGoogle().catch(e => console.error('[SlopBowl] sign-in failed', e))}
+              className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-[11px] text-neutral-600 transition-colors hover:border-neutral-900 hover:text-neutral-900"
+            >
+              <GoogleMark /> Sign in
+            </button>
+          )}
+
+          <Link to="/" className="flex items-center gap-1 text-[11px] uppercase tracking-wider text-neutral-400 hover:text-neutral-900">
+            <ChevronLeft size={13} /> Portfolio
+          </Link>
+        </div>
       </header>
+
+      {/* Guests aren't blocked — the app works fully without an account, this
+          just says what signing in buys you. */}
+      {ready && !user && (
+        <div className="shrink-0 border-b border-neutral-100 bg-neutral-50/70 px-4 py-1.5 text-[11px] text-neutral-500">
+          Your pantry is saved on this device. Sign in to keep it across your phone and laptop.
+        </div>
+      )}
 
       <div className="flex min-h-0 flex-1">
         <div className="hidden md:flex">{rail}</div>

@@ -189,6 +189,13 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    // Slop Bowl Rules — one doc per user holding the whole pantry.
+    // Needed because of the default-deny above: without this the app signs in
+    // fine and then every save is rejected.
+    match /users/{userId}/slopBowl/{docId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // Collaborative Flights/Trips Rules (Waves)
     match /trips/{tripId} {
       // Helper to check if user is a member of this trip
