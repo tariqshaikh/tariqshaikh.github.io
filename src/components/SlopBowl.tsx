@@ -923,15 +923,25 @@ export default function SlopBowl() {
 
 function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (it: Item) => void }) {
   const [name, setName] = useState('');
-  const [roles, setRoles] = useState<Role[]>(['base']);
-  const [flavors, setFlavors] = useState<Flavor[]>(['neutral']);
+  // Nothing preselected. Defaulting roles to ['base'] meant every new
+  // ingredient arrived as a Base whether you meant it or not, and the old
+  // toggle refused to remove the last remaining pick — so tapping Base to
+  // clear it did nothing at all and read as broken. Validation moved to the
+  // submit button, where it can actually say what's missing.
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [flavors, setFlavors] = useState<Flavor[]>([]);
 
   const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
-    set(arr.includes(v) ? (arr.length > 1 ? arr.filter(x => x !== v) : arr) : [...arr, v]);
+    set(arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
+
+  const missing = !name.trim() ? 'Name it first'
+    : !roles.length ? 'Pick at least one role'
+    : !flavors.length ? 'Pick at least one flavour'
+    : null;
 
   const submit = () => {
     const n = name.trim();
-    if (!n) return;
+    if (missing) return;
     const [cx, cy] = ROLE_CENTRES[roles[0]];
     onAdd({
       id: `${n.toLowerCase().replace(/\s+/g, '-')}-${n.length}-${roles.join('')}`,
@@ -958,14 +968,22 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (it: Item) 
           Role <span className="normal-case tracking-normal">— first pick is primary</span>
         </p>
         <div className="mb-4 flex flex-wrap gap-1.5">
-          {ROLES.map(r => (
-            <button key={r.id} onClick={() => toggle(roles, r.id, setRoles)}
-              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                roles.includes(r.id) ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
-              }`}>
-              <RoleDot role={r.id} size={5} /> {r.short}
-            </button>
-          ))}
+          {ROLES.map(r => {
+            const i = roles.indexOf(r.id);
+            return (
+              <button key={r.id} onClick={() => toggle(roles, r.id, setRoles)}
+                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                  i > -1 ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
+                }`}>
+                <RoleDot role={r.id} size={5} /> {r.short}
+                {/* Order is meaningful — [0] is the primary role — so show it
+                    rather than just claiming it in the label above. */}
+                {i > -1 && (
+                  <span className="text-[9px] text-white/60">{i === 0 ? 'primary' : i + 1}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         <p className="mb-1.5 text-[10px] uppercase tracking-wider text-neutral-400">Flavour</p>
@@ -978,9 +996,9 @@ function AddDialog({ onClose, onAdd }: { onClose: () => void; onAdd: (it: Item) 
           ))}
         </div>
 
-        <button onClick={submit} disabled={!name.trim()}
-          className="w-full rounded-full bg-neutral-900 py-2.5 text-[12px] text-white disabled:bg-neutral-200">
-          Add to pantry
+        <button onClick={submit} disabled={!!missing}
+          className="w-full rounded-full bg-neutral-900 py-2.5 text-[12px] text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-400">
+          {missing ?? 'Add to pantry'}
         </button>
       </div>
     </div>
