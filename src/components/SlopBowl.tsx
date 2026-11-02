@@ -436,13 +436,16 @@ function PantryRail({ store, setStore, addToBowl, onAdd }: {
 
 // ─── Map ─────────────────────────────────────────────────────────────────────
 
-function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, addToBowl }: {
+/**
+ * No edges are drawn. The derived pairings still run — they power "What can I
+ * make", the "goes with this" suggestions and the flavour-clash warning — but
+ * 125 lines over 19 ingredients is a hairball, and lighting them up on hover
+ * made it worse. The map earns its place through spatial grouping and the
+ * bowl as a target, not through drawn connections.
+ */
+function MapCanvas({ store, setStore, addToBowl }: {
   store: Store;
   setStore: React.Dispatch<React.SetStateAction<Store>>;
-  linkMode: boolean;
-  selected: string | null;
-  setSelected: (id: string | null) => void;
-  focus: string | null;
   addToBowl: (id: string) => void;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -450,7 +453,6 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
   const [dragId, setDragId] = useState<string | null>(null);
   const drag = useRef<{ id: string | null; ox: number; oy: number; px: number; py: number; moved: boolean } | null>(null);
 
-  const edges = useMemo(() => buildEdges(store), [store]);
   const byId = useMemo(() => Object.fromEntries(store.items.map(i => [i.id, i])), [store.items]);
 
   /**
@@ -484,19 +486,6 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
   }, [store.items]);
 
   useEffect(() => { fit(); /* once on mount; Reset view re-runs it */ }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const [hover, setHover] = useState<string | null>(null);
-  const active = focus ?? hover;
-
-  const lit = useMemo(() => {
-    if (!active) return null;
-    const s = new Set<string>([active]);
-    for (const e of edges) {
-      if (e.a === active && byId[e.b]?.stock !== 'out') s.add(e.b);
-      if (e.b === active && byId[e.a]?.stock !== 'out') s.add(e.a);
-    }
-    return s;
-  }, [active, edges, byId]);
 
   const toWorld = useCallback((cx: number, cy: number) => {
     const r = svgRef.current!.getBoundingClientRect();
@@ -535,22 +524,6 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
     // A tap on a bowl item never starts a drag, so d.id is null there — only
     // bail on genuine drags and on empty-canvas taps.
     if (!d || (d.moved && d.id) || !id) return;
-
-    if (linkMode) {
-      if (!selected) return setSelected(id);
-      if (selected === id) return setSelected(null);
-      const k = linkKey(selected, id);
-      setStore(s => {
-        const derived = buildEdges({ ...s, extraLinks: [], cutLinks: [] }).some(e => linkKey(e.a, e.b) === k);
-        const hasCut = s.cutLinks.some(([a, b]) => linkKey(a, b) === k);
-        const hasExtra = s.extraLinks.some(([a, b]) => linkKey(a, b) === k);
-        if (hasCut) return { ...s, cutLinks: s.cutLinks.filter(([a, b]) => linkKey(a, b) !== k) };
-        if (derived) return { ...s, cutLinks: [...s.cutLinks, [selected, id]] };
-        if (hasExtra) return { ...s, extraLinks: s.extraLinks.filter(([a, b]) => linkKey(a, b) !== k) };
-        return { ...s, extraLinks: [...s.extraLinks, [selected, id]] };
-      });
-      return setSelected(null);
-    }
     // Tap transfers into the bowl, tap again sends it home.
     if (store.bowl.includes(id)) setStore(s => ({ ...s, bowl: s.bowl.filter(b => b !== id) }));
     else if (byId[id].stock !== 'out') addToBowl(id);
@@ -594,46 +567,37 @@ function MapCanvas({ store, setStore, linkMode, selected, setSelected, focus, ad
             </text>
           </g>
 
-          {edges.map(e => {
-            const a = byId[e.a], b = byId[e.b];
-            if (!a || !b) return null;
-            const pa = pos[e.a], pb = pos[e.b];
-            const dim = a.stock === 'out' || b.stock === 'out';
-            const on = lit ? lit.has(a.id) && lit.has(b.id) : false;
-            // Links between two things already in the bowl would just be scribble.
-            if (store.bowl.includes(e.a) && store.bowl.includes(e.b)) return null;
+          {/* With the edges gone, the cluster headings are what tell you the
+              map has structure. */}
+          {ROLES.map(r => {
+            const [cx, cy] = ROLE_CENTRES[r.id];
             return (
-              <line key={`${e.a}~${e.b}`} x1={pa.x} y1={pa.y} x2={pb.x} y2={pb.y}
-                stroke={on ? '#111111' : '#ececec'} strokeWidth={on ? 1.4 : 1}
-                strokeDasharray={e.manual ? '4 3' : undefined}
-                opacity={dim ? 0.3 : on ? 0.9 : 0.75} />
+              <text key={r.id} x={cx} y={cy - 158} textAnchor="middle" pointerEvents="none"
+                fontSize={11} letterSpacing={2.2} fill="#c2c2c2"
+                style={{ fontFamily: 'ui-monospace, monospace' }}>
+                {r.label.toUpperCase()}
+              </text>
             );
           })}
 
           {store.items.map(it => {
             const out = it.stock === 'out';
-            const faded = lit ? !lit.has(it.id) : false;
-            const sel = selected === it.id;
             const inBowl = store.bowl.includes(it.id);
             const p = pos[it.id];
             const w = Math.max(78, it.name.length * 7.1 + 32);
             return (
-              <g key={it.id} transform={`translate(${p.x},${p.y})`} opacity={faded ? 0.22 : 1}
+              <g key={it.id} transform={`translate(${p.x},${p.y})`}
                 style={{
                   cursor: 'pointer',
                   // Glide into and out of the bowl, but never fight a drag.
                   transition: dragId === it.id ? 'none' : 'transform 420ms cubic-bezier(0.22,1,0.36,1)',
                 }}
                 onPointerDown={e => { e.stopPropagation(); down(e, it.id); }}
-                onPointerUp={e => { e.stopPropagation(); up(it.id); }}
-                // Replaces the crosshair button that used to live in the pantry
-                // rail: hover an ingredient to see what it goes with.
-                onPointerEnter={() => !inBowl && !drag.current && setHover(it.id)}
-                onPointerLeave={() => setHover(h => (h === it.id ? null : h))}>
+                onPointerUp={e => { e.stopPropagation(); up(it.id); }}>
                 <rect x={-w / 2} y={-17} width={w} height={34} rx={17}
                   fill={inBowl ? '#111111' : '#ffffff'}
-                  stroke={sel ? '#111111' : out ? '#d4d4d4' : '#dcdcdc'}
-                  strokeWidth={sel ? 1.8 : 1} strokeDasharray={out ? '5 4' : undefined} />
+                  stroke={out ? '#d4d4d4' : '#dcdcdc'}
+                  strokeWidth={1} strokeDasharray={out ? '5 4' : undefined} />
                 <circle cx={-w / 2 + 15} cy={0} r={3.5} fill={out ? '#c9c9c9' : ROLE_META[it.roles[0]].color} />
                 {it.roles.length > 1 && (
                   <circle cx={-w / 2 + 15} cy={0} r={6.5} fill="none"
@@ -846,16 +810,12 @@ export default function SlopBowl() {
   useScopedManifest();
   const [store, setStore] = useState<Store>(loadStore);
   const [tab, setTab] = useState<Tab>('map');
-  const [linkMode, setLinkMode] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [focus, setFocus] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* quota — memory still works */ }
   }, [store]);
-  useEffect(() => { if (!linkMode) setSelected(null); }, [linkMode]);
 
   const ideas = useMemo(() => (tab === 'ideas' ? suggestBowls(store) : []), [tab, store]);
 
@@ -900,36 +860,18 @@ export default function SlopBowl() {
                 { id: 'bowl', label: 'Bowl Nutrition', badge: store.bowl.length || undefined },
                 { id: 'ideas', label: 'What can I make' },
               ]}
-              value={tab} onChange={t => { setTab(t); setFocus(null); }}
+              value={tab} onChange={setTab}
             />
-            {tab === 'map' && (
-              <div className="flex items-center gap-2 pb-1.5">
-                {focus && (
-                  <button onClick={() => setFocus(null)}
-                    className="rounded-full border border-neutral-900 px-3 py-1 text-[10px] uppercase tracking-wider">Clear focus</button>
-                )}
-                <button onClick={() => setLinkMode(v => !v)}
-                  className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-wider transition-colors ${
-                    linkMode ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
-                  }`}>{linkMode ? 'Linking' : 'Link'}</button>
-              </div>
-            )}
           </div>
 
           {tab === 'map' && (
             <div className="shrink-0 border-b border-neutral-100 px-4 py-1.5 text-[11px] text-neutral-400">
-              {linkMode
-                ? selected ? 'Now tap a second ingredient to connect or disconnect them.'
-                  : 'Tap two ingredients to force a pairing, or cut one the rules suggested.'
-                : 'Tap a node to add it to your bowl. Drag to rearrange. Lines are suggested pairings.'}
+              Tap an ingredient to drop it in the bowl, tap it again to put it back. Drag to rearrange.
             </div>
           )}
 
           <main className="min-h-0 flex-1 overflow-hidden">
-            {tab === 'map' && (
-              <MapCanvas store={store} setStore={setStore} linkMode={linkMode}
-                selected={selected} setSelected={setSelected} focus={focus} addToBowl={addToBowl} />
-            )}
+            {tab === 'map' && <MapCanvas store={store} setStore={setStore} addToBowl={addToBowl} />}
             {tab === 'bowl' && <BowlView store={store} setStore={setStore} addToBowl={addToBowl} />}
             {tab === 'ideas' && (
               <div className="h-full overflow-y-auto px-6 py-5">
