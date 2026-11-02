@@ -75,7 +75,17 @@ const ROLES: { id: Role; label: string; short: string; color: string }[] = [
   { id: 'sauce',     label: 'Sauces & Seasonings', short: 'Sauce',  color: '#d97706' },
 ];
 
-const ROLE_META = Object.fromEntries(ROLES.map(r => [r.id, r])) as Record<Role, typeof ROLES[number]>;
+const ROLE_META_RAW = Object.fromEntries(ROLES.map(r => [r.id, r])) as Record<Role, typeof ROLES[number]>;
+
+/**
+ * Total by construction. A missing key used to return undefined and the next
+ * `.color` took the whole page down — a stale role id in saved data should
+ * degrade to a wrong colour, never a white screen. migrateRoles handles the
+ * known renames; this catches anything else.
+ */
+const ROLE_META = new Proxy(ROLE_META_RAW, {
+  get: (t, k: string) => t[k as Role] ?? ROLES[0],
+}) as Record<Role, typeof ROLES[number]>;
 
 /** Pushed well apart so the four neighbourhoods read as separate places, with
  *  the bowl sitting in the gap between them. The view auto-fits on mount, so
@@ -493,11 +503,39 @@ async function categorise(names: string[]): Promise<Record<string, Role[]>> {
 
 const KEY = 'slopbowl_v1';
 
+/**
+ * Role ids that existed before the six-section split, and where they go now.
+ *
+ * This caused a white screen. Splitting "Toppings & Mix-ins" and renaming
+ * "Accents & Enhancers" retired the `topping` and `accent` ids, but every
+ * pantry already saved to localStorage and Firestore still held them. On load
+ * those items came back with roles that aren't in ROLE_META, so the first
+ * `ROLE_META[role].color` threw during render and took the whole page down.
+ *
+ * Changing a persisted enum needs a migration; this is it.
+ */
+const LEGACY_ROLES: Record<string, Role> = {
+  topping: 'crunch',   // Toppings & Mix-ins -> Crunch & Mix-ins
+  accent: 'sauce',     // Accents & Enhancers -> Sauces & Seasonings
+};
+const VALID_ROLES = new Set<string>(ROLES.map(r => r.id));
+
+function migrateRoles(raw: unknown): Role[] {
+  const out: Role[] = [];
+  for (const r of Array.isArray(raw) ? raw : []) {
+    const mapped = VALID_ROLES.has(r as string) ? (r as Role) : LEGACY_ROLES[r as string];
+    if (mapped && !out.includes(mapped)) out.push(mapped);
+  }
+  // An item with no recognisable role would be unrenderable; park it somewhere
+  // real rather than dropping an ingredient the user added.
+  return out.length ? out : ['base'];
+}
+
 function coerce(p: unknown): Store | null {
   const o = p as Partial<Store> | null;
   if (!o || !Array.isArray(o.items) || !o.items.length) return null;
   return {
-    items: o.items,
+    items: o.items.map(i => ({ ...i, roles: migrateRoles(i?.roles) })),
     extraLinks: o.extraLinks ?? [],
     cutLinks: o.cutLinks ?? [],
     bowl: o.bowl ?? [],
