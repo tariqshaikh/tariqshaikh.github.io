@@ -79,16 +79,57 @@ const ROLE_META = Object.fromEntries(ROLES.map(r => [r.id, r])) as Record<Role, 
 /** Pushed well apart so the four neighbourhoods read as separate places, with
  *  the bowl sitting in the gap between them. The view auto-fits on mount, so
  *  the extra spread costs nothing on screen. */
-// Three down each side with the bowl flanked in the middle. Clusters are
-// single-column now (see blobRows) so each is narrow enough that the middle
-// pair clears the bowl horizontally.
-const ROLE_CENTRES: Record<Role, [number, number]> = {
-  base:      [255, 230], protein: [945, 230],
-  vegetable: [255, 590], fruit:   [945, 590],
-  crunch:    [255, 950], sauce:   [945, 950],
-};
+/**
+ * `ui-sans-serif` is a WebKit/Blink generic that Firefox does not implement,
+ * so Firefox skipped it and landed on a different fallback with different
+ * metrics — which is why canvas text looked smaller there while the chip
+ * widths stayed sized for Chrome. An explicit stack renders the same in both.
+ */
+const CANVAS_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
 const BOWL = { x: 600, y: 590, rx: 206, ry: 88, depth: 120 };
+
+/**
+ * Where the six clusters sit, and how big the board is.
+ *
+ * Wide windows get a hexagon around the bowl — two across the top, one each
+ * side, two across the bottom. Narrow or tall windows fall back to three down
+ * each side, because a hexagon squeezed into a tall pane just becomes two
+ * columns with wasted corners.
+ */
+function boardFor(wide: boolean): { centres: Record<Role, [number, number]>; world: { w: number; h: number } } {
+  if (wide) {
+    // Centred on the bowl, not near it — cy must track BOWL.y or the ring
+    // sits off-axis. Ry is sized so the bottom pair clears the bowl's full
+    // depth (ry + depth), which a smaller radius did not.
+    const cx = BOWL.x, cy = BOWL.y, Rx = 400, Ry = 440;
+    const at = (deg: number): [number, number] => [
+      cx + Rx * Math.cos((deg * Math.PI) / 180),
+      cy - Ry * Math.sin((deg * Math.PI) / 180),
+    ];
+    return {
+      centres: {
+        base: at(120), protein: at(60),      // top pair
+        vegetable: at(180), fruit: at(0),    // sides
+        crunch: at(240), sauce: at(300),     // bottom pair
+      },
+      world: { w: 1200, h: 1160 },
+    };
+  }
+  return {
+    centres: {
+      base:      [255, 230], protein: [945, 230],
+      vegetable: [255, 590], fruit:   [945, 590],
+      crunch:    [255, 950], sauce:   [945, 950],
+    },
+    world: { w: 1200, h: 1200 },
+  };
+}
+
+/** Used away from the canvas — seeding and new-item placement — where there
+ *  is no measured pane to decide on. */
+const ROLE_CENTRES = boardFor(true).centres;
+
 
 /** Fixed board size. The view fits this rect rather than live item bounds, so
  *  dragging one ingredient never rescales the whole board. */
@@ -881,6 +922,12 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
 
   const byId = useMemo(() => Object.fromEntries(store.items.map(i => [i.id, i])), [store.items]);
 
+  /** Hexagon on a roomy pane, two columns when it gets narrow or tall. The
+   *  threshold is the pane's own aspect, not the window's — the pantry takes
+   *  half the screen, so the window being wide says little about this. */
+  const board = useMemo(() => boardFor(size.w > 0 && size.w / size.h >= 1.1), [size.w, size.h]);
+  const { centres: CENTRES, world: WORLD } = board;
+
   /**
    * Where each node actually draws.
    *
@@ -904,7 +951,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
         .filter(i => i.roles[0] === r.id && !inBowl.has(i.id))
         .sort((a, b) => a.y - b.y || a.x - b.x);
       if (!resting.length) continue;
-      const [cx, cy] = ROLE_CENTRES[r.id];
+      const [cx, cy] = CENTRES[r.id];
       Object.assign(p, cloudLayout(resting.map(i => i.id), cx, cy));
     }
 
@@ -916,7 +963,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
       p[dragId] = { x: byId[dragId].x, y: byId[dragId].y };
     }
     return p;
-  }, [store.items, store.bowl, byId, dragId]);
+  }, [store.items, store.bowl, byId, dragId, CENTRES]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -941,7 +988,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
     const base = size.w && size.h ? Math.min(size.w / WORLD.w, size.h / WORLD.h) : 1;
     const k = base * zoom;
     return { k, x: size.w / 2 - BOWL.x * k, y: size.h / 2 - BOWL.y * k };
-  }, [size, zoom]);
+  }, [size, zoom, WORLD]);
 
   const toWorld = useCallback((cx: number, cy: number) => {
     const r = svgRef.current!.getBoundingClientRect();
@@ -1006,9 +1053,9 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
               fill="none" stroke={incoming ? '#d4d4d4' : '#f0f0f0'} strokeWidth={1}
               strokeDasharray={incoming ? '5 4' : undefined} />
             {store.bowl.length === 0 && (
-              <text x={BOWL.x} y={BOWL.y + 4} textAnchor="middle" fontSize={12}
+              <text x={BOWL.x} y={BOWL.y + 4} textAnchor="middle" fontSize={13}
                 fill={incoming ? '#111111' : '#c9c9c9'}
-                style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
+                style={{ fontFamily: CANVAS_FONT }}>
                 {incoming ? 'Drop it in' : 'Tap or drag an ingredient in'}
               </text>
             )}
@@ -1043,8 +1090,8 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
                 <rect x={-w / 2} y={-13} width={w} height={26} rx={13}
                   fill={r.color} fillOpacity={0.09} stroke={r.color} strokeOpacity={0.22} strokeWidth={1} />
                 <circle cx={-w / 2 + 15} cy={0} r={3.5} fill={r.color} />
-                <text x={-w / 2 + 25} y={4} fontSize={11.5} fontWeight={600} letterSpacing={0.9} fill={r.color}
-                  style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>
+                <text x={-w / 2 + 25} y={4} fontSize={12.5} fontWeight={600} letterSpacing={0.8} fill={r.color}
+                  style={{ fontFamily: CANVAS_FONT }}>
                   {r.label}
                 </text>
               </g>
@@ -1055,7 +1102,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
             const out = it.stock === 'out';
             const inBowl = store.bowl.includes(it.id);
             const p = pos[it.id];
-            const w = Math.max(78, it.name.length * 7.1 + 32);
+            const w = Math.max(86, it.name.length * 7.8 + 34);
             return (
               <g key={it.id} transform={`translate(${p.x},${p.y})`}
                 style={{
@@ -1074,9 +1121,9 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
                   <circle cx={-w / 2 + 15} cy={0} r={6.5} fill="none"
                     stroke={out ? '#dcdcdc' : ROLE_META[it.roles[1]].color} strokeWidth={1} opacity={0.65} />
                 )}
-                <text x={-w / 2 + 26} y={4.5} fontSize={12.5}
+                <text x={-w / 2 + 26} y={4.5} fontSize={13.5}
                   fill={inBowl ? '#ffffff' : out ? '#a3a3a3' : '#111111'}
-                  style={{ fontFamily: 'ui-sans-serif, system-ui, sans-serif' }}>{it.name}</text>
+                  style={{ fontFamily: CANVAS_FONT }}>{it.name}</text>
                 {it.stock === 'low' && !inBowl && (
                   <text x={w / 2 - 9} y={4} fontSize={9} textAnchor="end" fill="#a3a3a3"
                     style={{ fontFamily: 'ui-monospace, monospace' }}>low</text>
