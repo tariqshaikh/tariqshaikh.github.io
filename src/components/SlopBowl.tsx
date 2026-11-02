@@ -265,9 +265,35 @@ const SEED: Omit<Item, 'x' | 'y'>[] = [
 ];
 
 const NODE_H = 34;
-const LANE_Y = 44;   // row pitch, comfortably clear of NODE_H
-const LANE_X = 215;  // column pitch, clear of the widest chip
+const LANE_Y = 50;   // row pitch, comfortably clear of NODE_H even after jitter
+const LANE_X = 268;  // column pitch; must exceed the widest chip + 2*JITTER_X
 const PER_COL = 7;
+const NODE_W_MAX = 176;  // longest ingredient name we expect to render
+
+/**
+ * Deterministic per-item scatter, so a cluster reads as a cloud rather than a
+ * ruled column. Derived from the id so it never changes between renders.
+ *
+ * Both spans are bounded by the pitch they sit in, and a test covering every
+ * pair at 1/3/5/7/8/12/19 items enforces it:
+ *
+ *   vertical   LANE_Y - 2*JITTER_Y = 36px  >  NODE_H 34px
+ *   horizontal LANE_X - 2*JITTER_X = 192px >  NODE_W_MAX 176px
+ *
+ * The horizontal bound is the one that bites. An earlier attempt used
+ * LANE_X 230 with JITTER_X 46, which left only 138px between adjacent
+ * columns and let wide chips in multi-column clusters collide.
+ */
+const JITTER_X = 38;
+const JITTER_Y = 7;
+
+function hashId(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = ((h * 31) + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+const scatter = (id: string, salt: number, span: number) =>
+  (((hashId(id + salt) % 1000) / 1000) - 0.5) * 2 * span;
 
 /**
  * Cluster each role so the map reads as four neighbourhoods, not a hairball.
@@ -671,7 +697,11 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
     // A third of the screen, not a sidebar — the pantry is the part you spend
     // the most time in. Floor keeps the rows usable on a laptop; ceiling stops
     // it becoming absurd on an ultrawide.
-    <aside className="flex h-full w-1/3 min-w-[320px] max-w-[560px] shrink-0 flex-col border-r border-neutral-200 bg-neutral-50/70">
+    // 42% rather than a third, and the cap raised from 560 — at 1680px wide
+    // the old cap meant you got 560px, well under the third that was asked
+    // for. @container lets the rows respond to the rail's own width instead
+    // of the viewport's, since the rail is what actually changes size.
+    <aside className="@container flex h-full w-1/2 min-w-[430px] max-w-[920px] shrink-0 flex-col border-r border-neutral-200 bg-neutral-50/70">
       <div className="shrink-0 border-b border-neutral-200/80 px-4 pb-3 pt-4">
         <div className="mb-0.5 flex items-baseline justify-between">
           <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900">Pantry</h2>
@@ -723,7 +753,10 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
                 <span className="text-[10px] tabular-nums text-neutral-300">{rows.length}</span>
               </h3>
             )}
-            <div className="space-y-0.5">{rows.map(row)}</div>
+            {/* One column while narrow, two once the rail is wide enough to
+                justify it — otherwise the extra width is just dead space to
+                the right of every ingredient name. */}
+            <div className="grid grid-cols-1 gap-x-2 gap-y-0.5 @[620px]:grid-cols-2">{rows.map(row)}</div>
           </section>
         ))}
 
@@ -763,12 +796,14 @@ function PantryRail({ store, setStore, addToBowl, toggleInBowl, onAdd, onEdit, o
  * made it worse. The map earns its place through spatial grouping and the
  * bowl as a target, not through drawn connections.
  */
-function MapCanvas({ store, setStore, addToBowl, incoming }: {
+function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNow }: {
   store: Store;
   setStore: React.Dispatch<React.SetStateAction<Store>>;
   addToBowl: (id: string) => void;
   /** Something is being dragged in from the pantry — light the bowl up. */
   incoming: boolean;
+  saveFavorite: () => void;
+  savedNow: boolean;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -780,18 +815,52 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
   const byId = useMemo(() => Object.fromEntries(store.items.map(i => [i.id, i])), [store.items]);
 
   /**
-   * Where each node actually draws. Items in the bowl are placed by bowlSlots
-   * rather than by their own x/y, so their pantry position survives untouched
-   * and they glide home when removed. Edges read from here too, or they would
-   * detach from anything sitting in the bowl.
+   * Where each node actually draws.
+   *
+   * Positions are derived, not read straight off the item. Moving an
+   * ingredient into the bowl used to leave a hole in its column — Hot Honey
+   * going in left a gap above Olive Oil — because the remaining nodes kept
+   * their stored coordinates. Each cluster is re-packed from whatever is
+   * still resting there, so the column always closes up.
+   *
+   * Stored x/y survives as the ORDER within a cluster, which is what makes
+   * dragging still mean something: drag a node past another and it keeps the
+   * new order, it just snaps to a tidy slot. The node under the cursor is
+   * exempt so it tracks the pointer rather than fighting it.
    */
   const pos = useMemo(() => {
     const p: Record<string, { x: number; y: number }> = {};
-    for (const it of store.items) p[it.id] = { x: it.x, y: it.y };
+    const inBowl = new Set(store.bowl);
+
+    for (const r of ROLES) {
+      const resting = store.items
+        .filter(i => i.roles[0] === r.id && !inBowl.has(i.id))
+        .sort((a, b) => a.y - b.y || a.x - b.x);
+      const total = resting.length;
+      if (!total) continue;
+      const cols = Math.ceil(total / PER_COL);
+      const rows = Math.ceil(total / cols);
+      const [cx, cy] = ROLE_CENTRES[r.id];
+      resting.forEach((it, i) => {
+        const col = Math.floor(i / rows);
+        const rowI = i % rows;
+        const inCol = Math.min(rows, total - col * rows);
+        p[it.id] = {
+          x: cx + (col - (cols - 1) / 2) * LANE_X + scatter(it.id, 1, JITTER_X),
+          y: cy + (rowI - (inCol - 1) / 2) * LANE_Y + scatter(it.id, 2, JITTER_Y),
+        };
+      });
+    }
+
     const slots = bowlSlots(store.bowl.length);
-    store.bowl.forEach((id, i) => { if (p[id]) p[id] = slots[i]; });
+    store.bowl.forEach((id, i) => { if (byId[id]) p[id] = slots[i]; });
+
+    // Let the dragged node follow the pointer instead of snapping mid-drag.
+    if (dragId && byId[dragId] && !inBowl.has(dragId)) {
+      p[dragId] = { x: byId[dragId].x, y: byId[dragId].y };
+    }
     return p;
-  }, [store.items, store.bowl]);
+  }, [store.items, store.bowl, byId, dragId]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -899,10 +968,15 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
               sit on a tinted chip. Anchored to the cluster's actual top edge
               rather than a fixed offset, so they follow dragged nodes. */}
           {ROLES.map(r => {
-            const mine = store.items.filter(i => i.roles[0] === r.id && !store.bowl.includes(i.id));
+            // Must read from `pos`, not from item.x/y. Stored coordinates are
+            // only an ordering hint now; nodes render at packed positions, so
+            // anchoring to the stale values dropped the heading on top of the
+            // first ingredient in the column.
+            const mine = store.items
+              .filter(i => i.roles[0] === r.id && !store.bowl.includes(i.id) && pos[i.id]);
             if (!mine.length) return null;
-            const cx = mine.reduce((a, i) => a + i.x, 0) / mine.length;
-            const top = Math.min(...mine.map(i => i.y));
+            const cx = mine.reduce((a, i) => a + pos[i.id].x, 0) / mine.length;
+            const top = Math.min(...mine.map(i => pos[i.id].y));
             const w = r.label.length * 7.2 + 30;
             return (
               <g key={r.id} pointerEvents="none" transform={`translate(${cx},${top - 46})`}>
@@ -953,6 +1027,27 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
         </g>
       </svg>
 
+      {/* Sits with the bowl, because that's where the bowl now gets built. */}
+      {store.bowl.length > 0 && (
+        <div className="absolute bottom-14 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
+          <span className="pl-1.5 text-[11px] text-neutral-400">
+            {store.bowl.length} in bowl
+          </span>
+          <button onClick={saveFavorite} disabled={savedNow}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] transition-colors ${
+              savedNow
+                ? 'border-neutral-900 bg-neutral-900 text-white'
+                : 'border-neutral-200 text-neutral-700 hover:border-neutral-900'
+            }`}>
+            {savedNow ? <><Check size={12} /> Saved</> : <><Star size={12} /> Save to Favorites</>}
+          </button>
+          <button onClick={() => setStore(s => ({ ...s, bowl: [] }))}
+            className="rounded-full px-2 py-1 text-[11px] text-neutral-400 hover:text-neutral-900">
+            Empty
+          </button>
+        </div>
+      )}
+
       <div className="pointer-events-none absolute bottom-3 left-4 flex flex-wrap gap-x-4 gap-y-1">
         {ROLES.map(r => (
           <span key={r.id} className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
@@ -961,11 +1056,11 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
         ))}
       </div>
       <div className="absolute bottom-3 right-4 flex gap-2">
-        {/* Saved layouts predate the grid, so they still hold the old
-            overlapping circle positions. This re-runs the layout on demand. */}
+        {/* Positions are derived, so spacing can't drift — but dragging
+            reorders a cluster, and this puts that order back to default. */}
         <button
           onClick={() => setStore(s => ({ ...s, items: layoutItems(s.items) }))}
-          title="Re-arrange everything into clean columns"
+          title="Put every cluster back in its default order"
           className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] uppercase tracking-wider text-neutral-500 hover:border-neutral-400 hover:text-neutral-900">
           Tidy up
         </button>
@@ -988,10 +1083,12 @@ function MapCanvas({ store, setStore, addToBowl, incoming }: {
 
 // ─── Bowl builder ────────────────────────────────────────────────────────────
 
-function BowlView({ store, setStore, addToBowl }: {
+function BowlView({ store, setStore, addToBowl, saveFavorite, savedNow }: {
   store: Store;
   setStore: React.Dispatch<React.SetStateAction<Store>>;
   addToBowl: (id: string) => void;
+  saveFavorite: () => void;
+  savedNow: boolean;
 }) {
   const byId = useMemo(() => Object.fromEntries(store.items.map(i => [i.id, i])), [store.items]);
   const items = store.bowl.map(id => byId[id]).filter(Boolean);
@@ -1012,26 +1109,6 @@ function BowlView({ store, setStore, addToBowl }: {
 
   const drop = (id: string) => setStore(s => ({ ...s, bowl: s.bowl.filter(b => b !== id) }));
 
-  const [savedNow, setSavedNow] = useState(false);
-  const key = store.bowl.slice().sort().join('~');
-  useEffect(() => { setSavedNow(false); }, [key]);
-
-  const saveFavorite = () => {
-    if (!items.length) return;
-    setStore(s => {
-      // Same ingredients, already saved — don't pile up duplicates.
-      if (s.favorites.some(f => f.itemIds.slice().sort().join('~') === key)) return s;
-      const fav: Favorite = {
-        id: `${key}-${s.favorites.length}`,
-        name: slotted.map(x => x.item.name).join(' + '),
-        itemIds: [...s.bowl],
-        itemNames: items.map(i => i.name),   // snapshot, so renames don't rewrite history
-        savedAt: Date.now(),
-      };
-      return { ...s, favorites: [fav, ...s.favorites] };
-    });
-    setSavedNow(true);
-  };
 
   const totals = items.reduce(
     (t, i) => i.macros
@@ -1274,6 +1351,29 @@ export default function SlopBowl() {
     setStore(s => ({ ...s, bowl: s.bowl.includes(id) ? s.bowl.filter(b => b !== id) : [...s.bowl, id] }));
   }, []);
 
+  // Saving lives here rather than inside BowlView because the bowl is composed
+  // on the Map now — burying the only save button in another tab meant nobody
+  // found it. Both surfaces call the same thing.
+  const bowlKey = store.bowl.slice().sort().join('~');
+  const alreadySaved = store.favorites.some(f => f.itemIds.slice().sort().join('~') === bowlKey);
+
+  const saveFavorite = useCallback(() => {
+    setStore(s => {
+      if (!s.bowl.length) return s;
+      const k = s.bowl.slice().sort().join('~');
+      if (s.favorites.some(f => f.itemIds.slice().sort().join('~') === k)) return s;  // no duplicates
+      const named = s.bowl.map(id => s.items.find(i => i.id === id)).filter(Boolean) as Item[];
+      const fav: Favorite = {
+        id: `${k}-${s.favorites.length}`,
+        name: assignSlots(named).map(x => x.item.name).join(' + '),
+        itemIds: [...s.bowl],
+        itemNames: named.map(i => i.name),   // snapshot, so later renames don't rewrite history
+        savedAt: Date.now(),
+      };
+      return { ...s, favorites: [fav, ...s.favorites] };
+    });
+  }, []);
+
   const rail = (
     <PantryRail store={store} setStore={setStore} addToBowl={addToBowl} toggleInBowl={toggleInBowl}
       onAdd={() => { setEditing(null); setAdding(true); }}
@@ -1365,8 +1465,14 @@ export default function SlopBowl() {
           {/* Marks the drop zone for pantry drags — hit-tested by coordinate,
               so it works regardless of the canvas pan/zoom transform. */}
           <main data-slopbowl-drop={tab === 'map' ? '' : undefined} className="min-h-0 flex-1 overflow-hidden">
-            {tab === 'map' && <MapCanvas store={store} setStore={setStore} addToBowl={addToBowl} incoming={dragging} />}
-            {tab === 'bowl' && <BowlView store={store} setStore={setStore} addToBowl={addToBowl} />}
+            {tab === 'map' && (
+              <MapCanvas store={store} setStore={setStore} addToBowl={addToBowl} incoming={dragging}
+                saveFavorite={saveFavorite} savedNow={alreadySaved} />
+            )}
+            {tab === 'bowl' && (
+              <BowlView store={store} setStore={setStore} addToBowl={addToBowl}
+                saveFavorite={saveFavorite} savedNow={alreadySaved} />
+            )}
             {tab === 'favorites' && <FavoritesView store={store} setStore={setStore} goToBowl={() => setTab('bowl')} />}
             {tab === 'ideas' && (
               <div className="h-full overflow-y-auto px-6 py-5">
