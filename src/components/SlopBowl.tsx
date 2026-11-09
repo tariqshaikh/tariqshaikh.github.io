@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil, Sparkles, AlertTriangle, Search } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Plus, X, Trash2, PanelLeft, LogOut, Star, Check, Pencil, Sparkles, AlertTriangle, Search, ShoppingBasket } from 'lucide-react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
@@ -1336,7 +1336,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
 
       {/* Sits with the bowl, because that's where the bowl now gets built. */}
       {store.bowl.length > 0 && (
-        <div className="absolute bottom-24 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
+        <div className="absolute bottom-28 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
           <span className="pl-1.5 text-[11px] text-neutral-400">
             {store.bowl.length} in bowl
           </span>
@@ -1355,14 +1355,14 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
         </div>
       )}
 
-      <div className="pointer-events-none absolute bottom-14 left-4 flex flex-wrap gap-x-4 gap-y-1">
+      <div className="pointer-events-none absolute bottom-16 left-4 flex flex-wrap gap-x-4 gap-y-1">
         {ROLES.map(r => (
           <span key={r.id} className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
             <RoleDot role={r.id} size={6} /> {r.short}
           </span>
         ))}
       </div>
-      <div className="absolute bottom-14 right-4 flex gap-2">
+      <div className="absolute bottom-16 right-4 flex gap-2">
         {/* Positions are derived, so spacing can't drift — but dragging
             reorders a cluster, and this puts that order back to default. */}
         <button
@@ -1910,17 +1910,32 @@ export default function SlopBowl() {
                   shopOpen ? 'h-[64%] shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]' : 'h-10'
                 }`}
               >
+                {/* Dark when shut. A white bar on a white board was invisible
+                    — it read as part of the page, not as something you could
+                    open. neutral-900 is already the app's primary-action
+                    colour, so this says "control" without adding a new one. */}
                 <button
                   onClick={() => setShopOpen(v => !v)}
-                  className="flex h-10 shrink-0 items-center justify-between px-5 text-left transition-colors hover:bg-neutral-50"
+                  className={`flex h-11 shrink-0 items-center justify-between px-5 text-left transition-colors ${
+                    shopOpen ? 'bg-white hover:bg-neutral-50' : 'bg-neutral-900 text-white hover:bg-neutral-800'
+                  }`}
                 >
-                  <span className="flex items-baseline gap-2">
+                  <span className="flex items-center gap-2.5">
+                    <ShoppingBasket size={15} className={shopOpen ? 'text-neutral-400' : 'text-white'} />
                     <span className="text-[12.5px] font-semibold tracking-tight">SlopShop</span>
-                    <span className="text-[11px] text-neutral-400">
-                      {shopOpen ? 'Tap an ingredient to stock your pantry' : `Browse ${CATALOG.length} ingredients`}
+                    <span className={`text-[11px] ${shopOpen ? 'text-neutral-400' : 'text-white/60'}`}>
+                      {shopOpen ? 'Tap an ingredient to stock your pantry' : 'Browse popular ingredients'}
                     </span>
                   </span>
-                  <ChevronDown size={15} className={`text-neutral-400 transition-transform ${shopOpen ? '' : 'rotate-180'}`} />
+                  <span className="flex items-center gap-2.5">
+                    {!shopOpen && (
+                      <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] tabular-nums text-white">
+                        {CATALOG.length}
+                      </span>
+                    )}
+                    <ChevronDown size={15}
+                      className={`transition-transform ${shopOpen ? 'text-neutral-400' : 'rotate-180 text-white'}`} />
+                  </span>
                 </button>
                 {shopOpen && (
                   <div className="min-h-0 flex-1 overflow-hidden border-t border-neutral-100">
