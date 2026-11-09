@@ -1336,7 +1336,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
 
       {/* Sits with the bowl, because that's where the bowl now gets built. */}
       {store.bowl.length > 0 && (
-        <div className="absolute bottom-28 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
+        <div className="absolute bottom-[124px] left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
           <span className="pl-1.5 text-[11px] text-neutral-400">
             {store.bowl.length} in bowl
           </span>
@@ -1355,14 +1355,14 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
         </div>
       )}
 
-      <div className="pointer-events-none absolute bottom-16 left-4 flex flex-wrap gap-x-4 gap-y-1">
+      <div className="pointer-events-none absolute bottom-[72px] left-4 flex flex-wrap gap-x-4 gap-y-1">
         {ROLES.map(r => (
           <span key={r.id} className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
             <RoleDot role={r.id} size={6} /> {r.short}
           </span>
         ))}
       </div>
-      <div className="absolute bottom-16 right-4 flex gap-2">
+      <div className="absolute bottom-[72px] right-4 flex gap-2">
         {/* Positions are derived, so spacing can't drift — but dragging
             reorders a cluster, and this puts that order back to default. */}
         <button
@@ -1910,31 +1910,49 @@ export default function SlopBowl() {
                   shopOpen ? 'h-[64%] shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]' : 'h-10'
                 }`}
               >
-                {/* Dark when shut. A white bar on a white board was invisible
-                    — it read as part of the page, not as something you could
-                    open. neutral-900 is already the app's primary-action
-                    colour, so this says "control" without adding a new one. */}
+                {/* A spectrum of the six section colours across the top edge.
+                    Black was visible but foreign — this uses the palette the
+                    app already has, so the bar announces itself AND says what
+                    lives inside it. Reads like the rim of a stocked shelf. */}
+                <div className="flex h-[5px] w-full shrink-0 overflow-hidden">
+                  {ROLES.map(r => (
+                    <span key={r.id} className="flex-1 transition-all duration-300"
+                      style={{ background: r.color, opacity: shopOpen ? 1 : 0.85 }} />
+                  ))}
+                </div>
+
                 <button
                   onClick={() => setShopOpen(v => !v)}
-                  className={`flex h-11 shrink-0 items-center justify-between px-5 text-left transition-colors ${
-                    shopOpen ? 'bg-white hover:bg-neutral-50' : 'bg-neutral-900 text-white hover:bg-neutral-800'
-                  }`}
+                  className="group flex h-14 shrink-0 items-center justify-between bg-[#FBFAF7] px-5 text-left transition-colors hover:bg-white"
                 >
-                  <span className="flex items-center gap-2.5">
-                    <ShoppingBasket size={15} className={shopOpen ? 'text-neutral-400' : 'text-white'} />
-                    <span className="text-[12.5px] font-semibold tracking-tight">SlopShop</span>
-                    <span className={`text-[11px] ${shopOpen ? 'text-neutral-400' : 'text-white/60'}`}>
-                      {shopOpen ? 'Tap an ingredient to stock your pantry' : 'Browse popular ingredients'}
+                  <span className="flex items-center gap-3">
+                    <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-200">
+                      <ShoppingBasket size={15} className="text-neutral-700" />
+                    </span>
+                    <span className="flex flex-col">
+                      <span className="text-[14px] font-semibold tracking-tight text-neutral-900">SlopShop</span>
+                      <span className="text-[11px] text-neutral-500">
+                        {shopOpen
+                          ? 'Tap anything to stock your pantry'
+                          : `${CATALOG.length} ingredients, ready to throw in a bowl`}
+                      </span>
                     </span>
                   </span>
-                  <span className="flex items-center gap-2.5">
-                    {!shopOpen && (
-                      <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] tabular-nums text-white">
-                        {CATALOG.length}
-                      </span>
-                    )}
-                    <ChevronDown size={15}
-                      className={`transition-transform ${shopOpen ? 'text-neutral-400' : 'rotate-180 text-white'}`} />
+
+                  <span className="flex items-center gap-3">
+                    {/* One dot per section — the whole palette, in order, so
+                        you can see at a glance that everything's in there. */}
+                    <span className="hidden items-center gap-1 sm:flex">
+                      {ROLES.map((r, i) => (
+                        <span key={r.id}
+                          className="h-2 w-2 rounded-full transition-transform duration-200 group-hover:scale-125"
+                          style={{ background: r.color, transitionDelay: `${i * 30}ms` }} />
+                      ))}
+                    </span>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full ring-1 ring-neutral-200 transition-colors group-hover:ring-neutral-400">
+                      <ChevronDown size={15}
+                        className={`text-neutral-500 transition-transform ${shopOpen ? '' : 'rotate-180'}`} />
+                    </span>
                   </span>
                 </button>
                 {shopOpen && (
