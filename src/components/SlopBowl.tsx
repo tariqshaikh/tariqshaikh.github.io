@@ -1336,7 +1336,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
 
       {/* Sits with the bowl, because that's where the bowl now gets built. */}
       {store.bowl.length > 0 && (
-        <div className="absolute bottom-14 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
+        <div className="absolute bottom-24 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
           <span className="pl-1.5 text-[11px] text-neutral-400">
             {store.bowl.length} in bowl
           </span>
@@ -1355,14 +1355,14 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
         </div>
       )}
 
-      <div className="pointer-events-none absolute bottom-3 left-4 flex flex-wrap gap-x-4 gap-y-1">
+      <div className="pointer-events-none absolute bottom-14 left-4 flex flex-wrap gap-x-4 gap-y-1">
         {ROLES.map(r => (
           <span key={r.id} className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
             <RoleDot role={r.id} size={6} /> {r.short}
           </span>
         ))}
       </div>
-      <div className="absolute bottom-3 right-4 flex gap-2">
+      <div className="absolute bottom-14 right-4 flex gap-2">
         {/* Positions are derived, so spacing can't drift — but dragging
             reorders a cluster, and this puts that order back to default. */}
         <button
@@ -1733,7 +1733,7 @@ function SlopShopView({ store, onAdd }: {
   );
 }
 
-type Tab = 'map' | 'bowl' | 'favorites' | 'ideas' | 'shop';
+type Tab = 'map' | 'bowl' | 'favorites' | 'ideas';
 
 export default function SlopBowl() {
   useScopedManifest();
@@ -1755,6 +1755,7 @@ export default function SlopBowl() {
   const [dragging, setDragging] = useState(false);
   const [editing, setEditing] = useState<Item | null>(null);
   const [presetRole, setPresetRole] = useState<Role | null>(null);
+  const [shopOpen, setShopOpen] = useState(false);
 
   const toggleInBowl = useCallback((id: string) => {
     setStore(s => ({ ...s, bowl: s.bowl.includes(id) ? s.bowl.filter(b => b !== id) : [...s.bowl, id] }));
@@ -1877,7 +1878,6 @@ export default function SlopBowl() {
                 { id: 'bowl', label: 'Bowl Nutrition', badge: store.bowl.length || undefined },
                 { id: 'favorites', label: 'Favorite Bowls', badge: store.favorites.length || undefined },
                 { id: 'ideas', label: 'What can I make' },
-                { id: 'shop', label: 'SlopShop' },
               ]}
               value={tab} onChange={setTab}
             />
@@ -1891,7 +1891,7 @@ export default function SlopBowl() {
 
           {/* Marks the drop zone for pantry drags — hit-tested by coordinate,
               so it works regardless of the canvas pan/zoom transform. */}
-          <main data-slopbowl-drop={tab === 'map' ? '' : undefined} className="min-h-0 flex-1 overflow-hidden">
+          <main data-slopbowl-drop={tab === 'map' ? '' : undefined} className="relative min-h-0 flex-1 overflow-hidden">
             {tab === 'map' && (
               <MapCanvas store={store} setStore={setStore} addToBowl={addToBowl} incoming={dragging}
                 saveFavorite={saveFavorite} savedNow={alreadySaved} />
@@ -1901,7 +1901,34 @@ export default function SlopBowl() {
                 saveFavorite={saveFavorite} savedNow={alreadySaved} />
             )}
             {tab === 'favorites' && <FavoritesView store={store} setStore={setStore} goToBowl={() => setTab('bowl')} />}
-            {tab === 'shop' && <SlopShopView store={store} onAdd={addFromCatalog} />}
+
+            {/* SlopShop lives under the map as a drawer rather than a tab:
+                it's a tool for stocking the pantry, not a place you go. */}
+            {tab === 'map' && (
+              <div
+                className={`absolute inset-x-0 bottom-0 z-30 flex flex-col border-t border-neutral-200 bg-white transition-[height] duration-300 ease-out ${
+                  shopOpen ? 'h-[64%] shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]' : 'h-10'
+                }`}
+              >
+                <button
+                  onClick={() => setShopOpen(v => !v)}
+                  className="flex h-10 shrink-0 items-center justify-between px-5 text-left transition-colors hover:bg-neutral-50"
+                >
+                  <span className="flex items-baseline gap-2">
+                    <span className="text-[12.5px] font-semibold tracking-tight">SlopShop</span>
+                    <span className="text-[11px] text-neutral-400">
+                      {shopOpen ? 'Tap an ingredient to stock your pantry' : `Browse ${CATALOG.length} ingredients`}
+                    </span>
+                  </span>
+                  <ChevronDown size={15} className={`text-neutral-400 transition-transform ${shopOpen ? '' : 'rotate-180'}`} />
+                </button>
+                {shopOpen && (
+                  <div className="min-h-0 flex-1 overflow-hidden border-t border-neutral-100">
+                    <SlopShopView store={store} onAdd={addFromCatalog} />
+                  </div>
+                )}
+              </div>
+            )}
             {tab === 'ideas' && (
               <div className="h-full overflow-y-auto px-6 py-5">
                 {ideas.length === 0 ? (
