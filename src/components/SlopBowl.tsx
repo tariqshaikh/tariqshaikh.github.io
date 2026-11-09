@@ -1617,7 +1617,123 @@ function FavoritesView({ store, setStore, goToBowl }: {
   );
 }
 
-type Tab = 'map' | 'bowl' | 'favorites' | 'ideas';
+/**
+ * SlopShop — browse the catalog and stock the pantry from it.
+ *
+ * Reads the same CATALOG that drives autocomplete, so an ingredient added
+ * there shows up in both without being entered twice. Adding is one tap and
+ * carries the section, since the catalog already knows it.
+ */
+function SlopShopView({ store, onAdd }: {
+  store: Store;
+  onAdd: (c: CatalogItem) => void;
+}) {
+  const [q, setQ] = useState('');
+  const [filter, setFilter] = useState<Role | 'all'>('all');
+
+  // Case-insensitive, because the pantry title-cases and the catalog may not
+  // match a user's own spelling exactly.
+  const owned = useMemo(
+    () => new Set(store.items.map(i => i.name.trim().toLowerCase())),
+    [store.items]
+  );
+
+  const needle = q.trim().toLowerCase();
+  const matches = (c: CatalogItem) =>
+    (!needle || c.name.toLowerCase().includes(needle)) &&
+    (filter === 'all' || c.roles[0] === filter);
+
+  const sections = ROLES
+    .map(r => ({ role: r, rows: CATALOG.filter(c => c.roles[0] === r.id && matches(c)) }))
+    .filter(s => s.rows.length);
+
+  const total = CATALOG.filter(matches).length;
+  const have = CATALOG.filter(c => owned.has(c.name.toLowerCase())).length;
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="shrink-0 border-b border-neutral-100 px-6 pb-3 pt-4">
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="text-[15px] font-semibold tracking-tight">SlopShop</h2>
+          <span className="text-[11px] text-neutral-400">
+            {have} of {CATALOG.length} already in your pantry
+          </span>
+        </div>
+        <input
+          value={q} onChange={e => setQ(e.target.value)}
+          placeholder="Search the shop"
+          className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-neutral-300 focus:border-neutral-900"
+        />
+        <div className="mt-2 flex flex-wrap gap-1">
+          {([['all', 'All'], ...ROLES.map(r => [r.id, r.label] as const)] as [Role | 'all', string][]).map(([id, label]) => {
+            const n = id === 'all' ? total : CATALOG.filter(c => c.roles[0] === id && matches(c)).length;
+            const on = filter === id;
+            return (
+              <button key={id} onClick={() => setFilter(id)}
+                className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] transition-colors ${
+                  on ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-400'
+                }`}>
+                {id !== 'all' && <RoleDot role={id} size={5} muted={on} />}
+                {label}
+                <span className={on ? 'text-white/50' : 'text-neutral-300'}>{n}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+        {sections.length === 0 && (
+          <p className="pt-16 text-center text-[13px] text-neutral-400">
+            Nothing in the shop matches “{q.trim()}”. You can still add it by hand from the pantry.
+          </p>
+        )}
+
+        {sections.map(({ role, rows }) => (
+          <section key={role.id} className="mb-5">
+            <h3 className="mb-2 flex items-center gap-2">
+              <RoleDot role={role.id} size={7} />
+              <span className="text-[11px] font-semibold tracking-wide text-neutral-700">{role.label}</span>
+              <span className="text-[10px] tabular-nums text-neutral-300">{rows.length}</span>
+            </h3>
+            <div className="grid grid-cols-2 gap-1.5 lg:grid-cols-3">
+              {rows.map(c => {
+                const has = owned.has(c.name.toLowerCase());
+                return (
+                  <button
+                    key={c.name}
+                    onClick={() => !has && onAdd(c)}
+                    disabled={has}
+                    title={has ? 'Already in your pantry' : `Add ${c.name} to ${ROLE_META[c.roles[0] as Role].label}`}
+                    className={`group flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all ${
+                      has
+                        ? 'cursor-default border-neutral-100 bg-neutral-50/60'
+                        : 'border-neutral-200 hover:border-neutral-900 hover:shadow-sm'
+                    }`}
+                  >
+                    <span className={`min-w-0 flex-1 truncate text-[12.5px] ${has ? 'text-neutral-400' : 'text-neutral-900'}`}>
+                      {c.name}
+                    </span>
+                    {c.roles.length > 1 && !has && (
+                      <span className="shrink-0 text-[9px] uppercase tracking-wider text-neutral-400">
+                        +{ROLE_META[c.roles[1] as Role].short}
+                      </span>
+                    )}
+                    {has
+                      ? <Check size={13} className="shrink-0 text-emerald-600" />
+                      : <Plus size={13} className="shrink-0 text-neutral-300 group-hover:text-neutral-900" />}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type Tab = 'map' | 'bowl' | 'favorites' | 'ideas' | 'shop';
 
 export default function SlopBowl() {
   useScopedManifest();
@@ -1664,6 +1780,24 @@ export default function SlopBowl() {
         savedAt: Date.now(),
       };
       return { ...s, favorites: [fav, ...s.favorites] };
+    });
+  }, []);
+
+  /** One tap from the shop into the pantry, section already known. */
+  const addFromCatalog = useCallback((c: CatalogItem) => {
+    setStore(s => {
+      if (s.items.some(i => i.name.trim().toLowerCase() === c.name.toLowerCase())) return s;
+      const [cx, cy] = ROLE_CENTRES[c.roles[0] as Role];
+      const n = c.name;
+      return {
+        ...s,
+        items: [...s.items, {
+          id: `shop-${n.toLowerCase().replace(/\s+/g, '-')}-${s.items.length}`,
+          name: n, roles: c.roles as Role[], stock: 'in' as Stock,
+          x: cx + (n.length % 7) * 18 - 50,
+          y: cy + (n.length % 5) * 22 - 40,
+        }],
+      };
     });
   }, []);
 
@@ -1743,6 +1877,7 @@ export default function SlopBowl() {
                 { id: 'bowl', label: 'Bowl Nutrition', badge: store.bowl.length || undefined },
                 { id: 'favorites', label: 'Favorite Bowls', badge: store.favorites.length || undefined },
                 { id: 'ideas', label: 'What can I make' },
+                { id: 'shop', label: 'SlopShop' },
               ]}
               value={tab} onChange={setTab}
             />
@@ -1766,6 +1901,7 @@ export default function SlopBowl() {
                 saveFavorite={saveFavorite} savedNow={alreadySaved} />
             )}
             {tab === 'favorites' && <FavoritesView store={store} setStore={setStore} goToBowl={() => setTab('bowl')} />}
+            {tab === 'shop' && <SlopShopView store={store} onAdd={addFromCatalog} />}
             {tab === 'ideas' && (
               <div className="h-full overflow-y-auto px-6 py-5">
                 {ideas.length === 0 ? (
