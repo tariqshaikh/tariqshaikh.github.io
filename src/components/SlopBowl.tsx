@@ -323,7 +323,7 @@ const SEED: Omit<Item, 'x' | 'y'>[] = [
   { id: 'oats',     name: 'Oats',            roles: ['base'],            stock: 'in',  macros: m(150, 5, 27, 3) },
   { id: 'yogurt',   name: 'Greek Yogurt',    roles: ['base', 'protein'], stock: 'in',  macros: m(100, 17, 6, 0.7) },
   { id: 'cottage',  name: 'Cottage Cheese',  roles: ['base', 'protein'], stock: 'in',  macros: m(110, 12, 5, 4.5) },
-  { id: 'greens',   name: 'Greens',          roles: ['base', 'vegetable'], stock: 'in', macros: m(15, 1.5, 3, 0.2) },
+  { id: 'greens',   name: 'Mixed Greens',    roles: ['base', 'vegetable'], stock: 'in', macros: m(15, 1.5, 3, 0.2) },
 
   { id: 'chicken',  name: 'Grilled Chicken', roles: ['protein'],         stock: 'in',  macros: m(185, 35, 0, 4) },
   { id: 'eggs',     name: 'Eggs',            roles: ['protein'],         stock: 'in',  macros: m(140, 12, 1, 10) },
@@ -341,7 +341,7 @@ const SEED: Omit<Item, 'x' | 'y'>[] = [
 
   { id: 'nuts',     name: 'Roasted Nuts',    roles: ['crunch'],          stock: 'in',  macros: m(170, 6, 6, 15) },
   { id: 'granola',  name: 'Granola',         roles: ['crunch'],          stock: 'low', macros: m(120, 3, 18, 5) },
-  { id: 'seeds',    name: 'Seeds',           roles: ['crunch'],          stock: 'in',  macros: m(60, 2, 3, 5) },
+  { id: 'seeds',    name: 'Pumpkin Seeds',   roles: ['crunch'],          stock: 'in',  macros: m(60, 2, 3, 5) },
 
   { id: 'honey',    name: 'Honey',           roles: ['sauce'],           stock: 'in',  macros: m(64, 0, 17, 0) },
   { id: 'hothoney', name: 'Hot Honey',       roles: ['sauce'],           stock: 'in',  macros: m(60, 0, 16, 0) },
