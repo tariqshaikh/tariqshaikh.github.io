@@ -6,6 +6,7 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, signInWithGoogle, logout } from '../firebase';
 import { llmChat, extractJson } from '../lib/llm';
+import { CATALOG, searchCatalog, type CatalogItem } from '../data/slopCatalog';
 
 /**
  * Slop Bowl — map a pantry, then build a bowl out of what you actually have.
@@ -1858,23 +1859,38 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
   const [note, setNote] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const addDraft = () => {
+  const suggestions = useMemo(() => searchCatalog(draft, staged), [draft, staged]);
+  const [hi, setHi] = useState(0);
+  useEffect(() => { setHi(0); }, [draft]);
+
+  /**
+   * `pick` is set when the name came from the catalog, which brings its
+   * section with it — the single biggest reason the old flow felt broken,
+   * since a freshly added ingredient otherwise showed no category at all.
+   */
+  const addDraft = (pick?: CatalogItem) => {
     // One field, but a pasted "a, b, c" shouldn't become one ingredient.
-    const parts = draft.split(/[\n,]/).map(titleCase).filter(Boolean);
+    const parts = pick ? [pick.name] : draft.split(/[\n,]/).map(titleCase).filter(Boolean);
     if (!parts.length) return;
-    setStaged(prev => {
-      const seen = new Set(prev.map(n => n.toLowerCase()));
-      const next = [...prev];
-      for (const n of parts) if (!seen.has(n.toLowerCase())) { next.push(n); seen.add(n.toLowerCase()); }
+
+    const fresh = parts.filter(n => !staged.some(s => s.toLowerCase() === n.toLowerCase()));
+    // Newest first. Appending pushed the row you just typed below the fold,
+    // so the chips under your cursor belonged to an earlier ingredient — which
+    // is what made it look like sections were landing on the wrong item.
+    setStaged(prev => [...fresh, ...prev]);
+
+    setRoles(prev => {
+      const next = { ...prev };
+      for (const n of fresh) {
+        if (next[n]?.length) continue;
+        const known = pick?.roles ?? CATALOG.find(c => c.name.toLowerCase() === n.toLowerCase())?.roles;
+        // Catalog knows best, then the section whose + you pressed.
+        if (known) next[n] = known as Role[];
+        else if (presetRole) next[n] = [presetRole];
+      }
       return next;
     });
-    if (presetRole) {
-      setRoles(prev => {
-        const next = { ...prev };
-        for (const n of parts) if (!next[n]?.length) next[n] = [presetRole];
-        return next;
-      });
-    }
+
     setDraft('');
     inputRef.current?.focus();
   };
@@ -1946,19 +1962,48 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
 
         {!editing && (
           <div className="shrink-0 border-b border-neutral-100 px-5 py-3">
-            <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-1 pl-3.5 pr-1.5 transition-colors focus-within:border-neutral-900">
-              <Search size={14} className="shrink-0 text-neutral-300" />
-              <input
-                ref={inputRef} autoFocus value={draft}
-                onChange={e => setDraft(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addDraft(); } }}
-                placeholder="Add an ingredient…"
-                className="min-w-0 flex-1 bg-transparent py-1 text-[13.5px] outline-none placeholder:text-neutral-300"
-              />
-              <button onClick={addDraft} disabled={!draft.trim()} aria-label="Add ingredient"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-300">
-                <Plus size={15} />
-              </button>
+            <div className="relative">
+              <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-1 pl-3.5 pr-1.5 transition-colors focus-within:border-neutral-900">
+                <Search size={14} className="shrink-0 text-neutral-300" />
+                <input
+                  ref={inputRef} autoFocus value={draft}
+                  onChange={e => setDraft(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'ArrowDown' && suggestions.length) { e.preventDefault(); setHi(h => (h + 1) % suggestions.length); }
+                    else if (e.key === 'ArrowUp' && suggestions.length) { e.preventDefault(); setHi(h => (h - 1 + suggestions.length) % suggestions.length); }
+                    else if (e.key === 'Escape') setDraft('');
+                    else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      // Enter takes the highlighted suggestion, so "ban" +
+                      // Enter files Banana under Fruits without extra taps.
+                      addDraft(suggestions[hi]);
+                    }
+                  }}
+                  placeholder="Add an ingredient…"
+                  className="min-w-0 flex-1 bg-transparent py-1 text-[13.5px] outline-none placeholder:text-neutral-300"
+                />
+                <button onClick={() => addDraft()} disabled={!draft.trim()} aria-label="Add ingredient"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white transition-colors disabled:bg-neutral-100 disabled:text-neutral-300">
+                  <Plus size={15} />
+                </button>
+              </div>
+
+              {suggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg">
+                  {suggestions.map((sug, i) => (
+                    <button key={sug.name}
+                      onMouseEnter={() => setHi(i)}
+                      onClick={() => addDraft(sug)}
+                      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12.5px] transition-colors ${
+                        i === hi ? 'bg-neutral-50' : ''
+                      }`}>
+                      <RoleDot role={sug.roles[0] as Role} size={6} />
+                      <span className="flex-1 truncate">{sug.name}</span>
+                      <span className="text-[10px] text-neutral-400">{ROLE_META[sug.roles[0] as Role].short}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-2 flex items-center justify-between">
@@ -2002,10 +2047,15 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
           )}
 
           {staged.map(n => (
-            <div key={n} className="mb-3 rounded-xl border border-neutral-100 p-3 last:mb-0">
+            <div key={n} className={`mb-3 rounded-xl border p-3 last:mb-0 ${
+              roles[n]?.length ? 'border-neutral-100' : 'border-amber-200 bg-amber-50/40'
+            }`}>
               {!editing && (
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="truncate text-[13px] font-medium">{n}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-[13px] font-medium">{n}</span>
+                    {!roles[n]?.length && <span className="shrink-0 text-[10px] text-amber-700">needs a section</span>}
+                  </span>
                   <button onClick={() => drop(n)} aria-label={`Remove ${n}`}
                     className="shrink-0 text-neutral-300 hover:text-red-600">
                     <X size={13} />
