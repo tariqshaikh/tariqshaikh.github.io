@@ -1810,7 +1810,7 @@ export default function SlopBowl() {
   );
 
   return (
-    <div className="flex h-screen flex-col bg-white text-neutral-900">
+    <div className="flex h-dvh flex-col bg-white text-neutral-900">
       <header className="flex shrink-0 items-center justify-between border-b border-neutral-200 px-4 py-2.5">
         <div className="flex items-center gap-2.5">
           <button onClick={() => setRailOpen(v => !v)} className="text-neutral-400 hover:text-neutral-900 md:hidden">
@@ -1870,7 +1870,10 @@ export default function SlopBowl() {
           </div>
         )}
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        {/* min-h-0 matters as much as min-w-0 here: without it this column's
+            min-height is its content, so it overflows the row and the bottom
+            of the map — SlopShop included — ends up below the viewport. */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex items-end justify-between border-b border-neutral-300 pr-3">
             <FolderTabs<Tab>
               tabs={[
