@@ -1336,7 +1336,7 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
 
       {/* Sits with the bowl, because that's where the bowl now gets built. */}
       {store.bowl.length > 0 && (
-        <div className="absolute bottom-[124px] left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
+        <div className="absolute bottom-[156px] left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-neutral-200 bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur">
           <span className="pl-1.5 text-[11px] text-neutral-400">
             {store.bowl.length} in bowl
           </span>
@@ -1355,14 +1355,14 @@ function MapCanvas({ store, setStore, addToBowl, incoming, saveFavorite, savedNo
         </div>
       )}
 
-      <div className="pointer-events-none absolute bottom-[72px] left-4 flex flex-wrap gap-x-4 gap-y-1">
+      <div className="pointer-events-none absolute bottom-[104px] left-4 flex flex-wrap gap-x-4 gap-y-1">
         {ROLES.map(r => (
           <span key={r.id} className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-neutral-400">
             <RoleDot role={r.id} size={6} /> {r.short}
           </span>
         ))}
       </div>
-      <div className="absolute bottom-[72px] right-4 flex gap-2">
+      <div className="absolute bottom-[104px] right-4 flex gap-2">
         {/* Positions are derived, so spacing can't drift — but dragging
             reorders a cluster, and this puts that order back to default. */}
         <button
@@ -1906,11 +1906,16 @@ export default function SlopBowl() {
             {tab === 'favorites' && <FavoritesView store={store} setStore={setStore} goToBowl={() => setTab('bowl')} />}
 
             {/* SlopShop lives under the map as a drawer rather than a tab:
-                it's a tool for stocking the pantry, not a place you go. */}
+                it's a tool for stocking the pantry, not a place you go.
+
+                Floated off the bottom edge rather than flush to it. Pinned at
+                bottom-0 it kept getting clipped by a few pixels of layout
+                drift; inset on all sides it reads as a card over the board
+                and cannot be cut off by the viewport. */}
             {tab === 'map' && (
               <div
-                className={`absolute inset-x-0 bottom-0 z-30 flex flex-col border-t border-neutral-200 bg-white transition-[height] duration-300 ease-out ${
-                  shopOpen ? 'h-[64%] shadow-[0_-8px_24px_-12px_rgba(0,0,0,0.15)]' : 'h-10'
+                className={`absolute bottom-4 left-4 right-4 z-30 flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] transition-[height] duration-300 ease-out ${
+                  shopOpen ? 'h-[66%]' : 'h-[74px]'
                 }`}
               >
                 {/* A spectrum of the six section colours across the top edge.
@@ -1926,18 +1931,20 @@ export default function SlopBowl() {
 
                 <button
                   onClick={() => setShopOpen(v => !v)}
-                  className="group flex h-14 shrink-0 items-center justify-between bg-[#FBFAF7] px-5 text-left transition-colors hover:bg-white"
+                  className="group flex h-[69px] shrink-0 items-center justify-between bg-[#FBFAF7] px-5 text-left transition-colors hover:bg-white"
                 >
                   <span className="flex items-center gap-3">
                     <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-200">
                       <ShoppingBasket size={15} className="text-neutral-700" />
                     </span>
-                    <span className="flex flex-col">
+                    <span className="flex min-w-0 flex-col">
                       <span className="text-[14px] font-semibold tracking-tight text-neutral-900">SlopShop</span>
-                      <span className="text-[11px] text-neutral-500">
+                      {/* Says what it actually is. "SlopShop" alone doesn't
+                          tell you it's a shelf you add from. */}
+                      <span className="truncate text-[11px] leading-snug text-neutral-500">
                         {shopOpen
-                          ? 'Tap anything to stock your pantry'
-                          : `${CATALOG.length} ingredients, ready to throw in a bowl`}
+                          ? 'Tap any ingredient to add it to your pantry — a tick means you already have it'
+                          : `A shelf of ${CATALOG.length} common ingredients. Tap to stock your pantry.`}
                       </span>
                     </span>
                   </span>
