@@ -175,13 +175,15 @@ export const CATALOG: CatalogItem[] = [
  * Nutritional Yeast before Roasted Nuts, which is what you meant if you
  * started typing at the beginning of a word.
  */
-export function searchCatalog(q: string, exclude: string[] = [], limit = 6): CatalogItem[] {
+export function searchCatalog(q: string, exclude: string[] = [], limit = 6, extra: CatalogItem[] = []): CatalogItem[] {
   const needle = q.trim().toLowerCase();
   if (!needle) return [];
   const taken = new Set(exclude.map(n => n.toLowerCase()));
   const starts: CatalogItem[] = [];
   const contains: CatalogItem[] = [];
-  for (const it of CATALOG) {
+  // User additions first: if someone has taken the trouble to add an
+  // ingredient to their own shop, it should outrank the stock list.
+  for (const it of [...extra, ...CATALOG]) {
     const name = it.name.toLowerCase();
     if (taken.has(name)) continue;
     if (name.startsWith(needle)) starts.push(it);

@@ -65,6 +65,9 @@ interface Store {
   /** The bowl currently being composed. */
   bowl: string[];
   favorites: Favorite[];
+  /** Ingredients the user added to SlopShop themselves. Kept separate from
+   *  the bundled CATALOG so updates to that list never clobber them. */
+  shopExtras: CatalogItem[];
 }
 
 const ROLES: { id: Role; label: string; short: string; color: string }[] = [
@@ -591,6 +594,7 @@ function coerce(p: unknown): Store | null {
     cutLinks: o.cutLinks ?? [],
     bowl: o.bowl ?? [],
     favorites: o.favorites ?? [],   // absent in stores saved before favourites existed
+    shopExtras: o.shopExtras ?? [],
   };
 }
 
@@ -599,7 +603,7 @@ function loadStore(): Store {
     const raw = localStorage.getItem(KEY);
     if (raw) { const s = coerce(JSON.parse(raw)); if (s) return s; }
   } catch { /* fall through to seed */ }
-  return { items: seedLayout(SEED), extraLinks: [], cutLinks: [], bowl: [], favorites: [] };
+  return { items: seedLayout(SEED), extraLinks: [], cutLinks: [], bowl: [], favorites: [], shopExtras: [] };
 }
 
 /** One doc per user — the whole pantry is a few KB, far short of Firestore's
@@ -1624,12 +1628,35 @@ function FavoritesView({ store, setStore, goToBowl }: {
  * there shows up in both without being entered twice. Adding is one tap and
  * carries the section, since the catalog already knows it.
  */
-function SlopShopView({ store, onAdd }: {
+function SlopShopView({ store, onAdd, onAddToShop, onRemoveFromShop }: {
   store: Store;
   onAdd: (c: CatalogItem) => void;
+  onAddToShop: (c: CatalogItem) => void;
+  onRemoveFromShop: (name: string) => void;
 }) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Role | 'all'>('all');
+  // Inline rather than a modal: you're already in a panel, and stacking a
+  // dialog on top of it to type one name would be heavy.
+  const [newName, setNewName] = useState('');
+  const [newRoles, setNewRoles] = useState<Role[]>([]);
+  const [adding, setAdding] = useState(false);
+
+  /** The bundled list plus anything the user added, theirs first. */
+  const shelf = useMemo(() => [...store.shopExtras, ...CATALOG], [store.shopExtras]);
+  const isMine = useMemo(
+    () => new Set(store.shopExtras.map(c => c.name.toLowerCase())),
+    [store.shopExtras]
+  );
+
+  const clash = newName.trim() && shelf.some(c => c.name.toLowerCase() === titleCase(newName).toLowerCase());
+  const canSave = !!newName.trim() && newRoles.length > 0 && !clash;
+
+  const saveNew = () => {
+    if (!canSave) return;
+    onAddToShop({ name: titleCase(newName), roles: newRoles as CatalogItem['roles'] });
+    setNewName(''); setNewRoles([]); setAdding(false);
+  };
 
   // Case-insensitive, because the pantry title-cases and the catalog may not
   // match a user's own spelling exactly.
@@ -1644,21 +1671,66 @@ function SlopShopView({ store, onAdd }: {
     (filter === 'all' || c.roles[0] === filter);
 
   const sections = ROLES
-    .map(r => ({ role: r, rows: CATALOG.filter(c => c.roles[0] === r.id && matches(c)) }))
+    .map(r => ({ role: r, rows: shelf.filter(c => c.roles[0] === r.id && matches(c)) }))
     .filter(s => s.rows.length);
 
-  const total = CATALOG.filter(matches).length;
-  const have = CATALOG.filter(c => owned.has(c.name.toLowerCase())).length;
+  const total = shelf.filter(matches).length;
+  const have = shelf.filter(c => owned.has(c.name.toLowerCase())).length;
 
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 border-b border-neutral-100 px-6 pb-3 pt-4">
-        <div className="mb-2 flex items-baseline justify-between">
+        <div className="mb-2 flex items-baseline justify-between gap-3">
           <h2 className="text-[15px] font-semibold tracking-tight">SlopShop</h2>
-          <span className="text-[11px] text-neutral-400">
-            {have} of {CATALOG.length} already in your pantry
+          <span className="flex items-baseline gap-3">
+            <span className="hidden text-[11px] text-neutral-400 sm:inline">
+              {have} of {shelf.length} already in your pantry
+            </span>
+            <button onClick={() => setAdding(v => !v)}
+              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                adding ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-600 hover:border-neutral-900 hover:text-neutral-900'
+              }`}>
+              <Plus size={12} /> Add to shop
+            </button>
           </span>
         </div>
+
+        {/* Missing ingredients should be addable from here, not only by
+            typing them into the pantry every time you want them. */}
+        {adding && (
+          <div className="mb-3 rounded-xl border border-neutral-200 bg-neutral-50/70 p-3">
+            <input
+              autoFocus value={newName} onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && canSave) saveNew(); if (e.key === 'Escape') setAdding(false); }}
+              placeholder="Ingredient name"
+              className="mb-2 w-full rounded-lg border border-neutral-200 px-2.5 py-1.5 text-[13px] outline-none placeholder:text-neutral-300 focus:border-neutral-900"
+            />
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {ROLES.map(r => {
+                const i = newRoles.indexOf(r.id);
+                return (
+                  <button key={r.id}
+                    onClick={() => setNewRoles(prev => prev.includes(r.id) ? prev.filter(x => x !== r.id) : [...prev, r.id])}
+                    className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                      i > -1 ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200 text-neutral-500 hover:border-neutral-400'
+                    }`}>
+                    <RoleDot role={r.id} size={5} /> {r.short}
+                    {i === 0 && <span className="text-[9px] text-white/60">primary</span>}
+                  </button>
+                );
+              })}
+            </div>
+            {clash && <p className="mb-2 text-[11px] text-amber-700">The shop already stocks that.</p>}
+            <div className="flex gap-2">
+              <button onClick={saveNew} disabled={!canSave}
+                className="flex-1 rounded-full bg-neutral-900 py-1.5 text-[11.5px] text-white disabled:bg-neutral-200 disabled:text-neutral-400">
+                {!newName.trim() ? 'Name it' : !newRoles.length ? 'Pick a section' : 'Add to shop'}
+              </button>
+              <button onClick={() => { setAdding(false); setNewName(''); setNewRoles([]); }}
+                className="rounded-full px-3 text-[11.5px] text-neutral-500 hover:text-neutral-900">Cancel</button>
+            </div>
+          </div>
+        )}
         <input
           value={q} onChange={e => setQ(e.target.value)}
           placeholder="Search the shop"
@@ -1666,7 +1738,7 @@ function SlopShopView({ store, onAdd }: {
         />
         <div className="mt-2 flex flex-wrap gap-1">
           {([['all', 'All'], ...ROLES.map(r => [r.id, r.label] as const)] as [Role | 'all', string][]).map(([id, label]) => {
-            const n = id === 'all' ? total : CATALOG.filter(c => c.roles[0] === id && matches(c)).length;
+            const n = id === 'all' ? total : shelf.filter(c => c.roles[0] === id && matches(c)).length;
             const on = filter === id;
             return (
               <button key={id} onClick={() => setFilter(id)}
@@ -1722,6 +1794,14 @@ function SlopShopView({ store, onAdd }: {
                     {has
                       ? <Check size={13} className="shrink-0 text-emerald-600" />
                       : <Plus size={13} className="shrink-0 text-neutral-300 group-hover:text-neutral-900" />}
+                    {isMine.has(c.name.toLowerCase()) && (
+                      <span role="button" tabIndex={0} title="Remove from shop"
+                        onClick={e => { e.stopPropagation(); onRemoveFromShop(c.name); }}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); onRemoveFromShop(c.name); } }}
+                        className="shrink-0 text-neutral-200 hover:text-red-600">
+                        <Trash2 size={12} />
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -1971,7 +2051,18 @@ export default function SlopBowl() {
                 </button>
                 {shopOpen && (
                   <div className="min-h-0 flex-1 overflow-hidden border-t border-neutral-100">
-                    <SlopShopView store={store} onAdd={addFromCatalog} />
+                    <SlopShopView
+                      store={store}
+                      onAdd={addFromCatalog}
+                      onAddToShop={c => setStore(s2 => (
+                        s2.shopExtras.some(x => x.name.toLowerCase() === c.name.toLowerCase())
+                          ? s2 : { ...s2, shopExtras: [c, ...s2.shopExtras] }
+                      ))}
+                      onRemoveFromShop={name => setStore(s2 => ({
+                        ...s2,
+                        shopExtras: s2.shopExtras.filter(x => x.name.toLowerCase() !== name.toLowerCase()),
+                      }))}
+                    />
                   </div>
                 )}
               </div>
@@ -2022,6 +2113,7 @@ export default function SlopBowl() {
           item={editing}
           presetRole={presetRole}
           existingNames={store.items.map(i => i.name)}
+          catalogExtra={store.shopExtras}
           onClose={() => { setAdding(false); setEditing(null); setPresetRole(null); }}
           onSaveMany={made => setStore(s => {
             let items = s.items;
@@ -2053,11 +2145,12 @@ export default function SlopBowl() {
  * Editing keeps the item's id, position, stock and macros — only the fields
  * on screen change, so renaming doesn't move the node or reset its stock.
  */
-function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
+function ItemDialog({ item, presetRole, existingNames, catalogExtra, onClose, onSaveMany }: {
   item: Item | null;
   /** Set when opened from a section's + button, so that section is preselected. */
   presetRole: Role | null;
   existingNames: string[];
+  catalogExtra: CatalogItem[];
   onClose: () => void;
   onSaveMany: (items: Item[]) => void;
 }) {
@@ -2069,7 +2162,7 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
   const [note, setNote] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const suggestions = useMemo(() => searchCatalog(draft, staged), [draft, staged]);
+  const suggestions = useMemo(() => searchCatalog(draft, staged, 6, catalogExtra), [draft, staged, catalogExtra]);
   const [hi, setHi] = useState(0);
   useEffect(() => { setHi(0); }, [draft]);
 
@@ -2093,7 +2186,8 @@ function ItemDialog({ item, presetRole, existingNames, onClose, onSaveMany }: {
       const next = { ...prev };
       for (const n of fresh) {
         if (next[n]?.length) continue;
-        const known = pick?.roles ?? CATALOG.find(c => c.name.toLowerCase() === n.toLowerCase())?.roles;
+        const known = pick?.roles
+          ?? [...catalogExtra, ...CATALOG].find(c => c.name.toLowerCase() === n.toLowerCase())?.roles;
         // Catalog knows best, then the section whose + you pressed.
         if (known) next[n] = known as Role[];
         else if (presetRole) next[n] = [presetRole];
