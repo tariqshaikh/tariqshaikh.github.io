@@ -1915,7 +1915,11 @@ export default function SlopBowl() {
             {tab === 'map' && (
               <div
                 className={`absolute bottom-4 left-4 right-4 z-30 flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_30px_-12px_rgba(0,0,0,0.25)] transition-[height] duration-300 ease-out ${
-                  shopOpen ? 'h-[66%]' : 'h-[74px]'
+                  // Full height when open — 66% left a sliver of board above
+                  // it that was neither usable nor worth keeping. Expressed
+                  // as a height rather than setting `top` so the open/close
+                  // still animates.
+                  shopOpen ? 'h-[calc(100%-2rem)]' : 'h-[74px]'
                 }`}
               >
                 {/* A spectrum of the six section colours across the top edge.
